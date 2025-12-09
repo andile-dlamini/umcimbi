@@ -58,6 +58,51 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          last_message_at: string | null
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_vendors: {
         Row: {
           created_at: string | null
@@ -173,6 +218,44 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_type: Database["public"]["Enums"]["sender_type"]
+          sender_user_id: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type: Database["public"]["Enums"]["sender_type"]
+          sender_user_id?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type?: Database["public"]["Enums"]["sender_type"]
+          sender_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -380,6 +463,7 @@ export type Database = {
       event_type: "umembeso" | "umabo"
       preferred_language: "zulu" | "english"
       rsvp_status: "invited" | "yes" | "no" | "unknown"
+      sender_type: "user" | "vendor" | "system"
       task_category:
         | "gifts"
         | "decor"
@@ -540,6 +624,7 @@ export const Constants = {
       event_type: ["umembeso", "umabo"],
       preferred_language: ["zulu", "english"],
       rsvp_status: ["invited", "yes", "no", "unknown"],
+      sender_type: ["user", "vendor", "system"],
       task_category: [
         "gifts",
         "decor",
