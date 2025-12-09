@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { useApp } from '@/context/AppContext';
-import { sampleVendors } from '@/data/vendors';
+import { useVendor } from '@/hooks/useVendors';
+import { useEventVendors } from '@/hooks/useEvents';
 import { cn } from '@/lib/utils';
 
 export default function VendorDetail() {
@@ -13,11 +13,21 @@ export default function VendorDetail() {
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('eventId');
   
-  const { events, addVendorToEvent, removeVendorFromEvent } = useApp();
+  const { vendor, isLoading } = useVendor(id);
+  const { addVendorToEvent, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId || undefined);
 
-  const vendor = sampleVendors.find(v => v.id === id);
-  const event = eventId ? events.find(e => e.id === eventId) : null;
-  const isSelected = event?.selectedVendorIds.includes(id || '') || false;
+  const isSelected = id ? isVendorSelected(id) : false;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pb-safe">
+        <PageHeader title="Loading..." showBack />
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading vendor...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!vendor) {
     return (
@@ -31,14 +41,18 @@ export default function VendorDetail() {
   }
 
   const handleToggleVendor = () => {
-    if (!eventId) return;
+    if (!eventId || !id) return;
     
     if (isSelected) {
-      removeVendorFromEvent(eventId, vendor.id);
+      removeVendorFromEvent(id);
     } else {
-      addVendorToEvent(eventId, vendor.id);
+      addVendorToEvent(id);
     }
   };
+
+  const whatsappLink = vendor.whatsapp_number 
+    ? `https://wa.me/${vendor.whatsapp_number.replace(/\D/g, '')}`
+    : null;
 
   return (
     <div className="min-h-screen pb-safe">
@@ -47,7 +61,7 @@ export default function VendorDetail() {
       {/* Hero Image */}
       <div className="aspect-video bg-muted">
         <img
-          src={vendor.imageUrls[0] || '/placeholder.svg'}
+          src={vendor.image_urls?.[0] || '/placeholder.svg'}
           alt={vendor.name}
           className="w-full h-full object-cover"
         />
@@ -74,52 +88,74 @@ export default function VendorDetail() {
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-warning text-warning" />
               <span className="font-medium">{vendor.rating}</span>
-              <span className="text-muted-foreground">({vendor.reviewCount} reviews)</span>
+              <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
             </div>
             
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{vendor.location}</span>
-            </div>
+            {vendor.location && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>{vendor.location}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Price */}
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground mb-1">Price Range</p>
-            <p className="text-xl font-bold text-primary">{vendor.priceRangeText}</p>
-          </CardContent>
-        </Card>
+        {vendor.price_range_text && (
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground mb-1">Price Range</p>
+              <p className="text-xl font-bold text-primary">{vendor.price_range_text}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* About */}
-        <div>
-          <h2 className="font-semibold text-foreground mb-2">About</h2>
-          <p className="text-muted-foreground leading-relaxed">{vendor.about}</p>
-        </div>
+        {vendor.about && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-2">About</h2>
+            <p className="text-muted-foreground leading-relaxed">{vendor.about}</p>
+          </div>
+        )}
+
+        {/* Languages */}
+        {vendor.languages && vendor.languages.length > 0 && (
+          <div>
+            <h2 className="font-semibold text-foreground mb-2">Languages</h2>
+            <div className="flex flex-wrap gap-2">
+              {vendor.languages.map((lang) => (
+                <Badge key={lang} variant="outline">{lang}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Contact Actions */}
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            asChild
-          >
-            <a href={`tel:${vendor.phoneNumber}`}>
-              <Phone className="h-4 w-4 mr-2" />
-              Call
-            </a>
-          </Button>
+          {vendor.phone_number && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              asChild
+            >
+              <a href={`tel:${vendor.phone_number}`}>
+                <Phone className="h-4 w-4 mr-2" />
+                Call
+              </a>
+            </Button>
+          )}
           
-          <Button
-            className="flex-1 bg-success hover:bg-success/90"
-            asChild
-          >
-            <a href={vendor.whatsappLink} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              WhatsApp
-            </a>
-          </Button>
+          {whatsappLink && (
+            <Button
+              className="flex-1 bg-success hover:bg-success/90"
+              asChild
+            >
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                WhatsApp
+              </a>
+            </Button>
+          )}
         </div>
 
         {/* Add to Event */}

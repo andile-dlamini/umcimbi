@@ -2,13 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useApp } from '@/context/AppContext';
+import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/shared/EventCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function EventsList() {
   const navigate = useNavigate();
-  const { events } = useApp();
+  const { events, isLoading } = useEvents();
 
   const sortedEvents = [...events].sort((a, b) => {
     if (!a.date) return 1;
@@ -29,7 +29,9 @@ export default function EventsList() {
       />
 
       <div className="px-4 py-6 max-w-lg mx-auto">
-        {sortedEvents.length === 0 ? (
+        {isLoading ? (
+          <p className="text-center text-muted-foreground py-8">Loading...</p>
+        ) : sortedEvents.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-12 text-center">
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3" />

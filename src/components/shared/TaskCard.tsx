@@ -1,5 +1,5 @@
-import { Task } from '@/types';
-import { useApp } from '@/context/AppContext';
+import { Task } from '@/types/database';
+import { useTasks } from '@/hooks/useTasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,10 +26,10 @@ const categoryColors: Record<string, string> = {
 };
 
 export function TaskCard({ task, showDelete = false }: TaskCardProps) {
-  const { updateTask, deleteTask } = useApp();
+  const { toggleTask, deleteTask } = useTasks(task.event_id);
 
   const handleToggle = () => {
-    updateTask(task.id, { completed: !task.completed });
+    toggleTask(task.id);
   };
 
   return (
@@ -64,10 +64,10 @@ export function TaskCard({ task, showDelete = false }: TaskCardProps) {
                 {task.category}
               </Badge>
               
-              {task.dueDate && (
+              {task.due_date && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3" />
-                  {format(new Date(task.dueDate), 'dd MMM')}
+                  {format(new Date(task.due_date), 'dd MMM')}
                 </span>
               )}
             </div>

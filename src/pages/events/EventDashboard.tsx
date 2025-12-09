@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Users, Wallet, Play } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProgressBar } from '@/components/shared/ProgressBar';
-import { useApp } from '@/context/AppContext';
+import { useEvents } from '@/hooks/useEvents';
+import { useTasks } from '@/hooks/useTasks';
+import { useBudget } from '@/hooks/useBudget';
 import { TasksTab } from './tabs/TasksTab';
 import { BudgetTab } from './tabs/BudgetTab';
 import { GuestsTab } from './tabs/GuestsTab';
@@ -19,10 +21,37 @@ import { cn } from '@/lib/utils';
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, updateEvent, getEventProgress, getEventBudgetSummary } = useApp();
+  const { events, updateEvent, isLoading } = useEvents();
+  const { getProgress } = useTasks(id);
+  const { getSummary } = useBudget(id);
   
   const event = events.find(e => e.id === id);
   const [activeTab, setActiveTab] = useState('overview');
+  const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (event) {
+      setNotes(event.notes || '');
+    }
+  }, [event]);
+
+  const handleNotesChange = (value: string) => {
+    setNotes(value);
+    if (event) {
+      updateEvent(event.id, { notes: value });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pb-safe">
+        <PageHeader title="Loading..." showBack />
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading event...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -38,8 +67,8 @@ export default function EventDashboard() {
     );
   }
 
-  const progress = getEventProgress(event.id);
-  const budget = getEventBudgetSummary(event.id);
+  const progress = getProgress();
+  const budget = getSummary();
 
   const formattedDate = event.date 
     ? format(new Date(event.date), 'dd MMMM yyyy')
@@ -140,7 +169,7 @@ export default function EventDashboard() {
                     <span className="text-xs">Est. Guests</span>
                   </div>
                   <p className="text-2xl font-bold text-foreground">
-                    {event.estimatedGuestCount}
+                    {event.estimated_guest_count}
                   </p>
                 </CardContent>
               </Card>
@@ -166,8 +195,8 @@ export default function EventDashboard() {
               <CardContent>
                 <Textarea
                   placeholder="Add notes about your ceremony..."
-                  value={event.notes}
-                  onChange={(e) => updateEvent(event.id, { notes: e.target.value })}
+                  value={notes}
+                  onChange={(e) => handleNotesChange(e.target.value)}
                   className="min-h-[100px] resize-none"
                 />
               </CardContent>
@@ -183,11 +212,11 @@ export default function EventDashboard() {
           </TabsContent>
 
           <TabsContent value="guests" className="px-4 py-6">
-            <GuestsTab eventId={event.id} estimatedCount={event.estimatedGuestCount} />
+            <GuestsTab eventId={event.id} estimatedCount={event.estimated_guest_count} />
           </TabsContent>
 
           <TabsContent value="vendors" className="px-4 py-6">
-            <VendorsTab eventId={event.id} location={event.location} />
+            <VendorsTab eventId={event.id} location={event.location || ''} />
           </TabsContent>
         </Tabs>
       </div>

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Vendor } from '@/types';
+import { Vendor } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 interface VendorCardProps {
@@ -16,7 +16,7 @@ const categoryLabels: Record<string, string> = {
   catering: 'Catering',
   livestock: 'Livestock',
   tents: 'Tents',
-  photography: 'Photography',
+  photographer: 'Photography',
   attire: 'Attire',
   transport: 'Transport',
   other: 'Other',
@@ -44,7 +44,7 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
         <div className="flex items-start gap-3">
           <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
             <img 
-              src={vendor.imageUrls[0] || '/placeholder.svg'} 
+              src={vendor.image_urls?.[0] || '/placeholder.svg'} 
               alt={vendor.name}
               className="w-full h-full object-cover"
             />
@@ -52,8 +52,8 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-xs">
-                {categoryLabels[vendor.category]}
+              <Badge variant="outline" className="text-xs capitalize">
+                {categoryLabels[vendor.category] || vendor.category}
               </Badge>
               {isSelected && (
                 <Badge className="text-xs bg-success text-success-foreground">
@@ -70,18 +70,22 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
               <div className="flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                 <span className="font-medium">{vendor.rating}</span>
-                <span className="text-muted-foreground">({vendor.reviewCount})</span>
+                <span className="text-muted-foreground">({vendor.review_count})</span>
               </div>
               
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="truncate">{vendor.location}</span>
-              </div>
+              {vendor.location && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span className="truncate">{vendor.location}</span>
+                </div>
+              )}
             </div>
             
-            <p className="text-sm text-primary font-medium mt-1">
-              {vendor.priceRangeText}
-            </p>
+            {vendor.price_range_text && (
+              <p className="text-sm text-primary font-medium mt-1">
+                {vendor.price_range_text}
+              </p>
+            )}
           </div>
           
           <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />

@@ -3,8 +3,8 @@ import { Calendar, MapPin, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Event } from '@/types';
-import { useApp } from '@/context/AppContext';
+import { Event } from '@/types/database';
+import { useTasks } from '@/hooks/useTasks';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -14,8 +14,8 @@ interface EventCardProps {
 
 export function EventCard({ event }: EventCardProps) {
   const navigate = useNavigate();
-  const { getEventProgress } = useApp();
-  const progress = getEventProgress(event.id);
+  const { getProgress } = useTasks(event.id);
+  const progress = getProgress();
 
   const formattedDate = event.date 
     ? format(new Date(event.date), 'dd MMM yyyy')

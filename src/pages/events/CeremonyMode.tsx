@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useApp } from '@/context/AppContext';
-import { sampleVendors } from '@/data/vendors';
+import { useEvents, useEventVendors } from '@/hooks/useEvents';
+import { useVendors } from '@/hooks/useVendors';
 import { cn } from '@/lib/utils';
 
 interface ProgramItem {
@@ -45,31 +45,32 @@ const umaboProgramTemplate: Omit<ProgramItem, 'completed'>[] = [
 export default function CeremonyMode() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, updateEvent } = useApp();
+  const { events, updateEvent } = useEvents();
+  const { eventVendors  } = useEventVendors(id);
+  const { vendors } = useVendors();
   
   const event = events.find(e => e.id === id);
   
-  const programTemplate = event?.type === 'umembeso' 
-    ? umembesoProgramTemplate 
-    : umaboProgramTemplate;
-  
-  const [program, setProgram] = useState<ProgramItem[]>(
-    programTemplate.map(item => ({ ...item, completed: false }))
+  const selectedVendors = vendors.filter(v => 
+    eventVendors.some(ev => ev.vendor_id === v.id)
   );
-  const [todayNotes, setTodayNotes] = useState('');
-  const [vendorStatuses, setVendorStatuses] = useState<Record<string, 'expected' | 'arrived'>>({});
+
+  const [program, setProgram] = useState<ProgramItem[]>(() => {
+    const template = event?.type === 'umembeso' 
+      ? umembesoProgramTemplate 
+      : umaboProgramTemplate;
+    return template.map(item => ({ ...item, completed: false }));
+  });
+  
+  const [notes, setNotes] = useState(event?.notes || '');
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-primary text-primary-foreground flex items-center justify-center">
-        <p>Event not found</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Event not found</p>
       </div>
     );
   }
-
-  const selectedVendors = sampleVendors.filter(v => 
-    event.selectedVendorIds.includes(v.id)
-  );
 
   const toggleProgramItem = (itemId: string) => {
     setProgram(prev => prev.map(item => 
@@ -77,164 +78,139 @@ export default function CeremonyMode() {
     ));
   };
 
-  const toggleVendorStatus = (vendorId: string) => {
-    setVendorStatuses(prev => ({
-      ...prev,
-      [vendorId]: prev[vendorId] === 'arrived' ? 'expected' : 'arrived'
-    }));
+  const handleSaveNotes = () => {
+    updateEvent(event.id, { notes });
   };
 
   const completedCount = program.filter(p => p.completed).length;
+  const progress = Math.round((completedCount / program.length) * 100);
 
   return (
-    <div className="min-h-screen bg-primary/95 text-primary-foreground">
+    <div className="min-h-screen bg-gradient-to-b from-primary/20 to-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-primary border-b border-primary-foreground/20 px-4 py-4">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <div>
-            <Badge className="bg-primary-foreground/20 text-primary-foreground mb-1">
-              Ceremony Mode
-            </Badge>
-            <h1 className="text-xl font-bold">{event.name}</h1>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-            onClick={() => navigate(`/events/${id}`)}
-          >
-            <X className="h-6 w-6" />
-          </Button>
+      <div className="sticky top-0 z-50 bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="font-bold text-lg">{event.name}</h1>
+          <p className="text-sm text-primary-foreground/80">Ceremony Mode</p>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="text-primary-foreground hover:text-primary-foreground/80"
+          onClick={() => navigate(`/events/${event.id}`)}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="px-4 py-3 bg-background/80 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between text-sm mb-2">
+          <span className="text-muted-foreground">Day Progress</span>
+          <span className="font-medium">{progress}%</span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
-        {/* Progress */}
-        <div className="text-center mb-6">
-          <p className="text-primary-foreground/70 text-sm mb-2">Today's Progress</p>
-          <p className="text-4xl font-bold">{completedCount} / {program.length}</p>
-          <p className="text-primary-foreground/70 text-sm mt-1">items completed</p>
-        </div>
-
-        {/* Timeline */}
-        <Card className="bg-primary-foreground/10 border-primary-foreground/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-primary-foreground flex items-center gap-2">
+        {/* Program */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Day's Program
+              Day Program
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1">
-            {program.map((item) => (
+          <CardContent className="space-y-2">
+            {program.map((item, index) => (
               <div 
                 key={item.id}
                 className={cn(
                   'flex items-start gap-3 p-3 rounded-lg transition-colors',
-                  item.completed 
-                    ? 'bg-primary-foreground/20' 
-                    : 'hover:bg-primary-foreground/5'
+                  item.completed ? 'bg-success/10' : 'bg-muted/50'
                 )}
-                onClick={() => toggleProgramItem(item.id)}
               >
-                <Checkbox 
+                <Checkbox
                   checked={item.completed}
-                  className="mt-0.5 border-primary-foreground/50 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
+                  onCheckedChange={() => toggleProgramItem(item.id)}
+                  className="mt-0.5"
                 />
                 <div className="flex-1">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-lg font-mono font-semibold text-primary-foreground/80">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs font-mono">
                       {item.time}
-                    </span>
-                    <span className={cn(
-                      'text-base',
-                      item.completed && 'line-through text-primary-foreground/50'
-                    )}>
-                      {item.title}
-                    </span>
+                    </Badge>
+                    {item.completed && (
+                      <Check className="h-4 w-4 text-success" />
+                    )}
                   </div>
+                  <p className={cn(
+                    'text-sm mt-1',
+                    item.completed && 'line-through text-muted-foreground'
+                  )}>
+                    {item.title}
+                  </p>
                 </div>
-                {item.completed && (
-                  <Check className="h-5 w-5 text-secondary" />
-                )}
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Vendors */}
+        {/* Vendors Quick Access */}
         {selectedVendors.length > 0 && (
-          <Card className="bg-primary-foreground/10 border-primary-foreground/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-primary-foreground flex items-center gap-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Vendors ({selectedVendors.length})
+                Quick Contact
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {selectedVendors.map((vendor) => (
+            <CardContent className="space-y-2">
+              {selectedVendors.map(vendor => (
                 <div 
                   key={vendor.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-primary-foreground/5"
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold text-primary-foreground">{vendor.name}</p>
-                    <p className="text-sm text-primary-foreground/70">{vendor.category}</p>
+                  <div>
+                    <p className="font-medium text-sm">{vendor.name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{vendor.category}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant="outline"
-                      className={cn(
-                        'cursor-pointer border-primary-foreground/30',
-                        vendorStatuses[vendor.id] === 'arrived' 
-                          ? 'bg-secondary text-secondary-foreground border-secondary' 
-                          : 'text-primary-foreground'
-                      )}
-                      onClick={() => toggleVendorStatus(vendor.id)}
-                    >
-                      {vendorStatuses[vendor.id] === 'arrived' ? 'Arrived' : 'Expected'}
-                    </Badge>
-                    <a href={`tel:${vendor.phoneNumber}`}>
-                      <Button 
-                        size="icon" 
-                        variant="ghost"
-                        className="text-primary-foreground hover:bg-primary-foreground/10"
-                      >
+                  {vendor.phone_number && (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`tel:${vendor.phone_number}`}>
                         <Phone className="h-4 w-4" />
-                      </Button>
-                    </a>
-                  </div>
+                      </a>
+                    </Button>
+                  )}
                 </div>
               ))}
             </CardContent>
           </Card>
         )}
 
-        {/* Quick Notes */}
-        <Card className="bg-primary-foreground/10 border-primary-foreground/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-primary-foreground flex items-center gap-2">
+        {/* Notes */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Today's Notes
+              Notes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Textarea 
-              placeholder="Quick notes for today..."
-              value={todayNotes}
-              onChange={(e) => setTodayNotes(e.target.value)}
-              className="min-h-[100px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+            <Textarea
+              placeholder="Add notes for today..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={handleSaveNotes}
+              className="min-h-[100px]"
             />
           </CardContent>
         </Card>
-
-        {/* Exit Button */}
-        <Button 
-          variant="outline"
-          className="w-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-          onClick={() => navigate(`/events/${id}`)}
-        >
-          Exit Ceremony Mode
-        </Button>
       </div>
     </div>
   );

@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VendorCard } from '@/components/shared/VendorCard';
-import { useApp } from '@/context/AppContext';
-import { sampleVendors } from '@/data/vendors';
-import { cn } from '@/lib/utils';
+import { useEventVendors } from '@/hooks/useEvents';
+import { useVendors } from '@/hooks/useVendors';
 
 interface VendorsTabProps {
   eventId: string;
@@ -15,21 +14,12 @@ interface VendorsTabProps {
 }
 
 export function VendorsTab({ eventId, location }: VendorsTabProps) {
-  const { events, removeVendorFromEvent } = useApp();
   const [search, setSearch] = useState('');
+  const { eventVendors, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId);
+  const { vendors } = useVendors({ search, location: location || undefined });
 
-  const event = events.find(e => e.id === eventId);
-  const selectedVendorIds = event?.selectedVendorIds || [];
-
-  const selectedVendors = sampleVendors.filter(v => selectedVendorIds.includes(v.id));
-  
-  const availableVendors = sampleVendors
-    .filter(v => !selectedVendorIds.includes(v.id))
-    .filter(v => 
-      search === '' || 
-      v.name.toLowerCase().includes(search.toLowerCase()) ||
-      v.category.toLowerCase().includes(search.toLowerCase())
-    );
+  const selectedVendors = vendors.filter(v => isVendorSelected(v.id));
+  const availableVendors = vendors.filter(v => !isVendorSelected(v.id));
 
   return (
     <div className="space-y-6">
@@ -43,7 +33,7 @@ export function VendorsTab({ eventId, location }: VendorsTabProps) {
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <Badge variant="outline" className="text-xs mb-1">
+                      <Badge variant="outline" className="text-xs mb-1 capitalize">
                         {vendor.category}
                       </Badge>
                       <p className="font-medium text-foreground truncate">{vendor.name}</p>
@@ -53,7 +43,7 @@ export function VendorsTab({ eventId, location }: VendorsTabProps) {
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-destructive"
-                      onClick={() => removeVendorFromEvent(eventId, vendor.id)}
+                      onClick={() => removeVendorFromEvent(vendor.id)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -88,7 +78,7 @@ export function VendorsTab({ eventId, location }: VendorsTabProps) {
               key={vendor.id} 
               vendor={vendor} 
               eventId={eventId}
-              isSelected={selectedVendorIds.includes(vendor.id)}
+              isSelected={isVendorSelected(vendor.id)}
             />
           ))}
 
