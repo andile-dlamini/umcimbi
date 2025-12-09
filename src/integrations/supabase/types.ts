@@ -367,6 +367,54 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          event_id: string | null
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          rating: number
+          updated_at?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           about: string | null

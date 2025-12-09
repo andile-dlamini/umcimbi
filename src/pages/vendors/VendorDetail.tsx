@@ -8,6 +8,7 @@ import { useVendor } from '@/hooks/useVendors';
 import { useEventVendors } from '@/hooks/useEvents';
 import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
+import { VendorRating } from '@/components/vendors/VendorRating';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -152,6 +153,9 @@ export default function VendorDetail() {
             </div>
           </div>
         )}
+
+        {/* Reviews Section */}
+        <VendorRating vendorId={id!} />
 
         {/* Chat with Vendor Button */}
         <Button
