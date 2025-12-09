@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, Gift, Heart, Handshake, Sparkles } from 'lucide-react';
+import { Plus, Calendar, Gift, Heart, Baby, Users, Handshake, Package, Sparkles, Flower2, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
@@ -7,11 +7,11 @@ import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/shared/EventCard';
 import { EventType } from '@/types/database';
 
-const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift },
-  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles },
+const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-secondary/20 text-secondary border-secondary/50' },
+  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent border-accent/50' },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-emerald-500/20 text-emerald-600 border-emerald-500/50' },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-pink-500/20 text-pink-600 border-pink-500/50' },
 ];
 
 export default function Home() {
@@ -27,8 +27,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-safe">
-      {/* Header with shweshwe pattern */}
-      <div className="bg-primary text-primary-foreground px-4 pt-8 pb-6 shweshwe-pattern">
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground px-4 pt-8 pb-6">
         <h1 className="text-2xl font-bold">
           Hi, {profile?.full_name?.split(' ')[0] || 'there'}
         </h1>
@@ -85,11 +85,11 @@ export default function Home() {
               return (
                 <Card 
                   key={option.type}
-                  className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-border"
+                  className={`cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border ${option.colorClass.split(' ').find(c => c.startsWith('border-')) || ''}`}
                   onClick={() => navigate(`/events/new?type=${option.type}`)}
                 >
                   <CardContent className="p-4 text-center">
-                    <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 bg-secondary text-primary">
+                    <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ${option.colorClass.split(' ').slice(0, 2).join(' ')}`}>
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="font-semibold text-foreground text-sm">

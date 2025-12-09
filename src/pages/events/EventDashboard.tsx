@@ -19,8 +19,8 @@ import { BudgetTab } from './tabs/BudgetTab';
 import { GuestsTab } from './tabs/GuestsTab';
 import { VendorsTab } from './tabs/VendorsTab';
 import { format, differenceInDays, addDays } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { getEventTypeInfo } from '@/types/database';
 
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -130,7 +130,6 @@ export default function EventDashboard() {
 
   const progress = getProgress();
   const budget = getSummary();
-  const typeInfo = getEventTypeInfo(event.type);
 
   const formattedDate = event.date 
     ? format(new Date(event.date), 'dd MMMM yyyy')
@@ -169,16 +168,24 @@ export default function EventDashboard() {
       )}
 
       {/* Hero Card */}
-      <div className="px-4 py-5 bg-secondary">
+      <div className={cn(
+        'px-4 py-5',
+        event.type === 'umembeso' ? 'bg-secondary/10' : 'bg-accent/10'
+      )}>
         <div className="max-w-lg mx-auto">
           <div className="flex items-start justify-between mb-3">
-            <Badge className="bg-primary text-primary-foreground">
-              {typeInfo.shortLabel}
+            <Badge 
+              className={cn(
+                event.type === 'umembeso' 
+                  ? 'bg-secondary text-secondary-foreground' 
+                  : 'bg-accent text-accent-foreground'
+              )}
+            >
+              {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
             </Badge>
             <Button 
               variant="outline" 
               size="sm"
-              className="bg-background"
               onClick={() => navigate(`/events/${event.id}/ceremony-mode`)}
             >
               <Play className="h-4 w-4 mr-1" />
@@ -196,7 +203,7 @@ export default function EventDashboard() {
                   <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-background" align="start">
+              <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
                   selected={event.date ? new Date(event.date) : undefined}
