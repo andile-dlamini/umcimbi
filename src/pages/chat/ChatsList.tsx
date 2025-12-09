@@ -66,7 +66,7 @@ const ChatsList = () => {
               <button
                 key={conv.id}
                 onClick={() => navigate(`/chat/${conv.id}`)}
-                className="w-full flex items-start gap-3 p-3 rounded-xl bg-card border border-accent/50 hover:bg-accent/20 transition-colors text-left"
+                className="w-full flex items-start gap-3 p-3 rounded-xl bg-card border border-card-border hover:bg-accent/20 transition-colors text-left"
               >
                 <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
                   <MessageCircle className="h-5 w-5 text-accent" />

@@ -61,6 +61,7 @@ export default {
         },
         umembeso: "hsl(var(--umembeso))",
         umabo: "hsl(var(--umabo))",
+        "card-border": "hsl(var(--card-border))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
