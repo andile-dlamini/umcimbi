@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, Gift, Heart, Baby, Users, Handshake, Package, Sparkles, Flower2, Flame } from 'lucide-react';
+import { Plus, Calendar, Gift, Heart, Handshake, Sparkles, Store, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
@@ -8,15 +8,15 @@ import { EventCard } from '@/components/shared/EventCard';
 import { EventType } from '@/types/database';
 
 const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-accent/20 text-accent' },
-  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent' },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-accent/20 text-accent' },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-accent/20 text-accent' },
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-primary/10 text-primary' },
+  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-primary/10 text-primary' },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-primary/10 text-primary' },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-primary/10 text-primary' },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, isVendor } = useAuth();
   const { events, isLoading } = useEvents();
 
   const upcomingEvents = [...events].sort((a, b) => {
@@ -104,6 +104,36 @@ export default function Home() {
             })}
           </div>
         </section>
+
+        {/* Vendor CTA - only show if user is not already a vendor */}
+        {!isVendor && (
+          <section>
+            <Card className="bg-primary text-primary-foreground overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary-foreground/20 flex items-center justify-center shrink-0">
+                    <Store className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold">Are you a vendor?</h3>
+                    <p className="text-sm text-primary-foreground/80 mt-0.5">
+                      List your services and reach families planning ceremonies
+                    </p>
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => navigate('/vendors/onboarding')}
+                  >
+                    Join
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
       </div>
     </div>
   );
