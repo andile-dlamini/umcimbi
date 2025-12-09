@@ -33,7 +33,7 @@ export function TaskCard({ task, showDelete = false }: TaskCardProps) {
   };
 
   return (
-    <Card className={cn('transition-opacity', task.completed && 'opacity-60')}>
+    <Card className={cn('transition-opacity border-accent/50', task.completed && 'opacity-60')}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Checkbox

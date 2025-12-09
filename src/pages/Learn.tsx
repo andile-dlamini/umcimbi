@@ -46,7 +46,7 @@ export default function Learn() {
             return (
               <Card 
                 key={article.id}
-                className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none"
+                className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-accent/50"
                 onClick={() => navigate(`/learn/${article.id}`)}
               >
                 <CardContent className="p-4 flex items-start gap-4">

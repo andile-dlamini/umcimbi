@@ -35,7 +35,7 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
   return (
     <Card 
       className={cn(
-        'cursor-pointer hover:shadow-md transition-shadow tap-highlight-none',
+        'cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-accent/50',
         isSelected && 'ring-2 ring-primary'
       )}
       onClick={handleClick}
