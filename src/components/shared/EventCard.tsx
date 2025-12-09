@@ -1,40 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ChevronRight, Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame } from 'lucide-react';
+import { Calendar, MapPin, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Event, EventType, getEventTypeInfo } from '@/types/database';
+import { Event, getEventTypeInfo } from '@/types/database';
 import { useTasks } from '@/hooks/useTasks';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
 interface EventCardProps {
   event: Event;
 }
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Baby,
-  Users,
-  Handshake,
-  Gift,
-  Package,
-  Heart,
-  Sparkles,
-  Flower2,
-  Flame,
-};
-
-const colorMap: Record<EventType, string> = {
-  imbeleko: 'bg-amber-500 text-white',
-  family_introduction: 'bg-blue-500 text-white',
-  lobola: 'bg-emerald-500 text-white',
-  umembeso: 'bg-secondary text-secondary-foreground',
-  umbondo: 'bg-purple-500 text-white',
-  umabo: 'bg-accent text-accent-foreground',
-  umemulo: 'bg-pink-500 text-white',
-  funeral: 'bg-slate-500 text-white',
-  ancestral_ritual: 'bg-orange-500 text-white',
-};
 
 export function EventCard({ event }: EventCardProps) {
   const navigate = useNavigate();
@@ -46,7 +21,6 @@ export function EventCard({ event }: EventCardProps) {
     : 'Date not set';
 
   const typeInfo = getEventTypeInfo(event.type);
-  const badgeColor = colorMap[event.type] || 'bg-primary text-primary-foreground';
 
   return (
     <Card 
@@ -59,7 +33,7 @@ export function EventCard({ event }: EventCardProps) {
             <div className="flex items-center gap-2 mb-2">
               <Badge 
                 variant="secondary"
-                className={cn('text-xs font-medium', badgeColor)}
+                className="text-xs font-medium bg-secondary text-primary"
               >
                 {typeInfo.shortLabel}
               </Badge>

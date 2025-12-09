@@ -2,116 +2,126 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Isiko Planner Design System - Shweshwe Inspired */
-/* Bright, celebratory colors from traditional South African fabrics */
+/* Isiko Planner Design System - Unified Shweshwe-Inspired */
+/* Primary: #264653 (Deep Teal) | Secondary: #EDF3FF (Soft Light Blue) */
 
 @layer base {
   :root {
-    /* Warm cream background */
-    --background: 40 33% 96%;
-    --foreground: 220 25% 15%;
+    /* Primary: #264653 → HSL(195, 37%, 24%) */
+    --primary: 195 37% 24%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 195 42% 18%;
+    --primary-light: 195 30% 45%;
+
+    /* Secondary: #EDF3FF → HSL(220, 100%, 96%) */
+    --secondary: 220 100% 96%;
+    --secondary-foreground: 195 37% 24%;
+    --secondary-dark: 220 50% 90%;
+    --secondary-light: 220 100% 98%;
+
+    /* Background and surfaces */
+    --background: 0 0% 100%;
+    --foreground: 195 50% 11%;
 
     /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 15%;
+    --card-foreground: 195 50% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover-foreground: 195 50% 11%;
 
-    /* Primary: Deep Shweshwe Indigo Blue */
-    --primary: 220 65% 35%;
-    --primary-foreground: 0 0% 100%;
+    /* Muted tones - derived from primary/secondary blend */
+    --muted: 210 25% 94%;
+    --muted-foreground: 195 20% 45%;
 
-    /* Secondary: Warm Terracotta Orange */
-    --secondary: 20 75% 55%;
-    --secondary-foreground: 0 0% 100%;
+    /* Accent - lighter tint of primary for hover states */
+    --accent: 220 100% 96%;
+    --accent-foreground: 195 37% 24%;
 
-    /* Muted tones */
-    --muted: 40 20% 90%;
-    --muted-foreground: 220 15% 45%;
-
-    /* Accent: Rich Burgundy Red */
-    --accent: 350 65% 45%;
-    --accent-foreground: 0 0% 100%;
-
-    /* Success green for completed items */
-    --success: 145 60% 40%;
+    /* Status colors - derived from primary palette */
+    --success: 195 45% 35%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning/attention */
-    --warning: 45 90% 50%;
-    --warning-foreground: 220 25% 15%;
+    --warning: 195 30% 50%;
+    --warning-foreground: 195 50% 11%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 85%;
-    --input: 220 20% 85%;
-    --ring: 220 65% 35%;
+    /* Borders and inputs - soft neutral grey-blue */
+    --border: 210 25% 88%;
+    --input: 210 25% 88%;
+    --ring: 195 37% 24%;
 
     --radius: 0.75rem;
 
-    /* Ceremony type colors */
-    --umembeso: 20 75% 55%;
-    --umabo: 350 65% 45%;
+    /* Legacy ceremony colors - now using primary/secondary tints */
+    --umembeso: 195 37% 24%;
+    --umabo: 195 42% 18%;
 
-    /* Sidebar (not used much in mobile-first) */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 25% 15%;
-    --sidebar-primary: 220 65% 35%;
+    /* Sidebar (using primary palette) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 195 50% 11%;
+    --sidebar-primary: 195 37% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 92%;
-    --sidebar-accent-foreground: 220 25% 15%;
-    --sidebar-border: 220 20% 85%;
-    --sidebar-ring: 220 65% 35%;
+    --sidebar-accent: 220 100% 96%;
+    --sidebar-accent-foreground: 195 37% 24%;
+    --sidebar-border: 210 25% 88%;
+    --sidebar-ring: 195 37% 24%;
   }
 
   .dark {
-    --background: 220 25% 10%;
-    --foreground: 40 20% 95%;
+    /* Primary stays similar in dark mode */
+    --primary: 195 35% 55%;
+    --primary-foreground: 195 50% 10%;
+    --primary-dark: 195 40% 40%;
+    --primary-light: 195 30% 65%;
 
-    --card: 220 25% 14%;
-    --card-foreground: 40 20% 95%;
+    /* Secondary adapts for dark mode */
+    --secondary: 210 20% 18%;
+    --secondary-foreground: 220 100% 96%;
+    --secondary-dark: 210 20% 12%;
+    --secondary-light: 210 20% 22%;
 
-    --popover: 220 25% 14%;
-    --popover-foreground: 40 20% 95%;
+    --background: 195 30% 8%;
+    --foreground: 210 25% 95%;
 
-    --primary: 220 60% 55%;
-    --primary-foreground: 0 0% 100%;
+    --card: 195 25% 12%;
+    --card-foreground: 210 25% 95%;
 
-    --secondary: 20 70% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --popover: 195 25% 12%;
+    --popover-foreground: 210 25% 95%;
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 15% 65%;
+    --muted: 195 20% 18%;
+    --muted-foreground: 210 20% 60%;
 
-    --accent: 350 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 210 20% 18%;
+    --accent-foreground: 210 25% 95%;
 
-    --success: 145 55% 45%;
+    --success: 195 40% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 85% 55%;
-    --warning-foreground: 220 25% 10%;
+    --warning: 195 30% 55%;
+    --warning-foreground: 195 30% 10%;
 
-    --destructive: 0 65% 45%;
+    --destructive: 0 50% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
-    --ring: 220 60% 55%;
+    --border: 195 20% 22%;
+    --input: 195 20% 22%;
+    --ring: 195 35% 55%;
 
-    --umembeso: 20 70% 50%;
-    --umabo: 350 60% 50%;
+    --umembeso: 195 35% 55%;
+    --umabo: 195 40% 45%;
 
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 40 20% 95%;
-    --sidebar-primary: 220 60% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 40 20% 95%;
-    --sidebar-border: 220 20% 25%;
-    --sidebar-ring: 220 60% 55%;
+    --sidebar-background: 195 25% 10%;
+    --sidebar-foreground: 210 25% 95%;
+    --sidebar-primary: 195 35% 55%;
+    --sidebar-primary-foreground: 195 50% 10%;
+    --sidebar-accent: 210 20% 18%;
+    --sidebar-accent-foreground: 210 25% 95%;
+    --sidebar-border: 195 20% 22%;
+    --sidebar-ring: 195 35% 55%;
   }
 }
 
@@ -132,7 +142,7 @@
 }
 
 @layer components {
-  /* Shweshwe-inspired decorative border pattern */
+  /* Shweshwe-inspired decorative border pattern - using primary color only */
   .shweshwe-border {
     background-image: repeating-linear-gradient(
       90deg,
@@ -146,13 +156,31 @@
     background-repeat: no-repeat;
   }
 
-  /* Ceremony type badges */
+  /* Shweshwe pattern background - primary on secondary */
+  .shweshwe-pattern {
+    background-color: hsl(var(--primary));
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(var(--secondary)) 2px, transparent 2px),
+      radial-gradient(circle at 75% 75%, hsl(var(--secondary)) 2px, transparent 2px);
+    background-size: 16px 16px;
+  }
+
+  /* Light shweshwe pattern - secondary with primary dots */
+  .shweshwe-pattern-light {
+    background-color: hsl(var(--secondary));
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.15) 2px, transparent 2px),
+      radial-gradient(circle at 75% 75%, hsl(var(--primary) / 0.15) 2px, transparent 2px);
+    background-size: 16px 16px;
+  }
+
+  /* Ceremony type badges - unified with primary/secondary */
   .badge-umembeso {
     @apply bg-secondary text-secondary-foreground;
   }
 
   .badge-umabo {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-primary text-primary-foreground;
   }
 
   /* Safe area for mobile bottom nav */

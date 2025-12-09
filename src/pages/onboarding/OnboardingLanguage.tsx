@@ -11,45 +11,50 @@ export default function OnboardingLanguage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
-      <div className="w-full max-w-sm text-center space-y-8">
-        {/* Logo/Title */}
-        <div className="space-y-3">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center">
-            <span className="text-3xl font-bold text-primary-foreground">I</span>
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Shweshwe Pattern Header */}
+      <div className="h-32 shweshwe-pattern" />
+      
+      <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-16">
+        <div className="w-full max-w-sm text-center space-y-8">
+          {/* Logo/Title */}
+          <div className="space-y-3">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+              <span className="text-3xl font-bold text-primary-foreground">I</span>
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">Isiko Planner</h1>
+            <p className="text-muted-foreground">
+              Plan your Zulu ceremonies with respect
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Isiko Planner</h1>
-          <p className="text-muted-foreground">
-            Plan your Zulu ceremonies with respect
+
+          {/* Language Selection */}
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-14 text-lg font-medium border-border"
+              onClick={() => handleLanguageSelect('zu')}
+              disabled
+            >
+              isiZulu
+              <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
+            </Button>
+            
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg font-medium"
+              onClick={() => handleLanguageSelect('en')}
+            >
+              English
+            </Button>
+          </div>
+
+          {/* Footer note */}
+          <p className="text-xs text-muted-foreground">
+            You can change this later in Settings
           </p>
         </div>
-
-        {/* Language Selection */}
-        <div className="space-y-3">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full h-14 text-lg font-medium"
-            onClick={() => handleLanguageSelect('zu')}
-            disabled
-          >
-            isiZulu
-            <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
-          </Button>
-          
-          <Button
-            size="lg"
-            className="w-full h-14 text-lg font-medium"
-            onClick={() => handleLanguageSelect('en')}
-          >
-            English
-          </Button>
-        </div>
-
-        {/* Footer note */}
-        <p className="text-xs text-muted-foreground">
-          You can change this later in Settings
-        </p>
       </div>
     </div>
   );
