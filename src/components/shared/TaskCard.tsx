@@ -14,15 +14,15 @@ interface TaskCardProps {
 }
 
 const categoryColors: Record<string, string> = {
-  gifts: 'bg-secondary/20 text-secondary border-secondary/30',
-  decor: 'bg-accent/20 text-accent border-accent/30',
-  livestock: 'bg-warning/20 text-warning-foreground border-warning/30',
-  transport: 'bg-primary/20 text-primary border-primary/30',
-  catering: 'bg-success/20 text-success border-success/30',
-  attire: 'bg-accent/20 text-accent border-accent/30',
-  finance: 'bg-muted text-muted-foreground border-muted',
-  venue: 'bg-primary/20 text-primary border-primary/30',
-  other: 'bg-muted text-muted-foreground border-muted',
+  gifts: 'bg-accent/20 text-accent border-accent/50',
+  decor: 'bg-accent/20 text-accent border-accent/50',
+  livestock: 'bg-accent/20 text-accent border-accent/50',
+  transport: 'bg-accent/20 text-accent border-accent/50',
+  catering: 'bg-accent/20 text-accent border-accent/50',
+  attire: 'bg-accent/20 text-accent border-accent/50',
+  finance: 'bg-accent/20 text-accent border-accent/50',
+  venue: 'bg-accent/20 text-accent border-accent/50',
+  other: 'bg-accent/20 text-accent border-accent/50',
 };
 
 export function TaskCard({ task, showDelete = false }: TaskCardProps) {
