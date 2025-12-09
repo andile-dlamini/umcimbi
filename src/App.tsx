@@ -20,16 +20,7 @@ import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorProfile from "@/pages/profile/VendorProfile";
 import Learn from "@/pages/Learn";
-import UmembesoBasics from "@/pages/learn/UmembesoBasics";
-import UmaboGuide from "@/pages/learn/UmaboGuide";
-import CombiningCeremonies from "@/pages/learn/CombiningCeremonies";
-import ImbelekoGuide from "@/pages/learn/ImbelekoGuide";
-import FamilyIntroductionGuide from "@/pages/learn/FamilyIntroductionGuide";
-import LobolaGuide from "@/pages/learn/LobolaGuide";
-import UmbondoGuide from "@/pages/learn/UmbondoGuide";
-import UmemuloGuide from "@/pages/learn/UmemuloGuide";
-import FuneralGuide from "@/pages/learn/FuneralGuide";
-import AncestralRitualsGuide from "@/pages/learn/AncestralRitualsGuide";
+import ArticlePage from "@/pages/learn/ArticlePage";
 import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ChatsList from "@/pages/chat/ChatsList";
@@ -85,9 +76,7 @@ function AppRoutes() {
         <Route path="/chats" element={<ChatsList />} />
         <Route path="/chat/:conversationId" element={<ChatThread />} />
         <Route path="/learn" element={<Learn />} />
-        <Route path="/learn/umembeso" element={<UmembesoBasics />} />
-        <Route path="/learn/umabo" element={<UmaboGuide />} />
-        <Route path="/learn/combining-ceremonies" element={<CombiningCeremonies />} />
+        <Route path="/learn/:articleId" element={<ArticlePage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/profile/vendor" element={<VendorProfile />} />
