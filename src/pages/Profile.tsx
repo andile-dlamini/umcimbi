@@ -1,19 +1,19 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Globe, Bell, Info, LogOut } from 'lucide-react';
+import { User, Globe, Bell, Info, LogOut, Store, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, logout } = useApp();
+  const { profile, user, signOut, isVendor, isAdmin } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/onboarding');
   };
 
@@ -31,18 +31,68 @@ export default function Profile() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
-                  {user?.name || 'Guest'}
+                  {profile?.full_name || 'User'}
                 </h2>
-                {user?.phoneNumber && (
-                  <p className="text-sm text-muted-foreground">{user.phoneNumber}</p>
+                {user?.email && (
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
                 )}
-                {user?.isGuest && (
-                  <p className="text-xs text-warning">Limited features</p>
+                {profile?.phone_number && (
+                  <p className="text-sm text-muted-foreground">{profile.phone_number}</p>
                 )}
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Vendor Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Store className="h-5 w-5" />
+              Vendor Services
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isVendor ? (
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/profile/vendor')}
+              >
+                Manage vendor profile
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Do you offer services for traditional ceremonies? Join our vendor marketplace.
+                </p>
+                <Button 
+                  className="w-full"
+                  onClick={() => navigate('/vendors/onboarding')}
+                >
+                  <Store className="h-4 w-4 mr-2" />
+                  I offer services (become a vendor)
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Admin Link */}
+        {isAdmin && (
+          <Card>
+            <CardContent className="p-4">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/admin')}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Settings */}
         <Card>
@@ -50,7 +100,6 @@ export default function Profile() {
             <CardTitle className="text-base">Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Language */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-muted-foreground" />
@@ -66,7 +115,6 @@ export default function Profile() {
 
             <Separator />
 
-            {/* Notifications */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bell className="h-5 w-5 text-muted-foreground" />
@@ -95,7 +143,7 @@ export default function Profile() {
               with trusted vendors to make your special day memorable.
             </p>
             <p className="text-xs text-muted-foreground mt-4">
-              Version 1.0.0
+              Version 2.0.0
             </p>
           </CardContent>
         </Card>
