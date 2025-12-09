@@ -13,16 +13,16 @@ interface TaskCardProps {
   showDelete?: boolean;
 }
 
-const categoryStyles: Record<string, { bg: string; text: string; border: string }> = {
-  gifts: { bg: 'bg-accent/15', text: 'text-accent', border: 'border-accent/30' },
-  decor: { bg: 'bg-secondary/15', text: 'text-secondary', border: 'border-secondary/30' },
-  livestock: { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30' },
-  transport: { bg: 'bg-secondary/15', text: 'text-secondary', border: 'border-secondary/30' },
-  catering: { bg: 'bg-success/15', text: 'text-success', border: 'border-success/30' },
-  attire: { bg: 'bg-primary/15', text: 'text-primary', border: 'border-primary/30' },
-  finance: { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-muted' },
-  venue: { bg: 'bg-accent/15', text: 'text-accent', border: 'border-accent/30' },
-  other: { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-muted' },
+const categoryColors: Record<string, string> = {
+  gifts: 'bg-secondary/20 text-secondary border-secondary/30',
+  decor: 'bg-accent/20 text-accent border-accent/30',
+  livestock: 'bg-warning/20 text-warning-foreground border-warning/30',
+  transport: 'bg-primary/20 text-primary border-primary/30',
+  catering: 'bg-success/20 text-success border-success/30',
+  attire: 'bg-accent/20 text-accent border-accent/30',
+  finance: 'bg-muted text-muted-foreground border-muted',
+  venue: 'bg-primary/20 text-primary border-primary/30',
+  other: 'bg-muted text-muted-foreground border-muted',
 };
 
 export function TaskCard({ task, showDelete = false }: TaskCardProps) {
@@ -32,16 +32,14 @@ export function TaskCard({ task, showDelete = false }: TaskCardProps) {
     toggleTask(task.id);
   };
 
-  const style = categoryStyles[task.category || 'other'] || categoryStyles.other;
-
   return (
-    <Card className={cn('transition-all hover:shadow-shweshwe', task.completed && 'opacity-60')}>
+    <Card className={cn('transition-opacity', task.completed && 'opacity-60')}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Checkbox
             checked={task.completed}
             onCheckedChange={handleToggle}
-            className="mt-0.5 border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            className="mt-0.5"
           />
           
           <div className="flex-1 min-w-0">
@@ -61,14 +59,8 @@ export function TaskCard({ task, showDelete = false }: TaskCardProps) {
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <Badge 
                 variant="outline" 
-                className={cn(
-                  'text-xs capitalize',
-                  style.bg,
-                  style.text,
-                  style.border
-                )}
+                className={cn('text-xs capitalize', categoryColors[task.category])}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5" />
                 {task.category}
               </Badge>
               

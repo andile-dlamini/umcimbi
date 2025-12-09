@@ -19,37 +19,29 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-safe">
-      {/* Header with Shweshwe Pattern */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 shweshwe-pattern-red opacity-60" />
-        <div className="relative bg-gradient-to-b from-primary/90 to-primary text-primary-foreground px-4 pt-10 pb-8">
-          <h1 className="text-2xl font-bold">
-            Hi, {profile?.full_name?.split(' ')[0] || 'there'}
-          </h1>
-          <p className="text-primary-foreground/80 mt-1">
-            Let's plan your ceremony
-          </p>
-        </div>
-        {/* Decorative divider */}
-        <div className="divider-shweshwe" />
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground px-4 pt-8 pb-6">
+        <h1 className="text-2xl font-bold">
+          Hi, {profile?.full_name?.split(' ')[0] || 'there'}
+        </h1>
+        <p className="text-primary-foreground/80 mt-1">
+          Let's plan your ceremony
+        </p>
       </div>
 
       <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
         {/* Upcoming Ceremonies */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary" />
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Upcoming ceremonies
           </h2>
 
           {isLoading ? (
             <p className="text-muted-foreground text-center py-8">Loading...</p>
           ) : upcomingEvents.length === 0 ? (
-            <Card className="border-dashed border-2 border-muted bg-muted/30">
+            <Card className="border-dashed">
               <CardContent className="py-8 text-center">
-                <div className="w-16 h-16 mx-auto rounded-full shweshwe-pattern-teal flex items-center justify-center mb-4">
-                  <Calendar className="h-8 w-8 text-secondary" />
-                </div>
+                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                 <p className="text-muted-foreground mb-4">
                   You have no ceremonies yet
                 </p>
@@ -70,49 +62,42 @@ export default function Home() {
 
         {/* Start New */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-secondary" />
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Start new
           </h2>
           
           <div className="grid grid-cols-2 gap-3">
             <Card 
-              className="cursor-pointer hover:shadow-shweshwe-lg transition-all tap-highlight-none border-secondary/30 group overflow-hidden"
+              className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-secondary/50"
               onClick={() => navigate('/events/new?type=umembeso')}
             >
-              <CardContent className="p-4 text-center relative">
-                <div className="absolute inset-0 shweshwe-pattern-teal opacity-20 group-hover:opacity-30 transition-opacity" />
-                <div className="relative">
-                  <div className="w-14 h-14 mx-auto rounded-full bg-secondary/20 flex items-center justify-center mb-3 ring-2 ring-secondary/30">
-                    <Gift className="h-7 w-7 text-secondary" />
-                  </div>
-                  <h3 className="font-semibold text-foreground text-sm">
-                    Plan Umembeso
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Gift-giving ceremony
-                  </p>
+              <CardContent className="p-4 text-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/20 flex items-center justify-center mb-3">
+                  <Gift className="h-6 w-6 text-secondary" />
                 </div>
+                <h3 className="font-semibold text-foreground text-sm">
+                  Plan Umembeso
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gift-giving ceremony
+                </p>
               </CardContent>
             </Card>
 
             <Card 
-              className="cursor-pointer hover:shadow-shweshwe-lg transition-all tap-highlight-none border-primary/30 group overflow-hidden"
+              className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-accent/50"
               onClick={() => navigate('/events/new?type=umabo')}
             >
-              <CardContent className="p-4 text-center relative">
-                <div className="absolute inset-0 shweshwe-pattern-red opacity-20 group-hover:opacity-30 transition-opacity" />
-                <div className="relative">
-                  <div className="w-14 h-14 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-3 ring-2 ring-primary/30">
-                    <Calendar className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-foreground text-sm">
-                    Plan Umabo
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Traditional wedding
-                  </p>
+              <CardContent className="p-4 text-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-3">
+                  <Calendar className="h-6 w-6 text-accent" />
                 </div>
+                <h3 className="font-semibold text-foreground text-sm">
+                  Plan Umabo
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Traditional wedding
+                </p>
               </CardContent>
             </Card>
           </div>
