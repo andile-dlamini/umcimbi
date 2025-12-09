@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Minus, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,9 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
 import { useBudget } from '@/hooks/useBudget';
-import { BudgetCategory } from '@/types/database';
+import { BudgetCategory, BudgetItem } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface BudgetTabProps {
   eventId: string;
@@ -29,6 +31,9 @@ const categories: { value: BudgetCategory; label: string }[] = [
 export function BudgetTab({ eventId }: BudgetTabProps) {
   const { budgetItems, addBudgetItem, updateBudgetItem, deleteBudgetItem, getSummary, isLoading } = useBudget(eventId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isScaleDialogOpen, setIsScaleDialogOpen] = useState(false);
+  const [scalePercent, setScalePercent] = useState(100);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
   
   // Form state
   const [description, setDescription] = useState('');
@@ -54,6 +59,28 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
     setCategory('other');
     setPlannedAmount('');
     setIsDialogOpen(false);
+  };
+
+  const handleQuickAdjust = (item: BudgetItem, delta: number) => {
+    const newAmount = Math.max(0, Number(item.planned_amount) + delta);
+    updateBudgetItem(item.id, { planned_amount: newAmount });
+  };
+
+  const handleScaleBudget = async () => {
+    const multiplier = scalePercent / 100;
+    
+    for (const item of budgetItems) {
+      const newPlanned = Math.round(Number(item.planned_amount) * multiplier);
+      await updateBudgetItem(item.id, { planned_amount: newPlanned });
+    }
+    
+    toast.success(`Budget scaled to ${scalePercent}%`);
+    setIsScaleDialogOpen(false);
+    setScalePercent(100);
+  };
+
+  const getScaledTotal = () => {
+    return Math.round(summary.planned * (scalePercent / 100));
   };
 
   if (isLoading) {
@@ -88,6 +115,78 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
               </p>
             </div>
           </div>
+
+          {/* Scale Budget Button */}
+          {budgetItems.length > 0 && (
+            <Dialog open={isScaleDialogOpen} onOpenChange={setIsScaleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full mt-4">
+                  <ChevronUp className="h-4 w-4 mr-1" />
+                  <ChevronDown className="h-4 w-4 mr-1" />
+                  Adjust entire budget
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Scale Budget</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6 pt-4">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Adjust all budget items by percentage
+                    </p>
+                    <p className="text-4xl font-bold text-primary">{scalePercent}%</p>
+                  </div>
+
+                  <Slider
+                    value={[scalePercent]}
+                    onValueChange={([v]) => setScalePercent(v)}
+                    min={50}
+                    max={200}
+                    step={5}
+                    className="w-full"
+                  />
+
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>50%</span>
+                    <span>100%</span>
+                    <span>200%</span>
+                  </div>
+
+                  <div className="bg-muted rounded-lg p-4 text-center">
+                    <p className="text-sm text-muted-foreground mb-1">New total will be</p>
+                    <p className="text-2xl font-bold">
+                      R{getScaledTotal().toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {scalePercent > 100 ? '+' : ''}{Math.round((scalePercent - 100) / 100 * summary.planned).toLocaleString()} from current
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        setScalePercent(100);
+                        setIsScaleDialogOpen(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={handleScaleBudget}
+                      disabled={scalePercent === 100}
+                    >
+                      Apply {scalePercent}%
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </CardContent>
       </Card>
 
@@ -121,18 +220,40 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
                     {item.description}
                   </p>
                   
-                  <div className="flex items-center gap-4 mt-2">
+                  {/* Editable amounts */}
+                  <div className="flex items-center gap-2 mt-2">
+                    {/* Planned Amount with +/- */}
                     <div className="flex-1">
                       <Label className="text-xs text-muted-foreground">Planned</Label>
-                      <Input
-                        type="number"
-                        value={item.planned_amount}
-                        onChange={(e) => updateBudgetItem(item.id, { 
-                          planned_amount: parseFloat(e.target.value) || 0 
-                        })}
-                        className="h-8 text-sm"
-                      />
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => handleQuickAdjust(item, -500)}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <Input
+                          type="number"
+                          value={item.planned_amount}
+                          onChange={(e) => updateBudgetItem(item.id, { 
+                            planned_amount: parseFloat(e.target.value) || 0 
+                          })}
+                          className="h-8 text-sm text-center"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => handleQuickAdjust(item, 500)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
+                    
+                    {/* Actual Amount */}
                     <div className="flex-1">
                       <Label className="text-xs text-muted-foreground">Actual</Label>
                       <Input
