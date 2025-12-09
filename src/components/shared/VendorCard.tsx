@@ -52,7 +52,7 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-xs capitalize">
+              <Badge variant="outline" className="text-xs capitalize bg-accent/20 text-accent border-accent/50">
                 {categoryLabels[vendor.category] || vendor.category}
               </Badge>
               {isSelected && (
