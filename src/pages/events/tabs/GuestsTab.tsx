@@ -7,7 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useApp } from '@/context/AppContext';
+import { useGuests } from '@/hooks/useGuests';
+import { useEvents } from '@/hooks/useEvents';
+import { RsvpStatus } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 interface GuestsTabProps {
@@ -15,7 +17,7 @@ interface GuestsTabProps {
   estimatedCount: number;
 }
 
-const rsvpOptions = [
+const rsvpOptions: { value: RsvpStatus; label: string; color: string }[] = [
   { value: 'invited', label: 'Invited', color: 'bg-muted text-muted-foreground' },
   { value: 'yes', label: 'Yes', color: 'bg-success text-success-foreground' },
   { value: 'no', label: 'No', color: 'bg-destructive text-destructive-foreground' },
@@ -23,27 +25,24 @@ const rsvpOptions = [
 ];
 
 export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
-  const { getEventGuests, addGuest, updateGuest, deleteGuest, events, updateEvent } = useApp();
+  const { guests, addGuest, updateGuest, deleteGuest, getRsvpCounts, isLoading } = useGuests(eventId);
+  const { updateEvent } = useEvents();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Form state
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [rsvp, setRsvp] = useState<'invited' | 'yes' | 'no' | 'unknown'>('invited');
+  const [rsvp, setRsvp] = useState<RsvpStatus>('invited');
 
-  const guests = getEventGuests(eventId);
-  const event = events.find(e => e.id === eventId);
+  const counts = getRsvpCounts();
 
-  const confirmedCount = guests.filter(g => g.rsvpStatus === 'yes').length;
-
-  const handleAddGuest = () => {
+  const handleAddGuest = async () => {
     if (!name.trim()) return;
 
-    addGuest({
-      eventId,
+    await addGuest({
       name: name.trim(),
-      phoneNumber: phone.trim(),
-      rsvpStatus: rsvp,
+      phone_number: phone.trim() || null,
+      rsvp_status: rsvp,
     });
 
     // Reset form
@@ -55,10 +54,12 @@ export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
 
   const handleEstimatedChange = (value: string) => {
     const count = parseInt(value) || 0;
-    if (event) {
-      updateEvent(eventId, { estimatedGuestCount: count });
-    }
+    updateEvent(eventId, { estimated_guest_count: count });
   };
+
+  if (isLoading) {
+    return <p className="text-center text-muted-foreground py-8">Loading guests...</p>;
+  }
 
   return (
     <div className="space-y-6">
@@ -87,21 +88,19 @@ export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <Card>
             <CardContent className="p-3">
-              <p className="text-2xl font-bold text-foreground">{guests.length}</p>
+              <p className="text-2xl font-bold text-foreground">{counts.total}</p>
               <p className="text-xs text-muted-foreground">Total</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3">
-              <p className="text-2xl font-bold text-success">{confirmedCount}</p>
+              <p className="text-2xl font-bold text-success">{counts.yes}</p>
               <p className="text-xs text-muted-foreground">Confirmed</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3">
-              <p className="text-2xl font-bold text-muted-foreground">
-                {guests.filter(g => g.rsvpStatus === 'invited').length}
-              </p>
+              <p className="text-2xl font-bold text-muted-foreground">{counts.invited}</p>
               <p className="text-xs text-muted-foreground">Pending</p>
             </CardContent>
           </Card>
@@ -111,7 +110,7 @@ export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
       {/* Guest List */}
       <div className="space-y-2">
         {guests.map((guest) => {
-          const rsvpOption = rsvpOptions.find(r => r.value === guest.rsvpStatus);
+          const rsvpOption = rsvpOptions.find(r => r.value === guest.rsvp_status);
           
           return (
             <Card key={guest.id}>
@@ -119,16 +118,14 @@ export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{guest.name}</p>
-                    {guest.phoneNumber && (
-                      <p className="text-sm text-muted-foreground">{guest.phoneNumber}</p>
+                    {guest.phone_number && (
+                      <p className="text-sm text-muted-foreground">{guest.phone_number}</p>
                     )}
                   </div>
                   
                   <Select 
-                    value={guest.rsvpStatus} 
-                    onValueChange={(v) => updateGuest(guest.id, { 
-                      rsvpStatus: v as 'invited' | 'yes' | 'no' | 'unknown' 
-                    })}
+                    value={guest.rsvp_status} 
+                    onValueChange={(v) => updateGuest(guest.id, { rsvp_status: v as RsvpStatus })}
                   >
                     <SelectTrigger className="w-28 h-8">
                       <Badge className={cn('text-xs', rsvpOption?.color)}>
@@ -202,7 +199,7 @@ export function GuestsTab({ eventId, estimatedCount }: GuestsTabProps) {
 
             <div className="space-y-2">
               <Label>RSVP Status</Label>
-              <Select value={rsvp} onValueChange={(v) => setRsvp(v as typeof rsvp)}>
+              <Select value={rsvp} onValueChange={(v) => setRsvp(v as RsvpStatus)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

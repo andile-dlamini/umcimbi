@@ -4,23 +4,31 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
-import { sampleVendors, vendorCategories, locations } from '@/data/vendors';
+import { useVendors, useVendorLocations } from '@/hooks/useVendors';
+import { VendorCategory } from '@/types/database';
+
+const vendorCategories: { value: VendorCategory | 'all'; label: string }[] = [
+  { value: 'all', label: 'All Categories' },
+  { value: 'decor', label: 'Decor' },
+  { value: 'catering', label: 'Catering' },
+  { value: 'livestock', label: 'Livestock' },
+  { value: 'tents', label: 'Tents' },
+  { value: 'photographer', label: 'Photography' },
+  { value: 'attire', label: 'Attire' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'other', label: 'Other' },
+];
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState<VendorCategory | 'all'>('all');
   const [location, setLocation] = useState('All Locations');
-
-  const filteredVendors = sampleVendors.filter(vendor => {
-    const matchesSearch = search === '' || 
-      vendor.name.toLowerCase().includes(search.toLowerCase()) ||
-      vendor.about.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesCategory = category === 'all' || vendor.category === category;
-    
-    const matchesLocation = location === 'All Locations' || vendor.location === location;
-
-    return matchesSearch && matchesCategory && matchesLocation;
+  
+  const locations = useVendorLocations();
+  const { vendors, isLoading } = useVendors({ 
+    category, 
+    location, 
+    search 
   });
 
   return (
@@ -41,7 +49,7 @@ export default function VendorsList() {
 
         {/* Filters */}
         <div className="flex gap-3">
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={(v) => setCategory(v as VendorCategory | 'all')}>
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -71,14 +79,14 @@ export default function VendorsList() {
         {/* Results */}
         <div className="space-y-3 pt-2">
           <p className="text-sm text-muted-foreground">
-            {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''} found
+            {isLoading ? 'Loading...' : `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''} found`}
           </p>
 
-          {filteredVendors.map((vendor) => (
+          {vendors.map((vendor) => (
             <VendorCard key={vendor.id} vendor={vendor} />
           ))}
 
-          {filteredVendors.length === 0 && (
+          {!isLoading && vendors.length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No vendors found</p>
               <p className="text-sm text-muted-foreground mt-1">

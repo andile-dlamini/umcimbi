@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TaskCard } from '@/components/shared/TaskCard';
-import { useApp } from '@/context/AppContext';
-import { TaskCategory } from '@/types';
+import { useTasks } from '@/hooks/useTasks';
+import { TaskCategory } from '@/types/database';
 import { isThisWeek, parseISO } from 'date-fns';
 
 interface TasksTabProps {
@@ -29,7 +29,7 @@ const categories: { value: TaskCategory; label: string }[] = [
 type FilterType = 'all' | 'thisWeek' | 'completed';
 
 export function TasksTab({ eventId }: TasksTabProps) {
-  const { getEventTasks, addTask } = useApp();
+  const { tasks, addTask, isLoading } = useTasks(eventId);
   const [filter, setFilter] = useState<FilterType>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -39,12 +39,10 @@ export function TasksTab({ eventId }: TasksTabProps) {
   const [category, setCategory] = useState<TaskCategory>('other');
   const [dueDate, setDueDate] = useState('');
 
-  const tasks = getEventTasks(eventId);
-
   const filteredTasks = tasks.filter(task => {
     switch (filter) {
       case 'thisWeek':
-        return task.dueDate && isThisWeek(parseISO(task.dueDate)) && !task.completed;
+        return task.due_date && isThisWeek(parseISO(task.due_date)) && !task.completed;
       case 'completed':
         return task.completed;
       default:
@@ -55,17 +53,16 @@ export function TasksTab({ eventId }: TasksTabProps) {
   const incompleteTasks = filteredTasks.filter(t => !t.completed);
   const completedTasks = filteredTasks.filter(t => t.completed);
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!title.trim()) return;
 
-    addTask({
-      eventId,
+    await addTask({
       title: title.trim(),
-      description: description.trim(),
+      description: description.trim() || null,
       category,
-      dueDate: dueDate || null,
+      due_date: dueDate || null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     });
 
     // Reset form
@@ -75,6 +72,10 @@ export function TasksTab({ eventId }: TasksTabProps) {
     setDueDate('');
     setIsDialogOpen(false);
   };
+
+  if (isLoading) {
+    return <p className="text-center text-muted-foreground py-8">Loading tasks...</p>;
+  }
 
   return (
     <div className="space-y-4">

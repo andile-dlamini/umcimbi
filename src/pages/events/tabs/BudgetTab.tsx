@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useApp } from '@/context/AppContext';
-import { BudgetCategory } from '@/types';
+import { useBudget } from '@/hooks/useBudget';
+import { BudgetCategory } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 interface BudgetTabProps {
@@ -27,7 +27,7 @@ const categories: { value: BudgetCategory; label: string }[] = [
 ];
 
 export function BudgetTab({ eventId }: BudgetTabProps) {
-  const { getEventBudget, addBudgetItem, updateBudgetItem, deleteBudgetItem, getEventBudgetSummary } = useApp();
+  const { budgetItems, addBudgetItem, updateBudgetItem, deleteBudgetItem, getSummary, isLoading } = useBudget(eventId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Form state
@@ -35,20 +35,18 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
   const [category, setCategory] = useState<BudgetCategory>('other');
   const [plannedAmount, setPlannedAmount] = useState('');
 
-  const items = getEventBudget(eventId);
-  const summary = getEventBudgetSummary(eventId);
+  const summary = getSummary();
   const difference = summary.planned - summary.actual;
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (!description.trim() || !plannedAmount) return;
 
-    addBudgetItem({
-      eventId,
+    await addBudgetItem({
       description: description.trim(),
       category,
-      plannedAmount: parseFloat(plannedAmount) || 0,
-      actualAmount: 0,
-      isPaid: false,
+      planned_amount: parseFloat(plannedAmount) || 0,
+      actual_amount: 0,
+      is_paid: false,
     });
 
     // Reset form
@@ -57,6 +55,10 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
     setPlannedAmount('');
     setIsDialogOpen(false);
   };
+
+  if (isLoading) {
+    return <p className="text-center text-muted-foreground py-8">Loading budget...</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -91,14 +93,14 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
 
       {/* Budget Items */}
       <div className="space-y-2">
-        {items.map((item) => (
+        {budgetItems.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-3">
               <div className="flex items-start gap-3">
                 <Checkbox
-                  checked={item.isPaid}
+                  checked={item.is_paid}
                   onCheckedChange={(checked) => 
-                    updateBudgetItem(item.id, { isPaid: checked as boolean })
+                    updateBudgetItem(item.id, { is_paid: checked as boolean })
                   }
                   className="mt-1"
                 />
@@ -108,13 +110,13 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
                     <span className="text-xs text-muted-foreground capitalize">
                       {item.category}
                     </span>
-                    {item.isPaid && (
+                    {item.is_paid && (
                       <span className="text-xs text-success font-medium">Paid</span>
                     )}
                   </div>
                   <p className={cn(
                     'font-medium text-sm',
-                    item.isPaid && 'line-through text-muted-foreground'
+                    item.is_paid && 'line-through text-muted-foreground'
                   )}>
                     {item.description}
                   </p>
@@ -124,9 +126,9 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
                       <Label className="text-xs text-muted-foreground">Planned</Label>
                       <Input
                         type="number"
-                        value={item.plannedAmount}
+                        value={item.planned_amount}
                         onChange={(e) => updateBudgetItem(item.id, { 
-                          plannedAmount: parseFloat(e.target.value) || 0 
+                          planned_amount: parseFloat(e.target.value) || 0 
                         })}
                         className="h-8 text-sm"
                       />
@@ -135,9 +137,9 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
                       <Label className="text-xs text-muted-foreground">Actual</Label>
                       <Input
                         type="number"
-                        value={item.actualAmount}
+                        value={item.actual_amount}
                         onChange={(e) => updateBudgetItem(item.id, { 
-                          actualAmount: parseFloat(e.target.value) || 0 
+                          actual_amount: parseFloat(e.target.value) || 0 
                         })}
                         className="h-8 text-sm"
                       />
@@ -158,7 +160,7 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
           </Card>
         ))}
 
-        {items.length === 0 && (
+        {budgetItems.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
             No budget items yet
           </p>

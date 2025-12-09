@@ -7,9 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { useApp } from '@/context/AppContext';
-import { EventType, EventSize } from '@/types';
+import { useEvents } from '@/hooks/useEvents';
+import { EventType } from '@/types/database';
 import { cn } from '@/lib/utils';
+
+type EventSize = 'small' | 'medium' | 'large';
 
 const sizeOptions = [
   { value: 'small', label: 'Small (up to 80 guests)', count: 80 },
@@ -20,7 +22,7 @@ const sizeOptions = [
 export default function CreateEvent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { createEvent } = useApp();
+  const { createEvent } = useEvents();
   
   const preselectedType = searchParams.get('type') as EventType | null;
   
@@ -30,28 +32,34 @@ export default function CreateEvent() {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [size, setSize] = useState<EventSize>('medium');
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleTypeSelect = (type: EventType) => {
     setEventType(type);
     setStep(2);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!eventType) return;
 
+    setIsCreating(true);
     const selectedSize = sizeOptions.find(s => s.value === size);
     
-    const event = createEvent({
+    const event = await createEvent({
       name: name || `My ${eventType === 'umembeso' ? 'Umembeso' : 'Umabo'}`,
       type: eventType,
       date: date || null,
-      location,
-      estimatedGuestCount: selectedSize?.count || 150,
+      location: location || null,
+      estimated_guest_count: selectedSize?.count || 150,
       size,
-      notes: '',
+      notes: null,
     });
 
-    navigate(`/events/${event.id}`);
+    setIsCreating(false);
+    
+    if (event) {
+      navigate(`/events/${event.id}`);
+    }
   };
 
   const isValid = eventType && name.length >= 2;
@@ -189,9 +197,9 @@ export default function CreateEvent() {
               size="lg"
               className="w-full h-12"
               onClick={handleCreate}
-              disabled={!isValid}
+              disabled={!isValid || isCreating}
             >
-              Create ceremony plan
+              {isCreating ? 'Creating...' : 'Create ceremony plan'}
             </Button>
           </div>
         )}

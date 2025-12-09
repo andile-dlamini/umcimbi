@@ -1,33 +1,47 @@
-import { Task, BudgetItem, EventType } from '@/types';
+import { TaskCategory, BudgetCategory, EventType } from '@/types/database';
 
-export const getDefaultTasks = (eventId: string, eventType: EventType): Omit<Task, 'id'>[] => {
-  const baseTasks: Omit<Task, 'id'>[] = [
+interface TaskTemplate {
+  title: string;
+  description: string;
+  category: TaskCategory;
+  due_date: string | null;
+  completed: boolean;
+  assignee_name: string | null;
+}
+
+interface BudgetTemplate {
+  category: BudgetCategory;
+  description: string;
+  planned_amount: number;
+  actual_amount: number;
+  is_paid: boolean;
+}
+
+export const getDefaultTasks = (eventId: string, eventType: EventType): TaskTemplate[] => {
+  const baseTasks: TaskTemplate[] = [
     {
-      eventId,
       title: 'Set the date with both families',
       description: 'Coordinate with both families to agree on a suitable date',
       category: 'other',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Confirm venue/homestead',
       description: 'Confirm the location where the ceremony will take place',
       category: 'venue',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Book photographer',
       description: 'Find and book a photographer who understands traditional ceremonies',
       category: 'other',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
   ];
 
@@ -35,67 +49,60 @@ export const getDefaultTasks = (eventId: string, eventType: EventType): Omit<Tas
     return [
       ...baseTasks,
       {
-        eventId,
         title: 'Negotiate and finalize gift list (izibizo)',
         description: 'Work with both families to agree on the gifts required',
         category: 'gifts',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Purchase blankets (izingubo)',
         description: 'Buy the required blankets for the in-laws',
         category: 'gifts',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Purchase pinafores and headwraps',
         description: 'Get the traditional clothing items for mothers and aunts',
         category: 'gifts',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Purchase groceries for in-laws',
         description: 'Buy the food items as part of the gifts',
         category: 'gifts',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Arrange transport for gifts',
         description: 'Organize how gifts will be transported to the homestead',
         category: 'transport',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Prepare umakoti attire',
         description: 'Get the traditional outfit for the bride',
         category: 'attire',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
       {
-        eventId,
         title: 'Organize refreshments for guests',
         description: 'Plan food and drinks for attendees',
         category: 'catering',
-        dueDate: null,
+        due_date: null,
         completed: false,
-        assigneeName: '',
+        assignee_name: null,
       },
     ];
   }
@@ -104,112 +111,103 @@ export const getDefaultTasks = (eventId: string, eventType: EventType): Omit<Tas
   return [
     ...baseTasks,
     {
-      eventId,
       title: 'Confirm cattle (inkomo) arrangements',
       description: 'Arrange for the required cattle for the ceremony',
       category: 'livestock',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Book tent and seating',
       description: 'Hire tents, chairs, and tables for guests',
       category: 'venue',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Arrange catering',
       description: 'Book catering for traditional food including pap, meat, and salads',
       category: 'catering',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Order traditional beer (utshwala)',
       description: 'Arrange for traditional beer to be brewed or purchased',
       category: 'catering',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Plan decor setup',
       description: 'Organize traditional decorations, umbrellas, and mats',
       category: 'decor',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Prepare bridal party attire',
       description: 'Coordinate traditional outfits for the wedding party',
       category: 'attire',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Arrange goat for ceremonies',
       description: 'Source a goat for traditional rituals',
       category: 'livestock',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Book transport for bridal party',
       description: 'Arrange transport to and from the venue',
       category: 'transport',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
     {
-      eventId,
       title: 'Prepare izibongo (praise songs)',
       description: 'Work with elders on the praise songs for the ceremony',
       category: 'other',
-      dueDate: null,
+      due_date: null,
       completed: false,
-      assigneeName: '',
+      assignee_name: null,
     },
   ];
 };
 
-export const getDefaultBudgetItems = (eventId: string, eventType: EventType): Omit<BudgetItem, 'id'>[] => {
+export const getDefaultBudgetItems = (eventId: string, eventType: EventType): BudgetTemplate[] => {
   if (eventType === 'umembeso') {
     return [
-      { eventId, category: 'gifts', description: 'Blankets (izingubo)', plannedAmount: 3000, actualAmount: 0, isPaid: false },
-      { eventId, category: 'gifts', description: 'Pinafores & headwraps', plannedAmount: 2000, actualAmount: 0, isPaid: false },
-      { eventId, category: 'gifts', description: 'Groceries for in-laws', plannedAmount: 5000, actualAmount: 0, isPaid: false },
-      { eventId, category: 'attire', description: 'Umakoti outfit', plannedAmount: 2500, actualAmount: 0, isPaid: false },
-      { eventId, category: 'transport', description: 'Gift transport', plannedAmount: 1500, actualAmount: 0, isPaid: false },
-      { eventId, category: 'catering', description: 'Refreshments', plannedAmount: 3000, actualAmount: 0, isPaid: false },
-      { eventId, category: 'other', description: 'Photography', plannedAmount: 3500, actualAmount: 0, isPaid: false },
+      { category: 'gifts', description: 'Blankets (izingubo)', planned_amount: 3000, actual_amount: 0, is_paid: false },
+      { category: 'gifts', description: 'Pinafores & headwraps', planned_amount: 2000, actual_amount: 0, is_paid: false },
+      { category: 'gifts', description: 'Groceries for in-laws', planned_amount: 5000, actual_amount: 0, is_paid: false },
+      { category: 'attire', description: 'Umakoti outfit', planned_amount: 2500, actual_amount: 0, is_paid: false },
+      { category: 'transport', description: 'Gift transport', planned_amount: 1500, actual_amount: 0, is_paid: false },
+      { category: 'catering', description: 'Refreshments', planned_amount: 3000, actual_amount: 0, is_paid: false },
+      { category: 'other', description: 'Photography', planned_amount: 3500, actual_amount: 0, is_paid: false },
     ];
   }
 
   // Umabo budget
   return [
-    { eventId, category: 'livestock', description: 'Cattle (inkomo)', plannedAmount: 15000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'livestock', description: 'Goat for rituals', plannedAmount: 2500, actualAmount: 0, isPaid: false },
-    { eventId, category: 'venue', description: 'Tent & seating hire', plannedAmount: 12000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'catering', description: 'Food catering', plannedAmount: 25000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'catering', description: 'Traditional beer', plannedAmount: 3000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'decor', description: 'Decor & setup', plannedAmount: 8000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'attire', description: 'Bridal party attire', plannedAmount: 10000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'transport', description: 'Transport', plannedAmount: 4000, actualAmount: 0, isPaid: false },
-    { eventId, category: 'other', description: 'Photography & video', plannedAmount: 8000, actualAmount: 0, isPaid: false },
+    { category: 'livestock', description: 'Cattle (inkomo)', planned_amount: 15000, actual_amount: 0, is_paid: false },
+    { category: 'livestock', description: 'Goat for rituals', planned_amount: 2500, actual_amount: 0, is_paid: false },
+    { category: 'venue', description: 'Tent & seating hire', planned_amount: 12000, actual_amount: 0, is_paid: false },
+    { category: 'catering', description: 'Food catering', planned_amount: 25000, actual_amount: 0, is_paid: false },
+    { category: 'catering', description: 'Traditional beer', planned_amount: 3000, actual_amount: 0, is_paid: false },
+    { category: 'decor', description: 'Decor & setup', planned_amount: 8000, actual_amount: 0, is_paid: false },
+    { category: 'attire', description: 'Bridal party attire', planned_amount: 10000, actual_amount: 0, is_paid: false },
+    { category: 'transport', description: 'Transport', planned_amount: 4000, actual_amount: 0, is_paid: false },
+    { category: 'other', description: 'Photography & video', planned_amount: 8000, actual_amount: 0, is_paid: false },
   ];
 };

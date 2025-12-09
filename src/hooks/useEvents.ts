@@ -64,9 +64,9 @@ export function useEvents() {
       title: t.title,
       description: t.description,
       category: t.category,
-      due_date: t.dueDate,
+      due_date: t.due_date,
       completed: false,
-      assignee_name: t.assigneeName,
+      assignee_name: t.assignee_name,
     }));
 
     await supabase.from('tasks').insert(tasksToInsert);
@@ -77,7 +77,7 @@ export function useEvents() {
       event_id: event.id,
       category: b.category,
       description: b.description,
-      planned_amount: b.plannedAmount,
+      planned_amount: b.planned_amount,
       actual_amount: 0,
       is_paid: false,
     }));
