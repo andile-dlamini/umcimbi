@@ -55,6 +55,9 @@
     --umembeso: 20 75% 55%;
     --umabo: 350 65% 45%;
 
+    /* Card border color - Deep Teal */
+    --card-border: 195 35% 24%;
+
     /* Sidebar (not used much in mobile-first) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 220 25% 15%;
@@ -103,6 +106,9 @@
 
     --umembeso: 20 70% 50%;
     --umabo: 350 60% 50%;
+
+    /* Card border color - Deep Teal (lighter for dark mode) */
+    --card-border: 195 35% 40%;
 
     --sidebar-background: 220 25% 12%;
     --sidebar-foreground: 40 20% 95%;

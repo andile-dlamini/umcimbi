@@ -50,7 +50,7 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-accent/50"
+      className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-card-border"
       onClick={() => navigate(`/events/${event.id}`)}
     >
       <CardContent className="p-4">

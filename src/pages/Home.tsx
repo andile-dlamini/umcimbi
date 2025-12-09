@@ -8,10 +8,10 @@ import { EventCard } from '@/components/shared/EventCard';
 import { EventType } from '@/types/database';
 
 const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-accent/20 text-accent border-accent/50' },
-  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent border-accent/50' },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-accent/20 text-accent border-accent/50' },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-accent/20 text-accent border-accent/50' },
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-accent/20 text-accent' },
+  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent' },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-accent/20 text-accent' },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-accent/20 text-accent' },
 ];
 
 export default function Home() {
@@ -85,7 +85,7 @@ export default function Home() {
               return (
                 <Card 
                   key={option.type}
-                  className={`cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border ${option.colorClass.split(' ').find(c => c.startsWith('border-')) || ''}`}
+                  className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-card-border"
                   onClick={() => navigate(`/events/new?type=${option.type}`)}
                 >
                   <CardContent className="p-4 text-center">
