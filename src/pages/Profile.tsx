@@ -1,16 +1,21 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Globe, Bell, Info, LogOut, Store, Shield } from 'lucide-react';
+import { User, Globe, Bell, Info, LogOut, Store, Shield, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useAuth } from '@/context/AuthContext';
+import { useMyServiceRequests } from '@/hooks/useServiceRequests';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { profile, user, signOut, isVendor, isAdmin } = useAuth();
+  const { requests } = useMyServiceRequests();
+
+  const pendingQuotes = requests.filter(r => r.status === 'quoted').length;
 
   const handleLogout = async () => {
     await signOut();
@@ -44,6 +49,28 @@ export default function Profile() {
           </CardContent>
         </Card>
 
+        {/* My Requests */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              My Quote Requests
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              variant="outline" 
+              className="w-full justify-between"
+              onClick={() => navigate('/profile/requests')}
+            >
+              <span>View my requests</span>
+              {pendingQuotes > 0 && (
+                <Badge variant="destructive">{pendingQuotes} quotes received</Badge>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Vendor Section */}
         <Card>
           <CardHeader>
@@ -54,13 +81,22 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             {isVendor ? (
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/profile/vendor')}
-              >
-                Manage vendor profile
-              </Button>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigate('/profile/vendor')}
+                >
+                  Manage vendor profile
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  className="w-full"
+                  onClick={() => navigate('/vendor-dashboard')}
+                >
+                  Vendor Dashboard
+                </Button>
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">

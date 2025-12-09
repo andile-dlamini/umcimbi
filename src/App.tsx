@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { RoleProvider } from "@/context/RoleContext";
 import { BottomNav } from "@/components/layout/BottomNav";
 
 // Pages
@@ -19,6 +20,8 @@ import VendorsList from "@/pages/vendors/VendorsList";
 import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorProfile from "@/pages/profile/VendorProfile";
+import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
+import MyRequests from "@/pages/profile/MyRequests";
 import Learn from "@/pages/Learn";
 import ArticlePage from "@/pages/learn/ArticlePage";
 import Profile from "@/pages/Profile";
@@ -80,6 +83,8 @@ function AppRoutes() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/profile/vendor" element={<VendorProfile />} />
+        <Route path="/profile/requests" element={<MyRequests />} />
+        <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
@@ -93,13 +98,15 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
+      <RoleProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </RoleProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
