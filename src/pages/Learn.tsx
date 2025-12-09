@@ -1,10 +1,12 @@
-import { BookOpen, Gift, Calendar, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, Gift, Calendar, Heart, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 const articles = [
   {
     id: 'umembeso',
+    path: '/learn/umembeso',
     icon: Gift,
     title: 'Umembeso Basics',
     description: 'Learn about the gift-giving ceremony and its significance',
@@ -12,6 +14,7 @@ const articles = [
   },
   {
     id: 'umabo',
+    path: '/learn/umabo',
     icon: Calendar,
     title: 'Umabo: Traditional Wedding Guide',
     description: 'Everything you need to know about the Zulu traditional wedding',
@@ -19,6 +22,7 @@ const articles = [
   },
   {
     id: 'combined',
+    path: '/learn/combining-ceremonies',
     icon: Heart,
     title: 'Combining Ceremonies',
     description: 'Respectfully combining church and traditional ceremonies',
@@ -27,6 +31,8 @@ const articles = [
 ];
 
 export default function Learn() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen pb-safe">
       <PageHeader title="Learn" subtitle="Traditional ceremony guides" />
@@ -40,6 +46,7 @@ export default function Learn() {
               <Card 
                 key={article.id}
                 className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none"
+                onClick={() => navigate(article.path)}
               >
                 <CardContent className="p-4 flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl ${article.color} flex items-center justify-center flex-shrink-0`}>
@@ -53,6 +60,7 @@ export default function Learn() {
                       {article.description}
                     </p>
                   </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground mt-1" />
                 </CardContent>
               </Card>
             );
