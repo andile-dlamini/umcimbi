@@ -90,8 +90,9 @@ export function BudgetTab({ eventId }: BudgetTabProps) {
   return (
     <div className="space-y-4">
       {/* Summary Card */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-4">
+      <Card className="relative overflow-hidden border-secondary/20">
+        <div className="absolute inset-0 shweshwe-pattern-teal opacity-10" />
+        <CardContent className="p-4 relative">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Planned</p>

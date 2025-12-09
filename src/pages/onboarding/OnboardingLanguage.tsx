@@ -5,24 +5,30 @@ export default function OnboardingLanguage() {
   const navigate = useNavigate();
 
   const handleLanguageSelect = (lang: 'en' | 'zu') => {
-    // Store language preference (for future use)
     localStorage.setItem('isiko-language', lang);
     navigate('/auth');
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
-      <div className="w-full max-w-sm text-center space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-background relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 shweshwe-pattern-teal opacity-30" />
+      
+      <div className="relative w-full max-w-sm text-center space-y-8">
         {/* Logo/Title */}
-        <div className="space-y-3">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center">
-            <span className="text-3xl font-bold text-primary-foreground">I</span>
+        <div className="space-y-4">
+          <div className="w-24 h-24 mx-auto rounded-2xl bg-primary flex items-center justify-center shadow-shweshwe-lg relative overflow-hidden">
+            <div className="absolute inset-0 shweshwe-dots opacity-20" />
+            <span className="relative text-4xl font-bold text-primary-foreground">I</span>
           </div>
           <h1 className="text-3xl font-bold text-foreground">Isiko Planner</h1>
           <p className="text-muted-foreground">
             Plan your Zulu ceremonies with respect
           </p>
         </div>
+
+        {/* Decorative divider */}
+        <div className="divider-shweshwe rounded-full" />
 
         {/* Language Selection */}
         <div className="space-y-3">
