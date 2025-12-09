@@ -35,24 +35,29 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
   return (
     <Card 
       className={cn(
-        'cursor-pointer hover:shadow-md transition-shadow tap-highlight-none',
+        'cursor-pointer hover:shadow-shweshwe-lg transition-all tap-highlight-none overflow-hidden',
         isSelected && 'ring-2 ring-primary'
       )}
       onClick={handleClick}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
-            <img 
-              src={vendor.image_urls?.[0] || '/placeholder.svg'} 
-              alt={vendor.name}
-              className="w-full h-full object-cover"
-            />
+          {/* Image with decorative circle */}
+          <div className="relative">
+            <div className="w-16 h-16 rounded-xl bg-muted flex-shrink-0 overflow-hidden ring-2 ring-accent/20">
+              <img 
+                src={vendor.image_urls?.[0] || '/placeholder.svg'} 
+                alt={vendor.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {/* Small decorative circle */}
+            <div className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-gradient-to-br from-primary via-accent to-secondary" />
           </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-xs capitalize">
+              <Badge variant="outline" className="text-xs capitalize border-secondary/30 text-secondary">
                 {categoryLabels[vendor.category] || vendor.category}
               </Badge>
               {isSelected && (
@@ -68,7 +73,7 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
             
             <div className="flex items-center gap-3 mt-1 text-sm">
               <div className="flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                <Star className="h-3.5 w-3.5 fill-accent text-accent" />
                 <span className="font-medium">{vendor.rating}</span>
                 <span className="text-muted-foreground">({vendor.review_count})</span>
               </div>
@@ -82,13 +87,15 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
             </div>
             
             {vendor.price_range_text && (
-              <p className="text-sm text-primary font-medium mt-1">
+              <p className="text-sm text-secondary font-medium mt-1">
                 {vendor.price_range_text}
               </p>
             )}
           </div>
           
-          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </div>
         </div>
       </CardContent>
     </Card>

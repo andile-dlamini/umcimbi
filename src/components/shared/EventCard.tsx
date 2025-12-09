@@ -21,25 +21,23 @@ export function EventCard({ event }: EventCardProps) {
     ? format(new Date(event.date), 'dd MMM yyyy')
     : 'Date not set';
 
+  const isUmembeso = event.type === 'umembeso';
+
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none"
+      className={cn(
+        "cursor-pointer hover:shadow-shweshwe-lg transition-all tap-highlight-none overflow-hidden",
+        "border-l-4",
+        isUmembeso ? "border-l-secondary" : "border-l-primary"
+      )}
       onClick={() => navigate(`/events/${event.id}`)}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <Badge 
-                variant="secondary"
-                className={cn(
-                  'text-xs font-medium',
-                  event.type === 'umembeso' 
-                    ? 'bg-secondary text-secondary-foreground' 
-                    : 'bg-accent text-accent-foreground'
-                )}
-              >
-                {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
+              <Badge variant={isUmembeso ? "umembeso" : "umabo"}>
+                {isUmembeso ? 'Umembeso' : 'Umabo'}
               </Badge>
             </div>
             
@@ -61,13 +59,21 @@ export function EventCard({ event }: EventCardProps) {
             </div>
           </div>
           
-          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+          <div className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+            isUmembeso ? "bg-secondary/10" : "bg-primary/10"
+          )}>
+            <ChevronRight className={cn(
+              "h-5 w-5",
+              isUmembeso ? "text-secondary" : "text-primary"
+            )} />
+          </div>
         </div>
         
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs mb-1.5">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium text-foreground">{progress}%</span>
+            <span className="font-semibold text-foreground">{progress}%</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>

@@ -169,18 +169,16 @@ export default function EventDashboard() {
 
       {/* Hero Card */}
       <div className={cn(
-        'px-4 py-5',
-        event.type === 'umembeso' ? 'bg-secondary/10' : 'bg-accent/10'
+        'px-4 py-5 relative overflow-hidden',
+        event.type === 'umembeso' ? 'bg-secondary-light' : 'bg-primary-light'
       )}>
-        <div className="max-w-lg mx-auto">
+        <div className={cn(
+          'absolute inset-0 opacity-30',
+          event.type === 'umembeso' ? 'shweshwe-pattern-teal' : 'shweshwe-pattern-red'
+        )} />
+        <div className="max-w-lg mx-auto relative">
           <div className="flex items-start justify-between mb-3">
-            <Badge 
-              className={cn(
-                event.type === 'umembeso' 
-                  ? 'bg-secondary text-secondary-foreground' 
-                  : 'bg-accent text-accent-foreground'
-              )}
-            >
+            <Badge variant={event.type === 'umembeso' ? 'umembeso' : 'umabo'}>
               {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
             </Badge>
             <Button 
