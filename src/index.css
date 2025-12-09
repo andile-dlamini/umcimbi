@@ -2,122 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Isiko Planner Design System - Shweshwe Inspired */
-/* Bright, celebratory colors from traditional South African fabrics */
+/* Isiko Planner Design System - Mono-Palette Shweshwe Inspired */
+/* Brand colors: #264653 (Primary Teal) and #EDF3FF (Secondary Light Blue) */
 
 @layer base {
   :root {
-    /* Warm cream background */
-    --background: 40 33% 96%;
-    --foreground: 220 25% 15%;
+    /* Primary: Deep Teal #264653 = HSL(195, 41%, 24%) */
+    --primary: 195 41% 24%;
+    --primary-dark: 195 45% 18%;
+    --primary-light: 195 35% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Soft Blue #EDF3FF = HSL(222, 100%, 96%) */
+    --secondary: 222 100% 96%;
+    --secondary-light: 222 100% 98%;
+    --secondary-foreground: 195 41% 24%;
+
+    /* Background & Foreground */
+    --background: 222 100% 98%;
+    --foreground: 195 45% 18%;
 
     /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 15%;
+    --card-foreground: 195 45% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover-foreground: 195 45% 18%;
 
-    /* Primary: Deep Shweshwe Indigo Blue */
-    --primary: 220 65% 35%;
-    --primary-foreground: 0 0% 100%;
+    /* Muted tones - derived from brand */
+    --muted: 222 40% 94%;
+    --muted-foreground: 195 25% 40%;
 
-    /* Secondary: Warm Terracotta Orange */
-    --secondary: 20 75% 55%;
-    --secondary-foreground: 0 0% 100%;
+    /* Accent - lighter tint of primary */
+    --accent: 195 30% 90%;
+    --accent-foreground: 195 41% 24%;
 
-    /* Muted tones */
-    --muted: 40 20% 90%;
-    --muted-foreground: 220 15% 45%;
-
-    /* Accent: Rich Burgundy Red */
-    --accent: 350 65% 45%;
-    --accent-foreground: 0 0% 100%;
-
-    /* Success green for completed items */
-    --success: 145 60% 40%;
+    /* Success - teal-tinted green */
+    --success: 170 50% 35%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning/attention */
-    --warning: 45 90% 50%;
-    --warning-foreground: 220 25% 15%;
+    /* Warning - muted warm tone */
+    --warning: 45 60% 55%;
+    --warning-foreground: 195 45% 18%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 60% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 85%;
-    --input: 220 20% 85%;
-    --ring: 220 65% 35%;
+    --border: 195 20% 85%;
+    --input: 195 20% 85%;
+    --ring: 195 41% 24%;
 
     --radius: 0.75rem;
 
-    /* Ceremony type colors */
-    --umembeso: 20 75% 55%;
-    --umabo: 350 65% 45%;
+    /* Ceremony type colors - tints of primary */
+    --umembeso: 195 35% 35%;
+    --umabo: 195 45% 28%;
 
-    /* Card border color - Deep Teal */
-    --card-border: 195 35% 24%;
+    /* Card border color */
+    --card-border: 195 41% 24%;
 
-    /* Sidebar (not used much in mobile-first) */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 25% 15%;
-    --sidebar-primary: 220 65% 35%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 195 45% 18%;
+    --sidebar-primary: 195 41% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 92%;
-    --sidebar-accent-foreground: 220 25% 15%;
-    --sidebar-border: 220 20% 85%;
-    --sidebar-ring: 220 65% 35%;
+    --sidebar-accent: 222 40% 94%;
+    --sidebar-accent-foreground: 195 45% 18%;
+    --sidebar-border: 195 20% 85%;
+    --sidebar-ring: 195 41% 24%;
   }
 
   .dark {
-    --background: 220 25% 10%;
-    --foreground: 40 20% 95%;
-
-    --card: 220 25% 14%;
-    --card-foreground: 40 20% 95%;
-
-    --popover: 220 25% 14%;
-    --popover-foreground: 40 20% 95%;
-
-    --primary: 220 60% 55%;
+    /* Primary stays similar but slightly brighter */
+    --primary: 195 45% 45%;
+    --primary-dark: 195 41% 24%;
+    --primary-light: 195 40% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 20 70% 50%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary adjusted for dark mode */
+    --secondary: 222 30% 20%;
+    --secondary-light: 222 25% 25%;
+    --secondary-foreground: 222 100% 96%;
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 15% 65%;
+    --background: 195 35% 10%;
+    --foreground: 222 100% 96%;
 
-    --accent: 350 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --card: 195 30% 14%;
+    --card-foreground: 222 100% 96%;
 
-    --success: 145 55% 45%;
+    --popover: 195 30% 14%;
+    --popover-foreground: 222 100% 96%;
+
+    --muted: 195 25% 20%;
+    --muted-foreground: 195 20% 65%;
+
+    --accent: 195 30% 25%;
+    --accent-foreground: 222 100% 96%;
+
+    --success: 170 45% 40%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 85% 55%;
-    --warning-foreground: 220 25% 10%;
+    --warning: 45 55% 50%;
+    --warning-foreground: 195 35% 10%;
 
-    --destructive: 0 65% 45%;
+    --destructive: 0 55% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
-    --ring: 220 60% 55%;
+    --border: 195 25% 25%;
+    --input: 195 25% 25%;
+    --ring: 195 45% 45%;
 
-    --umembeso: 20 70% 50%;
-    --umabo: 350 60% 50%;
+    --umembeso: 195 40% 45%;
+    --umabo: 195 45% 40%;
 
-    /* Card border color - Deep Teal (lighter for dark mode) */
-    --card-border: 195 35% 40%;
+    --card-border: 195 40% 50%;
 
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 40 20% 95%;
-    --sidebar-primary: 220 60% 55%;
+    --sidebar-background: 195 30% 12%;
+    --sidebar-foreground: 222 100% 96%;
+    --sidebar-primary: 195 45% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 40 20% 95%;
-    --sidebar-border: 220 20% 25%;
-    --sidebar-ring: 220 60% 55%;
+    --sidebar-accent: 195 25% 18%;
+    --sidebar-accent-foreground: 222 100% 96%;
+    --sidebar-border: 195 25% 25%;
+    --sidebar-ring: 195 45% 45%;
   }
 }
 
@@ -127,7 +134,7 @@
   }
 
   body {
-    @apply text-foreground antialiased shweshwe-bg;
+    @apply text-foreground antialiased bg-shweshwe-dots;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
@@ -138,6 +145,111 @@
 }
 
 @layer components {
+  /* ================================================
+     PATTERN 1: SHWESHWE DOTS (Global Background)
+     Classic indigo-style dot grid pattern
+     ================================================ */
+  .bg-shweshwe-dots {
+    background-color: hsl(var(--background));
+    background-image:
+      /* Primary dots - neat grid */
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.08) 2px, transparent 2px),
+      /* Secondary offset dots */
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.05) 1.5px, transparent 1.5px);
+    background-size: 
+      20px 20px,
+      20px 20px;
+    background-position:
+      0 0,
+      10px 10px;
+  }
+
+  .dark .bg-shweshwe-dots {
+    background-image:
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 2px, transparent 2px),
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.10) 1.5px, transparent 1.5px);
+  }
+
+  /* ================================================
+     PATTERN 2: SHWESHWE RHOMBUS (Headers/Hero)
+     Diamond/rhombus strip pattern
+     ================================================ */
+  .bg-shweshwe-rhombus {
+    background-color: hsl(var(--primary));
+    background-image:
+      /* Rhombus pattern using rotated squares */
+      linear-gradient(45deg, hsl(var(--secondary) / 0.15) 25%, transparent 25%),
+      linear-gradient(-45deg, hsl(var(--secondary) / 0.15) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, hsl(var(--secondary) / 0.15) 75%),
+      linear-gradient(-45deg, transparent 75%, hsl(var(--secondary) / 0.15) 75%),
+      /* Inner diamond accent */
+      linear-gradient(45deg, hsl(var(--secondary) / 0.08) 50%, transparent 50%),
+      linear-gradient(-45deg, hsl(var(--secondary) / 0.08) 50%, transparent 50%);
+    background-size: 
+      24px 24px,
+      24px 24px,
+      24px 24px,
+      24px 24px,
+      12px 12px,
+      12px 12px;
+    background-position:
+      0 0,
+      0 12px,
+      12px -12px,
+      -12px 0,
+      0 0,
+      6px 6px;
+  }
+
+  .dark .bg-shweshwe-rhombus {
+    background-color: hsl(var(--primary-dark));
+    background-image:
+      linear-gradient(45deg, hsl(var(--secondary) / 0.20) 25%, transparent 25%),
+      linear-gradient(-45deg, hsl(var(--secondary) / 0.20) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, hsl(var(--secondary) / 0.20) 75%),
+      linear-gradient(-45deg, transparent 75%, hsl(var(--secondary) / 0.20) 75%),
+      linear-gradient(45deg, hsl(var(--secondary) / 0.12) 50%, transparent 50%),
+      linear-gradient(-45deg, hsl(var(--secondary) / 0.12) 50%, transparent 50%);
+  }
+
+  /* ================================================
+     PATTERN 3: SHWESHWE MEDALLION (Cards/Sections)
+     Corner medallion/circular accent pattern
+     ================================================ */
+  .bg-shweshwe-medallion {
+    background-color: hsl(var(--card));
+    background-image:
+      /* Corner medallion circles */
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.06) 20px, transparent 20px),
+      radial-gradient(circle at 100% 100%, hsl(var(--primary) / 0.06) 20px, transparent 20px),
+      /* Inner ring accents */
+      radial-gradient(circle at 0% 0%, transparent 10px, hsl(var(--primary) / 0.04) 11px, transparent 12px),
+      radial-gradient(circle at 100% 100%, transparent 10px, hsl(var(--primary) / 0.04) 11px, transparent 12px),
+      /* Subtle dot grid overlay */
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.03) 1px, transparent 1px);
+    background-size: 
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      16px 16px;
+    background-position:
+      0 0,
+      100% 100%,
+      0 0,
+      100% 100%,
+      0 0;
+  }
+
+  .dark .bg-shweshwe-medallion {
+    background-image:
+      radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.12) 20px, transparent 20px),
+      radial-gradient(circle at 100% 100%, hsl(var(--primary) / 0.12) 20px, transparent 20px),
+      radial-gradient(circle at 0% 0%, transparent 10px, hsl(var(--primary) / 0.08) 11px, transparent 12px),
+      radial-gradient(circle at 100% 100%, transparent 10px, hsl(var(--primary) / 0.08) 11px, transparent 12px),
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  }
+
   /* Shweshwe-inspired decorative border pattern */
   .shweshwe-border {
     background-image: repeating-linear-gradient(
@@ -152,63 +264,18 @@
     background-repeat: no-repeat;
   }
 
-  /* Shweshwe-inspired bold background pattern */
+  /* Legacy class for backwards compatibility */
   .shweshwe-bg {
-    background-color: hsl(var(--background));
-    background-image: 
-      /* Dense dot grid - primary color */
-      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 2px, transparent 2px),
-      /* Secondary dot grid offset */
-      radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.12) 2px, transparent 2px),
-      /* Accent dot grid */
-      radial-gradient(circle at 50% 50%, hsl(var(--accent) / 0.10) 1.5px, transparent 1.5px),
-      /* Medium concentric rings */
-      radial-gradient(circle at 50% 50%, transparent 6px, hsl(var(--primary) / 0.08) 7px, transparent 8px),
-      radial-gradient(circle at 50% 50%, transparent 10px, hsl(var(--primary) / 0.06) 11px, transparent 12px),
-      /* Large decorative circles */
-      radial-gradient(circle at 50% 50%, transparent 18px, hsl(var(--secondary) / 0.07) 19px, hsl(var(--secondary) / 0.05) 21px, transparent 22px),
-      /* Corner accent circles */
-      radial-gradient(circle at 0% 0%, hsl(var(--accent) / 0.08) 4px, transparent 5px),
-      radial-gradient(circle at 100% 100%, hsl(var(--accent) / 0.08) 4px, transparent 5px);
-    background-size: 
-      24px 24px,
-      32px 32px,
-      16px 16px,
-      48px 48px,
-      48px 48px,
-      64px 64px,
-      64px 64px,
-      64px 64px;
-    background-position:
-      0 0,
-      16px 16px,
-      8px 8px,
-      0 0,
-      0 0,
-      0 0,
-      0 0,
-      32px 32px;
+    @apply bg-shweshwe-dots;
   }
 
-  .dark .shweshwe-bg {
-    background-image: 
-      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.20) 2px, transparent 2px),
-      radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
-      radial-gradient(circle at 50% 50%, hsl(var(--accent) / 0.12) 1.5px, transparent 1.5px),
-      radial-gradient(circle at 50% 50%, transparent 6px, hsl(var(--primary) / 0.12) 7px, transparent 8px),
-      radial-gradient(circle at 50% 50%, transparent 10px, hsl(var(--primary) / 0.08) 11px, transparent 12px),
-      radial-gradient(circle at 50% 50%, transparent 18px, hsl(var(--secondary) / 0.10) 19px, hsl(var(--secondary) / 0.07) 21px, transparent 22px),
-      radial-gradient(circle at 0% 0%, hsl(var(--accent) / 0.12) 4px, transparent 5px),
-      radial-gradient(circle at 100% 100%, hsl(var(--accent) / 0.12) 4px, transparent 5px);
-  }
-
-  /* Ceremony type badges */
+  /* Ceremony type badges - using primary tints */
   .badge-umembeso {
-    @apply bg-secondary text-secondary-foreground;
+    @apply bg-primary/80 text-primary-foreground;
   }
 
   .badge-umabo {
-    @apply bg-accent text-accent-foreground;
+    @apply bg-primary text-primary-foreground;
   }
 
   /* Safe area for mobile bottom nav */
