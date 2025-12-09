@@ -7,7 +7,7 @@ export default function OnboardingLanguage() {
   const handleLanguageSelect = (lang: 'en' | 'zu') => {
     // Store language preference (for future use)
     localStorage.setItem('isiko-language', lang);
-    navigate('/onboarding/login');
+    navigate('/auth');
   };
 
   return (
