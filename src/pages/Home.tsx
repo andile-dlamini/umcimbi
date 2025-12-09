@@ -8,10 +8,10 @@ import { EventCard } from '@/components/shared/EventCard';
 import { EventType } from '@/types/database';
 
 const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-secondary/20 text-secondary border-secondary/50' },
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-accent/20 text-accent border-accent/50' },
   { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent border-accent/50' },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-emerald-500/20 text-emerald-600 border-emerald-500/50' },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-pink-500/20 text-pink-600 border-pink-500/50' },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-accent/20 text-accent border-accent/50' },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-accent/20 text-accent border-accent/50' },
 ];
 
 export default function Home() {
