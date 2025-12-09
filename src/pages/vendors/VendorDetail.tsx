@@ -1,22 +1,45 @@
-import { useParams, useSearchParams } from 'react-router-dom';
-import { Star, MapPin, Phone, MessageCircle, Check } from 'lucide-react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { Star, MapPin, Phone, MessageCircle, Check, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useVendor } from '@/hooks/useVendors';
 import { useEventVendors } from '@/hooks/useEvents';
+import { useStartConversation } from '@/hooks/useChat';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function VendorDetail() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('eventId');
+  const navigate = useNavigate();
   
+  const { user } = useAuth();
   const { vendor, isLoading } = useVendor(id);
   const { addVendorToEvent, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId || undefined);
+  const { startConversation } = useStartConversation();
 
   const isSelected = id ? isVendorSelected(id) : false;
+
+  const handleChatWithVendor = async () => {
+    if (!user) {
+      toast.error('Please log in to chat with vendors');
+      navigate('/auth');
+      return;
+    }
+
+    if (!id) return;
+
+    const conversationId = await startConversation(id, eventId || undefined);
+    if (conversationId) {
+      navigate(`/chat/${conversationId}`);
+    } else {
+      toast.error('Could not start conversation');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -129,6 +152,17 @@ export default function VendorDetail() {
             </div>
           </div>
         )}
+
+        {/* Chat with Vendor Button */}
+        <Button
+          size="lg"
+          className="w-full"
+          variant="default"
+          onClick={handleChatWithVendor}
+        >
+          <Send className="h-4 w-4 mr-2" />
+          Chat with this vendor
+        </Button>
 
         {/* Contact Actions */}
         <div className="flex gap-3">

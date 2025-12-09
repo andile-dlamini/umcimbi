@@ -1,19 +1,27 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Store, BookOpen } from 'lucide-react';
+import { Home, Calendar, Store, MessageCircle, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useConversations } from '@/hooks/useChat';
+import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/events', icon: Calendar, label: 'Events' },
   { to: '/vendors', icon: Store, label: 'Vendors' },
+  { to: '/chats', icon: MessageCircle, label: 'Chats' },
   { to: '/learn', icon: BookOpen, label: 'Learn' },
 ];
 
 export function BottomNav() {
   const location = useLocation();
+  const { user } = useAuth();
+  const { conversations } = useConversations();
+
+  // Calculate total unread count
+  const totalUnread = conversations.reduce((acc, conv) => acc + (conv.unread_count || 0), 0);
 
   // Hide bottom nav on onboarding screens
-  if (location.pathname.startsWith('/onboarding')) {
+  if (location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/chat/')) {
     return null;
   }
 
@@ -26,14 +34,21 @@ export function BottomNav() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center justify-center w-full h-full gap-1 tap-highlight-none transition-colors',
+                'flex flex-col items-center justify-center w-full h-full gap-1 tap-highlight-none transition-colors relative',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )
             }
           >
-            <Icon className="w-5 h-5" />
+            <div className="relative">
+              <Icon className="w-5 h-5" />
+              {to === '/chats' && totalUnread > 0 && user && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
+            </div>
             <span className="text-xs font-medium">{label}</span>
           </NavLink>
         ))}

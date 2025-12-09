@@ -25,6 +25,8 @@ import UmaboGuide from "@/pages/learn/UmaboGuide";
 import CombiningCeremonies from "@/pages/learn/CombiningCeremonies";
 import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import ChatsList from "@/pages/chat/ChatsList";
+import ChatThread from "@/pages/chat/ChatThread";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +75,8 @@ function AppRoutes() {
         <Route path="/vendors" element={<VendorsList />} />
         <Route path="/vendors/onboarding" element={<VendorOnboarding />} />
         <Route path="/vendors/:id" element={<VendorDetail />} />
+        <Route path="/chats" element={<ChatsList />} />
+        <Route path="/chat/:conversationId" element={<ChatThread />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/learn/umembeso" element={<UmembesoBasics />} />
         <Route path="/learn/umabo" element={<UmaboGuide />} />

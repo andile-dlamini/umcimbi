@@ -6,6 +6,7 @@ export type VendorCategory = 'decor' | 'catering' | 'livestock' | 'tents' | 'tra
 export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'catering' | 'attire' | 'finance' | 'venue' | 'other';
 export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
+export type SenderType = 'user' | 'vendor' | 'system';
 
 export interface Profile {
   id: string;
@@ -105,9 +106,40 @@ export interface Guest {
   updated_at: string;
 }
 
+export interface Conversation {
+  id: string;
+  user_id: string;
+  vendor_id: string;
+  event_id: string | null;
+  last_message_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_type: SenderType;
+  sender_user_id: string | null;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+// Extended types with joined data
+export interface ConversationWithDetails extends Conversation {
+  vendor?: Vendor;
+  event?: Event;
+  user_profile?: Profile;
+  last_message?: Message;
+  unread_count?: number;
+}
+
 // Form types for creating/updating
 export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count'>;
 export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at'>;
 export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;
 export type CreateGuest = Omit<Guest, 'id' | 'created_at' | 'updated_at'>;
+export type CreateConversation = Omit<Conversation, 'id' | 'created_at' | 'updated_at' | 'last_message_at'>;
+export type CreateMessage = Omit<Message, 'id' | 'created_at' | 'read_at'>;
