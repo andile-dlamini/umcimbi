@@ -65,7 +65,11 @@ export default function EventDashboard() {
             >
               {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
             </Badge>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate(`/events/${event.id}/ceremony-mode`)}
+            >
               <Play className="h-4 w-4 mr-1" />
               Ceremony Mode
             </Button>
