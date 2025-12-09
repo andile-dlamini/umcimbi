@@ -508,7 +508,19 @@ export type Database = {
         | "attire"
         | "venue"
         | "other"
-      event_type: "umembeso" | "umabo"
+        | "funeral_services"
+        | "healer_services"
+        | "music"
+      event_type:
+        | "umembeso"
+        | "umabo"
+        | "imbeleko"
+        | "family_introduction"
+        | "lobola"
+        | "umbondo"
+        | "umemulo"
+        | "funeral"
+        | "ancestral_ritual"
       preferred_language: "zulu" | "english"
       rsvp_status: "invited" | "yes" | "no" | "unknown"
       sender_type: "user" | "vendor" | "system"
@@ -668,8 +680,21 @@ export const Constants = {
         "attire",
         "venue",
         "other",
+        "funeral_services",
+        "healer_services",
+        "music",
       ],
-      event_type: ["umembeso", "umabo"],
+      event_type: [
+        "umembeso",
+        "umabo",
+        "imbeleko",
+        "family_introduction",
+        "lobola",
+        "umbondo",
+        "umemulo",
+        "funeral",
+        "ancestral_ritual",
+      ],
       preferred_language: ["zulu", "english"],
       rsvp_status: ["invited", "yes", "no", "unknown"],
       sender_type: ["user", "vendor", "system"],
