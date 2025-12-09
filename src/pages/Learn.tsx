@@ -18,16 +18,16 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const colorMap: Record<string, string> = {
-  'imbeleko': 'bg-amber-500/20 text-amber-600',
-  'family-introduction': 'bg-blue-500/20 text-blue-600',
-  'lobola': 'bg-emerald-500/20 text-emerald-600',
-  'umembeso': 'bg-secondary/20 text-secondary',
-  'umbondo': 'bg-purple-500/20 text-purple-600',
+  'imbeleko': 'bg-accent/20 text-accent',
+  'family-introduction': 'bg-accent/20 text-accent',
+  'lobola': 'bg-accent/20 text-accent',
+  'umembeso': 'bg-accent/20 text-accent',
+  'umbondo': 'bg-accent/20 text-accent',
   'umabo': 'bg-accent/20 text-accent',
-  'umemulo': 'bg-pink-500/20 text-pink-600',
-  'funeral': 'bg-slate-500/20 text-slate-600',
-  'ancestral-rituals': 'bg-orange-500/20 text-orange-600',
-  'combining-ceremonies': 'bg-primary/20 text-primary',
+  'umemulo': 'bg-accent/20 text-accent',
+  'funeral': 'bg-accent/20 text-accent',
+  'ancestral-rituals': 'bg-accent/20 text-accent',
+  'combining-ceremonies': 'bg-accent/20 text-accent',
 };
 
 export default function Learn() {

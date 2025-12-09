@@ -66,10 +66,10 @@ const ChatsList = () => {
               <button
                 key={conv.id}
                 onClick={() => navigate(`/chat/${conv.id}`)}
-                className="w-full flex items-start gap-3 p-3 rounded-xl bg-card border border-border hover:bg-accent/50 transition-colors text-left"
+                className="w-full flex items-start gap-3 p-3 rounded-xl bg-card border border-accent/50 hover:bg-accent/20 transition-colors text-left"
               >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <MessageCircle className="h-5 w-5 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                  <MessageCircle className="h-5 w-5 text-accent" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
@@ -94,7 +94,7 @@ const ChatsList = () => {
                     )}
                   </div>
                   {conv.event && (
-                    <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
+                    <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
                       {conv.event.name}
                     </span>
                   )}
