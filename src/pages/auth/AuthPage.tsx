@@ -74,10 +74,13 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Shweshwe Pattern Header */}
+      <div className="h-24 shweshwe-pattern" />
+      
       {/* Header */}
-      <div className="px-4 py-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/onboarding')}>
+      <div className="px-4 py-4 -mt-12">
+        <Button variant="ghost" size="icon" className="bg-background" onClick={() => navigate('/onboarding')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
       </div>
@@ -85,7 +88,7 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center px-4 pb-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-secondary flex items-center justify-center mb-4">
               <span className="text-2xl">🎊</span>
             </div>
             <CardTitle className="text-2xl">
