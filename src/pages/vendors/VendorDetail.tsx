@@ -1,5 +1,5 @@
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Phone, MessageCircle, Check, Send } from 'lucide-react';
+import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { useEventVendors } from '@/hooks/useEvents';
 import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
+import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -156,6 +157,14 @@ export default function VendorDetail() {
 
         {/* Reviews Section */}
         <VendorRating vendorId={id!} />
+
+        {/* Request Quote Button */}
+        <RequestQuoteDialog vendor={vendor}>
+          <Button size="lg" variant="secondary" className="w-full">
+            <FileText className="h-4 w-4 mr-2" />
+            Request a quote
+          </Button>
+        </RequestQuoteDialog>
 
         {/* Chat with Vendor Button */}
         <Button

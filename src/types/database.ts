@@ -7,6 +7,7 @@ export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'cate
 export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'funeral_services' | 'healer_services' | 'music' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
 export type SenderType = 'user' | 'vendor' | 'system';
+export type ServiceRequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled';
 
 export interface Profile {
   id: string;
@@ -126,6 +127,23 @@ export interface Message {
   read_at: string | null;
 }
 
+export interface ServiceRequest {
+  id: string;
+  event_id: string;
+  vendor_id: string;
+  requester_user_id: string;
+  status: ServiceRequestStatus;
+  message: string | null;
+  event_date: string | null;
+  guest_count: number | null;
+  budget_range: string | null;
+  vendor_response: string | null;
+  quoted_amount: number | null;
+  created_at: string;
+  updated_at: string;
+  responded_at: string | null;
+}
+
 // Extended types with joined data
 export interface ConversationWithDetails extends Conversation {
   vendor?: Vendor;
@@ -133,6 +151,12 @@ export interface ConversationWithDetails extends Conversation {
   user_profile?: Profile;
   last_message?: Message;
   unread_count?: number;
+}
+
+export interface ServiceRequestWithDetails extends ServiceRequest {
+  event?: Event;
+  vendor?: Vendor;
+  requester_profile?: Profile;
 }
 
 // Event type metadata for UI
@@ -168,3 +192,4 @@ export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_a
 export type CreateGuest = Omit<Guest, 'id' | 'created_at' | 'updated_at'>;
 export type CreateConversation = Omit<Conversation, 'id' | 'created_at' | 'updated_at' | 'last_message_at'>;
 export type CreateMessage = Omit<Message, 'id' | 'created_at' | 'read_at'>;
+export type CreateServiceRequest = Omit<ServiceRequest, 'id' | 'created_at' | 'updated_at' | 'responded_at' | 'vendor_response' | 'quoted_amount' | 'status'>;

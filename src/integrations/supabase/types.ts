@@ -302,6 +302,72 @@ export type Database = {
         }
         Relationships: []
       }
+      service_requests: {
+        Row: {
+          budget_range: string | null
+          created_at: string
+          event_date: string | null
+          event_id: string
+          guest_count: number | null
+          id: string
+          message: string | null
+          quoted_amount: number | null
+          requester_user_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["service_request_status"]
+          updated_at: string
+          vendor_id: string
+          vendor_response: string | null
+        }
+        Insert: {
+          budget_range?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id: string
+          guest_count?: number | null
+          id?: string
+          message?: string | null
+          quoted_amount?: number | null
+          requester_user_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["service_request_status"]
+          updated_at?: string
+          vendor_id: string
+          vendor_response?: string | null
+        }
+        Update: {
+          budget_range?: string | null
+          created_at?: string
+          event_date?: string | null
+          event_id?: string
+          guest_count?: number | null
+          id?: string
+          message?: string | null
+          quoted_amount?: number | null
+          requester_user_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["service_request_status"]
+          updated_at?: string
+          vendor_id?: string
+          vendor_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee_name: string | null
@@ -524,6 +590,13 @@ export type Database = {
       preferred_language: "zulu" | "english"
       rsvp_status: "invited" | "yes" | "no" | "unknown"
       sender_type: "user" | "vendor" | "system"
+      service_request_status:
+        | "pending"
+        | "quoted"
+        | "accepted"
+        | "declined"
+        | "completed"
+        | "cancelled"
       task_category:
         | "gifts"
         | "decor"
@@ -698,6 +771,14 @@ export const Constants = {
       preferred_language: ["zulu", "english"],
       rsvp_status: ["invited", "yes", "no", "unknown"],
       sender_type: ["user", "vendor", "system"],
+      service_request_status: [
+        "pending",
+        "quoted",
+        "accepted",
+        "declined",
+        "completed",
+        "cancelled",
+      ],
       task_category: [
         "gifts",
         "decor",
