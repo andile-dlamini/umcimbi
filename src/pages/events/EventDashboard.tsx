@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Play } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Play, Pencil, Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { useEvents } from '@/hooks/useEvents';
@@ -15,23 +18,33 @@ import { TasksTab } from './tabs/TasksTab';
 import { BudgetTab } from './tabs/BudgetTab';
 import { GuestsTab } from './tabs/GuestsTab';
 import { VendorsTab } from './tabs/VendorsTab';
-import { format } from 'date-fns';
+import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { events, updateEvent, isLoading } = useEvents();
-  const { getProgress } = useTasks(id);
+  const { tasks, getProgress, updateTask } = useTasks(id);
   const { getSummary } = useBudget(id);
   
   const event = events.find(e => e.id === id);
   const [activeTab, setActiveTab] = useState('overview');
   const [notes, setNotes] = useState('');
+  
+  // Editable fields state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   useEffect(() => {
     if (event) {
       setNotes(event.notes || '');
+      setEditName(event.name);
+      setEditLocation(event.location || '');
     }
   }, [event]);
 
@@ -40,6 +53,54 @@ export default function EventDashboard() {
     if (event) {
       updateEvent(event.id, { notes: value });
     }
+  };
+
+  const handleSaveName = async () => {
+    if (event && editName.trim()) {
+      await updateEvent(event.id, { name: editName.trim() });
+      setIsEditingName(false);
+      toast.success('Event name updated');
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    if (event) {
+      await updateEvent(event.id, { location: editLocation.trim() || null });
+      setIsEditingLocation(false);
+      toast.success('Location updated');
+    }
+  };
+
+  const handleDateChange = async (newDate: Date | undefined) => {
+    if (!event || !newDate) return;
+    
+    const oldDate = event.date ? new Date(event.date) : null;
+    const newDateStr = format(newDate, 'yyyy-MM-dd');
+    
+    // Update the event date
+    await updateEvent(event.id, { date: newDateStr });
+    
+    // Recalculate task due dates if there was an old date
+    if (oldDate && tasks.length > 0) {
+      const daysDiff = differenceInDays(newDate, oldDate);
+      
+      if (daysDiff !== 0) {
+        // Update all tasks with due dates
+        const tasksWithDueDates = tasks.filter(t => t.due_date);
+        for (const task of tasksWithDueDates) {
+          const oldDueDate = new Date(task.due_date!);
+          const newDueDate = addDays(oldDueDate, daysDiff);
+          await updateTask(task.id, { due_date: format(newDueDate, 'yyyy-MM-dd') });
+        }
+        toast.success(`Event date updated. ${tasksWithDueDates.length} task dates recalculated.`);
+      } else {
+        toast.success('Event date updated');
+      }
+    } else {
+      toast.success('Event date updated');
+    }
+    
+    setDatePickerOpen(false);
   };
 
   if (isLoading) {
@@ -76,7 +137,35 @@ export default function EventDashboard() {
 
   return (
     <div className="min-h-screen pb-safe">
-      <PageHeader title={event.name} showBack />
+      <PageHeader 
+        title={isEditingName ? '' : event.name} 
+        showBack 
+        rightAction={
+          !isEditingName && (
+            <Button variant="ghost" size="icon" onClick={() => setIsEditingName(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )
+        }
+      />
+
+      {/* Inline name editing */}
+      {isEditingName && (
+        <div className="px-4 py-2 bg-background border-b flex items-center gap-2">
+          <Input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="flex-1"
+            autoFocus
+          />
+          <Button size="icon" variant="ghost" onClick={handleSaveName}>
+            <Check className="h-4 w-4 text-primary" />
+          </Button>
+          <Button size="icon" variant="ghost" onClick={() => { setIsEditingName(false); setEditName(event.name); }}>
+            <X className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </div>
+      )}
 
       {/* Hero Card */}
       <div className={cn(
@@ -105,15 +194,52 @@ export default function EventDashboard() {
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground mb-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>{formattedDate}</span>
-            </div>
-            {event.location && (
+            {/* Editable Date */}
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-2 hover:text-foreground transition-colors group">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formattedDate}</span>
+                  <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={event.date ? new Date(event.date) : undefined}
+                  onSelect={handleDateChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {/* Editable Location */}
+            {isEditingLocation ? (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>{event.location}</span>
+                <Input
+                  value={editLocation}
+                  onChange={(e) => setEditLocation(e.target.value)}
+                  className="h-7 text-sm flex-1"
+                  placeholder="Enter location"
+                  autoFocus
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveLocation}>
+                  <Check className="h-3 w-3 text-primary" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setIsEditingLocation(false); setEditLocation(event.location || ''); }}>
+                  <X className="h-3 w-3 text-muted-foreground" />
+                </Button>
               </div>
+            ) : (
+              <button 
+                className="flex items-center gap-2 hover:text-foreground transition-colors group"
+                onClick={() => setIsEditingLocation(true)}
+              >
+                <MapPin className="h-4 w-4" />
+                <span>{event.location || 'Add location'}</span>
+                <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
             )}
           </div>
 
