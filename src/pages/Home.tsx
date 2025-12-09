@@ -1,10 +1,18 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, Gift } from 'lucide-react';
+import { Plus, Calendar, Gift, Heart, Baby, Users, Handshake, Package, Sparkles, Flower2, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/shared/EventCard';
+import { EventType } from '@/types/database';
+
+const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-secondary/20 text-secondary border-secondary/50' },
+  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart, colorClass: 'bg-accent/20 text-accent border-accent/50' },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake, colorClass: 'bg-emerald-500/20 text-emerald-600 border-emerald-500/50' },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles, colorClass: 'bg-pink-500/20 text-pink-600 border-pink-500/50' },
+];
 
 export default function Home() {
   const navigate = useNavigate();
@@ -60,46 +68,40 @@ export default function Home() {
           )}
         </section>
 
-        {/* Start New */}
+        {/* Quick Start */}
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
-            Start new
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-foreground">
+              Quick start
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/events/new')}>
+              View all
+            </Button>
+          </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-secondary/50"
-              onClick={() => navigate('/events/new?type=umembeso')}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/20 flex items-center justify-center mb-3">
-                  <Gift className="h-6 w-6 text-secondary" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">
-                  Plan Umembeso
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Gift-giving ceremony
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border-accent/50"
-              onClick={() => navigate('/events/new?type=umabo')}
-            >
-              <CardContent className="p-4 text-center">
-                <div className="w-12 h-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-3">
-                  <Calendar className="h-6 w-6 text-accent" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">
-                  Plan Umabo
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Traditional wedding
-                </p>
-              </CardContent>
-            </Card>
+            {quickStartOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <Card 
+                  key={option.type}
+                  className={`cursor-pointer hover:shadow-md transition-shadow tap-highlight-none border ${option.colorClass.split(' ').find(c => c.startsWith('border-')) || ''}`}
+                  onClick={() => navigate(`/events/new?type=${option.type}`)}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ${option.colorClass.split(' ').slice(0, 2).join(' ')}`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">
+                      {option.label}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {option.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
       </div>

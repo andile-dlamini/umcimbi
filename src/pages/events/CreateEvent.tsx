@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Gift, Calendar, ChevronRight, Users } from 'lucide-react';
+import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
-import { EventType } from '@/types/database';
+import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 type EventSize = 'small' | 'medium' | 'large';
@@ -18,6 +18,30 @@ const sizeOptions = [
   { value: 'medium', label: 'Medium (80–200 guests)', count: 150 },
   { value: 'large', label: 'Large (200+ guests)', count: 250 },
 ];
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Baby,
+  Users,
+  Handshake,
+  Gift,
+  Package,
+  Heart,
+  Sparkles,
+  Flower2,
+  Flame,
+};
+
+const colorMap: Record<EventType, string> = {
+  imbeleko: 'bg-amber-500/20 text-amber-600',
+  family_introduction: 'bg-blue-500/20 text-blue-600',
+  lobola: 'bg-emerald-500/20 text-emerald-600',
+  umembeso: 'bg-secondary/20 text-secondary',
+  umbondo: 'bg-purple-500/20 text-purple-600',
+  umabo: 'bg-accent/20 text-accent',
+  umemulo: 'bg-pink-500/20 text-pink-600',
+  funeral: 'bg-slate-500/20 text-slate-600',
+  ancestral_ritual: 'bg-orange-500/20 text-orange-600',
+};
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -44,9 +68,10 @@ export default function CreateEvent() {
 
     setIsCreating(true);
     const selectedSize = sizeOptions.find(s => s.value === size);
+    const typeInfo = getEventTypeInfo(eventType);
     
     const event = await createEvent({
-      name: name || `My ${eventType === 'umembeso' ? 'Umembeso' : 'Umabo'}`,
+      name: name || `My ${typeInfo.shortLabel}`,
       type: eventType,
       date: date || null,
       location: location || null,
@@ -63,6 +88,8 @@ export default function CreateEvent() {
   };
 
   const isValid = eventType && name.length >= 2;
+
+  const selectedTypeInfo = eventType ? getEventTypeInfo(eventType) : null;
 
   return (
     <div className="min-h-screen pb-safe bg-background">
@@ -81,61 +108,49 @@ export default function CreateEvent() {
             </div>
 
             <div className="space-y-3">
-              <Card 
-                className={cn(
-                  'cursor-pointer transition-all tap-highlight-none',
-                  'hover:shadow-md hover:border-secondary',
-                  eventType === 'umembeso' && 'ring-2 ring-secondary'
-                )}
-                onClick={() => handleTypeSelect('umembeso')}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-secondary/20 flex items-center justify-center flex-shrink-0">
-                    <Gift className="h-7 w-7 text-secondary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">Umembeso</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Gift-giving ceremony to honor the bride's family
-                    </p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </CardContent>
-              </Card>
-
-              <Card 
-                className={cn(
-                  'cursor-pointer transition-all tap-highlight-none',
-                  'hover:shadow-md hover:border-accent',
-                  eventType === 'umabo' && 'ring-2 ring-accent'
-                )}
-                onClick={() => handleTypeSelect('umabo')}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
-                    <Calendar className="h-7 w-7 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">Umabo</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Traditional Zulu wedding ceremony
-                    </p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </CardContent>
-              </Card>
+              {EVENT_TYPES.map((typeInfo) => {
+                const Icon = iconMap[typeInfo.icon] || Gift;
+                const colorClass = colorMap[typeInfo.id];
+                
+                return (
+                  <Card 
+                    key={typeInfo.id}
+                    className={cn(
+                      'cursor-pointer transition-all tap-highlight-none',
+                      'hover:shadow-md hover:border-primary/50',
+                      eventType === typeInfo.id && 'ring-2 ring-primary'
+                    )}
+                    onClick={() => handleTypeSelect(typeInfo.id)}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0', colorClass)}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground text-sm">
+                          {typeInfo.shortLabel}
+                        </h3>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {typeInfo.description}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {step === 2 && (
+        {step === 2 && selectedTypeInfo && (
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="text-xl font-semibold text-foreground mb-2">
                 Event details
               </h2>
               <p className="text-muted-foreground text-sm">
-                Tell us more about your {eventType === 'umembeso' ? 'Umembeso' : 'Umabo'}
+                Tell us more about your {selectedTypeInfo.shortLabel}
               </p>
             </div>
 
@@ -144,7 +159,7 @@ export default function CreateEvent() {
                 <Label htmlFor="name">Event name or nickname</Label>
                 <Input
                   id="name"
-                  placeholder={eventType === 'umembeso' ? "e.g., Nomsa's Umembeso" : "e.g., Nomsa & Sibusiso's Umabo"}
+                  placeholder={`e.g., ${selectedTypeInfo.shortLabel} for ${new Date().getFullYear()}`}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="h-12"
@@ -193,14 +208,24 @@ export default function CreateEvent() {
               </div>
             </div>
 
-            <Button
-              size="lg"
-              className="w-full h-12"
-              onClick={handleCreate}
-              disabled={!isValid || isCreating}
-            >
-              {isCreating ? 'Creating...' : 'Create ceremony plan'}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1 h-12"
+                onClick={() => setStep(1)}
+              >
+                Back
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1 h-12"
+                onClick={handleCreate}
+                disabled={!isValid || isCreating}
+              >
+                {isCreating ? 'Creating...' : 'Create'}
+              </Button>
+            </div>
           </div>
         )}
       </div>

@@ -1,10 +1,10 @@
 // Database types matching Supabase schema
 export type AppRole = 'user' | 'vendor' | 'admin';
 export type PreferredLanguage = 'zulu' | 'english';
-export type EventType = 'umembeso' | 'umabo';
+export type EventType = 'umembeso' | 'umabo' | 'imbeleko' | 'family_introduction' | 'lobola' | 'umbondo' | 'umemulo' | 'funeral' | 'ancestral_ritual';
 export type VendorCategory = 'decor' | 'catering' | 'livestock' | 'tents' | 'transport' | 'attire' | 'photographer' | 'other';
 export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'catering' | 'attire' | 'finance' | 'venue' | 'other';
-export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'other';
+export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'funeral_services' | 'healer_services' | 'music' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
 export type SenderType = 'user' | 'vendor' | 'system';
 
@@ -134,6 +134,31 @@ export interface ConversationWithDetails extends Conversation {
   last_message?: Message;
   unread_count?: number;
 }
+
+// Event type metadata for UI
+export interface EventTypeInfo {
+  id: EventType;
+  label: string;
+  shortLabel: string;
+  description: string;
+  icon: string;
+}
+
+export const EVENT_TYPES: EventTypeInfo[] = [
+  { id: 'imbeleko', label: 'Imbeleko (Child / Ancestor Introduction)', shortLabel: 'Imbeleko', description: 'Child or ancestor introduction ceremony', icon: 'Baby' },
+  { id: 'family_introduction', label: 'Family Introduction (Ukucela / Ukumisa isizwe)', shortLabel: 'Family Introduction', description: 'Meeting between families', icon: 'Users' },
+  { id: 'lobola', label: 'Lobola Negotiation', shortLabel: 'Lobola', description: 'Bridewealth negotiation ceremony', icon: 'Handshake' },
+  { id: 'umembeso', label: 'Umembeso (Gift-Giving Ceremony)', shortLabel: 'Umembeso', description: 'Gift-giving ceremony to honor the bride\'s family', icon: 'Gift' },
+  { id: 'umbondo', label: 'Umbondo (Return Gifts)', shortLabel: 'Umbondo', description: 'Return gifts from bride\'s family', icon: 'Package' },
+  { id: 'umabo', label: 'Traditional Wedding (Umabo)', shortLabel: 'Umabo', description: 'Traditional Zulu wedding ceremony', icon: 'Heart' },
+  { id: 'umemulo', label: 'Umemulo (Coming-of-Age Ceremony)', shortLabel: 'Umemulo', description: 'Coming-of-age celebration', icon: 'Sparkles' },
+  { id: 'funeral', label: 'Funeral (Umngcwabo)', shortLabel: 'Funeral', description: 'Traditional funeral arrangements', icon: 'Flower2' },
+  { id: 'ancestral_ritual', label: 'Ancestral Ritual / Cleansing / Consultation', shortLabel: 'Ancestral Ritual', description: 'Spiritual rituals and cleansing', icon: 'Flame' },
+];
+
+export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
+  return EVENT_TYPES.find(t => t.id === type) || EVENT_TYPES[0];
+};
 
 // Form types for creating/updating
 export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count'>;
