@@ -10,6 +10,12 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
 import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { z } from 'zod';
+
+const eventSchema = z.object({
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
+  location: z.string().max(200, 'Location must be less than 200 characters').optional(),
+});
 
 type EventSize = 'small' | 'medium' | 'large';
 
@@ -57,6 +63,7 @@ export default function CreateEvent() {
   const [location, setLocation] = useState('');
   const [size, setSize] = useState<EventSize>('medium');
   const [isCreating, setIsCreating] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleTypeSelect = (type: EventType) => {
     setEventType(type);
@@ -66,15 +73,33 @@ export default function CreateEvent() {
   const handleCreate = async () => {
     if (!eventType) return;
 
+    // Validate inputs
+    const result = eventSchema.safeParse({
+      name: name.trim(),
+      location: location.trim() || undefined,
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          errors[err.path[0] as string] = err.message;
+        }
+      });
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     setIsCreating(true);
     const selectedSize = sizeOptions.find(s => s.value === size);
     const typeInfo = getEventTypeInfo(eventType);
     
     const event = await createEvent({
-      name: name || `My ${typeInfo.shortLabel}`,
+      name: result.data.name || `My ${typeInfo.shortLabel}`,
       type: eventType,
       date: date || null,
-      location: location || null,
+      location: result.data.location || null,
       estimated_guest_count: selectedSize?.count || 150,
       size,
       notes: null,
@@ -162,8 +187,12 @@ export default function CreateEvent() {
                   placeholder={`e.g., ${selectedTypeInfo.shortLabel} for ${new Date().getFullYear()}`}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="h-12"
+                  maxLength={100}
+                  className={cn('h-12', validationErrors.name && 'border-destructive')}
                 />
+                {validationErrors.name && (
+                  <p className="text-xs text-destructive">{validationErrors.name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -184,8 +213,12 @@ export default function CreateEvent() {
                   placeholder="e.g., KwaMashu, Durban"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="h-12"
+                  maxLength={200}
+                  className={cn('h-12', validationErrors.location && 'border-destructive')}
                 />
+                {validationErrors.location && (
+                  <p className="text-xs text-destructive">{validationErrors.location}</p>
+                )}
               </div>
 
               <div className="space-y-2">
