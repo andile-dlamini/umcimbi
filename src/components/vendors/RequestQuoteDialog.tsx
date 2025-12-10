@@ -18,7 +18,17 @@ import { useEvents } from '@/hooks/useEvents';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
 import { Vendor, getEventTypeInfo } from '@/types/database';
 import { format } from 'date-fns';
+import { z } from 'zod';
 
+const quoteRequestSchema = z.object({
+  guestCount: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true;
+    const num = parseInt(val);
+    return !isNaN(num) && num >= 1 && num <= 10000;
+  }, { message: 'Guest count must be between 1 and 10,000' }),
+  budgetRange: z.string().max(50, 'Budget range must be less than 50 characters').optional(),
+  message: z.string().max(2000, 'Message must be less than 2,000 characters').optional(),
+});
 interface RequestQuoteDialogProps {
   vendor: Vendor;
   children: React.ReactNode;
@@ -31,7 +41,7 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
   const [guestCount, setGuestCount] = useState('');
   const [budgetRange, setBudgetRange] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { events } = useEvents();
   const { createRequest } = useMyServiceRequests();
 
@@ -40,6 +50,25 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
   const handleSubmit = async () => {
     if (!selectedEventId) return;
 
+    // Validate inputs
+    const result = quoteRequestSchema.safeParse({
+      guestCount,
+      budgetRange: budgetRange.trim(),
+      message: message.trim(),
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          errors[err.path[0] as string] = err.message;
+        }
+      });
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     setIsSubmitting(true);
     const success = await createRequest({
       event_id: selectedEventId,
@@ -50,7 +79,6 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
       guest_count: guestCount ? parseInt(guestCount) : null,
       budget_range: budgetRange.trim() || null,
     });
-
     setIsSubmitting(false);
 
     if (success) {
@@ -112,7 +140,11 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
                 placeholder="e.g. 150"
                 value={guestCount}
                 onChange={(e) => setGuestCount(e.target.value)}
+                className={validationErrors.guestCount ? 'border-destructive' : ''}
               />
+              {validationErrors.guestCount && (
+                <p className="text-xs text-destructive">{validationErrors.guestCount}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="budget">Budget range</Label>
@@ -121,7 +153,12 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
                 placeholder="e.g. R5,000-R10,000"
                 value={budgetRange}
                 onChange={(e) => setBudgetRange(e.target.value)}
+                maxLength={50}
+                className={validationErrors.budgetRange ? 'border-destructive' : ''}
               />
+              {validationErrors.budgetRange && (
+                <p className="text-xs text-destructive">{validationErrors.budgetRange}</p>
+              )}
             </div>
           </div>
 
@@ -133,7 +170,12 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
+              maxLength={2000}
+              className={validationErrors.message ? 'border-destructive' : ''}
             />
+            {validationErrors.message && (
+              <p className="text-xs text-destructive">{validationErrors.message}</p>
+            )}
           </div>
         </div>
 
