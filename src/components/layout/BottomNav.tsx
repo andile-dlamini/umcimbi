@@ -1,24 +1,18 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Store, MessageCircle, User } from 'lucide-react';
+import { Home, Calendar, Store, BookOpen, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useConversations } from '@/hooks/useChat';
-import { useAuth } from '@/context/AuthContext';
+
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/events', icon: Calendar, label: 'Events' },
   { to: '/vendors', icon: Store, label: 'Vendors' },
-  { to: '/chats', icon: MessageCircle, label: 'Chats' },
+  { to: '/learn', icon: BookOpen, label: 'Learn' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function BottomNav() {
   const location = useLocation();
-  const { user } = useAuth();
-  const { conversations } = useConversations();
-
-  // Calculate total unread count
-  const totalUnread = conversations.reduce((acc, conv) => acc + (conv.unread_count || 0), 0);
 
   // Hide bottom nav on onboarding screens
   if (location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/chat/')) {
@@ -43,11 +37,6 @@ export function BottomNav() {
           >
             <div className="relative">
               <Icon className="w-5 h-5" />
-              {to === '/chats' && totalUnread > 0 && user && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
-                  {totalUnread > 9 ? '9+' : totalUnread}
-                </span>
-              )}
             </div>
             <span className="text-xs font-medium">{label}</span>
           </NavLink>
