@@ -1,0 +1,223 @@
+import { PageHeader } from '@/components/layout/PageHeader';
+import { BottomNav } from '@/components/layout/BottomNav';
+import { useClientQuotes } from '@/hooks/useQuotes';
+import { useClientBookings } from '@/hooks/useBookings';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { DollarSign, Clock, Star, CheckCircle, XCircle } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
+import { QuoteWithDetails, QuoteStatus } from '@/types/booking';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
+const statusConfig: Record<QuoteStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  pending_client: { label: 'Awaiting Your Decision', variant: 'secondary' },
+  client_accepted: { label: 'Accepted', variant: 'default' },
+  client_declined: { label: 'Declined', variant: 'destructive' },
+  expired: { label: 'Expired', variant: 'outline' },
+};
+
+function QuoteCard({ 
+  quote, 
+  onAccept, 
+  onDecline 
+}: { 
+  quote: QuoteWithDetails; 
+  onAccept: () => Promise<void>;
+  onDecline: () => Promise<boolean>;
+}) {
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const status = statusConfig[quote.status];
+  const isExpired = new Date(quote.expires_at) < new Date();
+  const isPending = quote.status === 'pending_client' && !isExpired;
+
+  const handleAccept = async () => {
+    setIsAccepting(true);
+    await onAccept();
+    setIsAccepting(false);
+  };
+
+  const handleDecline = async () => {
+    setIsDeclining(true);
+    await onDecline();
+    setIsDeclining(false);
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-3">
+            {quote.vendor?.image_urls?.[0] && (
+              <img 
+                src={quote.vendor.image_urls[0]} 
+                alt={quote.vendor.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            )}
+            <div>
+              <h3 className="font-semibold text-foreground">{quote.vendor?.name}</h3>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <span>{quote.vendor?.rating?.toFixed(1) || 'New'}</span>
+              </div>
+            </div>
+          </div>
+          <Badge variant={isExpired && quote.status === 'pending_client' ? 'outline' : status.variant}>
+            {isExpired && quote.status === 'pending_client' ? 'Expired' : status.label}
+          </Badge>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-lg font-bold text-foreground">
+            <DollarSign className="h-5 w-5" />
+            <span>R{quote.price.toLocaleString()}</span>
+          </div>
+          
+          {quote.notes && (
+            <p className="text-sm text-muted-foreground">{quote.notes}</p>
+          )}
+          
+          {quote.proposed_date_time_window && (
+            <p className="text-sm text-muted-foreground">
+              Available: {quote.proposed_date_time_window}
+            </p>
+          )}
+          
+          {isPending && (
+            <div className="flex items-center gap-2 text-sm text-warning">
+              <Clock className="h-4 w-4" />
+              <span>Expires {formatDistanceToNow(new Date(quote.expires_at), { addSuffix: true })}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+      
+      {isPending && (
+        <CardFooter className="p-4 pt-0 gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={handleDecline}
+            disabled={isDeclining}
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            {isDeclining ? 'Declining...' : 'Decline'}
+          </Button>
+          <Button 
+            className="flex-1"
+            onClick={handleAccept}
+            disabled={isAccepting}
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {isAccepting ? 'Accepting...' : 'Accept & Book'}
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+}
+
+export default function MyQuotes() {
+  const { quotes, isLoading, acceptQuote, declineQuote, refreshQuotes } = useClientQuotes();
+  const { createBooking } = useClientBookings();
+  const navigate = useNavigate();
+
+  const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
+  const decidedQuotes = quotes.filter(q => q.status !== 'pending_client');
+
+  const handleAcceptQuote = async (quote: QuoteWithDetails) => {
+    const success = await acceptQuote(quote.id);
+    if (success && quote.request) {
+      // Create the booking
+      const booking = await createBooking({
+        event_id: quote.request.event_id,
+        client_id: '', // Will be set by RLS
+        vendor_id: quote.vendor_id,
+        quote_id: quote.id,
+        agreed_price: quote.price,
+        deposit_amount: Math.round(quote.price * 0.3), // 30% deposit
+        balance_amount: Math.round(quote.price * 0.7), // 70% balance
+        event_date_time: quote.request.event_date || undefined,
+      });
+      
+      if (booking) {
+        toast.success('Booking created successfully!');
+        navigate(`/bookings/${booking.id}`);
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <PageHeader title="My Quotes" showBack />
+        <div className="p-4 space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-48 w-full" />
+          ))}
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <PageHeader title="My Quotes" showBack />
+      
+      <div className="p-4 space-y-6">
+        {quotes.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-muted-foreground">No quotes yet</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Send quote requests to vendors to receive quotes
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {pendingQuotes.length > 0 && (
+              <div>
+                <h2 className="font-semibold text-lg mb-3">Awaiting Your Decision</h2>
+                <div className="space-y-4">
+                  {pendingQuotes.map((quote) => (
+                    <QuoteCard
+                      key={quote.id}
+                      quote={quote}
+                      onAccept={() => handleAcceptQuote(quote)}
+                      onDecline={() => declineQuote(quote.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {decidedQuotes.length > 0 && (
+              <div>
+                <h2 className="font-semibold text-lg mb-3">Past Quotes</h2>
+                <div className="space-y-4">
+                  {decidedQuotes.map((quote) => (
+                    <QuoteCard
+                      key={quote.id}
+                      quote={quote}
+                      onAccept={() => handleAcceptQuote(quote)}
+                      onDecline={() => declineQuote(quote.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      
+      <BottomNav />
+    </div>
+  );
+}

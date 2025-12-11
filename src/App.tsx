@@ -21,7 +21,12 @@ import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
+import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
+import VendorBookings from "@/pages/vendor-dashboard/VendorBookings";
 import MyRequests from "@/pages/profile/MyRequests";
+import MyQuotes from "@/pages/quotes/MyQuotes";
+import ClientBookings from "@/pages/bookings/ClientBookings";
+import BookingDetail from "@/pages/bookings/BookingDetail";
 import Learn from "@/pages/Learn";
 import ArticlePage from "@/pages/learn/ArticlePage";
 import Profile from "@/pages/Profile";
@@ -85,7 +90,12 @@ function AppRoutes() {
         <Route path="/profile/complete" element={<CompleteProfile />} />
         <Route path="/profile/vendor" element={<VendorProfile />} />
         <Route path="/profile/requests" element={<MyRequests />} />
+        <Route path="/quotes" element={<MyQuotes />} />
+        <Route path="/bookings" element={<ClientBookings />} />
+        <Route path="/bookings/:bookingId" element={<BookingDetail />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+        <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
+        <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/bulk-vendors" element={<BulkVendorUpload />} />
         <Route path="/onboarding" element={<Navigate to="/" replace />} />

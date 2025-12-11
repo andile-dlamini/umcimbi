@@ -14,6 +14,123 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_reviews: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewed_party_id: string
+          reviewer_id: string
+          reviewer_type: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewed_party_id: string
+          reviewer_id: string
+          reviewer_type: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewed_party_id?: string
+          reviewer_id?: string
+          reviewer_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          agreed_price: number
+          balance_amount: number | null
+          balance_status: Database["public"]["Enums"]["payment_status"]
+          booking_status: Database["public"]["Enums"]["booking_status"]
+          client_id: string
+          created_at: string
+          deposit_amount: number | null
+          deposit_status: Database["public"]["Enums"]["payment_status"]
+          event_date_time: string | null
+          event_id: string
+          id: string
+          quote_id: string | null
+          service_category: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          agreed_price: number
+          balance_amount?: number | null
+          balance_status?: Database["public"]["Enums"]["payment_status"]
+          booking_status?: Database["public"]["Enums"]["booking_status"]
+          client_id: string
+          created_at?: string
+          deposit_amount?: number | null
+          deposit_status?: Database["public"]["Enums"]["payment_status"]
+          event_date_time?: string | null
+          event_id: string
+          id?: string
+          quote_id?: string | null
+          service_category?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          agreed_price?: number
+          balance_amount?: number | null
+          balance_status?: Database["public"]["Enums"]["payment_status"]
+          booking_status?: Database["public"]["Enums"]["booking_status"]
+          client_id?: string
+          created_at?: string
+          deposit_amount?: number | null
+          deposit_status?: Database["public"]["Enums"]["payment_status"]
+          event_date_time?: string | null
+          event_id?: string
+          id?: string
+          quote_id?: string | null
+          service_category?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_items: {
         Row: {
           actual_amount: number | null
@@ -99,6 +216,41 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_proofs: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          photos: string[] | null
+          uploaded_by: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          uploaded_by: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photos?: string[] | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_proofs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -302,12 +454,67 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          price: number
+          proposed_date_time_window: string | null
+          request_id: string
+          status: Database["public"]["Enums"]["quote_status"]
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          price: number
+          proposed_date_time_window?: string | null
+          request_id: string
+          status?: Database["public"]["Enums"]["quote_status"]
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          price?: number
+          proposed_date_time_window?: string | null
+          request_id?: string
+          status?: Database["public"]["Enums"]["quote_status"]
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_requests: {
         Row: {
           budget_range: string | null
           created_at: string
           event_date: string | null
           event_id: string
+          expires_at: string | null
           guest_count: number | null
           id: string
           message: string | null
@@ -324,6 +531,7 @@ export type Database = {
           created_at?: string
           event_date?: string | null
           event_id: string
+          expires_at?: string | null
           guest_count?: number | null
           id?: string
           message?: string | null
@@ -340,6 +548,7 @@ export type Database = {
           created_at?: string
           event_date?: string | null
           event_id?: string
+          expires_at?: string | null
           guest_count?: number | null
           id?: string
           message?: string | null
@@ -565,6 +774,12 @@ export type Database = {
     }
     Enums: {
       app_role: "user" | "vendor" | "admin"
+      booking_status:
+        | "pending_deposit"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
+        | "disputed"
       budget_category:
         | "gifts"
         | "decor"
@@ -587,7 +802,13 @@ export type Database = {
         | "umemulo"
         | "funeral"
         | "ancestral_ritual"
+      payment_status: "not_due" | "due" | "paid"
       preferred_language: "zulu" | "english"
+      quote_status:
+        | "pending_client"
+        | "client_accepted"
+        | "client_declined"
+        | "expired"
       rsvp_status: "invited" | "yes" | "no" | "unknown"
       sender_type: "user" | "vendor" | "system"
       service_request_status:
@@ -597,6 +818,8 @@ export type Database = {
         | "declined"
         | "completed"
         | "cancelled"
+        | "expired"
+        | "vendor_declined"
       task_category:
         | "gifts"
         | "decor"
@@ -744,6 +967,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "vendor", "admin"],
+      booking_status: [
+        "pending_deposit",
+        "confirmed",
+        "cancelled",
+        "completed",
+        "disputed",
+      ],
       budget_category: [
         "gifts",
         "decor",
@@ -768,7 +998,14 @@ export const Constants = {
         "funeral",
         "ancestral_ritual",
       ],
+      payment_status: ["not_due", "due", "paid"],
       preferred_language: ["zulu", "english"],
+      quote_status: [
+        "pending_client",
+        "client_accepted",
+        "client_declined",
+        "expired",
+      ],
       rsvp_status: ["invited", "yes", "no", "unknown"],
       sender_type: ["user", "vendor", "system"],
       service_request_status: [
@@ -778,6 +1015,8 @@ export const Constants = {
         "declined",
         "completed",
         "cancelled",
+        "expired",
+        "vendor_declined",
       ],
       task_category: [
         "gifts",
