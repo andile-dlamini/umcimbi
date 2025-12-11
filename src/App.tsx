@@ -26,6 +26,7 @@ import Learn from "@/pages/Learn";
 import ArticlePage from "@/pages/learn/ArticlePage";
 import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
 import NotFound from "@/pages/NotFound";
@@ -86,6 +87,7 @@ function AppRoutes() {
         <Route path="/profile/requests" element={<MyRequests />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/bulk-vendors" element={<BulkVendorUpload />} />
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
