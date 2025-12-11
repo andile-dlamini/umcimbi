@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Globe, Bell, Info, LogOut, Store, Shield, FileText } from 'lucide-react';
+import { User, Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -9,13 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
+import { useClientQuotes } from '@/hooks/useQuotes';
+import { useClientBookings } from '@/hooks/useBookings';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { profile, user, signOut, isVendor, isAdmin } = useAuth();
   const { requests } = useMyServiceRequests();
+  const { quotes } = useClientQuotes();
+  const { bookings } = useClientBookings();
 
-  const pendingQuotes = requests.filter(r => r.status === 'quoted').length;
+  const pendingQuotes = quotes.filter(q => q.status === 'pending_client').length;
+  const activeBookings = bookings.filter(b => b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed').length;
 
   const handleLogout = async () => {
     await signOut();
@@ -49,24 +54,50 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* My Requests */}
+        {/* My Bookings & Quotes */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              My Quote Requests
+              <Calendar className="h-5 w-5" />
+              My Bookings & Quotes
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button 
               variant="outline" 
               className="w-full justify-between"
+              onClick={() => navigate('/bookings')}
+            >
+              <span className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                My Bookings
+              </span>
+              {activeBookings > 0 && (
+                <Badge>{activeBookings} active</Badge>
+              )}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-between"
+              onClick={() => navigate('/quotes')}
+            >
+              <span className="flex items-center gap-2">
+                <Receipt className="h-4 w-4" />
+                My Quotes
+              </span>
+              {pendingQuotes > 0 && (
+                <Badge variant="destructive">{pendingQuotes} pending</Badge>
+              )}
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between text-muted-foreground"
               onClick={() => navigate('/profile/requests')}
             >
-              <span>View my requests</span>
-              {pendingQuotes > 0 && (
-                <Badge variant="destructive">{pendingQuotes} quotes received</Badge>
-              )}
+              <span className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Quote Requests Sent
+              </span>
             </Button>
           </CardContent>
         </Card>
