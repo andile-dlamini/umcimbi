@@ -139,8 +139,7 @@ export function useVendorServiceRequests() {
       .from('service_requests')
       .select(`
         *,
-        event:events(*),
-        requester_profile:profiles!service_requests_requester_user_id_fkey(*)
+        event:events(*)
       `)
       .eq('vendor_id', vendorProfile.id)
       .order('created_at', { ascending: false });
