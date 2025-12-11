@@ -6,20 +6,49 @@
 npm test
 ```
 
-## Test Coverage
+## Test Files
 
-### Business Logic Tests (`src/test/bookingLogic.test.ts`)
+| File | Description | Coverage |
+|------|-------------|----------|
+| `src/test/bookingLogic.test.ts` | Pure business logic | Booking state transitions, payments, review eligibility |
+| `tests/QuotesList.test.tsx` | Quotes display | Viewing, accepting, declining quotes |
+| `tests/BookingDetail.test.tsx` | Booking details | Payment status, review button visibility |
+| `tests/RequestFlow.test.tsx` | Quote request form | Form submission, validation errors |
+| `tests/VendorProfileReviews.test.tsx` | Vendor reviews | Rating display, review submission |
 
-Tests pure TypeScript functions in `src/lib/bookingLogic.ts`:
+## Business Logic Tests
 
-| Function | Tests |
-|----------|-------|
-| `createBookingFromQuote` | Creates booking with pending_deposit status, calculates 30/70 deposit split |
-| `markDepositPaid` | Changes status to confirmed, sets balance as due |
-| `markBalancePaid` | Validates deposit paid first, marks balance paid |
-| `canOpenReview` | Returns true only for completed bookings |
-| `getPaymentProgress` | Returns 0, 30, or 100 based on payment status |
+Located in `src/test/bookingLogic.test.ts`:
+
+- **`createBookingFromQuote`** - Creates booking from accepted quote with correct status
+- **`markDepositPaid`** - Updates payment and booking status
+- **`markBalancePaid`** - Validates deposit paid first
+- **`canOpenReview`** - Returns true only for completed bookings
+
+## Component Tests
+
+Located in `tests/` folder (outside src/ to avoid build conflicts):
+
+### QuotesList
+- Renders quotes with vendor names and prices
+- Accept/Decline button interactions
+- Status badge display
+
+### BookingDetail
+- Deposit/balance status display
+- Payment action buttons
+- Review button visibility rules
+
+### RequestFlow
+- Form submission with validation
+- Success/error message display
+
+### VendorProfileReviews
+- Average rating calculation
+- "No reviews yet" state
+- Review submission flow
 
 ## Adding New Tests
 
-Add pure function tests to `src/test/` with `.test.ts` extension using Vitest syntax.
+For business logic: Add to `src/test/` with `.test.ts`
+For components: Add to `tests/` with `.test.tsx`
