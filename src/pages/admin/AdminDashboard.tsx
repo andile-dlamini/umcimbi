@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, Calendar, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Store, Calendar, BarChart3, Upload } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -13,6 +15,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalVendors: 0,
@@ -191,6 +194,23 @@ export default function AdminDashboard() {
                     </p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Admin Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Admin Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/admin/bulk-vendors')}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Upload Vendors
+                </Button>
               </CardContent>
             </Card>
 
