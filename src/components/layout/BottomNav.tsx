@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Store, MessageCircle, BookOpen } from 'lucide-react';
+import { Home, Calendar, Store, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useConversations } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
@@ -9,7 +9,7 @@ const navItems = [
   { to: '/events', icon: Calendar, label: 'Events' },
   { to: '/vendors', icon: Store, label: 'Vendors' },
   { to: '/chats', icon: MessageCircle, label: 'Chats' },
-  { to: '/learn', icon: BookOpen, label: 'Learn' },
+  { to: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function BottomNav() {
