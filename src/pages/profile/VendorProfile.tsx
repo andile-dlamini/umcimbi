@@ -5,23 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useMyVendorProfile } from '@/hooks/useVendors';
-import { VendorCategory } from '@/types/database';
-
-const vendorCategories: { value: VendorCategory; label: string }[] = [
-  { value: 'decor', label: 'Decor & Design' },
-  { value: 'catering', label: 'Catering' },
-  { value: 'livestock', label: 'Livestock' },
-  { value: 'tents', label: 'Tents & Marquees' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'attire', label: 'Traditional Attire' },
-  { value: 'photographer', label: 'Photography & Video' },
-  { value: 'other', label: 'Other Services' },
-];
+import { toast } from 'sonner';
 
 export default function VendorProfile() {
   const navigate = useNavigate();
@@ -29,7 +17,6 @@ export default function VendorProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editData, setEditData] = useState({
-    category: '' as VendorCategory,
     about: '',
     price_range_text: '',
     phone_number: '',
@@ -69,7 +56,6 @@ export default function VendorProfile() {
 
   const startEditing = () => {
     setEditData({
-      category: vendor.category,
       about: vendor.about || '',
       price_range_text: vendor.price_range_text || '',
       phone_number: vendor.phone_number || '',
@@ -83,7 +69,6 @@ export default function VendorProfile() {
   const handleSave = async () => {
     setIsSaving(true);
     const success = await updateVendorProfile({
-      category: editData.category,
       about: editData.about || null,
       price_range_text: editData.price_range_text || null,
       phone_number: editData.phone_number || null,
@@ -162,24 +147,6 @@ export default function VendorProfile() {
           <CardContent className="space-y-4">
             {isEditing ? (
               <>
-                <div className="space-y-2">
-                  <Label>Service Category</Label>
-                  <Select
-                    value={editData.category}
-                    onValueChange={(v) => setEditData({ ...editData, category: v as VendorCategory })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your service category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vendorCategories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="space-y-2">
                   <Label>Location</Label>
                   <Input
