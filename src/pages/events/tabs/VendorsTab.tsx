@@ -16,7 +16,8 @@ interface VendorsTabProps {
 export function VendorsTab({ eventId, location }: VendorsTabProps) {
   const [search, setSearch] = useState('');
   const { eventVendors, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId);
-  const { vendors } = useVendors({ search, location: location || undefined });
+  // Don't filter by location - show all vendors so users can find relevant ones
+  const { vendors } = useVendors({ search });
 
   const selectedVendors = vendors.filter(v => isVendorSelected(v.id));
   const availableVendors = vendors.filter(v => !isVendorSelected(v.id));
