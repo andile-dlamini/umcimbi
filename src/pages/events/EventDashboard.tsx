@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { useEvents } from '@/hooks/useEvents';
@@ -26,7 +37,7 @@ import { toast } from 'sonner';
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, updateEvent, isLoading } = useEvents();
+  const { events, updateEvent, deleteEvent, isLoading } = useEvents();
   const { tasks, getProgress, updateTask } = useTasks(id);
   const { summary: budgetSummary, updateEstimatedBudget } = useEventBudgetSummary(id);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
@@ -42,6 +53,17 @@ export default function EventDashboard() {
   const [editName, setEditName] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteEvent = async () => {
+    if (!event) return;
+    setIsDeleting(true);
+    const success = await deleteEvent(event.id);
+    setIsDeleting(false);
+    if (success) {
+      navigate('/events');
+    }
+  };
 
   useEffect(() => {
     if (event) {
@@ -144,9 +166,36 @@ export default function EventDashboard() {
         showBack 
         rightAction={
           !isEditingName && (
-            <Button variant="ghost" size="icon" onClick={() => setIsEditingName(true)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" onClick={() => setIsEditingName(true)}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete "{event.name}"? This will also delete all associated tasks, budget items, and vendor assignments. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleDeleteEvent}
+                      disabled={isDeleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )
         }
       />
