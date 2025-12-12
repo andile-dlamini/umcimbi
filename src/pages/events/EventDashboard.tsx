@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Play, Pencil, Check, X } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Play, Pencil, Check, X, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +13,11 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { useEvents } from '@/hooks/useEvents';
 import { useTasks } from '@/hooks/useTasks';
-import { useBudget } from '@/hooks/useBudget';
+import { useEventBudgetSummary } from '@/hooks/useEventBudgetSummary';
 import { TasksTab } from './tabs/TasksTab';
-import { BudgetTab } from './tabs/BudgetTab';
-import { GuestsTab } from './tabs/GuestsTab';
+// Note: BudgetTab and GuestsTab are kept but hidden for potential future use
+// import { BudgetTab } from './tabs/BudgetTab';
+// import { GuestsTab } from './tabs/GuestsTab';
 import { VendorsTab } from './tabs/VendorsTab';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -27,7 +28,9 @@ export default function EventDashboard() {
   const navigate = useNavigate();
   const { events, updateEvent, isLoading } = useEvents();
   const { tasks, getProgress, updateTask } = useTasks(id);
-  const { getSummary } = useBudget(id);
+  const { summary: budgetSummary, updateEstimatedBudget } = useEventBudgetSummary(id);
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [editBudget, setEditBudget] = useState('');
   
   const event = events.find(e => e.id === id);
   const [activeTab, setActiveTab] = useState('overview');
@@ -129,7 +132,6 @@ export default function EventDashboard() {
   }
 
   const progress = getProgress();
-  const budget = getSummary();
 
   const formattedDate = event.date 
     ? format(new Date(event.date), 'dd MMMM yyyy')
@@ -265,18 +267,6 @@ export default function EventDashboard() {
                 Tasks
               </TabsTrigger>
               <TabsTrigger 
-                value="budget"
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
-              >
-                Budget
-              </TabsTrigger>
-              <TabsTrigger 
-                value="guests"
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
-              >
-                Guests
-              </TabsTrigger>
-              <TabsTrigger 
                 value="vendors"
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
               >
@@ -304,14 +294,82 @@ export default function EventDashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Wallet className="h-4 w-4" />
-                    <span className="text-xs">Budget</span>
+                    <span className="text-xs">Est. Budget</span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">
-                    R{budget.planned.toLocaleString()}
-                  </p>
+                  {isEditingBudget ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-lg font-bold">R</span>
+                      <Input
+                        type="number"
+                        value={editBudget}
+                        onChange={(e) => setEditBudget(e.target.value)}
+                        className="h-8 w-24 text-lg font-bold"
+                        autoFocus
+                      />
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="h-6 w-6"
+                        onClick={async () => {
+                          const val = parseFloat(editBudget) || 0;
+                          await updateEstimatedBudget(val);
+                          setIsEditingBudget(false);
+                          toast.success('Budget updated');
+                        }}
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <button 
+                      className="flex items-center gap-1 group"
+                      onClick={() => {
+                        setEditBudget(budgetSummary.estimatedBudget.toString());
+                        setIsEditingBudget(true);
+                      }}
+                    >
+                      <p className="text-2xl font-bold text-foreground">
+                        R{budgetSummary.estimatedBudget.toLocaleString()}
+                      </p>
+                      <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 text-muted-foreground" />
+                    </button>
+                  )}
                 </CardContent>
               </Card>
             </div>
+
+            {/* Running Budget from Bookings */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-xs">Running Budget (from bookings)</span>
+                    </div>
+                    <p className="text-2xl font-bold text-primary">
+                      R{budgetSummary.runningBudget.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{budgetSummary.bookingsCount} vendor{budgetSummary.bookingsCount !== 1 ? 's' : ''} booked</p>
+                    {budgetSummary.estimatedBudget > 0 && (
+                      <p className={cn(
+                        "text-sm font-medium",
+                        budgetSummary.runningBudget > budgetSummary.estimatedBudget 
+                          ? "text-destructive" 
+                          : "text-success"
+                      )}>
+                        {budgetSummary.runningBudget <= budgetSummary.estimatedBudget 
+                          ? `R${(budgetSummary.estimatedBudget - budgetSummary.runningBudget).toLocaleString()} remaining`
+                          : `R${(budgetSummary.runningBudget - budgetSummary.estimatedBudget).toLocaleString()} over budget`
+                        }
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Notes */}
             <Card>
@@ -333,6 +391,8 @@ export default function EventDashboard() {
             <TasksTab eventId={event.id} />
           </TabsContent>
 
+          {/* Note: Budget and Guests tabs are hidden but code is preserved for future use */}
+          {/* 
           <TabsContent value="budget" className="px-4 py-6">
             <BudgetTab eventId={event.id} />
           </TabsContent>
@@ -340,6 +400,7 @@ export default function EventDashboard() {
           <TabsContent value="guests" className="px-4 py-6">
             <GuestsTab eventId={event.id} estimatedCount={event.estimated_guest_count} />
           </TabsContent>
+          */}
 
           <TabsContent value="vendors" className="px-4 py-6">
             <VendorsTab eventId={event.id} location={event.location || ''} />

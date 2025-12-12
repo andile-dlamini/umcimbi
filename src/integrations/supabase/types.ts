@@ -298,6 +298,7 @@ export type Database = {
         Row: {
           created_at: string | null
           date: string | null
+          estimated_budget: number | null
           estimated_guest_count: number | null
           id: string
           location: string | null
@@ -311,6 +312,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           date?: string | null
+          estimated_budget?: number | null
           estimated_guest_count?: number | null
           id?: string
           location?: string | null
@@ -324,6 +326,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           date?: string | null
+          estimated_budget?: number | null
           estimated_guest_count?: number | null
           id?: string
           location?: string | null
