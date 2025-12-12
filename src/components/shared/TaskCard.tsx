@@ -1,5 +1,4 @@
 import { Task } from '@/types/database';
-import { useTasks } from '@/hooks/useTasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +10,8 @@ import { cn } from '@/lib/utils';
 interface TaskCardProps {
   task: Task;
   showDelete?: boolean;
+  onToggle?: (taskId: string) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -25,11 +26,13 @@ const categoryColors: Record<string, string> = {
   other: 'bg-accent/20 text-accent border-accent/50',
 };
 
-export function TaskCard({ task, showDelete = false }: TaskCardProps) {
-  const { toggleTask, deleteTask } = useTasks(task.event_id);
-
+export function TaskCard({ task, showDelete = false, onToggle, onDelete }: TaskCardProps) {
   const handleToggle = () => {
-    toggleTask(task.id);
+    onToggle?.(task.id);
+  };
+
+  const handleDelete = () => {
+    onDelete?.(task.id);
   };
 
   return (
@@ -73,12 +76,12 @@ export function TaskCard({ task, showDelete = false }: TaskCardProps) {
             </div>
           </div>
           
-          {showDelete && (
+          {showDelete && onDelete && (
             <Button
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              onClick={() => deleteTask(task.id)}
+              onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
