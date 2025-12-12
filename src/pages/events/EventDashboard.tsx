@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Play, Pencil, Check, X, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -175,7 +175,7 @@ export default function EventDashboard() {
         event.type === 'umembeso' ? 'bg-secondary/10' : 'bg-accent/10'
       )}>
         <div className="max-w-lg mx-auto">
-          <div className="flex items-start justify-between mb-3">
+          <div className="mb-3">
             <Badge 
               className={cn(
                 event.type === 'umembeso' 
@@ -185,14 +185,7 @@ export default function EventDashboard() {
             >
               {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
             </Badge>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate(`/events/${event.id}/ceremony-mode`)}
-            >
-              <Play className="h-4 w-4 mr-1" />
-              Ceremony Mode
-            </Button>
+            {/* Ceremony Mode button removed - code preserved in CeremonyMode.tsx */}
           </div>
 
           <div className="space-y-2 text-sm text-muted-foreground mb-4">
