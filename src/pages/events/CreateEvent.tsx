@@ -207,15 +207,18 @@ export default function CreateEvent() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location (homestead, town)</Label>
+                <Label htmlFor="location">Event Location</Label>
                 <Input
                   id="location"
-                  placeholder="e.g., KwaMashu, Durban"
+                  placeholder="e.g., 123 Main Road, KwaMashu, Durban"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   maxLength={200}
                   className={cn('h-12', validationErrors.location && 'border-destructive')}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter a full address to calculate vendor distances
+                </p>
                 {validationErrors.location && (
                   <p className="text-xs text-destructive">{validationErrors.location}</p>
                 )}
