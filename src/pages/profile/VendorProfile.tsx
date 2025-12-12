@@ -160,7 +160,7 @@ export default function VendorProfile() {
             {isEditing ? (
               <>
                 <div className="space-y-2">
-                  <Label>Location</Label>
+                  <Label>Address</Label>
                   <Input
                     value={editData.location}
                     onChange={(e) => setEditData({ ...editData, location: e.target.value })}
