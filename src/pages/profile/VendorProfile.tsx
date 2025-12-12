@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save } from 'lucide-react';
+import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,14 +8,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useMyVendorProfile } from '@/hooks/useVendors';
+import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { toast } from 'sonner';
 
 export default function VendorProfile() {
   const navigate = useNavigate();
-  const { vendor, isLoading, updateVendorProfile } = useMyVendorProfile();
+  const { vendor, isLoading, updateVendorProfile, deleteVendorProfile } = useMyVendorProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editData, setEditData] = useState({
     about: '',
     price_range_text: '',
@@ -82,6 +85,15 @@ export default function VendorProfile() {
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const success = await deleteVendorProfile();
+    setIsDeleting(false);
+    if (success) {
+      navigate('/profile');
+    }
+  };
+
   return (
     <div className="min-h-screen pb-safe bg-background">
       <PageHeader title="My Vendor Profile" showBack />
@@ -119,8 +131,8 @@ export default function VendorProfile() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <Badge variant="outline" className="mb-2 capitalize">
-                  {vendor.category}
+              <Badge variant="outline" className="mb-2">
+                  {getVendorCategoryLabel(vendor.category)}
                 </Badge>
                 <CardTitle>{vendor.name}</CardTitle>
                 {vendor.location && (
@@ -257,6 +269,35 @@ export default function VendorProfile() {
           <Eye className="h-4 w-4 mr-2" />
           Preview public profile
         </Button>
+
+        {/* Delete Profile */}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="w-full">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete vendor profile
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete vendor profile?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete your vendor profile and remove you from the marketplace. 
+                Your user account will remain active. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete profile'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

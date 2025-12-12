@@ -176,11 +176,34 @@ export function useMyVendorProfile() {
     return true;
   };
 
+  const deleteVendorProfile = async () => {
+    if (!user || !vendor) {
+      toast.error('No vendor profile found');
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('vendors')
+      .delete()
+      .eq('id', vendor.id);
+
+    if (error) {
+      console.error('Error deleting vendor:', error);
+      toast.error('Failed to delete vendor profile');
+      return false;
+    }
+
+    setVendor(null);
+    toast.success('Vendor profile deleted');
+    return true;
+  };
+
   return {
     vendor,
     isLoading,
     createVendorProfile,
     updateVendorProfile,
+    deleteVendorProfile,
     refreshVendor: fetchVendor,
   };
 }
