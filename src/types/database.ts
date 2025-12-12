@@ -2,7 +2,7 @@
 export type AppRole = 'user' | 'vendor' | 'admin';
 export type PreferredLanguage = 'zulu' | 'english';
 export type EventType = 'umembeso' | 'umabo' | 'imbeleko' | 'family_introduction' | 'lobola' | 'umbondo' | 'umemulo' | 'funeral' | 'ancestral_ritual';
-export type VendorCategory = 'decor' | 'catering' | 'livestock' | 'tents' | 'transport' | 'attire' | 'photographer' | 'other';
+export type VendorCategory = 'decor' | 'catering' | 'livestock' | 'tents' | 'transport' | 'attire' | 'photographer' | 'other' | 'invitations_stationery' | 'makeup_beauty' | 'cold_room_hire' | 'mobile_toilets' | 'attire_tailoring' | 'drinks_ice_delivery';
 export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'catering' | 'attire' | 'finance' | 'venue' | 'other';
 export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'funeral_services' | 'healer_services' | 'music' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';

@@ -839,6 +839,12 @@ export type Database = {
         | "attire"
         | "photographer"
         | "other"
+        | "invitations_stationery"
+        | "makeup_beauty"
+        | "cold_room_hire"
+        | "mobile_toilets"
+        | "attire_tailoring"
+        | "drinks_ice_delivery"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1038,6 +1044,12 @@ export const Constants = {
         "attire",
         "photographer",
         "other",
+        "invitations_stationery",
+        "makeup_beauty",
+        "cold_room_hire",
+        "mobile_toilets",
+        "attire_tailoring",
+        "drinks_ice_delivery",
       ],
     },
   },

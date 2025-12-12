@@ -10,6 +10,7 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
+import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -96,8 +97,8 @@ export default function VendorDetail() {
         {/* Header Info */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="secondary" className="capitalize">
-              {vendor.category}
+            <Badge variant="secondary">
+              {getVendorCategoryLabel(vendor.category)}
             </Badge>
             {isSelected && (
               <Badge className="bg-success text-success-foreground">

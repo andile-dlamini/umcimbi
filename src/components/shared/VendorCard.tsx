@@ -3,6 +3,7 @@ import { Star, MapPin, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vendor } from '@/types/database';
+import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { cn } from '@/lib/utils';
 
 interface VendorCardProps {
@@ -10,17 +11,6 @@ interface VendorCardProps {
   eventId?: string;
   isSelected?: boolean;
 }
-
-const categoryLabels: Record<string, string> = {
-  decor: 'Decor',
-  catering: 'Catering',
-  livestock: 'Livestock',
-  tents: 'Tents',
-  photographer: 'Photography',
-  attire: 'Attire',
-  transport: 'Transport',
-  other: 'Other',
-};
 
 export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
   const navigate = useNavigate();
@@ -52,8 +42,8 @@ export function VendorCard({ vendor, eventId, isSelected }: VendorCardProps) {
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-xs capitalize bg-accent/20 text-accent border-accent/50">
-                {categoryLabels[vendor.category] || vendor.category}
+              <Badge variant="outline" className="text-xs bg-accent/20 text-accent border-accent/50">
+                {getVendorCategoryLabel(vendor.category)}
               </Badge>
               {isSelected && (
                 <Badge className="text-xs bg-success text-success-foreground">

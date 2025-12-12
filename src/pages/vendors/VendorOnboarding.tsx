@@ -10,25 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useMyVendorProfile } from '@/hooks/useVendors';
-import { VendorCategory } from '@/types/database';
+import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { toast } from 'sonner';
-
-const vendorCategories: { value: VendorCategory; label: string }[] = [
-  { value: 'decor', label: 'Decor & Design' },
-  { value: 'catering', label: 'Catering' },
-  { value: 'livestock', label: 'Livestock' },
-  { value: 'tents', label: 'Tents & Marquees' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'attire', label: 'Traditional Attire' },
-  { value: 'photographer', label: 'Photography & Video' },
-  { value: 'other', label: 'Other Services' },
-];
 
 const phoneRegex = /^(\+27|0)[0-9]{9,10}$/;
 
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100, 'Business name must be less than 100 characters'),
-  category: z.enum(['decor', 'catering', 'livestock', 'tents', 'transport', 'attire', 'photographer', 'other'], {
+  category: z.enum(VENDOR_CATEGORY_VALUES, {
     required_error: 'Please select a category',
   }),
   location: z.string().trim().max(100, 'Location must be less than 100 characters').optional().or(z.literal('')),
@@ -146,7 +135,7 @@ export default function VendorOnboarding() {
                     <SelectValue placeholder="Select your service category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {vendorCategories.map((cat) => (
+                    {VENDOR_CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
                         {cat.label}
                       </SelectItem>
