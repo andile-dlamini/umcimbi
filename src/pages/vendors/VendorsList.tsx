@@ -42,12 +42,12 @@ export default function VendorsList() {
 
         {/* Event selector for distance */}
         {events.length > 0 && (
-          <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+          <Select value={selectedEventId || "none"} onValueChange={(v) => setSelectedEventId(v === "none" ? "" : v)}>
             <SelectTrigger>
               <SelectValue placeholder="Compare distances for ceremony..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No ceremony selected</SelectItem>
+              <SelectItem value="none">No ceremony selected</SelectItem>
               {events.map((event) => (
                 <SelectItem key={event.id} value={event.id}>
                   {event.name}
