@@ -5,19 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
 import { useVendors, useVendorLocations } from '@/hooks/useVendors';
-import { VendorCategory } from '@/types/database';
-
-const vendorCategories: { value: VendorCategory | 'all'; label: string }[] = [
-  { value: 'all', label: 'All Categories' },
-  { value: 'decor', label: 'Decor' },
-  { value: 'catering', label: 'Catering' },
-  { value: 'livestock', label: 'Livestock' },
-  { value: 'tents', label: 'Tents' },
-  { value: 'photographer', label: 'Photography' },
-  { value: 'attire', label: 'Attire' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'other', label: 'Other' },
-];
+import { VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
@@ -54,7 +42,7 @@ export default function VendorsList() {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              {vendorCategories.map((cat) => (
+              {VENDOR_CATEGORY_FILTER_OPTIONS.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value}>
                   {cat.label}
                 </SelectItem>

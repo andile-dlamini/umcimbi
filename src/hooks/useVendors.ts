@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Vendor, CreateVendor, VendorCategory } from '@/types/database';
+import { Vendor, CreateVendor } from '@/types/database';
+import { VendorCategory } from '@/lib/vendorCategories';
 import { toast } from 'sonner';
 
 export function useVendors(filters?: {
