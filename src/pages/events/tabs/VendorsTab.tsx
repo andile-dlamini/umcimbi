@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Vendor } from '@/types/database';
+import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { Star, ExternalLink } from 'lucide-react';
 
 interface VendorsTabProps {
@@ -104,8 +105,8 @@ export function VendorsTab({ eventId }: VendorsTabProps) {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {vendor.category}
+                      <Badge variant="outline" className="text-xs">
+                        {getVendorCategoryLabel(vendor.category)}
                       </Badge>
                       <Badge variant={status.variant} className="text-xs">
                         {status.label}
