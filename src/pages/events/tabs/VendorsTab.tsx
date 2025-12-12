@@ -1,95 +1,138 @@
-import { useState } from 'react';
-import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { VendorCard } from '@/components/shared/VendorCard';
-import { useEventVendors } from '@/hooks/useEvents';
-import { useVendors } from '@/hooks/useVendors';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { Vendor } from '@/types/database';
+import { Star, ExternalLink } from 'lucide-react';
 
 interface VendorsTabProps {
   eventId: string;
   location: string;
 }
 
-export function VendorsTab({ eventId, location }: VendorsTabProps) {
-  const [search, setSearch] = useState('');
-  const { eventVendors, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId);
-  // Don't filter by location - show all vendors so users can find relevant ones
-  const { vendors } = useVendors({ search });
+interface BookedVendor {
+  vendor: Vendor;
+  booking_status: string;
+  agreed_price: number;
+}
 
-  const selectedVendors = vendors.filter(v => isVendorSelected(v.id));
-  const availableVendors = vendors.filter(v => !isVendorSelected(v.id));
+export function VendorsTab({ eventId }: VendorsTabProps) {
+  const navigate = useNavigate();
+  const [bookedVendors, setBookedVendors] = useState<BookedVendor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookedVendors = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
+          booking_status,
+          agreed_price,
+          vendor:vendors(*)
+        `)
+        .eq('event_id', eventId);
+
+      if (error) {
+        console.error('Error fetching booked vendors:', error);
+      } else if (data) {
+        const vendors = data
+          .filter(b => b.vendor)
+          .map(b => ({
+            vendor: b.vendor as unknown as Vendor,
+            booking_status: b.booking_status,
+            agreed_price: b.agreed_price,
+          }));
+        setBookedVendors(vendors);
+      }
+      setIsLoading(false);
+    };
+
+    fetchBookedVendors();
+  }, [eventId]);
+
+  const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    pending_deposit: { label: 'Awaiting Deposit', variant: 'secondary' },
+    confirmed: { label: 'Confirmed', variant: 'default' },
+    completed: { label: 'Completed', variant: 'outline' },
+    cancelled: { label: 'Cancelled', variant: 'destructive' },
+    disputed: { label: 'Disputed', variant: 'destructive' },
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2].map(i => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-4 h-24" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (bookedVendors.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground mb-4">No vendors booked for this event yet</p>
+        <Button onClick={() => navigate('/vendors')}>
+          Browse Vendors
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Selected Vendors */}
-      {selectedVendors.length > 0 && (
-        <section>
-          <h3 className="font-semibold text-foreground mb-3">My Selected Vendors</h3>
-          <div className="space-y-3">
-            {selectedVendors.map((vendor) => (
-              <Card key={vendor.id}>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <Badge variant="outline" className="text-xs mb-1 capitalize">
+    <div className="space-y-4">
+      <h3 className="font-semibold text-foreground">Booked Vendors</h3>
+      
+      <div className="space-y-3">
+        {bookedVendors.map(({ vendor, booking_status, agreed_price }) => {
+          const status = statusConfig[booking_status] || { label: booking_status, variant: 'outline' as const };
+          
+          return (
+            <Card key={vendor.id} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  {vendor.image_urls?.[0] && (
+                    <img 
+                      src={vendor.image_urls[0]} 
+                      alt={vendor.name}
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs capitalize">
                         {vendor.category}
                       </Badge>
-                      <p className="font-medium text-foreground truncate">{vendor.name}</p>
-                      <p className="text-sm text-muted-foreground">{vendor.location}</p>
+                      <Badge variant={status.variant} className="text-xs">
+                        {status.label}
+                      </Badge>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => removeVendorFromEvent(vendor.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <p className="font-medium text-foreground truncate">{vendor.name}</p>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        {vendor.rating?.toFixed(1) || 'New'}
+                      </span>
+                      <span>R{agreed_price.toLocaleString()}</span>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Available Vendors */}
-      <section>
-        <h3 className="font-semibold text-foreground mb-3">
-          {location ? `Vendors near ${location}` : 'Available Vendors'}
-        </h3>
-
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search vendors..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        <div className="space-y-3">
-          {availableVendors.map((vendor) => (
-            <VendorCard 
-              key={vendor.id} 
-              vendor={vendor} 
-              eventId={eventId}
-              isSelected={isVendorSelected(vendor.id)}
-            />
-          ))}
-
-          {availableVendors.length === 0 && (
-            <p className="text-center text-muted-foreground py-6">
-              {search ? 'No vendors match your search' : 'All vendors selected'}
-            </p>
-          )}
-        </div>
-      </section>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => navigate(`/vendors/${vendor.id}`)}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }
