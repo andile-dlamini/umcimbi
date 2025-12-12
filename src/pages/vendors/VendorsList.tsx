@@ -1,21 +1,20 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
-import { useVendors, useVendorLocations } from '@/hooks/useVendors';
+import { useVendors } from '@/hooks/useVendors';
 import { VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<VendorCategory | 'all'>('all');
-  const [location, setLocation] = useState('All Locations');
+  const [locationFilter, setLocationFilter] = useState('');
   
-  const locations = useVendorLocations();
   const { vendors, isLoading } = useVendors({ 
     category, 
-    location, 
+    location: locationFilter || 'All Locations', 
     search 
   });
 
@@ -50,18 +49,15 @@ export default function VendorsList() {
             </SelectContent>
           </Select>
 
-          <Select value={location} onValueChange={setLocation}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Location" />
-            </SelectTrigger>
-            <SelectContent>
-              {locations.map((loc) => (
-                <SelectItem key={loc} value={loc}>
-                  {loc}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Filter by location..."
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         {/* Results */}
