@@ -29,7 +29,7 @@ const categories: { value: TaskCategory; label: string }[] = [
 type FilterType = 'all' | 'thisWeek' | 'completed';
 
 export function TasksTab({ eventId }: TasksTabProps) {
-  const { tasks, addTask, isLoading } = useTasks(eventId);
+  const { tasks, addTask, toggleTask, deleteTask, isLoading } = useTasks(eventId);
   const [filter, setFilter] = useState<FilterType>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -97,12 +97,24 @@ export function TasksTab({ eventId }: TasksTabProps) {
       {/* Task List */}
       <div className="space-y-3">
         {filter !== 'completed' && incompleteTasks.map((task) => (
-          <TaskCard key={task.id} task={task} showDelete />
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            showDelete 
+            onToggle={toggleTask}
+            onDelete={deleteTask}
+          />
         ))}
         
         {filter === 'completed' || filter === 'all' ? (
           completedTasks.map((task) => (
-            <TaskCard key={task.id} task={task} showDelete />
+            <TaskCard 
+              key={task.id} 
+              task={task} 
+              showDelete 
+              onToggle={toggleTask}
+              onDelete={deleteTask}
+            />
           ))
         ) : null}
 
