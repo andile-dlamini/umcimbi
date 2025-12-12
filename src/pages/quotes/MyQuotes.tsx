@@ -1,3 +1,4 @@
+import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useClientQuotes } from '@/hooks/useQuotes';
@@ -133,6 +134,13 @@ export default function MyQuotes() {
   const handleAcceptQuote = async (quote: QuoteWithDetails) => {
     const success = await acceptQuote(quote.id);
     if (success && quote.request) {
+      // Add vendor to event_vendors
+      await supabase.from('event_vendors').upsert({
+        event_id: quote.request.event_id,
+        vendor_id: quote.vendor_id,
+        role_or_note: 'Booked via quote',
+      }, { onConflict: 'event_id,vendor_id' });
+
       // Create the booking
       const booking = await createBooking({
         event_id: quote.request.event_id,
