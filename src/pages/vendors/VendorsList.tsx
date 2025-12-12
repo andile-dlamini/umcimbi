@@ -1,22 +1,28 @@
 import { useState } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
-import { useVendors } from '@/hooks/useVendors';
+import { useVendorsWithDistance, SortOption } from '@/hooks/useVendorsWithDistance';
+import { useEvents } from '@/hooks/useEvents';
 import { VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<VendorCategory | 'all'>('all');
   const [locationFilter, setLocationFilter] = useState('');
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
   
-  const { vendors, isLoading } = useVendors({ 
-    category, 
-    location: locationFilter || 'All Locations', 
-    search 
-  });
+  const { events } = useEvents();
+  const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
+    selectedEventId || undefined,
+    { 
+      category, 
+      location: locationFilter || 'All Locations', 
+      search 
+    }
+  );
 
   return (
     <div className="min-h-screen pb-safe">
@@ -33,6 +39,23 @@ export default function VendorsList() {
             className="pl-10"
           />
         </div>
+
+        {/* Event selector for distance */}
+        {events.length > 0 && (
+          <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Compare distances for ceremony..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No ceremony selected</SelectItem>
+              {events.map((event) => (
+                <SelectItem key={event.id} value={event.id}>
+                  {event.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         {/* Filters */}
         <div className="flex gap-3">
@@ -60,14 +83,38 @@ export default function VendorsList() {
           </div>
         </div>
 
+        {/* Sort control */}
+        {selectedEventId && (
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <SelectTrigger className="w-full">
+              <ArrowUpDown className="h-3.5 w-3.5 mr-2" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rating">Sort by Rating</SelectItem>
+              <SelectItem value="distance">Sort by Distance</SelectItem>
+              <SelectItem value="name">Sort by Name</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+
         {/* Results */}
         <div className="space-y-3 pt-2">
           <p className="text-sm text-muted-foreground">
             {isLoading ? 'Loading...' : `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''} found`}
+            {selectedEventId && !hasEventCoordinates && (
+              <span className="block text-xs mt-1">
+                Set ceremony location to see distances
+              </span>
+            )}
           </p>
 
           {vendors.map((vendor) => (
-            <VendorCard key={vendor.id} vendor={vendor} />
+            <VendorCard 
+              key={vendor.id} 
+              vendor={vendor} 
+              showDistance={!!selectedEventId && hasEventCoordinates}
+            />
           ))}
 
           {!isLoading && vendors.length === 0 && (

@@ -33,6 +33,8 @@ export interface Vendor {
   name: string;
   category: VendorCategory;
   location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   about: string | null;
   price_range_text: string | null;
   whatsapp_number: string | null;
@@ -57,7 +59,10 @@ export interface Event {
   type: EventType;
   date: string | null;
   location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   estimated_guest_count: number;
+  estimated_budget: number;
   size: string;
   notes: string | null;
   created_at: string;
@@ -185,8 +190,8 @@ export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
 };
 
 // Form types for creating/updating
-export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count'>;
-export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at'>;
+export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude'>;
+export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'estimated_budget'>;
 export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;
 export type CreateGuest = Omit<Guest, 'id' | 'created_at' | 'updated_at'>;
