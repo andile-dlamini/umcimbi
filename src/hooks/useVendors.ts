@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Vendor, CreateVendor } from '@/types/database';
 import { VendorCategory } from '@/lib/vendorCategories';
+import { geocodeAddress } from '@/lib/geocodingService';
 import { toast } from 'sonner';
 
 export function useVendors(filters?: {
@@ -127,12 +128,20 @@ export function useMyVendorProfile() {
       return null;
     }
 
+    // Geocode the location if provided
+    let coordinates: { latitude: number; longitude: number } | null = null;
+    if (vendorData.location) {
+      coordinates = await geocodeAddress(vendorData.location);
+    }
+
     const { data, error } = await supabase
       .from('vendors')
       .insert({
         ...vendorData,
         owner_user_id: user.id,
         is_active: true,
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
       })
       .select()
       .single();
@@ -160,9 +169,20 @@ export function useMyVendorProfile() {
       return false;
     }
 
+    // If location is being updated, geocode it
+    let finalUpdates = { ...updates };
+    if (updates.location !== undefined) {
+      const coordinates = updates.location ? await geocodeAddress(updates.location) : null;
+      finalUpdates = {
+        ...finalUpdates,
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
+      };
+    }
+
     const { error } = await supabase
       .from('vendors')
-      .update(updates)
+      .update(finalUpdates)
       .eq('id', vendor.id);
 
     if (error) {
@@ -171,7 +191,7 @@ export function useMyVendorProfile() {
       return false;
     }
 
-    setVendor(prev => prev ? { ...prev, ...updates } : null);
+    setVendor(prev => prev ? { ...prev, ...finalUpdates } : null);
     toast.success('Vendor profile updated');
     return true;
   };

@@ -301,7 +301,9 @@ export type Database = {
           estimated_budget: number | null
           estimated_guest_count: number | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
           notes: string | null
           owner_user_id: string
@@ -315,7 +317,9 @@ export type Database = {
           estimated_budget?: number | null
           estimated_guest_count?: number | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name: string
           notes?: string | null
           owner_user_id: string
@@ -329,7 +333,9 @@ export type Database = {
           estimated_budget?: number | null
           estimated_guest_count?: number | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string
           notes?: string | null
           owner_user_id?: string
@@ -704,7 +710,9 @@ export type Database = {
           image_urls: string[] | null
           is_active: boolean | null
           languages: string[] | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
           owner_user_id: string | null
           phone_number: string | null
@@ -726,7 +734,9 @@ export type Database = {
           image_urls?: string[] | null
           is_active?: boolean | null
           languages?: string[] | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name: string
           owner_user_id?: string | null
           phone_number?: string | null
@@ -748,7 +758,9 @@ export type Database = {
           image_urls?: string[] | null
           is_active?: boolean | null
           languages?: string[] | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string
           owner_user_id?: string | null
           phone_number?: string | null

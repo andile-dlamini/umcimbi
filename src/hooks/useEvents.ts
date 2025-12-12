@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Event, CreateEvent, EventVendor, Task, BudgetItem } from '@/types/database';
+import { Event, CreateEvent, EventVendor } from '@/types/database';
 import { getDefaultTasks, getDefaultBudgetItems } from '@/data/templates';
+import { geocodeAddress } from '@/lib/geocodingService';
 import { toast } from 'sonner';
 
 export function useEvents() {
@@ -42,11 +43,19 @@ export function useEvents() {
       return null;
     }
 
+    // Geocode the location if provided
+    let coordinates: { latitude: number; longitude: number } | null = null;
+    if (eventData.location) {
+      coordinates = await geocodeAddress(eventData.location);
+    }
+
     const { data: event, error } = await supabase
       .from('events')
       .insert({
         ...eventData,
         owner_user_id: user.id,
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
       })
       .select()
       .single();
@@ -90,9 +99,20 @@ export function useEvents() {
   };
 
   const updateEvent = async (id: string, updates: Partial<Event>) => {
+    // If location is being updated, geocode it
+    let finalUpdates = { ...updates };
+    if (updates.location !== undefined) {
+      const coordinates = updates.location ? await geocodeAddress(updates.location) : null;
+      finalUpdates = {
+        ...finalUpdates,
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
+      };
+    }
+
     const { error } = await supabase
       .from('events')
-      .update(updates)
+      .update(finalUpdates)
       .eq('id', id);
 
     if (error) {
@@ -101,7 +121,7 @@ export function useEvents() {
       return false;
     }
 
-    setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+    setEvents(prev => prev.map(e => e.id === id ? { ...e, ...finalUpdates } : e));
     return true;
   };
 
