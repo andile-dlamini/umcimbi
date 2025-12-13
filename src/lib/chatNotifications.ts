@@ -87,10 +87,10 @@ export const notificationMessages = {
       : `💰 ${vendorName} has responded to your request. Check your quotes to review.`,
   
   quoteAccepted: (eventName: string) =>
-    `✅ Quote accepted for "${eventName}"! The vendor has been notified.`,
+    `✅ Quote accepted for "${eventName}"! The booking process can now begin.`,
   
   quoteDeclined: () =>
-    `❌ Quote has been declined.`,
+    `❌ The client has declined this quote.`,
   
   vendorDeclinedRequest: (reason?: string) =>
     reason
@@ -101,4 +101,10 @@ export const notificationMessages = {
     date
       ? `🎉 Booking confirmed for "${eventName}" on ${date}!`
       : `🎉 Booking confirmed for "${eventName}"!`,
+  
+  bookingCompleted: (eventName: string) =>
+    `✨ Service for "${eventName}" has been marked as completed. Thank you!`,
+  
+  paymentReceived: (amount: number, type: 'deposit' | 'balance') =>
+    `💳 ${type === 'deposit' ? 'Deposit' : 'Balance'} payment of R${amount.toLocaleString()} has been recorded.`,
 };
