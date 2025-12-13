@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ServiceRequest, ServiceRequestWithDetails, CreateServiceRequest, ServiceRequestStatus } from '@/types/database';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { sendChatNotification, notificationMessages } from '@/lib/chatNotifications';
 
 // Hook for organisers to manage their service requests
 export function useMyServiceRequests() {
@@ -54,6 +55,28 @@ export function useMyServiceRequests() {
         console.error('Error creating service request:', error);
       }
       return false;
+    }
+
+    // Send chat notification
+    const { data: event } = await supabase
+      .from('events')
+      .select('name')
+      .eq('id', request.event_id)
+      .single();
+    
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('name')
+      .eq('id', request.vendor_id)
+      .single();
+
+    if (event && vendor) {
+      await sendChatNotification(
+        user.id,
+        request.vendor_id,
+        notificationMessages.quoteRequested(event.name, vendor.name),
+        request.event_id
+      );
     }
 
     toast.success('Quote request sent!');
@@ -161,6 +184,13 @@ export function useVendorServiceRequests() {
     response: string,
     quotedAmount?: number
   ): Promise<boolean> => {
+    // Get request details first for notification
+    const { data: requestData } = await supabase
+      .from('service_requests')
+      .select('requester_user_id, event_id')
+      .eq('id', requestId)
+      .single();
+
     const { error } = await supabase
       .from('service_requests')
       .update({
@@ -177,16 +207,33 @@ export function useVendorServiceRequests() {
       return false;
     }
 
+    // Send chat notification to user
+    if (requestData && vendorProfile) {
+      await sendChatNotification(
+        requestData.requester_user_id,
+        vendorProfile.id,
+        notificationMessages.quoteReceived(vendorProfile.name, quotedAmount),
+        requestData.event_id
+      );
+    }
+
     toast.success('Quote sent!');
     await fetchRequests();
     return true;
   };
 
   const declineRequest = async (requestId: string, reason?: string): Promise<boolean> => {
+    // Get request details first for notification
+    const { data: requestData } = await supabase
+      .from('service_requests')
+      .select('requester_user_id, event_id')
+      .eq('id', requestId)
+      .single();
+
     const { error } = await supabase
       .from('service_requests')
       .update({
-        status: 'declined' as ServiceRequestStatus,
+        status: 'vendor_declined' as ServiceRequestStatus,
         vendor_response: reason || 'Unable to fulfill this request at this time.',
         responded_at: new Date().toISOString(),
       })
@@ -196,6 +243,16 @@ export function useVendorServiceRequests() {
       toast.error('Failed to decline request');
       console.error('Error declining request:', error);
       return false;
+    }
+
+    // Send chat notification to user
+    if (requestData && vendorProfile) {
+      await sendChatNotification(
+        requestData.requester_user_id,
+        vendorProfile.id,
+        notificationMessages.vendorDeclinedRequest(reason),
+        requestData.event_id
+      );
     }
 
     toast.success('Request declined');

@@ -127,6 +127,23 @@ const ChatThread = () => {
         ) : (
           messages.map((message) => {
             const isOwn = isOwnMessage(message.sender_user_id, message.sender_type);
+            const isSystem = message.sender_type === 'system';
+            
+            if (isSystem) {
+              return (
+                <div key={message.id} className="flex justify-center">
+                  <div className="max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
+                    <p className="text-sm text-muted-foreground text-center whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+                      {formatMessageTime(message.created_at)}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+            
             return (
               <div
                 key={message.id}
