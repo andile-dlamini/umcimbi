@@ -102,6 +102,15 @@ export function useMyServiceRequests() {
   };
 
   const acceptQuote = async (requestId: string): Promise<boolean> => {
+    if (!user) return false;
+
+    // Get request details for notification
+    const { data: requestData } = await supabase
+      .from('service_requests')
+      .select('vendor_id, event_id')
+      .eq('id', requestId)
+      .single();
+
     const { error } = await supabase
       .from('service_requests')
       .update({ status: 'accepted' as ServiceRequestStatus })
@@ -113,12 +122,37 @@ export function useMyServiceRequests() {
       return false;
     }
 
+    // Send chat notification to vendor
+    if (requestData) {
+      const { data: event } = await supabase
+        .from('events')
+        .select('name')
+        .eq('id', requestData.event_id)
+        .single();
+
+      await sendChatNotification(
+        user.id,
+        requestData.vendor_id,
+        notificationMessages.quoteAccepted(event?.name || 'your event'),
+        requestData.event_id
+      );
+    }
+
     toast.success('Quote accepted!');
     await fetchRequests();
     return true;
   };
 
   const declineQuote = async (requestId: string): Promise<boolean> => {
+    if (!user) return false;
+
+    // Get request details for notification
+    const { data: requestData } = await supabase
+      .from('service_requests')
+      .select('vendor_id, event_id')
+      .eq('id', requestId)
+      .single();
+
     const { error } = await supabase
       .from('service_requests')
       .update({ status: 'declined' as ServiceRequestStatus })
@@ -128,6 +162,16 @@ export function useMyServiceRequests() {
       toast.error('Failed to decline quote');
       console.error('Error declining quote:', error);
       return false;
+    }
+
+    // Send chat notification to vendor
+    if (requestData) {
+      await sendChatNotification(
+        user.id,
+        requestData.vendor_id,
+        notificationMessages.quoteDeclined(),
+        requestData.event_id
+      );
     }
 
     toast.success('Quote declined');
