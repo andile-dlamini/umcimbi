@@ -171,7 +171,7 @@ export default function Profile() {
           <CardContent>
             <Button 
               variant="outline" 
-              className="w-full justify-between"
+              className="w-full justify-start items-center"
               onClick={() => navigate('/profile/requests')}
             >
               <span className="flex items-center gap-2">
