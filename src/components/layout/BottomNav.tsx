@@ -142,10 +142,10 @@ export function BottomNav() {
               )
             }
           >
-            <div className="relative">
+            <div className="relative flex items-center justify-center">
               <Icon className="w-5 h-5" />
-              {badge && badge > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+              {typeof badge === 'number' && badge > 0 && (
+                <span className="absolute -top-2 -right-2.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none">
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
