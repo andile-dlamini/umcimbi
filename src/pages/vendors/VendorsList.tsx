@@ -43,7 +43,7 @@ export default function VendorsList() {
         {/* Event selector for distance */}
         {events.length > 0 && (
           <Select value={selectedEventId || "none"} onValueChange={(v) => setSelectedEventId(v === "none" ? "" : v)}>
-            <SelectTrigger>
+            <SelectTrigger className="border-card-border">
               <SelectValue placeholder="Compare distances for ceremony..." />
             </SelectTrigger>
             <SelectContent>
@@ -60,7 +60,7 @@ export default function VendorsList() {
         {/* Filters */}
         <div className="flex gap-3">
           <Select value={category} onValueChange={(v) => setCategory(v as VendorCategory | 'all')}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="flex-1 border-card-border">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -78,7 +78,7 @@ export default function VendorsList() {
               placeholder="Filter by location..."
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
-              className="pl-10"
+              className="pl-10 border-card-border"
             />
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function VendorsList() {
         {/* Sort control */}
         {selectedEventId && (
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full border-card-border">
               <ArrowUpDown className="h-3.5 w-3.5 mr-2" />
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
