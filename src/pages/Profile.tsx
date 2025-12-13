@@ -171,13 +171,10 @@ export default function Profile() {
           <CardContent>
             <Button 
               variant="outline" 
-              className="w-full justify-start items-center"
+              className="w-full"
               onClick={() => navigate('/profile/requests')}
             >
-              <span className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                My Bookings
-              </span>
+              My Bookings
             </Button>
           </CardContent>
         </Card>
