@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Store, MessageCircle, User } from 'lucide-react';
+import { Home, Store, MessageCircle, BookOpen, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -115,9 +115,9 @@ export function BottomNav() {
 
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
-    { to: '/events', icon: Calendar, label: 'Events' },
     { to: '/vendors', icon: Store, label: 'Vendors' },
     { to: '/chats', icon: MessageCircle, label: 'Chats', badge: unreadCount },
+    { to: '/learn', icon: BookOpen, label: 'Learn' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
