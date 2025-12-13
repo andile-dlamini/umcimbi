@@ -198,7 +198,7 @@ export default function Profile() {
                   Manage vendor profile
                 </Button>
                 <Button 
-                  variant="secondary" 
+                  variant="outline" 
                   className="w-full"
                   onClick={() => navigate('/vendor-dashboard')}
                 >
