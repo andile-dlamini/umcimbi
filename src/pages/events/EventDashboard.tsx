@@ -33,6 +33,7 @@ import { VendorsTab } from './tabs/VendorsTab';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { getEventTypeInfo } from '@/types/database';
 
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -232,7 +233,7 @@ export default function EventDashboard() {
                   : 'bg-accent text-accent-foreground'
               )}
             >
-              {event.type === 'umembeso' ? 'Umembeso' : 'Umabo'}
+              {getEventTypeInfo(event.type).shortLabel}
             </Badge>
             {/* Ceremony Mode button removed - code preserved in CeremonyMode.tsx */}
           </div>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar } from 'lucide-react';
+import { Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -8,12 +8,15 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { useAuth } from '@/context/AuthContext';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
 import { useClientQuotes } from '@/hooks/useQuotes';
 import { useClientBookings } from '@/hooks/useBookings';
 import { useProfileSettings } from '@/hooks/useProfileSettings';
 import { PreferredLanguage } from '@/types/database';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -29,6 +32,20 @@ export default function Profile() {
   const handleLogout = async () => {
     await signOut();
     navigate('/onboarding');
+  };
+
+  const handleAvatarChange = async (url: string) => {
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ avatar_url: url })
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error saving avatar:', error);
+      toast.error('Failed to save avatar');
+    }
   };
 
   const handleNotificationToggle = async (checked: boolean) => {
@@ -48,9 +65,11 @@ export default function Profile() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-8 w-8 text-primary" />
-              </div>
+              <AvatarUpload
+                avatarUrl={(profile as any)?.avatar_url || null}
+                onAvatarChange={handleAvatarChange}
+                size="lg"
+              />
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
                   {profile?.full_name || 'User'}

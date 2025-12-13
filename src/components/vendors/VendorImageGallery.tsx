@@ -33,8 +33,7 @@ export function VendorImageGallery({
     const fileExt = file.name.split('.').pop();
     const fileName = `${vendorId}/${Date.now()}.${fileExt}`;
     
-    // Check if storage bucket exists, if not use a data URL as fallback
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('vendor-images')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -42,22 +41,16 @@ export function VendorImageGallery({
       });
 
     if (error) {
-      // If bucket doesn't exist, convert to data URL as fallback
       console.error('Storage error:', error);
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      });
+      toast.error('Failed to upload image');
+      return null;
     }
 
     const { data: urlData } = supabase.storage
       .from('vendor-images')
       .getPublicUrl(fileName);
 
-    return urlData.publicUrl;
+    return `${urlData.publicUrl}?t=${Date.now()}`;
   };
 
   const handleMainImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
