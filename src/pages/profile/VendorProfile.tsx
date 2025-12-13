@@ -9,9 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
-import { toast } from 'sonner';
 
 export default function VendorProfile() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ export default function VendorProfile() {
     whatsapp_number: '',
     email: '',
     location: '',
+    image_urls: [] as string[],
   });
 
   if (isLoading) {
@@ -65,6 +66,7 @@ export default function VendorProfile() {
       whatsapp_number: vendor.whatsapp_number || '',
       email: vendor.email || '',
       location: vendor.location || '',
+      image_urls: vendor.image_urls || [],
     });
     setIsEditing(true);
   };
@@ -78,6 +80,7 @@ export default function VendorProfile() {
       whatsapp_number: editData.whatsapp_number || null,
       email: editData.email || null,
       location: editData.location || null,
+      image_urls: editData.image_urls,
     });
     setIsSaving(false);
     if (success) {
@@ -125,6 +128,26 @@ export default function VendorProfile() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Image Gallery (Edit mode) */}
+        {isEditing && (
+          <VendorImageGallery
+            vendorId={vendor.id}
+            imageUrls={editData.image_urls}
+            isEditing={true}
+            onImagesChange={(images) => setEditData({ ...editData, image_urls: images })}
+          />
+        )}
+
+        {/* Image Gallery (View mode) */}
+        {!isEditing && vendor.image_urls && vendor.image_urls.length > 0 && (
+          <VendorImageGallery
+            vendorId={vendor.id}
+            imageUrls={vendor.image_urls}
+            isEditing={false}
+            onImagesChange={() => {}}
+          />
+        )}
 
         {/* Profile Card */}
         <Card>

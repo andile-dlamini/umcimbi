@@ -6,11 +6,14 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
 import { useClientQuotes } from '@/hooks/useQuotes';
 import { useClientBookings } from '@/hooks/useBookings';
+import { useProfileSettings } from '@/hooks/useProfileSettings';
+import { PreferredLanguage } from '@/types/database';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ export default function Profile() {
   const { requests } = useMyServiceRequests();
   const { quotes } = useClientQuotes();
   const { bookings } = useClientBookings();
+  const { settings, isLoading: settingsLoading, updateNotifications, updateLanguage } = useProfileSettings();
 
   const pendingQuotes = quotes.filter(q => q.status === 'pending_client').length;
   const activeBookings = bookings.filter(b => b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed').length;
@@ -25,6 +29,14 @@ export default function Profile() {
   const handleLogout = async () => {
     await signOut();
     navigate('/onboarding');
+  };
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    await updateNotifications(checked);
+  };
+
+  const handleLanguageChange = async (value: string) => {
+    await updateLanguage(value as PreferredLanguage);
   };
 
   return (
@@ -172,12 +184,24 @@ export default function Profile() {
                 <Globe className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <Label className="font-medium">Language</Label>
-                  <p className="text-xs text-muted-foreground">English</p>
+                  <p className="text-xs text-muted-foreground">
+                    {settings.preferred_language === 'zulu' ? 'isiZulu' : 'English'}
+                  </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" disabled>
-                Change
-              </Button>
+              <Select
+                value={settings.preferred_language}
+                onValueChange={handleLanguageChange}
+                disabled={settingsLoading}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="zulu">isiZulu</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Separator />
@@ -190,7 +214,11 @@ export default function Profile() {
                   <p className="text-xs text-muted-foreground">Reminders & updates</p>
                 </div>
               </div>
-              <Switch disabled />
+              <Switch 
+                checked={settings.notifications_enabled}
+                onCheckedChange={handleNotificationToggle}
+                disabled={settingsLoading}
+              />
             </div>
           </CardContent>
         </Card>
