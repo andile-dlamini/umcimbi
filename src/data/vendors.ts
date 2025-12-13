@@ -56,7 +56,7 @@ export const sampleVendors: Vendor[] = [
   {
     id: 'v5',
     name: 'Isibaya Photography',
-    category: 'photography',
+    category: 'photographer',
     location: 'Durban, KZN',
     about: 'Capturing the beauty and emotion of traditional ceremonies. Our photographers understand Zulu customs and know exactly when to capture those special moments.',
     priceRangeText: 'From R3,500',
