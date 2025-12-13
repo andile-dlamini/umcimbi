@@ -86,37 +86,49 @@ export function VendorImageGallery({
     }
   };
 
-  const handleGalleryImageAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleGalleryImagesAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
-    if (!canAddMore) {
+    const remainingSlots = 5 - imageUrls.length;
+    if (remainingSlots <= 0) {
       toast.error('Maximum 5 images allowed');
       return;
     }
 
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    
+    // Validate all files
+    for (const file of filesToUpload) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select only image files');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Each image must be less than 5MB');
+        return;
+      }
+    }
+
     setIsUploading(true);
-    setUploadingIndex(imageUrls.length);
 
     try {
-      const url = await uploadImage(file);
-      if (url) {
-        onImagesChange([...imageUrls, url]);
-        toast.success('Image added to gallery');
+      const uploadedUrls: string[] = [];
+      
+      for (const file of filesToUpload) {
+        const url = await uploadImage(file);
+        if (url) {
+          uploadedUrls.push(url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        onImagesChange([...imageUrls, ...uploadedUrls]);
+        toast.success(`${uploadedUrls.length} image${uploadedUrls.length > 1 ? 's' : ''} added`);
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
     } finally {
       setIsUploading(false);
       setUploadingIndex(null);
@@ -257,8 +269,9 @@ export function VendorImageGallery({
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
-            onChange={handleGalleryImageAdd}
+            onChange={handleGalleryImagesAdd}
           />
           <p className="text-xs text-muted-foreground">
             Upload up to 5 images total. First image is your main image.
