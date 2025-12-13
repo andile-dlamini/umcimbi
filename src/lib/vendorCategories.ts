@@ -24,7 +24,6 @@ export interface VendorCategoryInfo {
 
 // All vendor categories with human-readable labels (alphabetically sorted)
 export const VENDOR_CATEGORIES: VendorCategoryInfo[] = [
-  { value: 'attire', label: 'Attire' },
   { value: 'attire_tailoring', label: 'Attire & Tailoring' },
   { value: 'cakes_baking', label: 'Cakes & Baking' },
   { value: 'catering', label: 'Catering' },
