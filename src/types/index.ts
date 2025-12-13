@@ -72,14 +72,21 @@ export interface Vendor {
 }
 
 export type VendorCategory =
-  | 'decor'
-  | 'catering'
-  | 'livestock'
-  | 'tents'
-  | 'photography'
   | 'attire'
-  | 'transport'
-  | 'other';
+  | 'attire_tailoring'
+  | 'cakes_baking'
+  | 'catering'
+  | 'cold_room_hire'
+  | 'decor'
+  | 'drinks_ice_delivery'
+  | 'invitations_stationery'
+  | 'livestock'
+  | 'makeup_beauty'
+  | 'mobile_toilets'
+  | 'other'
+  | 'photographer'
+  | 'tents'
+  | 'transport';
 
 export interface Guest {
   id: string;
