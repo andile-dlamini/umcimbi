@@ -14,23 +14,39 @@ export async function sendChatNotification(
     // Find or create conversation
     let conversationId: string | null = null;
 
-    // Check if conversation exists
-    let query = supabase
-      .from('conversations')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('vendor_id', vendorId);
-
+    // First, try to find a conversation with this event_id if provided
     if (eventId) {
-      query = query.eq('event_id', eventId);
+      const { data: eventConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('vendor_id', vendorId)
+        .eq('event_id', eventId)
+        .maybeSingle();
+
+      if (eventConv) {
+        conversationId = eventConv.id;
+      }
     }
 
-    const { data: existingConv } = await query.maybeSingle();
+    // If no event-specific conversation, look for any conversation between user and vendor
+    if (!conversationId) {
+      const { data: anyConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('vendor_id', vendorId)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (existingConv) {
-      conversationId = existingConv.id;
-    } else {
-      // Create new conversation
+      if (anyConv) {
+        conversationId = anyConv.id;
+      }
+    }
+
+    // If still no conversation, create one
+    if (!conversationId) {
       const { data: newConv, error: convError } = await supabase
         .from('conversations')
         .insert({
