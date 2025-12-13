@@ -103,7 +103,7 @@ export default function Profile() {
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {/* User Info */}
-        <Card>
+        <Card className="border-card-border">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
@@ -161,7 +161,7 @@ export default function Profile() {
         </Card>
 
         {/* My Bookings & Quotes */}
-        <Card>
+        <Card className="border-card-border">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Calendar className="h-5 w-5" />
@@ -183,7 +183,7 @@ export default function Profile() {
         </Card>
 
         {/* Vendor Section */}
-        <Card>
+        <Card className="border-card-border">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Store className="h-5 w-5" />
@@ -227,7 +227,7 @@ export default function Profile() {
 
         {/* Admin Link */}
         {isAdmin && (
-          <Card>
+          <Card className="border-card-border">
             <CardContent className="p-4">
               <Button 
                 variant="outline" 
@@ -242,7 +242,7 @@ export default function Profile() {
         )}
 
         {/* Settings */}
-        <Card>
+        <Card className="border-card-border">
           <CardHeader>
             <CardTitle className="text-base">Settings</CardTitle>
           </CardHeader>
@@ -292,7 +292,7 @@ export default function Profile() {
         </Card>
 
         {/* About */}
-        <Card>
+        <Card className="border-card-border">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-5 w-5" />
