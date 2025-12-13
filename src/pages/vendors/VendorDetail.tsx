@@ -93,6 +93,23 @@ export default function VendorDetail() {
         />
       </div>
 
+      {/* Gallery Images */}
+      {vendor.image_urls && vendor.image_urls.length > 1 && (
+        <div className="px-4 pt-4">
+          <div className="grid grid-cols-4 gap-2 max-w-lg mx-auto">
+            {vendor.image_urls.slice(1, 5).map((url, index) => (
+              <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                <img 
+                  src={url} 
+                  alt={`${vendor.name} gallery ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {/* Header Info */}
         <div>
