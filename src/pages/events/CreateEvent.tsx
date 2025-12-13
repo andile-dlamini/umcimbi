@@ -17,6 +17,12 @@ const eventSchema = z.object({
   location: z.string().max(200, 'Location must be less than 200 characters').optional(),
 });
 
+// Get today's date in YYYY-MM-DD format for date validation
+const getTodayString = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
 type EventSize = 'small' | 'medium' | 'large';
 
 const sizeOptions = [
@@ -73,6 +79,8 @@ export default function CreateEvent() {
   const handleCreate = async () => {
     if (!eventType) return;
 
+    const errors: Record<string, string> = {};
+
     // Validate inputs
     const result = eventSchema.safeParse({
       name: name.trim(),
@@ -80,12 +88,22 @@ export default function CreateEvent() {
     });
 
     if (!result.success) {
-      const errors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
         if (err.path[0]) {
           errors[err.path[0] as string] = err.message;
         }
       });
+    }
+
+    // Validate date - must be today or in the future
+    if (date) {
+      const today = getTodayString();
+      if (date < today) {
+        errors.date = 'Event date must be today or in the future';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
@@ -96,10 +114,10 @@ export default function CreateEvent() {
     const typeInfo = getEventTypeInfo(eventType);
     
     const event = await createEvent({
-      name: result.data.name || `My ${typeInfo.shortLabel}`,
+      name: result.data?.name || name.trim() || `My ${typeInfo.shortLabel}`,
       type: eventType,
       date: date || null,
-      location: result.data.location || null,
+      location: result.data?.location || location.trim() || null,
       estimated_guest_count: selectedSize?.count || 150,
       size,
       notes: null,
@@ -201,9 +219,22 @@ export default function CreateEvent() {
                   id="date"
                   type="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="h-12"
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    // Clear date error when user changes value
+                    if (validationErrors.date) {
+                      setValidationErrors(prev => {
+                        const { date, ...rest } = prev;
+                        return rest;
+                      });
+                    }
+                  }}
+                  min={getTodayString()}
+                  className={cn('h-12', validationErrors.date && 'border-destructive')}
                 />
+                {validationErrors.date && (
+                  <p className="text-xs text-destructive">{validationErrors.date}</p>
+                )}
               </div>
 
               <div className="space-y-2">

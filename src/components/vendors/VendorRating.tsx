@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useVendorReviews } from '@/hooks/useVendorReviews';
+import { useCanReviewVendor } from '@/hooks/useCanReviewVendor';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -59,18 +60,20 @@ function StarRating({
 export function VendorRating({ vendorId }: VendorRatingProps) {
   const { user } = useAuth();
   const { reviews, userReview, submitReview, deleteReview, isLoading } = useVendorReviews(vendorId);
-  const [newRating, setNewRating] = useState(userReview?.rating || 0);
-  const [comment, setComment] = useState(userReview?.comment || '');
+  const { canReview, hasExistingReview, isLoading: eligibilityLoading } = useCanReviewVendor(vendorId);
+  
+  const [newRating, setNewRating] = useState(0);
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   // Update local state when userReview changes
-  useState(() => {
+  useEffect(() => {
     if (userReview) {
       setNewRating(userReview.rating);
       setComment(userReview.comment || '');
     }
-  });
+  }, [userReview]);
 
   const handleSubmit = async () => {
     if (newRating === 0) return;
@@ -92,6 +95,9 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
     setIsSubmitting(false);
   };
 
+  // Determine if user can write/edit a review
+  const canWriteReview = canReview || hasExistingReview;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -100,58 +106,68 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
       <CardContent className="space-y-4">
         {/* Submit/Edit Review Section */}
         {user ? (
-          <div className="space-y-3 pb-4 border-b">
-            {!showForm && !userReview ? (
-              <Button variant="outline" onClick={() => setShowForm(true)} className="w-full">
-                <Star className="h-4 w-4 mr-2" />
-                Write a Review
-              </Button>
-            ) : showForm || userReview ? (
-              <div className="space-y-3">
-                <p className="text-sm font-medium">
-                  {userReview ? 'Your Review' : 'Rate this vendor'}
-                </p>
-                <StarRating 
-                  rating={newRating} 
-                  onRate={setNewRating} 
-                  interactive 
-                />
-                <Textarea
-                  placeholder="Share your experience (optional)"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  rows={3}
-                />
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleSubmit} 
-                    disabled={newRating === 0 || isSubmitting}
-                    className="flex-1"
-                  >
-                    {userReview ? 'Update' : 'Submit'} Review
-                  </Button>
-                  {userReview && (
+          eligibilityLoading ? (
+            <p className="text-sm text-muted-foreground pb-4 border-b">
+              Checking eligibility...
+            </p>
+          ) : canWriteReview ? (
+            <div className="space-y-3 pb-4 border-b">
+              {!showForm && !userReview ? (
+                <Button variant="outline" onClick={() => setShowForm(true)} className="w-full">
+                  <Star className="h-4 w-4 mr-2" />
+                  Write a Review
+                </Button>
+              ) : showForm || userReview ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">
+                    {userReview ? 'Your Review' : 'Rate this vendor'}
+                  </p>
+                  <StarRating 
+                    rating={newRating} 
+                    onRate={setNewRating} 
+                    interactive 
+                  />
+                  <Textarea
+                    placeholder="Share your experience (optional)"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
                     <Button 
-                      variant="destructive" 
-                      size="icon"
-                      onClick={handleDelete}
-                      disabled={isSubmitting}
+                      onClick={handleSubmit} 
+                      disabled={newRating === 0 || isSubmitting}
+                      className="flex-1"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {userReview ? 'Update' : 'Submit'} Review
                     </Button>
-                  )}
-                  {!userReview && (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                    {userReview && (
+                      <Button 
+                        variant="destructive" 
+                        size="icon"
+                        onClick={handleDelete}
+                        disabled={isSubmitting}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {!userReview && (
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : null}
-          </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground pb-4 border-b">
+              Complete a booking with this vendor to leave a review
+            </p>
+          )
         ) : (
           <p className="text-sm text-muted-foreground pb-4 border-b">
             Log in to leave a review
@@ -162,7 +178,7 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading reviews...</p>
         ) : reviews.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No reviews yet. Be the first!</p>
+          <p className="text-sm text-muted-foreground">No reviews yet</p>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (

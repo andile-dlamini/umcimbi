@@ -428,6 +428,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_profile_complete: boolean | null
+          notifications_enabled: boolean | null
           phone_number: string | null
           preferred_language:
             | Database["public"]["Enums"]["preferred_language"]
@@ -441,6 +442,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_profile_complete?: boolean | null
+          notifications_enabled?: boolean | null
           phone_number?: string | null
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
@@ -454,6 +456,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_profile_complete?: boolean | null
+          notifications_enabled?: boolean | null
           phone_number?: string | null
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
