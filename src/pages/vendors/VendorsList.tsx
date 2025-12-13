@@ -36,7 +36,7 @@ export default function VendorsList() {
             placeholder="Search vendors..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 border-card-border"
           />
         </div>
 
