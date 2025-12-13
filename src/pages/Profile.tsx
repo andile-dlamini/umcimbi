@@ -165,44 +165,18 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              My Bookings & Quotes
+              My Bookings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             <Button 
               variant="outline" 
               className="w-full justify-between"
-              onClick={() => navigate('/bookings')}
-            >
-              <span className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                My Bookings
-              </span>
-              {activeBookings > 0 && (
-                <Badge>{activeBookings} active</Badge>
-              )}
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              onClick={() => navigate('/quotes')}
-            >
-              <span className="flex items-center gap-2">
-                <Receipt className="h-4 w-4" />
-                My Quotes
-              </span>
-              {pendingQuotes > 0 && (
-                <Badge variant="destructive">{pendingQuotes} pending</Badge>
-              )}
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-between text-muted-foreground"
               onClick={() => navigate('/profile/requests')}
             >
               <span className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Quote Requests Sent
+                My Bookings
               </span>
             </Button>
           </CardContent>
