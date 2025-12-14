@@ -47,8 +47,6 @@ export function BottomNav() {
         }
 
         // Count unread messages in these conversations
-        // For user view: count unread vendor and system messages
-        // For vendor view: count unread user and system messages
         let totalUnread = 0;
 
         for (const convId of conversationIds) {
@@ -62,19 +60,29 @@ export function BottomNav() {
 
           const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
           
-          // Count messages not sent by the current user that are unread
-          // For vendor: count user messages + system messages
-          // For client: count vendor messages + system messages
-          const senderTypes: ('user' | 'vendor' | 'system')[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
+          // For vendor view: count user messages
+          // For client view: count vendor messages
+          // System messages: count only if not sent by current user
+          const regularSenderType: 'user' | 'vendor' = isVendorView ? 'user' : 'vendor';
 
-          const { count } = await supabase
+          // Count regular messages (user/vendor)
+          const { count: regularCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', convId)
-            .in('sender_type', senderTypes)
+            .eq('sender_type', regularSenderType)
             .is('read_at', null);
 
-          totalUnread += count || 0;
+          // Count system messages NOT sent by current user
+          const { count: systemCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', convId)
+            .eq('sender_type', 'system')
+            .neq('sender_user_id', user.id)
+            .is('read_at', null);
+
+          totalUnread += (regularCount || 0) + (systemCount || 0);
         }
 
         setUnreadCount(totalUnread);

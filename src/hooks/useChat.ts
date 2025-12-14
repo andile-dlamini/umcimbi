@@ -63,16 +63,28 @@ export const useConversations = () => {
             .limit(1)
             .single();
 
-          // Count unread messages (including system messages)
+          // Count unread messages
           const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-          const senderTypes: SenderType[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
+          const regularSenderType: SenderType = isVendorView ? 'user' : 'vendor';
           
-          const { count } = await supabase
+          // Count regular messages (user/vendor)
+          const { count: regularCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
-            .in('sender_type', senderTypes)
+            .eq('sender_type', regularSenderType)
             .is('read_at', null);
+
+          // Count system messages NOT sent by current user
+          const { count: systemCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .eq('sender_type', 'system')
+            .neq('sender_user_id', user?.id)
+            .is('read_at', null);
+          
+          const totalCount = (regularCount || 0) + (systemCount || 0);
 
           return {
             ...conv,
@@ -80,7 +92,7 @@ export const useConversations = () => {
             event: event || undefined,
             user_profile: profile || undefined,
             last_message: lastMsg || undefined,
-            unread_count: count || 0,
+            unread_count: totalCount,
           } as ConversationWithDetails;
         })
       );
@@ -207,15 +219,24 @@ export const useMessages = (conversationId: string | undefined) => {
 
     if (!conv) return;
 
-    // Determine sender types to mark as read based on current user role
     const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-    const senderTypesToMark: SenderType[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
+    const regularSenderType: SenderType = isVendorView ? 'user' : 'vendor';
 
+    // Mark regular messages (user/vendor) as read
     await supabase
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .eq('conversation_id', conversationId)
-      .in('sender_type', senderTypesToMark)
+      .eq('sender_type', regularSenderType)
+      .is('read_at', null);
+
+    // Mark system messages as read only if current user is NOT the sender
+    await supabase
+      .from('messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .eq('sender_type', 'system')
+      .neq('sender_user_id', user.id)
       .is('read_at', null);
   }, [user, isVendor, vendorProfile]);
 
