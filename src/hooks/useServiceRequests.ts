@@ -57,24 +57,23 @@ export function useMyServiceRequests() {
       return false;
     }
 
-    // Send chat notification
+    // Send chat notification to vendor about the new request
     const { data: event } = await supabase
       .from('events')
-      .select('name')
+      .select('name, type, estimated_guest_count')
       .eq('id', request.event_id)
       .single();
-    
-    const { data: vendor } = await supabase
-      .from('vendors')
-      .select('name')
-      .eq('id', request.vendor_id)
-      .single();
 
-    if (event && vendor) {
+    if (event) {
+      // Send vendor-facing notification about new request
       await sendChatNotification(
         user.id,
         request.vendor_id,
-        notificationMessages.quoteRequested(event.name, vendor.name),
+        notificationMessages.newRequestForVendor(
+          event.name,
+          event.type.charAt(0).toUpperCase() + event.type.slice(1).replace('_', ' '),
+          request.guest_count || event.estimated_guest_count || undefined
+        ),
         request.event_id
       );
     }

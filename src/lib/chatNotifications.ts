@@ -94,8 +94,15 @@ export async function sendChatNotification(
 
 // Notification message templates
 export const notificationMessages = {
+  // For vendors - when they receive a new request
+  newRequestForVendor: (eventName: string, eventType: string, guestCount?: number) =>
+    guestCount
+      ? `🔔 New quote request! "${eventName}" (${eventType}) for ${guestCount} guests. Please review and respond.`
+      : `🔔 New quote request! "${eventName}" (${eventType}). Please review and respond.`,
+  
+  // For clients - confirmation that request was sent
   quoteRequested: (eventName: string, vendorName: string) =>
-    `📩 New quote request for "${eventName}" sent to ${vendorName}. The vendor will respond soon.`,
+    `📩 Quote request for "${eventName}" sent to ${vendorName}. The vendor will respond soon.`,
   
   quoteReceived: (vendorName: string, amount?: number) =>
     amount
