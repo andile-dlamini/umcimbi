@@ -63,15 +63,15 @@ export const useConversations = () => {
             .limit(1)
             .single();
 
-          // Count unread messages
+          // Count unread messages (including system messages)
           const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-          const unreadSenderType = isVendorView ? 'user' : 'vendor';
+          const senderTypes: SenderType[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
           
           const { count } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
-            .eq('sender_type', unreadSenderType)
+            .in('sender_type', senderTypes)
             .is('read_at', null);
 
           return {
@@ -207,15 +207,15 @@ export const useMessages = (conversationId: string | undefined) => {
 
     if (!conv) return;
 
-    // Determine sender type to mark as read based on current user role
+    // Determine sender types to mark as read based on current user role
     const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-    const senderTypeToMark: SenderType = isVendorView ? 'user' : 'vendor';
+    const senderTypesToMark: SenderType[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
 
     await supabase
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .eq('conversation_id', conversationId)
-      .eq('sender_type', senderTypeToMark)
+      .in('sender_type', senderTypesToMark)
       .is('read_at', null);
   }, [user, isVendor, vendorProfile]);
 
