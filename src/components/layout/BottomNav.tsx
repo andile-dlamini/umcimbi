@@ -47,8 +47,8 @@ export function BottomNav() {
         }
 
         // Count unread messages in these conversations
-        // For user view: count unread vendor messages
-        // For vendor view: count unread user messages
+        // For user view: count unread vendor and system messages
+        // For vendor view: count unread user and system messages
         let totalUnread = 0;
 
         for (const convId of conversationIds) {
@@ -61,13 +61,17 @@ export function BottomNav() {
           if (!conv) continue;
 
           const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-          const unreadSenderType = isVendorView ? 'user' : 'vendor';
+          
+          // Count messages not sent by the current user that are unread
+          // For vendor: count user messages + system messages
+          // For client: count vendor messages + system messages
+          const senderTypes: ('user' | 'vendor' | 'system')[] = isVendorView ? ['user', 'system'] : ['vendor', 'system'];
 
           const { count } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', convId)
-            .eq('sender_type', unreadSenderType)
+            .in('sender_type', senderTypes)
             .is('read_at', null);
 
           totalUnread += count || 0;
