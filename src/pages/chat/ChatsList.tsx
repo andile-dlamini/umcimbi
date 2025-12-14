@@ -62,45 +62,54 @@ const ChatsList = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => navigate(`/chat/${conv.id}`)}
-                className="w-full flex items-start gap-3 p-3 rounded-xl bg-card border border-card-border hover:bg-accent/20 transition-colors text-left"
-              >
-                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                  <MessageCircle className="h-5 w-5 text-accent" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-medium text-foreground truncate">
-                      {getDisplayName(conv)}
-                    </h3>
-                    <span className="text-xs text-muted-foreground shrink-0">
-                      {getTimeAgo(conv)}
-                    </span>
+            {conversations.map((conv) => {
+              const hasUnread = (conv.unread_count || 0) > 0;
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => navigate(`/chat/${conv.id}`)}
+                  className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-colors text-left ${
+                    hasUnread 
+                      ? 'bg-primary/5 border-primary/30 hover:bg-primary/10' 
+                      : 'bg-card border-card-border hover:bg-accent/20'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                    hasUnread ? 'bg-primary/20' : 'bg-accent/20'
+                  }`}>
+                    <MessageCircle className={`h-5 w-5 ${hasUnread ? 'text-primary' : 'text-accent'}`} />
                   </div>
-                  <p className="text-xs text-muted-foreground capitalize mb-1">
-                    {getSubtitle(conv)}
-                  </p>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm text-muted-foreground truncate">
-                      {getLastMessageSnippet(conv)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className={`truncate ${hasUnread ? 'font-semibold text-foreground' : 'font-medium text-foreground'}`}>
+                        {getDisplayName(conv)}
+                      </h3>
+                      <span className={`text-xs shrink-0 ${hasUnread ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                        {getTimeAgo(conv)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground capitalize mb-1">
+                      {getSubtitle(conv)}
                     </p>
-                    {(conv.unread_count || 0) > 0 && (
-                      <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                        {conv.unread_count}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                        {getLastMessageSnippet(conv)}
+                      </p>
+                      {hasUnread && (
+                        <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </div>
+                    {conv.event && (
+                      <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
+                        {conv.event.name}
                       </span>
                     )}
                   </div>
-                  {conv.event && (
-                    <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
-                      {conv.event.name}
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
