@@ -88,11 +88,11 @@ export default function VendorDetail() {
       <PageHeader title={vendor.name} showBack />
 
       {/* Hero Image */}
-      <div className="aspect-video bg-muted">
+      <div className="aspect-video bg-muted flex items-center justify-center">
         <img
           src={displayImage}
           alt={vendor.name}
-          className="w-full h-full object-cover transition-opacity duration-200"
+          className="max-w-full max-h-full object-contain transition-opacity duration-200"
         />
       </div>
 
