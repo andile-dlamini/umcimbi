@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +25,10 @@ export default function VendorDetail() {
   const { vendor, isLoading } = useVendor(id);
   const { addVendorToEvent, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId || undefined);
   const { startConversation } = useStartConversation();
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const isSelected = id ? isVendorSelected(id) : false;
+  const displayImage = vendor?.image_urls?.[selectedImageIndex] || vendor?.image_urls?.[0] || '/placeholder.svg';
 
   const handleChatWithVendor = async () => {
     if (!user) {
@@ -87,18 +90,27 @@ export default function VendorDetail() {
       {/* Hero Image */}
       <div className="aspect-video bg-muted">
         <img
-          src={vendor.image_urls?.[0] || '/placeholder.svg'}
+          src={displayImage}
           alt={vendor.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-opacity duration-200"
         />
       </div>
 
-      {/* Gallery Images */}
+      {/* Gallery Thumbnails */}
       {vendor.image_urls && vendor.image_urls.length > 1 && (
         <div className="px-4 pt-4">
           <div className="grid grid-cols-4 gap-2 max-w-lg mx-auto">
-            {vendor.image_urls.slice(1, 5).map((url, index) => (
-              <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
+            {vendor.image_urls.slice(0, 4).map((url, index) => (
+              <div 
+                key={index} 
+                onClick={() => setSelectedImageIndex(index)}
+                className={cn(
+                  "aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer transition-all duration-200",
+                  selectedImageIndex === index 
+                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background" 
+                    : "hover:opacity-80"
+                )}
+              >
                 <img 
                   src={url} 
                   alt={`${vendor.name} gallery ${index + 1}`}
