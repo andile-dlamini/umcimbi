@@ -75,14 +75,14 @@ export function BottomNav() {
             .eq('sender_type', regularSenderType)
             .is('read_at', null);
 
-          // Count system messages NOT sent by current user
+          // Count system messages NOT sent by current user (handle null sender_user_id)
           const { count: systemCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', convId)
             .eq('sender_type', 'system')
-            .neq('sender_user_id', user.id)
-            .is('read_at', null);
+            .is('read_at', null)
+            .or(`sender_user_id.is.null,sender_user_id.neq.${user.id}`);
 
           totalUnread += (regularCount || 0) + (systemCount || 0);
         }
