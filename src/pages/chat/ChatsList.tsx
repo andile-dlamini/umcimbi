@@ -62,29 +62,41 @@ const ChatsList = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {conversations.map((conv) => {
+            {/* Sort conversations: unread first, then by last message time */}
+            {[...conversations]
+              .sort((a, b) => {
+                const aUnread = (a.unread_count || 0) > 0;
+                const bUnread = (b.unread_count || 0) > 0;
+                if (aUnread && !bUnread) return -1;
+                if (!aUnread && bUnread) return 1;
+                // Then sort by last message time
+                const aTime = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+                const bTime = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+                return bTime - aTime;
+              })
+              .map((conv) => {
               const hasUnread = (conv.unread_count || 0) > 0;
               return (
                 <button
                   key={conv.id}
                   onClick={() => navigate(`/chat/${conv.id}`)}
-                  className={`w-full flex items-start gap-3 p-3 rounded-xl border transition-colors text-left ${
+                  className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                     hasUnread 
-                      ? 'bg-primary/5 border-primary/30 hover:bg-primary/10' 
-                      : 'bg-card border-card-border hover:bg-accent/20'
+                      ? 'bg-primary/15 border-primary shadow-md shadow-primary/20' 
+                      : 'bg-card border-transparent hover:bg-accent/10'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
-                    hasUnread ? 'bg-primary/20' : 'bg-accent/20'
+                    hasUnread ? 'bg-primary text-primary-foreground' : 'bg-muted'
                   }`}>
-                    <MessageCircle className={`h-5 w-5 ${hasUnread ? 'text-primary' : 'text-accent'}`} />
+                    <MessageCircle className={`h-5 w-5 ${hasUnread ? '' : 'text-muted-foreground'}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className={`truncate ${hasUnread ? 'font-semibold text-foreground' : 'font-medium text-foreground'}`}>
+                      <h3 className={`truncate ${hasUnread ? 'font-bold text-primary' : 'font-medium text-foreground'}`}>
                         {getDisplayName(conv)}
                       </h3>
-                      <span className={`text-xs shrink-0 ${hasUnread ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                      <span className={`text-xs shrink-0 ${hasUnread ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
                         {getTimeAgo(conv)}
                       </span>
                     </div>
@@ -92,11 +104,11 @@ const ChatsList = () => {
                       {getSubtitle(conv)}
                     </p>
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                      <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                         {getLastMessageSnippet(conv)}
                       </p>
                       {hasUnread && (
-                        <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                        <span className="shrink-0 min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center animate-pulse">
                           {conv.unread_count}
                         </span>
                       )}
