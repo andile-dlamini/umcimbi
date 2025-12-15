@@ -140,7 +140,7 @@ const ChatThread = () => {
                     className={`max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border ${
                       isClickable ? 'cursor-pointer hover:bg-primary/10 hover:border-primary/30 transition-colors' : ''
                     }`}
-                    onClick={isClickable ? () => navigate('/vendor/requests') : undefined}
+                    onClick={isClickable ? () => navigate('/vendor-dashboard/requests') : undefined}
                   >
                     <p className={`text-sm text-center whitespace-pre-wrap ${
                       isClickable ? 'text-foreground' : 'text-muted-foreground'
