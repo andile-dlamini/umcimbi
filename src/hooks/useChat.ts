@@ -75,14 +75,14 @@ export const useConversations = () => {
             .eq('sender_type', regularSenderType)
             .is('read_at', null);
 
-          // Count system messages NOT sent by current user
+          // Count system messages NOT sent by current user (handle null sender_user_id)
           const { count: systemCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
             .eq('sender_type', 'system')
-            .neq('sender_user_id', user?.id)
-            .is('read_at', null);
+            .is('read_at', null)
+            .or(`sender_user_id.is.null,sender_user_id.neq.${user?.id}`);
           
           const totalCount = (regularCount || 0) + (systemCount || 0);
 
@@ -230,14 +230,14 @@ export const useMessages = (conversationId: string | undefined) => {
       .eq('sender_type', regularSenderType)
       .is('read_at', null);
 
-    // Mark system messages as read only if current user is NOT the sender
+    // Mark system messages as read only if current user is NOT the sender (handle null)
     await supabase
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .eq('conversation_id', conversationId)
       .eq('sender_type', 'system')
-      .neq('sender_user_id', user.id)
-      .is('read_at', null);
+      .is('read_at', null)
+      .or(`sender_user_id.is.null,sender_user_id.neq.${user.id}`);
   }, [user, isVendor, vendorProfile]);
 
   // Set up real-time subscription
