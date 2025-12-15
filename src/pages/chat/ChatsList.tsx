@@ -145,16 +145,9 @@ const ChatsList = () => {
               {getTimeAgo(conv.last_message_at)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
-              {getLastMessageSnippet(conv)}
-            </p>
-            {hasUnread && (
-              <span className="shrink-0 min-w-[20px] h-[20px] px-1 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
-                {conv.unread_count}
-              </span>
-            )}
-          </div>
+          <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+            {getLastMessageSnippet(conv)}
+          </p>
         </div>
       </button>
     );
@@ -223,11 +216,6 @@ const ChatsList = () => {
                         <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                           {getLastMessageSnippet(latestConv)}
                         </p>
-                        {hasUnread && (
-                          <span className="shrink-0 min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center animate-pulse">
-                            {group.totalUnread}
-                          </span>
-                        )}
                       </div>
                       {latestConv.event && (
                         <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
@@ -278,11 +266,6 @@ const ChatsList = () => {
                         <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                           {getLastMessageSnippet(latestConv)}
                         </p>
-                        {hasUnread && (
-                          <span className="shrink-0 min-w-[22px] h-[22px] px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center animate-pulse">
-                            {group.totalUnread}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </button>

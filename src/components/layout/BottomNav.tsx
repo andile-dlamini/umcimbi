@@ -8,16 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 export function BottomNav() {
   const location = useLocation();
   const { user, isVendor, vendorProfile } = useAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasUnread, setHasUnread] = useState(false);
 
-  // Fetch unread message count - also refetch when route changes (e.g., leaving chat thread)
+  // Check if there are any unread messages
   useEffect(() => {
     if (!user) return;
 
-    const fetchUnreadCount = async () => {
+    const checkUnread = async () => {
       try {
-        let totalUnread = 0;
-
         // Get conversations where user is the client
         const { data: clientConvs } = await supabase
           .from('conversations')
@@ -26,19 +24,22 @@ export function BottomNav() {
 
         const clientConvIds = clientConvs?.map(c => c.id) || [];
 
-        // Count unread vendor messages in client conversations
+        // Check for unread vendor messages
         if (clientConvIds.length > 0) {
-          const { count: vendorMsgCount } = await supabase
+          const { count } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .in('conversation_id', clientConvIds)
             .eq('sender_type', 'vendor')
             .is('read_at', null);
 
-          totalUnread += vendorMsgCount || 0;
+          if ((count || 0) > 0) {
+            setHasUnread(true);
+            return;
+          }
         }
 
-        // If vendor, get those conversations too
+        // If vendor, check those conversations too
         let vendorConvIds: string[] = [];
         if (isVendor && vendorProfile) {
           const { data: vendorConvs } = await supabase
@@ -48,23 +49,24 @@ export function BottomNav() {
 
           vendorConvIds = vendorConvs?.map(c => c.id) || [];
 
-          // Count unread user messages in vendor conversations
           if (vendorConvIds.length > 0) {
-            const { count: userMsgCount } = await supabase
+            const { count } = await supabase
               .from('messages')
               .select('*', { count: 'exact', head: true })
               .in('conversation_id', vendorConvIds)
               .eq('sender_type', 'user')
               .is('read_at', null);
 
-            totalUnread += userMsgCount || 0;
+            if ((count || 0) > 0) {
+              setHasUnread(true);
+              return;
+            }
           }
         }
 
-        // Count unread system messages across all user's conversations
+        // Check system messages
         const allConvIds = [...new Set([...clientConvIds, ...vendorConvIds])];
         if (allConvIds.length > 0) {
-          // System messages not sent by current user
           const { count: systemCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
@@ -73,8 +75,7 @@ export function BottomNav() {
             .is('read_at', null)
             .neq('sender_user_id', user.id);
 
-          // System messages with null sender (like automated notifications)
-          const { count: nullSenderSystemCount } = await supabase
+          const { count: nullSenderCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .in('conversation_id', allConvIds)
@@ -82,44 +83,30 @@ export function BottomNav() {
             .is('read_at', null)
             .is('sender_user_id', null);
 
-          totalUnread += (systemCount || 0) + (nullSenderSystemCount || 0);
+          if ((systemCount || 0) + (nullSenderCount || 0) > 0) {
+            setHasUnread(true);
+            return;
+          }
         }
 
-        setUnreadCount(totalUnread);
+        setHasUnread(false);
       } catch (error) {
-        console.error('Error fetching unread count:', error);
+        console.error('Error checking unread:', error);
       }
     };
 
-    // Fetch immediately and when returning from chat thread
-    fetchUnreadCount();
+    checkUnread();
 
     // Set up real-time subscription for new messages
     const channelName = `unread-messages-${user.id}`;
     const channel = supabase
       .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        () => {
-          setTimeout(fetchUnreadCount, 100);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-        },
-        () => {
-          setTimeout(fetchUnreadCount, 100);
-        }
-      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+        setTimeout(checkUnread, 100);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
+        setTimeout(checkUnread, 100);
+      })
       .subscribe();
 
     return () => {
@@ -130,7 +117,7 @@ export function BottomNav() {
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/vendors', icon: Store, label: 'Vendors' },
-    { to: '/chats', icon: MessageCircle, label: 'Chats', badge: unreadCount },
+    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread },
     { to: '/learn', icon: BookOpen, label: 'Learn' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
@@ -143,7 +130,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
-        {navItems.map(({ to, icon: Icon, label, badge }) => (
+        {navItems.map(({ to, icon: Icon, label, showDot }) => (
           <NavLink
             key={to}
             to={to}
@@ -158,10 +145,8 @@ export function BottomNav() {
           >
             <div className="relative flex items-center justify-center">
               <Icon className="w-5 h-5" />
-              {typeof badge === 'number' && badge > 0 && (
-                <span className="absolute -top-2 -right-2.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none">
-                  {badge > 99 ? '99+' : badge}
-                </span>
+              {showDot && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
               )}
             </div>
             <span className="text-xs font-medium">{label}</span>
