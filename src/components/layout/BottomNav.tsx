@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Store, MessageCircle, BookOpen, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,8 @@ export function BottomNav() {
   const location = useLocation();
   const { user, isVendor, vendorProfile } = useAuth();
   const [hasUnread, setHasUnread] = useState(false);
+  const [isNewMessage, setIsNewMessage] = useState(false);
+  const previousUnreadRef = useRef(false);
 
   // Check if there are any unread messages
   useEffect(() => {
@@ -34,7 +36,15 @@ export function BottomNav() {
             .is('read_at', null);
 
           if ((count || 0) > 0) {
+            const wasUnread = previousUnreadRef.current;
             setHasUnread(true);
+            // Only flash if this is a NEW unread (wasn't unread before)
+            if (!wasUnread) {
+              setIsNewMessage(true);
+              // Stop flashing after 3 seconds
+              setTimeout(() => setIsNewMessage(false), 3000);
+            }
+            previousUnreadRef.current = true;
             return;
           }
         }
@@ -58,7 +68,13 @@ export function BottomNav() {
               .is('read_at', null);
 
             if ((count || 0) > 0) {
+              const wasUnread = previousUnreadRef.current;
               setHasUnread(true);
+              if (!wasUnread) {
+                setIsNewMessage(true);
+                setTimeout(() => setIsNewMessage(false), 3000);
+              }
+              previousUnreadRef.current = true;
               return;
             }
           }
@@ -84,12 +100,20 @@ export function BottomNav() {
             .is('sender_user_id', null);
 
           if ((systemCount || 0) + (nullSenderCount || 0) > 0) {
+            const wasUnread = previousUnreadRef.current;
             setHasUnread(true);
+            if (!wasUnread) {
+              setIsNewMessage(true);
+              setTimeout(() => setIsNewMessage(false), 3000);
+            }
+            previousUnreadRef.current = true;
             return;
           }
         }
 
         setHasUnread(false);
+        setIsNewMessage(false);
+        previousUnreadRef.current = false;
       } catch (error) {
         console.error('Error checking unread:', error);
       }
@@ -102,7 +126,11 @@ export function BottomNav() {
     const channel = supabase
       .channel(channelName)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
-        setTimeout(checkUnread, 100);
+        // New message arrived - trigger flash
+        setTimeout(() => {
+          previousUnreadRef.current = false; // Reset so we detect as "new"
+          checkUnread();
+        }, 100);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
         setTimeout(checkUnread, 100);
@@ -117,7 +145,7 @@ export function BottomNav() {
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/vendors', icon: Store, label: 'Vendors' },
-    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread },
+    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
     { to: '/learn', icon: BookOpen, label: 'Learn' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
@@ -130,7 +158,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
-        {navItems.map(({ to, icon: Icon, label, showDot }) => (
+        {navItems.map(({ to, icon: Icon, label, showDot, isNew }) => (
           <NavLink
             key={to}
             to={to}
@@ -146,7 +174,12 @@ export function BottomNav() {
             <div className="relative flex items-center justify-center">
               <Icon className="w-5 h-5" />
               {showDot && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                <span 
+                  className={cn(
+                    "absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-destructive",
+                    isNew && "animate-pulse"
+                  )} 
+                />
               )}
             </div>
             <span className="text-xs font-medium">{label}</span>
