@@ -134,13 +134,32 @@ const ChatThread = () => {
               const isQuoteRequestNotification = message.content.includes('🔔') && message.content.includes('quote request');
               const isVendorClickable = isVendorView && isQuoteRequestNotification;
               
-              // Check if this is a quote received notification for clients
+              // Check clickable notifications for clients
               const isQuoteReceivedNotification = message.content.includes('💰') && message.content.includes('quote');
-              const isClientClickable = !isVendorView && isQuoteReceivedNotification;
+              const isQuoteAcceptedNotification = message.content.includes('✅') && message.content.includes('Quote accepted');
+              const isBookingConfirmedNotification = message.content.includes('🎉') && message.content.includes('Booking confirmed');
+              const isBookingCompletedNotification = message.content.includes('✨') && message.content.includes('completed');
+              
+              const isClientClickable = !isVendorView && (
+                isQuoteReceivedNotification || 
+                isQuoteAcceptedNotification || 
+                isBookingConfirmedNotification || 
+                isBookingCompletedNotification
+              );
               
               const isClickable = isVendorClickable || isClientClickable;
-              const navigateTo = isVendorClickable ? '/vendor-dashboard/requests' : '/quotes';
-              const tapText = isVendorClickable ? 'Tap to view request →' : 'Tap to view quote →';
+              
+              // Determine navigation and text based on notification type
+              let navigateTo = '/quotes';
+              let tapText = 'Tap to view quote →';
+              
+              if (isVendorClickable) {
+                navigateTo = '/vendor-dashboard/requests';
+                tapText = 'Tap to view request →';
+              } else if (isQuoteAcceptedNotification || isBookingConfirmedNotification || isBookingCompletedNotification) {
+                navigateTo = '/bookings';
+                tapText = 'Tap to view booking →';
+              }
               
               return (
                 <div key={message.id} className="flex justify-center">
