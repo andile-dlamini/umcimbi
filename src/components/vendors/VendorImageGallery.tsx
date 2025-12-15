@@ -144,17 +144,22 @@ export function VendorImageGallery({
     toast.success('Image removed');
   };
 
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Reset selected index when imageUrls change
+  const displayImage = imageUrls[selectedIndex] || imageUrls[0] || null;
+
   if (!isEditing) {
     // Display view
     return (
       <div className="space-y-4">
         {/* Main Image */}
-        {mainImage ? (
+        {displayImage ? (
           <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
             <img 
-              src={mainImage} 
+              src={displayImage} 
               alt="Main vendor image" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-opacity duration-200"
             />
           </div>
         ) : (
@@ -163,13 +168,19 @@ export function VendorImageGallery({
           </div>
         )}
 
-        {/* Gallery */}
-        {galleryImages.length > 0 && (
+        {/* Gallery Thumbnails */}
+        {imageUrls.length > 1 && (
           <div className="grid grid-cols-4 gap-2">
-            {galleryImages.map((url, index) => (
+            {imageUrls.map((url, index) => (
               <div 
                 key={index} 
-                className="aspect-square overflow-hidden rounded-lg bg-muted"
+                onClick={() => setSelectedIndex(index)}
+                className={cn(
+                  "aspect-square overflow-hidden rounded-lg bg-muted cursor-pointer transition-all duration-200",
+                  selectedIndex === index 
+                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background" 
+                    : "hover:opacity-80"
+                )}
               >
                 <img 
                   src={url} 
