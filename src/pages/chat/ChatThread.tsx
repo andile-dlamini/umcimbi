@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, FileText } from 'lucide-react';
+import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { format, isToday, isYesterday } from 'date-fns';
-import { CreateQuoteFromChatDialog } from '@/components/vendors/CreateQuoteFromChatDialog';
 
 const ChatThread = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -16,7 +15,6 @@ const ChatThread = () => {
   const { messages, isLoading: msgLoading } = useMessages(conversationId);
   const { sendMessage, isSending } = useSendMessage();
   const [newMessage, setNewMessage] = useState('');
-  const [showQuoteDialog, setShowQuoteDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
@@ -193,17 +191,6 @@ const ChatThread = () => {
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
         <div className="flex items-center gap-2">
-          {/* Quote button for vendors */}
-          {isVendorView && conversation.event_id && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowQuoteDialog(true)}
-              title="Send a quote"
-            >
-              <FileText className="h-4 w-4" />
-            </Button>
-          )}
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -221,16 +208,6 @@ const ChatThread = () => {
           </Button>
         </div>
       </div>
-
-      {/* Quote Dialog for vendors */}
-      {isVendorView && conversation && (
-        <CreateQuoteFromChatDialog
-          open={showQuoteDialog}
-          onOpenChange={setShowQuoteDialog}
-          userId={conversation.user_id}
-          conversationEventId={conversation.event_id}
-        />
-      )}
     </div>
   );
 };
