@@ -132,7 +132,15 @@ const ChatThread = () => {
             if (isSystem) {
               // Check if this is a quote request notification for vendors
               const isQuoteRequestNotification = message.content.includes('🔔') && message.content.includes('quote request');
-              const isClickable = isVendorView && isQuoteRequestNotification;
+              const isVendorClickable = isVendorView && isQuoteRequestNotification;
+              
+              // Check if this is a quote received notification for clients
+              const isQuoteReceivedNotification = message.content.includes('💰') && message.content.includes('quote');
+              const isClientClickable = !isVendorView && isQuoteReceivedNotification;
+              
+              const isClickable = isVendorClickable || isClientClickable;
+              const navigateTo = isVendorClickable ? '/vendor-dashboard/requests' : '/quotes';
+              const tapText = isVendorClickable ? 'Tap to view request →' : 'Tap to view quote →';
               
               return (
                 <div key={message.id} className="flex justify-center">
@@ -140,7 +148,7 @@ const ChatThread = () => {
                     className={`max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border ${
                       isClickable ? 'cursor-pointer hover:bg-primary/10 hover:border-primary/30 transition-colors' : ''
                     }`}
-                    onClick={isClickable ? () => navigate('/vendor-dashboard/requests') : undefined}
+                    onClick={isClickable ? () => navigate(navigateTo) : undefined}
                   >
                     <p className={`text-sm text-center whitespace-pre-wrap ${
                       isClickable ? 'text-foreground' : 'text-muted-foreground'
@@ -149,7 +157,7 @@ const ChatThread = () => {
                     </p>
                     {isClickable && (
                       <p className="text-xs text-primary text-center mt-1 font-medium">
-                        Tap to view request →
+                        {tapText}
                       </p>
                     )}
                     <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
