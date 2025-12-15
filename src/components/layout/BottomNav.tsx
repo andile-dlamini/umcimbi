@@ -46,6 +46,9 @@ export function BottomNav() {
           return;
         }
 
+        // Deduplicate conversation IDs
+        conversationIds = [...new Set(conversationIds)];
+
         // Count unread messages in these conversations
         let totalUnread = 0;
 
@@ -60,9 +63,8 @@ export function BottomNav() {
 
           const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
           
-          // For vendor view: count user messages
-          // For client view: count vendor messages
-          // System messages: count only if not sent by current user
+          // For vendor view: count user messages + system messages not sent by vendor
+          // For client view: count vendor messages + system messages not sent by client
           const regularSenderType: 'user' | 'vendor' = isVendorView ? 'user' : 'vendor';
 
           // Count regular messages (user/vendor)
@@ -93,9 +95,10 @@ export function BottomNav() {
 
     fetchUnreadCount();
 
-    // Set up real-time subscription for new messages
+    // Set up real-time subscription for new messages with unique channel name
+    const channelName = `unread-messages-${user.id}`;
     const channel = supabase
-      .channel('unread-messages')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

@@ -213,7 +213,18 @@ export function useVendorServiceRequests() {
     if (error) {
       console.error('Error fetching vendor requests:', error);
     } else {
-      setRequests(data as unknown as ServiceRequestWithDetails[]);
+      // Fetch requester profiles separately
+      const requestsWithProfiles = await Promise.all(
+        (data || []).map(async (request) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', request.requester_user_id)
+            .single();
+          return { ...request, requester_profile: profile };
+        })
+      );
+      setRequests(requestsWithProfiles as unknown as ServiceRequestWithDetails[]);
     }
     setIsLoading(false);
   }, [vendorProfile]);
