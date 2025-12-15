@@ -10,7 +10,7 @@ export function BottomNav() {
   const { user, isVendor, vendorProfile } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Fetch unread message count
+  // Fetch unread message count - also refetch when route changes (e.g., leaving chat thread)
   useEffect(() => {
     if (!user) return;
 
@@ -91,6 +91,7 @@ export function BottomNav() {
       }
     };
 
+    // Fetch immediately and when returning from chat thread
     fetchUnreadCount();
 
     // Set up real-time subscription for new messages
@@ -105,7 +106,6 @@ export function BottomNav() {
           table: 'messages',
         },
         () => {
-          // Small delay to ensure DB is consistent
           setTimeout(fetchUnreadCount, 100);
         }
       )
@@ -125,7 +125,7 @@ export function BottomNav() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, isVendor, vendorProfile]);
+  }, [user, isVendor, vendorProfile, location.pathname]);
 
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
