@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Users, Wallet, MessageCircle, Clock, CheckCircle, XCircle, Send } from 'lucide-react';
+import { Calendar, Users, Wallet, MessageCircle, Clock, CheckCircle, XCircle, Send, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,6 +89,15 @@ export function ServiceRequestCard({
                 <p className="text-sm text-muted-foreground">
                   {getEventTypeInfo(request.event.type).shortLabel}
                 </p>
+              )}
+              {/* Show requester info for vendor view */}
+              {isVendorView && request.requester_profile && (
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-primary">
+                  <User className="h-3 w-3" />
+                  <span>
+                    {request.requester_profile.full_name || request.requester_profile.phone_number || request.requester_profile.email || 'Unknown user'}
+                  </span>
+                </div>
               )}
             </div>
             <Badge variant={status.variant} className="shrink-0">
