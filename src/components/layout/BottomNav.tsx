@@ -16,75 +16,73 @@ export function BottomNav() {
 
     const fetchUnreadCount = async () => {
       try {
-        // Get conversations for this user
-        let conversationIds: string[] = [];
-        
+        let totalUnread = 0;
+
         // Get conversations where user is the client
-        const { data: userConvs } = await supabase
+        const { data: clientConvs } = await supabase
           .from('conversations')
-          .select('id, vendor_id')
+          .select('id')
           .eq('user_id', user.id);
-        
-        if (userConvs) {
-          conversationIds = [...userConvs.map(c => c.id)];
+
+        const clientConvIds = clientConvs?.map(c => c.id) || [];
+
+        // Count unread vendor messages in client conversations
+        if (clientConvIds.length > 0) {
+          const { count: vendorMsgCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .in('conversation_id', clientConvIds)
+            .eq('sender_type', 'vendor')
+            .is('read_at', null);
+
+          totalUnread += vendorMsgCount || 0;
         }
 
-        // If vendor, also get those conversations
+        // If vendor, get those conversations too
+        let vendorConvIds: string[] = [];
         if (isVendor && vendorProfile) {
           const { data: vendorConvs } = await supabase
             .from('conversations')
             .select('id')
             .eq('vendor_id', vendorProfile.id);
-          
-          if (vendorConvs) {
-            conversationIds = [...conversationIds, ...vendorConvs.map(c => c.id)];
+
+          vendorConvIds = vendorConvs?.map(c => c.id) || [];
+
+          // Count unread user messages in vendor conversations
+          if (vendorConvIds.length > 0) {
+            const { count: userMsgCount } = await supabase
+              .from('messages')
+              .select('*', { count: 'exact', head: true })
+              .in('conversation_id', vendorConvIds)
+              .eq('sender_type', 'user')
+              .is('read_at', null);
+
+            totalUnread += userMsgCount || 0;
           }
         }
 
-        if (conversationIds.length === 0) {
-          setUnreadCount(0);
-          return;
-        }
-
-        // Deduplicate conversation IDs
-        conversationIds = [...new Set(conversationIds)];
-
-        // Count unread messages in these conversations
-        let totalUnread = 0;
-
-        for (const convId of conversationIds) {
-          const { data: conv } = await supabase
-            .from('conversations')
-            .select('vendor_id, user_id')
-            .eq('id', convId)
-            .single();
-
-          if (!conv) continue;
-
-          const isVendorView = isVendor && vendorProfile?.id === conv.vendor_id;
-          
-          // For vendor view: count user messages + system messages not sent by vendor
-          // For client view: count vendor messages + system messages not sent by client
-          const regularSenderType: 'user' | 'vendor' = isVendorView ? 'user' : 'vendor';
-
-          // Count regular messages (user/vendor)
-          const { count: regularCount } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', convId)
-            .eq('sender_type', regularSenderType)
-            .is('read_at', null);
-
-          // Count system messages NOT sent by current user (handle null sender_user_id)
+        // Count unread system messages across all user's conversations
+        const allConvIds = [...new Set([...clientConvIds, ...vendorConvIds])];
+        if (allConvIds.length > 0) {
+          // System messages not sent by current user
           const { count: systemCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', convId)
+            .in('conversation_id', allConvIds)
             .eq('sender_type', 'system')
             .is('read_at', null)
-            .or(`sender_user_id.is.null,sender_user_id.neq.${user.id}`);
+            .neq('sender_user_id', user.id);
 
-          totalUnread += (regularCount || 0) + (systemCount || 0);
+          // System messages with null sender (like automated notifications)
+          const { count: nullSenderSystemCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .in('conversation_id', allConvIds)
+            .eq('sender_type', 'system')
+            .is('read_at', null)
+            .is('sender_user_id', null);
+
+          totalUnread += (systemCount || 0) + (nullSenderSystemCount || 0);
         }
 
         setUnreadCount(totalUnread);
@@ -95,7 +93,7 @@ export function BottomNav() {
 
     fetchUnreadCount();
 
-    // Set up real-time subscription for new messages with unique channel name
+    // Set up real-time subscription for new messages
     const channelName = `unread-messages-${user.id}`;
     const channel = supabase
       .channel(channelName)
@@ -107,7 +105,8 @@ export function BottomNav() {
           table: 'messages',
         },
         () => {
-          fetchUnreadCount();
+          // Small delay to ensure DB is consistent
+          setTimeout(fetchUnreadCount, 100);
         }
       )
       .on(
@@ -118,7 +117,7 @@ export function BottomNav() {
           table: 'messages',
         },
         () => {
-          fetchUnreadCount();
+          setTimeout(fetchUnreadCount, 100);
         }
       )
       .subscribe();
