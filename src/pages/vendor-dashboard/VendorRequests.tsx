@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useVendorServiceRequests } from '@/hooks/useServiceRequests';
@@ -7,10 +9,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { CreateQuoteDialog } from '@/components/vendors/CreateQuoteDialog';
 
 export default function VendorRequests() {
-  const { requests, isLoading, respondToRequest, declineRequest } = useVendorServiceRequests();
+  const { requests, isLoading, respondToRequest, declineRequest, refreshRequests } = useVendorServiceRequests();
   const { createQuote } = useVendorQuotes();
+  const [showCreateQuoteDialog, setShowCreateQuoteDialog] = useState(false);
 
   const newRequests = requests.filter(r => r.status === 'pending');
   const respondedRequests = requests.filter(r => r.status === 'quoted');
@@ -49,6 +54,15 @@ export default function VendorRequests() {
       <PageHeader title="Quote Requests" showBack />
       
       <div className="p-4">
+        {/* Create Quote Button */}
+        <Button 
+          onClick={() => setShowCreateQuoteDialog(true)}
+          className="w-full mb-4"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Quote
+        </Button>
+
         <Tabs defaultValue="new" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="new" className="relative">
@@ -123,6 +137,13 @@ export default function VendorRequests() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Create Quote Dialog */}
+      <CreateQuoteDialog
+        open={showCreateQuoteDialog}
+        onOpenChange={setShowCreateQuoteDialog}
+        onSuccess={refreshRequests}
+      />
       
       <BottomNav />
     </div>
