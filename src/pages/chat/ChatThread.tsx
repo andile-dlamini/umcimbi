@@ -130,12 +130,28 @@ const ChatThread = () => {
             const isSystem = message.sender_type === 'system';
             
             if (isSystem) {
+              // Check if this is a quote request notification for vendors
+              const isQuoteRequestNotification = message.content.includes('🔔') && message.content.includes('quote request');
+              const isClickable = isVendorView && isQuoteRequestNotification;
+              
               return (
                 <div key={message.id} className="flex justify-center">
-                  <div className="max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
-                    <p className="text-sm text-muted-foreground text-center whitespace-pre-wrap">
+                  <div 
+                    className={`max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border ${
+                      isClickable ? 'cursor-pointer hover:bg-primary/10 hover:border-primary/30 transition-colors' : ''
+                    }`}
+                    onClick={isClickable ? () => navigate('/vendor/requests') : undefined}
+                  >
+                    <p className={`text-sm text-center whitespace-pre-wrap ${
+                      isClickable ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>
                       {message.content}
                     </p>
+                    {isClickable && (
+                      <p className="text-xs text-primary text-center mt-1 font-medium">
+                        Tap to view request →
+                      </p>
+                    )}
                     <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
                       {formatMessageTime(message.created_at)}
                     </p>
