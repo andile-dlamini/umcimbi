@@ -431,6 +431,7 @@ export type Database = {
           is_profile_complete: boolean | null
           notifications_enabled: boolean | null
           phone_number: string | null
+          phone_verified: boolean
           preferred_language:
             | Database["public"]["Enums"]["preferred_language"]
             | null
@@ -446,6 +447,7 @@ export type Database = {
           is_profile_complete?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
+          phone_verified?: boolean
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
@@ -461,6 +463,7 @@ export type Database = {
           is_profile_complete?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
+          phone_verified?: boolean
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
