@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Store, MessageCircle, BookOpen, User } from 'lucide-react';
+import { Home, Store, MessageCircle, BookOpen, User, LayoutDashboard, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useRole } from '@/context/RoleContext';
 
 export function BottomNav() {
   const location = useLocation();
   const { user, isVendor, vendorProfile } = useAuth();
+  const { activeRole, canSwitchRole } = useRole();
   const [hasUnread, setHasUnread] = useState(false);
   const [isNewMessage, setIsNewMessage] = useState(false);
   const previousUnreadRef = useRef(false);
@@ -142,7 +144,8 @@ export function BottomNav() {
     };
   }, [user, isVendor, vendorProfile, location.pathname]);
 
-  const navItems = [
+  // Role-specific navigation items
+  const organiserNavItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/vendors', icon: Store, label: 'Vendors' },
     { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
@@ -150,13 +153,34 @@ export function BottomNav() {
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
+  const vendorNavItems = [
+    { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/vendor-dashboard/requests', icon: Calendar, label: 'Requests' },
+    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
+    { to: '/vendors', icon: Store, label: 'Browse' },
+    { to: '/profile', icon: User, label: 'Profile' },
+  ];
+
+  const navItems = activeRole === 'vendor' && canSwitchRole ? vendorNavItems : organiserNavItems;
+
   // Hide bottom nav on onboarding screens and chat thread
   if (location.pathname.startsWith('/onboarding') || location.pathname.startsWith('/chat/')) {
     return null;
   }
 
+  const isVendorMode = activeRole === 'vendor' && canSwitchRole;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom">
+    <nav className={cn(
+      "fixed bottom-0 left-0 right-0 z-50 border-t safe-area-inset-bottom transition-colors",
+      isVendorMode 
+        ? "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 dark:border-orange-800/50"
+        : "bg-card border-border"
+    )}>
+      {/* Vendor mode indicator bar */}
+      {isVendorMode && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400 via-amber-500 to-orange-400" />
+      )}
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {navItems.map(({ to, icon: Icon, label, showDot, isNew }) => (
           <NavLink
