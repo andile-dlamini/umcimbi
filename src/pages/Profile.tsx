@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar, Edit2, Save, X } from 'lucide-react';
+import { Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar, Edit2, Save, X, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { useAuth } from '@/context/AuthContext';
+import { useRole } from '@/context/RoleContext';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
 import { useClientQuotes } from '@/hooks/useQuotes';
 import { useClientBookings } from '@/hooks/useBookings';
@@ -23,6 +24,7 @@ import { toast } from 'sonner';
 export default function Profile() {
   const navigate = useNavigate();
   const { profile, user, signOut, isVendor, isAdmin, refreshProfile } = useAuth();
+  const { activeRole, setActiveRole, canSwitchRole } = useRole();
   const { quotes } = useClientQuotes();
   const { bookings } = useClientBookings();
   const { settings, isLoading: settingsLoading, updateNotifications, updateLanguage } = useProfileSettings();
@@ -179,6 +181,36 @@ export default function Profile() {
           </CardContent>
         </Card>
 
+        {/* Vendor Quick Access - for vendors only */}
+        {isVendor && (
+          <Card className="border-orange-200 dark:border-orange-800/50 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-gradient-to-br from-orange-500 to-amber-500">
+                    <LayoutDashboard className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Vendor Dashboard</h3>
+                    <p className="text-xs text-muted-foreground">Manage requests & profile</p>
+                  </div>
+                </div>
+                <Button 
+                  size="sm"
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+                  onClick={() => {
+                    setActiveRole('vendor');
+                    navigate('/vendor-dashboard');
+                  }}
+                >
+                  Open
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Vendor Section */}
         <Card className="border-card-border">
           <CardHeader>
@@ -196,13 +228,6 @@ export default function Profile() {
                   onClick={() => navigate('/profile/vendor')}
                 >
                   Manage vendor profile
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate('/vendor-dashboard')}
-                >
-                  Vendor Dashboard
                 </Button>
               </div>
             ) : (
