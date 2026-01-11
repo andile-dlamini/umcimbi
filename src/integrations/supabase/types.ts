@@ -605,6 +605,7 @@ export type Database = {
           due_date: string | null
           event_id: string
           id: string
+          sort_order: number
           title: string
           updated_at: string | null
         }
@@ -617,6 +618,7 @@ export type Database = {
           due_date?: string | null
           event_id: string
           id?: string
+          sort_order?: number
           title: string
           updated_at?: string | null
         }
@@ -629,6 +631,7 @@ export type Database = {
           due_date?: string | null
           event_id?: string
           id?: string
+          sort_order?: number
           title?: string
           updated_at?: string | null
         }

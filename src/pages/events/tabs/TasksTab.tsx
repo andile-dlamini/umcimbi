@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TaskCard } from '@/components/shared/TaskCard';
 import { useTasks } from '@/hooks/useTasks';
-import { TaskCategory } from '@/types/database';
+import { Task, TaskCategory } from '@/types/database';
 import { isThisWeek, parseISO } from 'date-fns';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface TasksTabProps {
   eventId: string;
@@ -29,9 +30,10 @@ const categories: { value: TaskCategory; label: string }[] = [
 type FilterType = 'all' | 'thisWeek' | 'completed';
 
 export function TasksTab({ eventId }: TasksTabProps) {
-  const { tasks, addTask, toggleTask, deleteTask, isLoading } = useTasks(eventId);
+  const { tasks, addTask, updateTask, toggleTask, deleteTask, reorderTasks, isLoading } = useTasks(eventId);
   const [filter, setFilter] = useState<FilterType>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   
   // Form state
   const [title, setTitle] = useState('');
@@ -53,6 +55,14 @@ export function TasksTab({ eventId }: TasksTabProps) {
   const incompleteTasks = filteredTasks.filter(t => !t.completed);
   const completedTasks = filteredTasks.filter(t => t.completed);
 
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setCategory('other');
+    setDueDate('');
+    setEditingTask(null);
+  };
+
   const handleAddTask = async () => {
     if (!title.trim()) return;
 
@@ -65,12 +75,56 @@ export function TasksTab({ eventId }: TasksTabProps) {
       assignee_name: null,
     });
 
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setCategory('other');
-    setDueDate('');
+    resetForm();
     setIsDialogOpen(false);
+  };
+
+  const handleUpdateTask = async () => {
+    if (!editingTask || !title.trim()) return;
+
+    await updateTask(editingTask.id, {
+      title: title.trim(),
+      description: description.trim() || null,
+      category,
+      due_date: dueDate || null,
+    });
+
+    resetForm();
+    setIsDialogOpen(false);
+  };
+
+  const handleEditClick = (task: Task) => {
+    setEditingTask(task);
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setCategory(task.category);
+    setDueDate(task.due_date || '');
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const sourceIndex = result.source.index;
+    const destIndex = result.destination.index;
+    
+    if (sourceIndex === destIndex) return;
+
+    // Reorder only incomplete tasks (we're using filter 'all' or 'thisWeek')
+    const reordered = Array.from(incompleteTasks);
+    const [removed] = reordered.splice(sourceIndex, 1);
+    reordered.splice(destIndex, 0, removed);
+
+    // Merge back with completed tasks and update
+    const newTaskOrder = [...reordered, ...completedTasks];
+    reorderTasks(newTaskOrder);
   };
 
   if (isLoading) {
@@ -94,29 +148,63 @@ export function TasksTab({ eventId }: TasksTabProps) {
         ))}
       </div>
 
-      {/* Task List */}
+      {/* Task List with Drag and Drop */}
       <div className="space-y-3">
-        {filter !== 'completed' && incompleteTasks.map((task) => (
-          <TaskCard 
-            key={task.id} 
-            task={task} 
-            showDelete 
-            onToggle={toggleTask}
-            onDelete={deleteTask}
-          />
-        ))}
+        {filter !== 'completed' && (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="tasks">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="space-y-3"
+                >
+                  {incompleteTasks.map((task, index) => (
+                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          style={provided.draggableProps.style}
+                          className={snapshot.isDragging ? 'opacity-90' : ''}
+                        >
+                          <TaskCard
+                            task={task}
+                            showDelete
+                            showDragHandle
+                            onToggle={toggleTask}
+                            onDelete={deleteTask}
+                            onEdit={handleEditClick}
+                            dragHandleProps={provided.dragHandleProps || undefined}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
         
-        {filter === 'completed' || filter === 'all' ? (
-          completedTasks.map((task) => (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
-              showDelete 
-              onToggle={toggleTask}
-              onDelete={deleteTask}
-            />
-          ))
-        ) : null}
+        {(filter === 'completed' || filter === 'all') && completedTasks.length > 0 && (
+          <div className="space-y-3">
+            {filter === 'all' && completedTasks.length > 0 && incompleteTasks.length > 0 && (
+              <p className="text-sm text-muted-foreground pt-4">Completed</p>
+            )}
+            {completedTasks.map((task) => (
+              <TaskCard 
+                key={task.id} 
+                task={task} 
+                showDelete 
+                onToggle={toggleTask}
+                onDelete={deleteTask}
+                onEdit={handleEditClick}
+              />
+            ))}
+          </div>
+        )}
 
         {filteredTasks.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
@@ -125,8 +213,8 @@ export function TasksTab({ eventId }: TasksTabProps) {
         )}
       </div>
 
-      {/* Add Task Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Add/Edit Task Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogTrigger asChild>
           <Button className="w-full">
             <Plus className="h-4 w-4 mr-2" />
@@ -135,7 +223,7 @@ export function TasksTab({ eventId }: TasksTabProps) {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
+            <DialogTitle>{editingTask ? 'Edit Task' : 'Add New Task'}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 pt-4">
@@ -187,10 +275,10 @@ export function TasksTab({ eventId }: TasksTabProps) {
 
             <Button 
               className="w-full" 
-              onClick={handleAddTask}
+              onClick={editingTask ? handleUpdateTask : handleAddTask}
               disabled={!title.trim()}
             >
-              Add Task
+              {editingTask ? 'Save Changes' : 'Add Task'}
             </Button>
           </div>
         </DialogContent>
