@@ -154,8 +154,8 @@ export function BottomNav() {
   ];
 
   const vendorNavItems = [
+    { to: '/', icon: Home, label: 'Home' },
     { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/vendor-dashboard/requests', icon: Calendar, label: 'Requests' },
     { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
     { to: '/vendors', icon: Store, label: 'Browse' },
     { to: '/profile', icon: User, label: 'Profile' },
