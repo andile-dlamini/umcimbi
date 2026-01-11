@@ -20,7 +20,7 @@ export default function OnboardingLanguage() {
           </div>
           <h1 className="text-3xl font-bold text-foreground">Isiko Planner</h1>
           <p className="text-muted-foreground">
-            Plan your Zulu ceremonies with respect
+            Less stress, more meaning: plan your traditional ceremonies with ease.
           </p>
         </div>
 
