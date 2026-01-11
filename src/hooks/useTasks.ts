@@ -18,6 +18,7 @@ export function useTasks(eventId: string | undefined) {
       .from('tasks')
       .select('*')
       .eq('event_id', eventId)
+      .order('sort_order', { ascending: true })
       .order('due_date', { ascending: true, nullsFirst: false });
 
     if (error) {
@@ -36,11 +37,15 @@ export function useTasks(eventId: string | undefined) {
   const addTask = async (taskData: Omit<CreateTask, 'event_id'>) => {
     if (!eventId) return null;
 
+    // Get max sort_order for new task
+    const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.sort_order ?? 0)) : 0;
+
     const { data, error } = await supabase
       .from('tasks')
       .insert({
         ...taskData,
         event_id: eventId,
+        sort_order: maxOrder + 1,
       })
       .select()
       .single();
@@ -54,6 +59,34 @@ export function useTasks(eventId: string | undefined) {
     setTasks(prev => [...prev, data as Task]);
     toast.success('Task added');
     return data as Task;
+  };
+
+  const reorderTasks = async (reorderedTasks: Task[]) => {
+    // Optimistically update local state
+    setTasks(reorderedTasks);
+
+    // Prepare batch updates
+    const updates = reorderedTasks.map((task, index) => ({
+      id: task.id,
+      sort_order: index + 1,
+    }));
+
+    // Update each task's sort_order
+    for (const update of updates) {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ sort_order: update.sort_order })
+        .eq('id', update.id);
+
+      if (error) {
+        console.error('Error reordering tasks:', error);
+        toast.error('Failed to save task order');
+        fetchTasks(); // Revert on error
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
@@ -108,6 +141,7 @@ export function useTasks(eventId: string | undefined) {
     updateTask,
     deleteTask,
     toggleTask,
+    reorderTasks,
     getProgress,
     refreshTasks: fetchTasks,
   };

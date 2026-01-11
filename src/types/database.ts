@@ -86,6 +86,7 @@ export interface Task {
   due_date: string | null;
   completed: boolean;
   assignee_name: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -192,7 +193,7 @@ export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
 // Form types for creating/updating
 export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude'>;
 export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'estimated_budget'>;
-export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at'>;
+export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at' | 'sort_order'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;
 export type CreateGuest = Omit<Guest, 'id' | 'created_at' | 'updated_at'>;
 export type CreateConversation = Omit<Conversation, 'id' | 'created_at' | 'updated_at' | 'last_message_at'>;
