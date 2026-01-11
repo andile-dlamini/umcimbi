@@ -152,54 +152,108 @@
     background-repeat: no-repeat;
   }
 
-  /* Shweshwe-inspired bold background pattern */
+  /* Shweshwe-inspired stepped diamond pattern with center dots */
   .shweshwe-bg {
     background-color: hsl(var(--background));
     background-image: 
-      /* Dense dot grid - primary color */
-      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 2px, transparent 2px),
-      /* Secondary dot grid offset */
-      radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.12) 2px, transparent 2px),
-      /* Accent dot grid */
-      radial-gradient(circle at 50% 50%, hsl(var(--accent) / 0.10) 1.5px, transparent 1.5px),
-      /* Medium concentric rings */
-      radial-gradient(circle at 50% 50%, transparent 6px, hsl(var(--primary) / 0.08) 7px, transparent 8px),
-      radial-gradient(circle at 50% 50%, transparent 10px, hsl(var(--primary) / 0.06) 11px, transparent 12px),
-      /* Large decorative circles */
-      radial-gradient(circle at 50% 50%, transparent 18px, hsl(var(--secondary) / 0.07) 19px, hsl(var(--secondary) / 0.05) 21px, transparent 22px),
-      /* Corner accent circles */
-      radial-gradient(circle at 0% 0%, hsl(var(--accent) / 0.08) 4px, transparent 5px),
-      radial-gradient(circle at 100% 100%, hsl(var(--accent) / 0.08) 4px, transparent 5px);
+      /* Center dots in each diamond */
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.18) 5px, transparent 5px),
+      /* Stepped diamond outline - horizontal dashes */
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        hsl(var(--primary) / 0.12) 2px,
+        hsl(var(--primary) / 0.12) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 2px,
+        hsl(var(--primary) / 0.12) 2px,
+        hsl(var(--primary) / 0.12) 4px
+      ),
+      /* Diamond shape using conic gradient */
+      conic-gradient(
+        from 45deg at 50% 50%,
+        transparent 0deg,
+        hsl(var(--primary) / 0.06) 45deg,
+        transparent 90deg,
+        hsl(var(--primary) / 0.06) 135deg,
+        transparent 180deg,
+        hsl(var(--primary) / 0.06) 225deg,
+        transparent 270deg,
+        hsl(var(--primary) / 0.06) 315deg,
+        transparent 360deg
+      ),
+      /* Secondary smaller dots */
+      radial-gradient(circle at 0% 0%, hsl(var(--secondary) / 0.10) 2px, transparent 2px),
+      radial-gradient(circle at 100% 0%, hsl(var(--secondary) / 0.10) 2px, transparent 2px),
+      radial-gradient(circle at 0% 100%, hsl(var(--secondary) / 0.10) 2px, transparent 2px),
+      radial-gradient(circle at 100% 100%, hsl(var(--secondary) / 0.10) 2px, transparent 2px),
+      /* Outer diamond ring */
+      radial-gradient(circle at 50% 50%, transparent 14px, hsl(var(--primary) / 0.08) 15px, transparent 17px);
     background-size: 
-      24px 24px,
-      32px 32px,
-      16px 16px,
-      48px 48px,
-      48px 48px,
-      64px 64px,
-      64px 64px,
-      64px 64px;
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px,
+      40px 40px;
     background-position:
       0 0,
-      16px 16px,
-      8px 8px,
       0 0,
       0 0,
       0 0,
       0 0,
-      32px 32px;
+      0 0,
+      0 0,
+      0 0,
+      0 0;
   }
 
   .dark .shweshwe-bg {
     background-image: 
-      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.20) 2px, transparent 2px),
-      radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
-      radial-gradient(circle at 50% 50%, hsl(var(--accent) / 0.12) 1.5px, transparent 1.5px),
-      radial-gradient(circle at 50% 50%, transparent 6px, hsl(var(--primary) / 0.12) 7px, transparent 8px),
-      radial-gradient(circle at 50% 50%, transparent 10px, hsl(var(--primary) / 0.08) 11px, transparent 12px),
-      radial-gradient(circle at 50% 50%, transparent 18px, hsl(var(--secondary) / 0.10) 19px, hsl(var(--secondary) / 0.07) 21px, transparent 22px),
-      radial-gradient(circle at 0% 0%, hsl(var(--accent) / 0.12) 4px, transparent 5px),
-      radial-gradient(circle at 100% 100%, hsl(var(--accent) / 0.12) 4px, transparent 5px);
+      /* Center dots in each diamond */
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.25) 5px, transparent 5px),
+      /* Stepped diamond outline - horizontal dashes */
+      repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        hsl(var(--primary) / 0.18) 2px,
+        hsl(var(--primary) / 0.18) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 2px,
+        hsl(var(--primary) / 0.18) 2px,
+        hsl(var(--primary) / 0.18) 4px
+      ),
+      /* Diamond shape using conic gradient */
+      conic-gradient(
+        from 45deg at 50% 50%,
+        transparent 0deg,
+        hsl(var(--primary) / 0.10) 45deg,
+        transparent 90deg,
+        hsl(var(--primary) / 0.10) 135deg,
+        transparent 180deg,
+        hsl(var(--primary) / 0.10) 225deg,
+        transparent 270deg,
+        hsl(var(--primary) / 0.10) 315deg,
+        transparent 360deg
+      ),
+      /* Secondary smaller dots */
+      radial-gradient(circle at 0% 0%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
+      radial-gradient(circle at 100% 0%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
+      radial-gradient(circle at 0% 100%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
+      radial-gradient(circle at 100% 100%, hsl(var(--secondary) / 0.15) 2px, transparent 2px),
+      /* Outer diamond ring */
+      radial-gradient(circle at 50% 50%, transparent 14px, hsl(var(--primary) / 0.12) 15px, transparent 17px);
   }
 
   /* Ceremony type badges */
