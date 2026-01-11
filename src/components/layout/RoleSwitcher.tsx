@@ -21,26 +21,28 @@ export function RoleSwitcher() {
   if (!canSwitchRole) return null;
 
   return (
-    <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+    <div className="flex items-center bg-white/90 dark:bg-gray-800/90 rounded-full p-1 gap-1 shadow-sm">
       <button
+        type="button"
         onClick={() => setActiveRole('organiser')}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer',
           activeRole === 'organiser'
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-primary text-primary-foreground shadow-sm'
+            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
         )}
       >
         <Calendar className="h-4 w-4" />
         <span className="hidden sm:inline">Organiser</span>
       </button>
       <button
+        type="button"
         onClick={() => setActiveRole('vendor')}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer',
           activeRole === 'vendor'
             ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
         )}
       >
         <Store className="h-4 w-4" />
