@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Vendor, Event } from '@/types/database';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { getDistanceInKm, formatDistance } from '@/lib/distanceUtils';
+import { bookingStatusConfig } from '@/lib/statusConfig';
 import { Star, ExternalLink, Navigation, ArrowUpDown } from 'lucide-react';
 
 interface VendorsTabProps {
@@ -97,13 +98,7 @@ export function VendorsTab({ eventId }: VendorsTabProps) {
     }
   });
 
-  const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-    pending_deposit: { label: 'Awaiting Deposit', variant: 'secondary' },
-    confirmed: { label: 'Confirmed', variant: 'default' },
-    completed: { label: 'Completed', variant: 'outline' },
-    cancelled: { label: 'Cancelled', variant: 'destructive' },
-    disputed: { label: 'Disputed', variant: 'destructive' },
-  };
+  const statusConfig = bookingStatusConfig;
 
   const hasEventCoordinates = event?.latitude != null && event?.longitude != null;
 
@@ -169,7 +164,7 @@ export function VendorsTab({ eventId }: VendorsTabProps) {
                       <Badge variant="outline" className="text-xs">
                         {getVendorCategoryLabel(vendor.category)}
                       </Badge>
-                      <Badge variant={status.variant} className="text-xs">
+                      <Badge className={`text-xs ${status.label ? status.className : ''}`}>
                         {status.label}
                       </Badge>
                     </div>
