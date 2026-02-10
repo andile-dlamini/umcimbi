@@ -11,23 +11,18 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar, MapPin, DollarSign, Phone, MessageCircle, CheckCircle, AlertTriangle, Star, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingStatus, PaymentStatus } from '@/types/booking';
+import { bookingStatusConfig } from '@/lib/statusConfig';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
-const statusConfig: Record<BookingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending_deposit: { label: 'Deposit Due', variant: 'secondary' },
-  confirmed: { label: 'Confirmed', variant: 'default' },
-  cancelled: { label: 'Cancelled', variant: 'destructive' },
-  completed: { label: 'Completed', variant: 'outline' },
-  disputed: { label: 'Disputed', variant: 'destructive' },
-};
+const statusConfig = bookingStatusConfig;
 
-const paymentStatusConfig: Record<PaymentStatus, { label: string; color: string }> = {
+const paymentStatusCfg: Record<PaymentStatus, { label: string; color: string }> = {
   not_due: { label: 'Not Due', color: 'text-muted-foreground' },
-  due: { label: 'Due', color: 'text-warning' },
-  paid: { label: 'Paid', color: 'text-green-600' },
+  due: { label: 'Due', color: 'text-amber-600 dark:text-amber-400' },
+  paid: { label: 'Paid', color: 'text-emerald-600 dark:text-emerald-400' },
 };
 
 export default function BookingDetail() {
@@ -132,7 +127,7 @@ export default function BookingDetail() {
                 <CardTitle>{booking.vendor?.name}</CardTitle>
                 <p className="text-sm text-muted-foreground">{booking.service_category}</p>
               </div>
-              <Badge variant={status.variant}>{status.label}</Badge>
+              <Badge className={status.className}>{status.label}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -202,8 +197,8 @@ export default function BookingDetail() {
                   <p className="text-sm text-muted-foreground">R{booking.deposit_amount.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={paymentStatusConfig[booking.deposit_status].color}>
-                    {paymentStatusConfig[booking.deposit_status].label}
+                  <span className={paymentStatusCfg[booking.deposit_status].color}>
+                    {paymentStatusCfg[booking.deposit_status].label}
                   </span>
                   {isClient && booking.deposit_status === 'due' && (
                     <Button size="sm" onClick={handlePayDeposit}>Mark Paid</Button>
@@ -220,8 +215,8 @@ export default function BookingDetail() {
                   <p className="text-sm text-muted-foreground">R{booking.balance_amount.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={paymentStatusConfig[booking.balance_status].color}>
-                    {paymentStatusConfig[booking.balance_status].label}
+                  <span className={paymentStatusCfg[booking.balance_status].color}>
+                    {paymentStatusCfg[booking.balance_status].label}
                   </span>
                   {isClient && booking.balance_status === 'due' && (
                     <Button size="sm" onClick={handlePayBalance}>Mark Paid</Button>

@@ -13,13 +13,9 @@ import { QuoteWithDetails, QuoteStatus } from '@/types/booking';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { quoteStatusConfig } from '@/lib/statusConfig';
 
-const statusConfig: Record<QuoteStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending_client: { label: 'Awaiting Your Decision', variant: 'secondary' },
-  client_accepted: { label: 'Accepted', variant: 'default' },
-  client_declined: { label: 'Declined', variant: 'destructive' },
-  expired: { label: 'Expired', variant: 'outline' },
-};
+const statusConfig = quoteStatusConfig;
 
 function QuoteCard({ 
   quote, 
@@ -68,7 +64,7 @@ function QuoteCard({
               </div>
             </div>
           </div>
-          <Badge variant={isExpired && quote.status === 'pending_client' ? 'outline' : status.variant}>
+          <Badge className={isExpired && quote.status === 'pending_client' ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-700' : status.className}>
             {isExpired && quote.status === 'pending_client' ? 'Expired' : status.label}
           </Badge>
         </div>

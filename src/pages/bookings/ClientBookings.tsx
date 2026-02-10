@@ -9,14 +9,9 @@ import { Calendar, MapPin, DollarSign, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails, BookingStatus } from '@/types/booking';
+import { bookingStatusConfig } from '@/lib/statusConfig';
 
-const statusConfig: Record<BookingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending_deposit: { label: 'Deposit Due', variant: 'secondary' },
-  confirmed: { label: 'Confirmed', variant: 'default' },
-  cancelled: { label: 'Cancelled', variant: 'destructive' },
-  completed: { label: 'Completed', variant: 'outline' },
-  disputed: { label: 'Disputed', variant: 'destructive' },
-};
+const statusConfig = bookingStatusConfig;
 
 function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClick: () => void }) {
   const status = statusConfig[booking.booking_status];
@@ -29,7 +24,7 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
             <h3 className="font-semibold text-foreground">{booking.vendor?.name}</h3>
             <p className="text-sm text-muted-foreground">{booking.service_category}</p>
           </div>
-          <Badge variant={status.variant}>{status.label}</Badge>
+          <Badge className={status.className}>{status.label}</Badge>
         </div>
         
         <div className="space-y-2 text-sm text-muted-foreground">
