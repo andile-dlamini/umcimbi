@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
         Authorization: clickatellKey,
       },
       body: JSON.stringify({
-        content: `Your Isiko Planner verification code is: ${otp}. It expires in 5 minutes.`,
+        content: `UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`,
         to: [normalized.replace("+", "")],
       }),
     });
