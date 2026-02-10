@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -193,11 +194,7 @@ export default function VendorOnboarding() {
     const locationParts = [address.city.trim(), address.state_province?.trim()].filter(Boolean);
     const composedLocation = locationParts.join(', ') || null;
 
-    // Upload images if any (logo as first, showcases after)
-    let imageUrls: string[] = [];
-    // Note: images will be uploaded after vendor creation via VendorImageGallery
-    // For onboarding, we just create the profile first
-
+    // Create vendor profile first (without images)
     const result = await createVendorProfile({
       name: formData.name.trim(),
       category: formData.category as VendorCategory,
@@ -209,7 +206,7 @@ export default function VendorOnboarding() {
       email: formData.email.trim() || null,
       website_url: websiteUrl,
       languages: formData.languages,
-      image_urls: imageUrls,
+      image_urls: [],
       address_line_1: address.address_line_1.trim(),
       address_line_2: address.address_line_2.trim() || null,
       city: address.city.trim(),
@@ -218,13 +215,60 @@ export default function VendorOnboarding() {
       postal_code: address.postal_code.trim(),
     });
 
-    setIsLoading(false);
-
-    if (result) {
-      // TODO: Upload logo and showcase images to storage using result.id
-      // For now, navigate to vendor profile where they can upload images
-      navigate('/profile/vendor');
+    if (!result) {
+      setIsLoading(false);
+      return;
     }
+
+    // Upload images to storage now that we have a vendor ID
+    const uploadedUrls: string[] = [];
+
+    try {
+      // Upload logo as first image
+      if (logoFile) {
+        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const path = `${result.id}/logo.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('vendor-images')
+          .upload(path, logoFile, { upsert: true });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage
+            .from('vendor-images')
+            .getPublicUrl(path);
+          uploadedUrls.push(urlData.publicUrl);
+        }
+      }
+
+      // Upload showcase images
+      for (let i = 0; i < showcaseFiles.length; i++) {
+        const file = showcaseFiles[i].file;
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `${result.id}/showcase-${i}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('vendor-images')
+          .upload(path, file, { upsert: true });
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage
+            .from('vendor-images')
+            .getPublicUrl(path);
+          uploadedUrls.push(urlData.publicUrl);
+        }
+      }
+
+      // Update vendor record with image URLs
+      if (uploadedUrls.length > 0) {
+        await supabase
+          .from('vendors')
+          .update({ image_urls: uploadedUrls })
+          .eq('id', result.id);
+      }
+    } catch (err) {
+      console.error('Image upload error:', err);
+      toast.error('Profile created but some images failed to upload. You can add them later.');
+    }
+
+    setIsLoading(false);
+    navigate('/profile/vendor');
   };
 
   return (
