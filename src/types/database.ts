@@ -13,10 +13,16 @@ export interface Profile {
   id: string;
   user_id: string;
   phone_number: string | null;
+  phone_verified: boolean;
   full_name: string | null;
+  first_name: string | null;
+  surname: string | null;
+  address: string | null;
   email: string | null;
   preferred_language: PreferredLanguage;
   is_profile_complete: boolean;
+  avatar_url: string | null;
+  notifications_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
