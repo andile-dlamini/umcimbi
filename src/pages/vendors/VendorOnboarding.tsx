@@ -50,7 +50,7 @@ const vendorSchema = z.object({
   about: z.string().trim().max(2000).optional().or(z.literal('')),
   price_range_text: z.string().trim().max(100).optional().or(z.literal('')),
   email: z.string().trim().email('Please enter a valid email address').max(255).optional().or(z.literal('')),
-  website_url: z.string().trim().url('Please enter a valid URL (e.g., https://...)').max(500).optional().or(z.literal('')),
+  website_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
 
 export default function VendorOnboarding() {
@@ -175,6 +175,12 @@ export default function VendorOnboarding() {
 
     const e164Phone = toE164(formData.phone_number, formData.phone_country);
 
+    // Normalize website URL - add https:// if no protocol specified
+    let websiteUrl = formData.website_url.trim() || null;
+    if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) {
+      websiteUrl = 'https://' + websiteUrl;
+    }
+
     // Compose location from city + state for backward compatibility
     const locationParts = [address.city.trim(), address.state_province?.trim()].filter(Boolean);
     const composedLocation = locationParts.join(', ') || null;
@@ -193,7 +199,7 @@ export default function VendorOnboarding() {
       phone_number: e164Phone,
       whatsapp_number: null,
       email: formData.email.trim() || null,
-      website_url: formData.website_url.trim() || null,
+      website_url: websiteUrl,
       languages: formData.languages,
       image_urls: imageUrls,
       address_line_1: address.address_line_1.trim(),
