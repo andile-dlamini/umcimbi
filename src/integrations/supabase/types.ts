@@ -421,11 +421,52 @@ export type Database = {
           },
         ]
       }
+      otp_requests: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          expires_at: string
+          id: string
+          last_sent_at: string
+          max_attempts: number
+          otp_hash: string
+          phone_number: string
+          send_count: number
+          verified: boolean
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_sent_at?: string
+          max_attempts?: number
+          otp_hash: string
+          phone_number: string
+          send_count?: number
+          verified?: boolean
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_sent_at?: string
+          max_attempts?: number
+          otp_hash?: string
+          phone_number?: string
+          send_count?: number
+          verified?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
           id: string
           is_profile_complete: boolean | null
@@ -435,13 +476,16 @@ export type Database = {
           preferred_language:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          surname: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
           is_profile_complete?: boolean | null
@@ -451,13 +495,16 @@ export type Database = {
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          surname?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
           is_profile_complete?: boolean | null
@@ -467,6 +514,7 @@ export type Database = {
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          surname?: string | null
           updated_at?: string | null
           user_id?: string
         }
