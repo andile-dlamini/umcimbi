@@ -108,12 +108,14 @@ export function useMyVendorProfile() {
       .from('vendors')
       .select('*')
       .eq('owner_user_id', user.id)
-      .maybeSingle();
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
     if (error) {
       console.error('Error fetching vendor profile:', error);
     } else {
-      setVendor(data as Vendor | null);
+      setVendor(data && data.length > 0 ? (data[0] as Vendor) : null);
     }
     setIsLoading(false);
   }, [user]);
