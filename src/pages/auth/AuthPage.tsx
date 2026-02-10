@@ -16,24 +16,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { COUNTRIES, getCountryByCode, type Country } from '@/data/countries';
 import { cn } from '@/lib/utils';
 
-// Local number validation: starts with 0, then digits matching expected length
+// Local number validation: digits only, matching expected length for the country
 const validateLocalPhone = (phone: string, countryCode: string) => {
   const country = getCountryByCode(countryCode);
   if (!country) return false;
-  const cleaned = phone.replace(/\s/g, '');
-  if (!cleaned.startsWith('0')) return false;
-  return /^\d+$/.test(cleaned) && cleaned.length === country.phoneLength + 1;
+  const cleaned = phone.replace(/[\s\-()]/g, '');
+  // Strip leading 0 if present (user habit)
+  const digits = cleaned.startsWith('0') ? cleaned.slice(1) : cleaned;
+  return /^\d+$/.test(digits) && digits.length === country.phoneLength;
 };
 
-// Convert local number (0xx...) to E.164 format
+// Convert local number to E.164 format
 const toE164 = (phone: string, countryCode: string) => {
   const country = getCountryByCode(countryCode);
   if (!country) return phone;
-  const cleaned = phone.replace(/\s/g, '');
-  if (cleaned.startsWith('0')) {
-    return country.dial + cleaned.slice(1);
-  }
-  return country.dial + cleaned;
+  const cleaned = phone.replace(/[\s\-()]/g, '');
+  const digits = cleaned.startsWith('0') ? cleaned.slice(1) : cleaned;
+  return country.dial + digits;
 };
 
 const detailsSchema = z.object({
@@ -52,7 +51,7 @@ const detailsSchema = z.object({
   message: 'Passwords do not match',
   path: ['confirm_password'],
 }).refine(data => validateLocalPhone(data.phone_number, data.country), {
-  message: 'Please enter a valid phone number starting with 0',
+  message: 'Please enter a valid phone number',
   path: ['phone_number'],
 });
 
@@ -557,7 +556,7 @@ export default function AuthPage() {
                   <Input
                     id="phone_number"
                     type="tel"
-                    placeholder="0821234567"
+                    placeholder="821234567"
                     value={form.phone_number}
                     onChange={e => updateForm('phone_number', e.target.value)}
                     className={`h-12 ${errors.phone_number ? 'border-destructive' : ''}`}
