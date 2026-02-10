@@ -1,12 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Phone, Mail } from 'lucide-react';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+
+const profileSchema = z.object({
+  full_name: z.string().trim().min(1, 'Please enter your name').max(100),
+  phone_number: z.string().trim().optional().or(z.literal('')),
+  address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
+  address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
+  city: z.string().trim().min(1, 'City / Suburb is required').max(100),
+  state_province: z.string().trim().max(100).optional().or(z.literal('')),
+  country: z.string().trim().min(1, 'Country is required'),
+  postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
+});
 
 export default function CompleteProfile() {
   const navigate = useNavigate();
@@ -14,21 +27,54 @@ export default function CompleteProfile() {
   
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || '');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [address, setAddress] = useState<AddressData>({
+    address_line_1: '',
+    address_line_2: '',
+    city: '',
+    state_province: '',
+    country: 'ZA',
+    postal_code: '',
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!fullName.trim()) {
-      toast.error('Please enter your name');
+    setErrors({});
+
+    const validation = profileSchema.safeParse({
+      full_name: fullName,
+      phone_number: phoneNumber,
+      ...address,
+    });
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      const firstError = validation.error.errors[0]?.message;
+      if (firstError) toast.error(firstError);
       return;
     }
 
     setIsLoading(true);
 
+    const addressStr = [address.address_line_1, address.city, address.state_province].filter(Boolean).join(', ');
+
     const { error } = await updateProfile({
       full_name: fullName.trim(),
       phone_number: phoneNumber.trim() || null,
+      address: addressStr || null,
+      address_line_1: address.address_line_1.trim(),
+      address_line_2: address.address_line_2.trim() || null,
+      city: address.city.trim(),
+      state_province: address.state_province.trim() || null,
+      country: address.country,
+      postal_code: address.postal_code.trim(),
       is_profile_complete: true,
     });
 
@@ -71,9 +117,10 @@ export default function CompleteProfile() {
                   placeholder="Your full name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10 h-12"
+                  className={`pl-10 h-12 ${errors.full_name ? 'border-destructive' : ''}`}
                 />
               </div>
+              {errors.full_name && <p className="text-sm text-destructive">{errors.full_name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -104,6 +151,12 @@ export default function CompleteProfile() {
                   className="pl-10 h-12 bg-muted"
                 />
               </div>
+            </div>
+
+            {/* Address Section */}
+            <div className="pt-2">
+              <h3 className="text-sm font-medium mb-3">Address</h3>
+              <AddressFields data={address} onChange={setAddress} errors={errors} />
             </div>
 
             <div className="flex gap-3 pt-4">
