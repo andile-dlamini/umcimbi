@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check } from 'lucide-react';
 import { z } from 'zod';
@@ -55,8 +55,16 @@ const vendorSchema = z.object({
 
 export default function VendorOnboarding() {
   const navigate = useNavigate();
-  const { createVendorProfile } = useMyVendorProfile();
+  const { createVendorProfile, vendor: existingVendor, isLoading: isLoadingVendor } = useMyVendorProfile();
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Redirect if user already has a vendor profile
+  useEffect(() => {
+    if (!isLoadingVendor && existingVendor) {
+      toast.info('You already have a vendor profile');
+      navigate('/profile/vendor', { replace: true });
+    }
+  }, [existingVendor, isLoadingVendor, navigate]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
