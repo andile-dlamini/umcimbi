@@ -15,6 +15,9 @@ export interface Quote {
   expires_at: string;
   created_at: string;
   updated_at: string;
+  offer_number: string | null;
+  final_offer_pdf_key: string | null;
+  final_offer_pdf_generated_at: string | null;
 }
 
 export interface QuoteWithDetails extends Quote {

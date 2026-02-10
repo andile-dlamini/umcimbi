@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.verify-otp]
 verify_jwt = false
+
+[functions.generate-final-offer]
+verify_jwt = false
+
+[functions.get-final-offer-url]
+verify_jwt = false

@@ -542,8 +542,11 @@ export type Database = {
         Row: {
           created_at: string
           expires_at: string | null
+          final_offer_pdf_generated_at: string | null
+          final_offer_pdf_key: string | null
           id: string
           notes: string | null
+          offer_number: string | null
           price: number
           proposed_date_time_window: string | null
           request_id: string
@@ -554,8 +557,11 @@ export type Database = {
         Insert: {
           created_at?: string
           expires_at?: string | null
+          final_offer_pdf_generated_at?: string | null
+          final_offer_pdf_key?: string | null
           id?: string
           notes?: string | null
+          offer_number?: string | null
           price: number
           proposed_date_time_window?: string | null
           request_id: string
@@ -566,8 +572,11 @@ export type Database = {
         Update: {
           created_at?: string
           expires_at?: string | null
+          final_offer_pdf_generated_at?: string | null
+          final_offer_pdf_key?: string | null
           id?: string
           notes?: string | null
+          offer_number?: string | null
           price?: number
           proposed_date_time_window?: string | null
           request_id?: string
@@ -837,6 +846,7 @@ export type Database = {
           languages: string[] | null
           latitude: number | null
           location: string | null
+          logo_url: string | null
           longitude: number | null
           name: string
           owner_user_id: string | null
@@ -847,6 +857,8 @@ export type Database = {
           registered_business_name: string | null
           registration_number: string | null
           review_count: number | null
+          show_registration_on_pdf: boolean
+          show_vat_on_pdf: boolean
           state_province: string | null
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
@@ -877,6 +889,7 @@ export type Database = {
           languages?: string[] | null
           latitude?: number | null
           location?: string | null
+          logo_url?: string | null
           longitude?: number | null
           name: string
           owner_user_id?: string | null
@@ -887,6 +900,8 @@ export type Database = {
           registered_business_name?: string | null
           registration_number?: string | null
           review_count?: number | null
+          show_registration_on_pdf?: boolean
+          show_vat_on_pdf?: boolean
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
@@ -917,6 +932,7 @@ export type Database = {
           languages?: string[] | null
           latitude?: number | null
           location?: string | null
+          logo_url?: string | null
           longitude?: number | null
           name?: string
           owner_user_id?: string | null
@@ -927,6 +943,8 @@ export type Database = {
           registered_business_name?: string | null
           registration_number?: string | null
           review_count?: number | null
+          show_registration_on_pdf?: boolean
+          show_vat_on_pdf?: boolean
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
@@ -946,6 +964,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_offer_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

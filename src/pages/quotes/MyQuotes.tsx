@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, Star, CheckCircle, XCircle } from 'lucide-react';
+import { DollarSign, Clock, Star, CheckCircle, XCircle, FileText, Download } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails, QuoteStatus } from '@/types/booking';
 import { useState } from 'react';
@@ -28,6 +28,8 @@ function QuoteCard({
 }) {
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const isAccepted = quote.status === 'client_accepted';
   const status = statusConfig[quote.status];
   const isExpired = new Date(quote.expires_at) < new Date();
   const isPending = quote.status === 'pending_client' && !isExpired;
@@ -91,7 +93,7 @@ function QuoteCard({
               <span>Expires {formatDistanceToNow(new Date(quote.expires_at), { addSuffix: true })}</span>
             </div>
           )}
-        </div>
+       </div>
       </CardContent>
       
       {isPending && (
@@ -114,6 +116,79 @@ function QuoteCard({
             {isAccepting ? 'Accepting...' : 'Accept & Book'}
           </Button>
         </CardFooter>
+      )}
+
+      {isAccepted && quote.final_offer_pdf_key && (
+        <CardFooter className="p-4 pt-0 gap-2">
+          <Button
+            variant="outline"
+            className="flex-1"
+            disabled={isLoadingPdf}
+            onClick={async () => {
+              setIsLoadingPdf(true);
+              try {
+                const { data: sessionData } = await supabase.auth.getSession();
+                const token = sessionData?.session?.access_token;
+                const res = await fetch(
+                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${quote.id}`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                    },
+                  }
+                );
+                const data = await res.json();
+                if (data.url) window.open(data.url, '_blank');
+                else toast.error('Could not load document');
+              } catch { toast.error('Failed to load document'); }
+              finally { setIsLoadingPdf(false); }
+            }}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            {isLoadingPdf ? 'Loading...' : 'View Final Offer'}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            disabled={isLoadingPdf}
+            onClick={async () => {
+              setIsLoadingPdf(true);
+              try {
+                const { data: sessionData } = await supabase.auth.getSession();
+                const token = sessionData?.session?.access_token;
+                const res = await fetch(
+                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${quote.id}`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                    },
+                  }
+                );
+                const data = await res.json();
+                if (data.url) {
+                  const a = document.createElement('a');
+                  a.href = data.url;
+                  a.download = `${data.offer_number || 'final-offer'}.html`;
+                  a.click();
+                } else toast.error('Could not load document');
+              } catch { toast.error('Failed to download'); }
+              finally { setIsLoadingPdf(false); }
+            }}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Download
+          </Button>
+        </CardFooter>
+      )}
+
+      {isAccepted && quote.offer_number && (
+        <div className="px-4 pb-3">
+          <p className="text-xs text-muted-foreground">
+            Offer #{quote.offer_number}
+          </p>
+        </div>
       )}
     </Card>
   );

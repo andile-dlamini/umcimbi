@@ -44,37 +44,41 @@ export function useClientQuotes(requestId?: string) {
   const acceptQuote = async (quoteId: string): Promise<boolean> => {
     if (!user) return false;
 
-    // Get quote details for notification
     const quote = quotes.find(q => q.id === quoteId);
-    
-    const { error } = await supabase
-      .from('quotes')
-      .update({ status: 'client_accepted' as QuoteStatus })
-      .eq('id', quoteId);
 
-    if (error) {
-      toast.error('Failed to accept quote');
-      console.error('Error accepting quote:', error);
-      return false;
-    }
+    try {
+      // Call edge function to accept quote + generate PDF
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
 
-    // Decline other quotes for the same request
-    if (quote) {
-      await supabase
-        .from('quotes')
-        .update({ status: 'client_declined' as QuoteStatus })
-        .eq('request_id', quote.request_id)
-        .neq('id', quoteId);
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-final-offer`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ quote_id: quoteId }),
+        }
+      );
 
-      // Get event name for notification
-      if (quote.request?.event_id) {
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Failed to accept quote');
+        return false;
+      }
+
+      // Send chat notification to vendor
+      if (quote?.request?.event_id) {
         const { data: event } = await supabase
           .from('events')
           .select('name')
           .eq('id', quote.request.event_id)
           .single();
 
-        // Send chat notification to vendor
         await sendChatNotification(
           user.id,
           quote.vendor_id,
@@ -82,11 +86,15 @@ export function useClientQuotes(requestId?: string) {
           quote.request.event_id
         );
       }
-    }
 
-    toast.success('Quote accepted!');
-    await fetchQuotes();
-    return true;
+      toast.success('Quote accepted! Final offer document generated.');
+      await fetchQuotes();
+      return true;
+    } catch (err) {
+      console.error('Error accepting quote:', err);
+      toast.error('Failed to accept quote');
+      return false;
+    }
   };
 
   const declineQuote = async (quoteId: string): Promise<boolean> => {
