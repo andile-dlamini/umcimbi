@@ -80,6 +80,9 @@ export interface Vendor {
   super_vendor_reason: string | null;
   verification_reviewed_at: string | null;
   verification_reviewed_by: string | null;
+  logo_url: string | null;
+  show_registration_on_pdf: boolean;
+  show_vat_on_pdf: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -234,7 +237,7 @@ export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
 };
 
 // Form types for creating/updating
-export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude' | 'is_super_vendor' | 'super_vendor_awarded_at' | 'super_vendor_reason' | 'verification_reviewed_at' | 'verification_reviewed_by'>;
+export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude' | 'is_super_vendor' | 'super_vendor_awarded_at' | 'super_vendor_reason' | 'verification_reviewed_at' | 'verification_reviewed_by' | 'logo_url' | 'show_registration_on_pdf' | 'show_vat_on_pdf'> & { logo_url?: string | null; show_registration_on_pdf?: boolean; show_vat_on_pdf?: boolean; };
 export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'estimated_budget'>;
 export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at' | 'sort_order'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;

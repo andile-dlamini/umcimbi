@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Users, Wallet, MessageCircle, Clock, CheckCircle, XCircle, Send, User } from 'lucide-react';
+import { Calendar, Users, Wallet, MessageCircle, Clock, CheckCircle, XCircle, Send, User, FileText, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ServiceRequestWithDetails, getEventTypeInfo } from '@/types/database';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -24,6 +26,7 @@ interface ServiceRequestCardProps {
   onAccept?: (requestId: string) => Promise<boolean>;
   onCancel?: (requestId: string) => Promise<boolean>;
   isVendorView?: boolean;
+  quoteId?: string; // Associated quote ID for PDF access
 }
 
 const statusConfig = {
@@ -35,6 +38,76 @@ const statusConfig = {
   cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800', icon: XCircle },
 };
 
+function FinalOfferPdfButtons({ requestId, isLoadingPdf, setIsLoadingPdf }: { requestId: string; isLoadingPdf: boolean; setIsLoadingPdf: (v: boolean) => void }) {
+  const [quoteData, setQuoteData] = useState<{ id: string; offer_number: string | null; final_offer_pdf_key: string | null } | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  const fetchQuote = async () => {
+    if (checked) return quoteData;
+    const { data } = await supabase
+      .from('quotes')
+      .select('id, offer_number, final_offer_pdf_key')
+      .eq('request_id', requestId)
+      .eq('status', 'client_accepted' as any)
+      .maybeSingle();
+    setQuoteData(data as any);
+    setChecked(true);
+    return data;
+  };
+
+  const handleAction = async (action: 'view' | 'download') => {
+    setIsLoadingPdf(true);
+    try {
+      const quote = await fetchQuote();
+      if (!quote?.final_offer_pdf_key) {
+        toast.error('No final offer document found');
+        return;
+      }
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${quote.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      const data = await res.json();
+      if (data.url) {
+        if (action === 'view') {
+          window.open(data.url, '_blank');
+        } else {
+          const a = document.createElement('a');
+          a.href = data.url;
+          a.download = `${data.offer_number || 'final-offer'}.html`;
+          a.click();
+        }
+      } else {
+        toast.error('Could not load document');
+      }
+    } catch {
+      toast.error('Failed to load document');
+    } finally {
+      setIsLoadingPdf(false);
+    }
+  };
+
+  return (
+    <div className="flex gap-2 pt-2">
+      <Button variant="outline" size="sm" className="flex-1" disabled={isLoadingPdf} onClick={() => handleAction('view')}>
+        <FileText className="h-4 w-4 mr-1" />
+        {isLoadingPdf ? 'Loading...' : 'View Final Offer'}
+      </Button>
+      <Button variant="outline" size="sm" className="flex-1" disabled={isLoadingPdf} onClick={() => handleAction('download')}>
+        <Download className="h-4 w-4 mr-1" />
+        Download
+      </Button>
+    </div>
+  );
+}
+
 export function ServiceRequestCard({
   request,
   onRespond,
@@ -42,11 +115,13 @@ export function ServiceRequestCard({
   onAccept,
   onCancel,
   isVendorView = false,
+  quoteId,
 }: ServiceRequestCardProps) {
   const [showRespondDialog, setShowRespondDialog] = useState(false);
   const [response, setResponse] = useState('');
   const [quotedAmount, setQuotedAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
 
   const status = statusConfig[request.status];
   const StatusIcon = status.icon;
@@ -147,6 +222,11 @@ export function ServiceRequestCard({
                 </p>
               )}
             </div>
+          )}
+
+          {/* Final Offer PDF buttons */}
+          {(request.status === 'accepted' || request.status === 'quoted') && isVendorView && (
+            <FinalOfferPdfButtons requestId={request.id} isLoadingPdf={isLoadingPdf} setIsLoadingPdf={setIsLoadingPdf} />
           )}
 
           {/* Actions */}

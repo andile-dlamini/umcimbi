@@ -13,6 +13,7 @@ import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { BrandingSection } from '@/components/vendors/BrandingSection';
 
 export default function VendorProfile() {
   const navigate = useNavigate();
@@ -161,19 +162,19 @@ export default function VendorProfile() {
                 <div className="flex items-center gap-1.5">
                   <CardTitle>{vendor.name}</CardTitle>
                   <VendorBadges 
-                    businessVerificationStatus={(vendor as any).business_verification_status}
-                    isSuperVendor={(vendor as any).is_super_vendor}
+                    businessVerificationStatus={vendor.business_verification_status}
+                    isSuperVendor={vendor.is_super_vendor}
                     size="md"
                   />
                 </div>
                 {/* Business verification status (private) */}
-                {(vendor as any).business_verification_status === 'pending' && (
+                {vendor.business_verification_status === 'pending' && (
                   <div className="flex items-center gap-1 mt-1">
                     <Clock className="h-3.5 w-3.5 text-amber-500" />
                     <span className="text-xs text-amber-600">Business verification under review</span>
                   </div>
                 )}
-                {(vendor as any).business_verification_status === 'rejected' && (
+                {vendor.business_verification_status === 'rejected' && (
                   <div className="flex items-center gap-1 mt-1">
                     <XCircle className="h-3.5 w-3.5 text-destructive" />
                     <span className="text-xs text-destructive">Verification rejected</span>
@@ -314,7 +315,10 @@ export default function VendorProfile() {
           Preview public profile
         </Button>
 
-        {/* Delete Profile */}
+        {/* Branding / Letterhead Section */}
+        <BrandingSection vendor={vendor} onUpdate={updateVendorProfile} />
+
+
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full">
