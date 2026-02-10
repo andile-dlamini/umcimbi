@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check } from 'lucide-react';
+import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check, Upload, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -81,6 +82,10 @@ export default function VendorOnboarding() {
     email: '',
     website_url: '',
     languages: ['English'],
+    is_registered_business: false,
+    registered_business_name: '',
+    registration_number: '',
+    vat_number: '',
   });
 
   const [address, setAddress] = useState<AddressData>({
@@ -98,7 +103,9 @@ export default function VendorOnboarding() {
 
   // Work showcase images placeholders
   const [showcaseFiles, setShowcaseFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string; preview: string }[]>([]);
   const showcaseInputRef = useRef<HTMLInputElement>(null);
+  const verificationInputRef = useRef<HTMLInputElement>(null);
 
   const selectedPhoneCountry = COUNTRIES.find(c => c.code === formData.phone_country) || COUNTRIES[0];
 
@@ -195,6 +202,9 @@ export default function VendorOnboarding() {
     const composedLocation = locationParts.join(', ') || null;
 
     // Create vendor profile first (without images)
+    const vendorBusinessType = formData.is_registered_business ? 'registered_business' as const : 'independent' as const;
+    const verificationStatus = formData.is_registered_business ? 'pending' as const : 'not_applicable' as const;
+
     const result = await createVendorProfile({
       name: formData.name.trim(),
       category: formData.category as VendorCategory,
@@ -213,6 +223,11 @@ export default function VendorOnboarding() {
       state_province: address.state_province.trim() || null,
       country: address.country,
       postal_code: address.postal_code.trim(),
+      vendor_business_type: vendorBusinessType,
+      business_verification_status: verificationStatus,
+      registered_business_name: formData.is_registered_business ? formData.registered_business_name.trim() || null : null,
+      registration_number: formData.is_registered_business ? formData.registration_number.trim() || null : null,
+      vat_number: formData.is_registered_business ? formData.vat_number.trim() || null : null,
     });
 
     if (!result) {
@@ -252,6 +267,29 @@ export default function VendorOnboarding() {
             .from('vendor-images')
             .getPublicUrl(path);
           uploadedUrls.push(urlData.publicUrl);
+        }
+      }
+
+      // Upload verification documents if registered business
+      if (formData.is_registered_business && verificationFiles.length > 0) {
+        for (let i = 0; i < verificationFiles.length; i++) {
+          const vf = verificationFiles[i];
+          const ext = vf.file.name.split('.').pop() || 'pdf';
+          const docPath = `${result.id}/docs/doc-${i}.${ext}`;
+          const { error: docUploadErr } = await supabase.storage
+            .from('vendor-images')
+            .upload(docPath, vf.file, { upsert: true });
+          if (!docUploadErr) {
+            const { data: docUrlData } = supabase.storage
+              .from('vendor-images')
+              .getPublicUrl(docPath);
+            await supabase.from('vendor_verification_documents').insert({
+              vendor_id: result.id,
+              doc_type: i === 0 ? 'cipc_registration' : 'proof_of_address',
+              file_url: docUrlData.publicUrl,
+              status: 'uploaded',
+            } as any);
+          }
         }
       }
 
@@ -348,6 +386,118 @@ export default function VendorOnboarding() {
                   </SelectContent>
                 </Select>
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+              </div>
+
+              {/* Business Type */}
+              <div className="space-y-4 pt-2 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Formally registered business?</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      e.g., CIPC / Company registration
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.is_registered_business}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_registered_business: checked })}
+                  />
+                </div>
+
+                {formData.is_registered_business ? (
+                  <div className="space-y-3 pl-1 border-l-2 border-primary/30 ml-1">
+                    <div className="pl-3 space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="registered_business_name">Registered business name *</Label>
+                        <Input
+                          id="registered_business_name"
+                          placeholder="e.g., Zulu Traditions (Pty) Ltd"
+                          value={formData.registered_business_name}
+                          onChange={(e) => setFormData({ ...formData, registered_business_name: e.target.value })}
+                          className="h-12"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="registration_number">Registration number *</Label>
+                        <Input
+                          id="registration_number"
+                          placeholder="e.g., 2024/123456/07"
+                          value={formData.registration_number}
+                          onChange={(e) => setFormData({ ...formData, registration_number: e.target.value })}
+                          className="h-12"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="vat_number">VAT number (optional)</Label>
+                        <Input
+                          id="vat_number"
+                          placeholder="e.g., 4123456789"
+                          value={formData.vat_number}
+                          onChange={(e) => setFormData({ ...formData, vat_number: e.target.value })}
+                          className="h-12"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Verification documents</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Upload CIPC registration and proof of address for verification.
+                        </p>
+                        <div className="space-y-2">
+                          {verificationFiles.map((item, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm bg-muted rounded-lg p-2">
+                              <Upload className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate flex-1">{item.file.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setVerificationFiles(prev => prev.filter((_, i) => i !== index))}
+                                className="text-destructive text-xs"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => verificationInputRef.current?.click()}
+                          >
+                            <Upload className="h-4 w-4 mr-1" />
+                            Add document
+                          </Button>
+                          <input
+                            ref={verificationInputRef}
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 10 * 1024 * 1024) {
+                                toast.error('Document must be less than 10MB');
+                                return;
+                              }
+                              setVerificationFiles(prev => [...prev, { file, docType: 'cipc_registration', preview: '' }]);
+                              if (verificationInputRef.current) verificationInputRef.current.value = '';
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 bg-primary/5 rounded-lg p-3">
+                        <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-muted-foreground">
+                          We'll review your documents. Once approved, you'll get a <strong>Verified Business</strong> badge on your profile.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 bg-muted rounded-lg p-3">
+                    <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      No worries! You can still earn a <strong>Super Vendor</strong> badge through great service and reviews.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Address Section */}

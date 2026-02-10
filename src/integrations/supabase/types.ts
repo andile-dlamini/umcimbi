@@ -777,12 +777,54 @@ export type Database = {
           },
         ]
       }
+      vendor_verification_documents: {
+        Row: {
+          created_at: string
+          doc_type: Database["public"]["Enums"]["verification_doc_type"]
+          file_url: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["verification_doc_status"]
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["verification_doc_type"]
+          file_url: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["verification_doc_status"]
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["verification_doc_type"]
+          file_url?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["verification_doc_status"]
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_verification_documents_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           about: string | null
           added_to_events_count: number | null
           address_line_1: string | null
           address_line_2: string | null
+          business_verification_status: Database["public"]["Enums"]["business_verification_status"]
           category: Database["public"]["Enums"]["vendor_category"]
           city: string | null
           country: string | null
@@ -791,6 +833,7 @@ export type Database = {
           id: string
           image_urls: string[] | null
           is_active: boolean | null
+          is_super_vendor: boolean
           languages: string[] | null
           latitude: number | null
           location: string | null
@@ -801,9 +844,17 @@ export type Database = {
           postal_code: string | null
           price_range_text: string | null
           rating: number | null
+          registered_business_name: string | null
+          registration_number: string | null
           review_count: number | null
           state_province: string | null
+          super_vendor_awarded_at: string | null
+          super_vendor_reason: string | null
           updated_at: string | null
+          vat_number: string | null
+          vendor_business_type: Database["public"]["Enums"]["vendor_business_type"]
+          verification_reviewed_at: string | null
+          verification_reviewed_by: string | null
           view_count: number | null
           website_url: string | null
           whatsapp_number: string | null
@@ -813,6 +864,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          business_verification_status?: Database["public"]["Enums"]["business_verification_status"]
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
           country?: string | null
@@ -821,6 +873,7 @@ export type Database = {
           id?: string
           image_urls?: string[] | null
           is_active?: boolean | null
+          is_super_vendor?: boolean
           languages?: string[] | null
           latitude?: number | null
           location?: string | null
@@ -831,9 +884,17 @@ export type Database = {
           postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
+          registered_business_name?: string | null
+          registration_number?: string | null
           review_count?: number | null
           state_province?: string | null
+          super_vendor_awarded_at?: string | null
+          super_vendor_reason?: string | null
           updated_at?: string | null
+          vat_number?: string | null
+          vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
+          verification_reviewed_at?: string | null
+          verification_reviewed_by?: string | null
           view_count?: number | null
           website_url?: string | null
           whatsapp_number?: string | null
@@ -843,6 +904,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          business_verification_status?: Database["public"]["Enums"]["business_verification_status"]
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
           country?: string | null
@@ -851,6 +913,7 @@ export type Database = {
           id?: string
           image_urls?: string[] | null
           is_active?: boolean | null
+          is_super_vendor?: boolean
           languages?: string[] | null
           latitude?: number | null
           location?: string | null
@@ -861,9 +924,17 @@ export type Database = {
           postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
+          registered_business_name?: string | null
+          registration_number?: string | null
           review_count?: number | null
           state_province?: string | null
+          super_vendor_awarded_at?: string | null
+          super_vendor_reason?: string | null
           updated_at?: string | null
+          vat_number?: string | null
+          vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
+          verification_reviewed_at?: string | null
+          verification_reviewed_by?: string | null
           view_count?: number | null
           website_url?: string | null
           whatsapp_number?: string | null
@@ -903,6 +974,11 @@ export type Database = {
         | "funeral_services"
         | "healer_services"
         | "music"
+      business_verification_status:
+        | "not_applicable"
+        | "pending"
+        | "verified"
+        | "rejected"
       event_type:
         | "umembeso"
         | "umabo"
@@ -941,6 +1017,7 @@ export type Database = {
         | "finance"
         | "venue"
         | "other"
+      vendor_business_type: "independent" | "registered_business"
       vendor_category:
         | "decor"
         | "catering"
@@ -957,6 +1034,13 @@ export type Database = {
         | "attire_tailoring"
         | "drinks_ice_delivery"
         | "cakes_baking"
+      verification_doc_status: "uploaded" | "approved" | "rejected"
+      verification_doc_type:
+        | "cipc_registration"
+        | "proof_of_address"
+        | "bank_confirmation"
+        | "vat_certificate"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1105,6 +1189,12 @@ export const Constants = {
         "healer_services",
         "music",
       ],
+      business_verification_status: [
+        "not_applicable",
+        "pending",
+        "verified",
+        "rejected",
+      ],
       event_type: [
         "umembeso",
         "umabo",
@@ -1147,6 +1237,7 @@ export const Constants = {
         "venue",
         "other",
       ],
+      vendor_business_type: ["independent", "registered_business"],
       vendor_category: [
         "decor",
         "catering",
@@ -1163,6 +1254,14 @@ export const Constants = {
         "attire_tailoring",
         "drinks_ice_delivery",
         "cakes_baking",
+      ],
+      verification_doc_status: ["uploaded", "approved", "rejected"],
+      verification_doc_type: [
+        "cipc_registration",
+        "proof_of_address",
+        "bank_confirmation",
+        "vat_certificate",
+        "other",
       ],
     },
   },
