@@ -10,7 +10,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
-import CompleteProfile from "@/pages/profile/CompleteProfile";
+
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
 import CreateEvent from "@/pages/events/CreateEvent";
@@ -60,16 +60,6 @@ function AppRoutes() {
     );
   }
 
-  // Logged in but profile not complete
-  if (!isProfileComplete) {
-    return (
-      <Routes>
-        <Route path="/profile/complete" element={<CompleteProfile />} />
-        <Route path="*" element={<Navigate to="/profile/complete" replace />} />
-      </Routes>
-    );
-  }
-
   // Fully authenticated
   return (
     <>
@@ -87,7 +77,7 @@ function AppRoutes() {
         <Route path="/learn" element={<Learn />} />
         <Route path="/learn/:articleId" element={<ArticlePage />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/complete" element={<CompleteProfile />} />
+        
         <Route path="/profile/vendor" element={<VendorProfile />} />
         <Route path="/profile/requests" element={<MyRequests />} />
         <Route path="/quotes" element={<MyQuotes />} />
