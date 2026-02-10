@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Store, Calendar, BarChart3, Upload } from 'lucide-react';
+import { Users, Store, Calendar, BarChart3, Upload, BadgeCheck, Star } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -210,6 +210,22 @@ export default function AdminDashboard() {
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Bulk Upload Vendors
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/admin/verification-queue')}
+                >
+                  <BadgeCheck className="h-4 w-4 mr-2" />
+                  Vendor Verification Queue
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/admin/super-vendors')}
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Super Vendor Management
                 </Button>
               </CardContent>
             </Card>

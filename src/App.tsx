@@ -32,6 +32,8 @@ import ArticlePage from "@/pages/learn/ArticlePage";
 import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
+import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
+import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
 import NotFound from "@/pages/NotFound";
@@ -88,6 +90,8 @@ function AppRoutes() {
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/bulk-vendors" element={<BulkVendorUpload />} />
+        <Route path="/admin/verification-queue" element={<VendorVerificationQueue />} />
+        <Route path="/admin/super-vendors" element={<SuperVendorManagement />} />
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />

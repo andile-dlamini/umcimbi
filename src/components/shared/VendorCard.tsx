@@ -3,6 +3,7 @@ import { Star, MapPin, ChevronRight, Navigation } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vendor } from '@/types/database';
+import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { formatDistance } from '@/lib/distanceUtils';
 import { cn } from '@/lib/utils';
@@ -56,8 +57,12 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false }
               )}
             </div>
             
-            <h3 className="font-semibold text-foreground truncate">
+            <h3 className="font-semibold text-foreground truncate flex items-center gap-1">
               {vendor.name}
+              <VendorBadges 
+                businessVerificationStatus={(vendor as any).business_verification_status} 
+                isSuperVendor={(vendor as any).is_super_vendor} 
+              />
             </h3>
             
             <div className="flex items-center gap-3 mt-1 text-sm flex-wrap">

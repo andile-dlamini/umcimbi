@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Search, MapPin, ArrowUpDown } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
 import { useVendorsWithDistance, SortOption } from '@/hooks/useVendorsWithDistance';
@@ -13,14 +15,17 @@ export default function VendorsList() {
   const [category, setCategory] = useState<VendorCategory | 'all'>('all');
   const [locationFilter, setLocationFilter] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string>('');
-  
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
   const { events } = useEvents();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
     selectedEventId || undefined,
     { 
       category, 
       location: locationFilter || 'All Locations', 
-      search 
+      search,
+      verifiedOnly,
+      superVendorsOnly,
     }
   );
 
@@ -80,6 +85,24 @@ export default function VendorsList() {
               onChange={(e) => setLocationFilter(e.target.value)}
               className="pl-10 border-card-border"
             />
+          </div>
+        </div>
+
+        {/* Badge Filters */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch id="verified" checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+            <Label htmlFor="verified" className="text-xs flex items-center gap-1 cursor-pointer">
+              <BadgeCheck className="h-3.5 w-3.5 text-blue-500" />
+              Verified only
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="super" checked={superVendorsOnly} onCheckedChange={setSuperVendorsOnly} />
+            <Label htmlFor="super" className="text-xs flex items-center gap-1 cursor-pointer">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              Super Vendors
+            </Label>
           </div>
         </div>
 

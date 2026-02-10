@@ -8,6 +8,10 @@ export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'tra
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
 export type SenderType = 'user' | 'vendor' | 'system';
 export type ServiceRequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled';
+export type VendorBusinessType = 'independent' | 'registered_business';
+export type BusinessVerificationStatus = 'not_applicable' | 'pending' | 'verified' | 'rejected';
+export type VerificationDocType = 'cipc_registration' | 'proof_of_address' | 'bank_confirmation' | 'vat_certificate' | 'other';
+export type VerificationDocStatus = 'uploaded' | 'approved' | 'rejected';
 
 export interface Profile {
   id: string;
@@ -66,6 +70,27 @@ export interface Vendor {
   added_to_events_count: number;
   is_active: boolean;
   image_urls: string[];
+  vendor_business_type: VendorBusinessType;
+  business_verification_status: BusinessVerificationStatus;
+  registered_business_name: string | null;
+  registration_number: string | null;
+  vat_number: string | null;
+  is_super_vendor: boolean;
+  super_vendor_awarded_at: string | null;
+  super_vendor_reason: string | null;
+  verification_reviewed_at: string | null;
+  verification_reviewed_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorVerificationDocument {
+  id: string;
+  vendor_id: string;
+  doc_type: VerificationDocType;
+  file_url: string;
+  status: VerificationDocStatus;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -209,7 +234,7 @@ export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
 };
 
 // Form types for creating/updating
-export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude'>;
+export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude' | 'is_super_vendor' | 'super_vendor_awarded_at' | 'super_vendor_reason' | 'verification_reviewed_at' | 'verification_reviewed_by'>;
 export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'estimated_budget'>;
 export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at' | 'sort_order'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;

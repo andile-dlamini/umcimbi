@@ -10,6 +10,7 @@ import { useEventVendors } from '@/hooks/useEvents';
 import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
+import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { cn } from '@/lib/utils';
@@ -148,7 +149,14 @@ export default function VendorDetail() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-foreground leading-tight">{vendor.name}</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-2xl font-bold text-foreground leading-tight">{vendor.name}</h1>
+                <VendorBadges 
+                  businessVerificationStatus={(vendor as any).business_verification_status}
+                  isSuperVendor={(vendor as any).is_super_vendor}
+                  size="md"
+                />
+              </div>
               <div className="flex items-center gap-4 text-sm mt-1">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-warning text-warning" />

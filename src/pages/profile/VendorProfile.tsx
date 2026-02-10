@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2 } from 'lucide-react';
+import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
+import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 
@@ -157,7 +158,27 @@ export default function VendorProfile() {
               <Badge variant="outline" className="mb-2">
                   {getVendorCategoryLabel(vendor.category)}
                 </Badge>
-                <CardTitle>{vendor.name}</CardTitle>
+                <div className="flex items-center gap-1.5">
+                  <CardTitle>{vendor.name}</CardTitle>
+                  <VendorBadges 
+                    businessVerificationStatus={(vendor as any).business_verification_status}
+                    isSuperVendor={(vendor as any).is_super_vendor}
+                    size="md"
+                  />
+                </div>
+                {/* Business verification status (private) */}
+                {(vendor as any).business_verification_status === 'pending' && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Clock className="h-3.5 w-3.5 text-amber-500" />
+                    <span className="text-xs text-amber-600">Business verification under review</span>
+                  </div>
+                )}
+                {(vendor as any).business_verification_status === 'rejected' && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <XCircle className="h-3.5 w-3.5 text-destructive" />
+                    <span className="text-xs text-destructive">Verification rejected</span>
+                  </div>
+                )}
                 {vendor.location && (
                   <CardDescription className="flex items-center gap-1 mt-1">
                     <MapPin className="h-3 w-3" />

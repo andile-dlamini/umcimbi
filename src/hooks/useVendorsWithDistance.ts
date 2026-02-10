@@ -16,6 +16,8 @@ export function useVendorsWithDistance(
     category?: VendorCategory | 'all';
     location?: string;
     search?: string;
+    verifiedOnly?: boolean;
+    superVendorsOnly?: boolean;
   }
 ) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -56,13 +58,21 @@ export function useVendorsWithDistance(
         query = query.or(`name.ilike.%${filters.search}%,about.ilike.%${filters.search}%`);
       }
 
+      if (filters?.verifiedOnly) {
+        query = query.eq('business_verification_status', 'verified');
+      }
+
+      if (filters?.superVendorsOnly) {
+        query = query.eq('is_super_vendor', true);
+      }
+
       const { data: vendorsData } = await query;
       setVendors((vendorsData || []) as Vendor[]);
       setIsLoading(false);
     };
 
     fetchData();
-  }, [eventId, filters?.category, filters?.location, filters?.search]);
+  }, [eventId, filters?.category, filters?.location, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
 
   // Compute distances and sort
   const vendorsWithDistance: VendorWithDistance[] = useMemo(() => {
@@ -79,11 +89,15 @@ export function useVendorsWithDistance(
       ),
     }));
 
-    // Sort based on sortBy
+    // Sort with badge boost: super vendors first, then verified, then by selected sort
     return withDistance.sort((a, b) => {
+      // Badge boost
+      const aBoost = ((a as any).is_super_vendor ? 2 : 0) + ((a as any).business_verification_status === 'verified' ? 1 : 0);
+      const bBoost = ((b as any).is_super_vendor ? 2 : 0) + ((b as any).business_verification_status === 'verified' ? 1 : 0);
+      if (aBoost !== bBoost) return bBoost - aBoost;
+
       switch (sortBy) {
         case 'distance':
-          // Null distances go to the end
           if (a.distanceKm === null && b.distanceKm === null) return 0;
           if (a.distanceKm === null) return 1;
           if (b.distanceKm === null) return -1;
