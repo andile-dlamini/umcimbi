@@ -1,50 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, ArrowLeft, ArrowRight, CheckCircle2, Loader2, Shield, Globe } from 'lucide-react';
+import { Phone, ArrowLeft, ArrowRight, CheckCircle2, Loader2, Shield, ChevronsUpDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
-
-const COUNTRIES = [
-  { code: 'ZA', name: 'South Africa', dial: '+27', flag: '🇿🇦', phoneLength: 9 },
-  { code: 'BW', name: 'Botswana', dial: '+267', flag: '🇧🇼', phoneLength: 8 },
-  { code: 'LS', name: 'Lesotho', dial: '+266', flag: '🇱🇸', phoneLength: 8 },
-  { code: 'SZ', name: 'Eswatini', dial: '+268', flag: '🇸🇿', phoneLength: 8 },
-  { code: 'MZ', name: 'Mozambique', dial: '+258', flag: '🇲🇿', phoneLength: 9 },
-  { code: 'ZW', name: 'Zimbabwe', dial: '+263', flag: '🇿🇼', phoneLength: 9 },
-  { code: 'NA', name: 'Namibia', dial: '+264', flag: '🇳🇦', phoneLength: 9 },
-  { code: 'NG', name: 'Nigeria', dial: '+234', flag: '🇳🇬', phoneLength: 10 },
-  { code: 'KE', name: 'Kenya', dial: '+254', flag: '🇰🇪', phoneLength: 9 },
-  { code: 'GH', name: 'Ghana', dial: '+233', flag: '🇬🇭', phoneLength: 9 },
-  { code: 'TZ', name: 'Tanzania', dial: '+255', flag: '🇹🇿', phoneLength: 9 },
-  { code: 'UG', name: 'Uganda', dial: '+256', flag: '🇺🇬', phoneLength: 9 },
-  { code: 'GB', name: 'United Kingdom', dial: '+44', flag: '🇬🇧', phoneLength: 10 },
-  { code: 'US', name: 'United States', dial: '+1', flag: '🇺🇸', phoneLength: 10 },
-] as const;
-
-type CountryCode = typeof COUNTRIES[number]['code'];
+import { COUNTRIES, getCountryByCode, type Country } from '@/data/countries';
+import { cn } from '@/lib/utils';
 
 // Local number validation: starts with 0, then digits matching expected length
-const validateLocalPhone = (phone: string, countryCode: CountryCode) => {
-  const country = COUNTRIES.find(c => c.code === countryCode);
+const validateLocalPhone = (phone: string, countryCode: string) => {
+  const country = getCountryByCode(countryCode);
   if (!country) return false;
   const cleaned = phone.replace(/\s/g, '');
   if (!cleaned.startsWith('0')) return false;
-  // local number without leading 0 should match phoneLength
   return /^\d+$/.test(cleaned) && cleaned.length === country.phoneLength + 1;
 };
 
 // Convert local number (0xx...) to E.164 format
-const toE164 = (phone: string, countryCode: CountryCode) => {
-  const country = COUNTRIES.find(c => c.code === countryCode);
+const toE164 = (phone: string, countryCode: string) => {
+  const country = getCountryByCode(countryCode);
   if (!country) return phone;
   const cleaned = phone.replace(/\s/g, '');
   if (cleaned.startsWith('0')) {
@@ -68,7 +51,7 @@ const detailsSchema = z.object({
 }).refine(data => data.password === data.confirm_password, {
   message: 'Passwords do not match',
   path: ['confirm_password'],
-}).refine(data => validateLocalPhone(data.phone_number, data.country as CountryCode), {
+}).refine(data => validateLocalPhone(data.phone_number, data.country), {
   message: 'Please enter a valid phone number starting with 0',
   path: ['phone_number'],
 });
@@ -184,7 +167,7 @@ export default function AuthPage() {
           'Content-Type': 'application/json',
           'apikey': SUPABASE_KEY,
         },
-        body: JSON.stringify({ phone_number: toE164(form.phone_number, form.country as CountryCode) }),
+        body: JSON.stringify({ phone_number: toE164(form.phone_number, form.country) }),
       });
 
       const data = await res.json();
@@ -219,7 +202,7 @@ export default function AuthPage() {
           'Content-Type': 'application/json',
           'apikey': SUPABASE_KEY,
         },
-        body: JSON.stringify({ phone_number: toE164(form.phone_number, form.country as CountryCode) }),
+        body: JSON.stringify({ phone_number: toE164(form.phone_number, form.country) }),
       });
       const data = await res.json();
       if (res.status === 429) {
@@ -253,7 +236,7 @@ export default function AuthPage() {
           'apikey': SUPABASE_KEY,
         },
         body: JSON.stringify({
-          phone_number: toE164(form.phone_number, form.country as CountryCode),
+          phone_number: toE164(form.phone_number, form.country),
           otp: otpValue,
           first_name: form.first_name,
           surname: form.surname,
@@ -281,7 +264,7 @@ export default function AuthPage() {
       }
 
       // Success! Sign in the user
-      const e164Phone = toE164(form.phone_number, form.country as CountryCode);
+      const e164Phone = toE164(form.phone_number, form.country);
       const loginEmail = form.email?.trim()
         ? form.email.trim()
         : `${e164Phone.replace(/^\+/, '')}@phone.isiko.app`;
@@ -524,21 +507,44 @@ export default function AuthPage() {
 
               <div className="space-y-2">
                 <Label>Country *</Label>
-                <Select
-                  value={form.country}
-                  onValueChange={v => updateForm('country', v)}
-                >
-                  <SelectTrigger className={`h-12 ${errors.country ? 'border-destructive' : ''}`}>
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COUNTRIES.map(c => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {c.flag} {c.name} ({c.dial})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        'w-full h-12 justify-between font-normal',
+                        !form.country && 'text-muted-foreground',
+                        errors.country && 'border-destructive'
+                      )}
+                    >
+                      {form.country
+                        ? `${selectedCountry.flag} ${selectedCountry.name} (${selectedCountry.dial})`
+                        : 'Select country'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search country..." />
+                      <CommandList className="max-h-[250px]">
+                        <CommandEmpty>No country found.</CommandEmpty>
+                        <CommandGroup>
+                          {COUNTRIES.map(c => (
+                            <CommandItem
+                              key={c.code}
+                              value={`${c.name} ${c.dial} ${c.code}`}
+                              onSelect={() => updateForm('country', c.code)}
+                            >
+                              <Check className={cn('mr-2 h-4 w-4', form.country === c.code ? 'opacity-100' : 'opacity-0')} />
+                              {c.flag} {c.name} <span className="ml-auto text-muted-foreground text-xs">{c.dial}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 {errors.country && <p className="text-xs text-destructive">{errors.country}</p>}
               </div>
 
