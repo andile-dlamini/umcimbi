@@ -109,14 +109,16 @@ Deno.serve(async (req) => {
 
     if (insertError) throw insertError;
 
-    // Send SMS via Clickatell
-    const smsResponse = await fetch("https://platform.clickatell.com/messages/http/send", {
+    // Send SMS via Clickatell One API
+    const smsResponse = await fetch("https://platform.clickatell.com/v1/message", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         Authorization: clickatellKey,
       },
       body: JSON.stringify({
+        channel: "sms",
         content: `UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`,
         to: [normalized.replace("+", "")],
       }),
