@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, MapPin, Phone, Mail, Globe, MessageCircle } from 'lucide-react';
+import { Store, Phone, Mail, Globe, MessageCircle } from 'lucide-react';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { toast } from 'sonner';
@@ -20,7 +21,12 @@ const vendorSchema = z.object({
   category: z.enum(VENDOR_CATEGORY_VALUES, {
     required_error: 'Please select a category',
   }),
-  location: z.string().trim().max(100, 'Location must be less than 100 characters').optional().or(z.literal('')),
+  address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200, 'Address must be less than 200 characters'),
+  address_line_2: z.string().trim().max(200, 'Address must be less than 200 characters').optional().or(z.literal('')),
+  city: z.string().trim().min(1, 'City / Suburb is required').max(100, 'City must be less than 100 characters'),
+  state_province: z.string().trim().max(100, 'State/Province must be less than 100 characters').optional().or(z.literal('')),
+  country: z.string().trim().min(1, 'Country is required'),
+  postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20, 'Postal code must be less than 20 characters'),
   about: z.string().trim().max(2000, 'Description must be less than 2000 characters').optional().or(z.literal('')),
   price_range_text: z.string().trim().max(100, 'Price range must be less than 100 characters').optional().or(z.literal('')),
   phone_number: z.string().trim().refine(val => !val || phoneRegex.test(val.replace(/\s/g, '')), {
@@ -43,7 +49,6 @@ export default function VendorOnboarding() {
   const [formData, setFormData] = useState({
     name: '',
     category: '' as VendorCategory | '',
-    location: '',
     about: '',
     price_range_text: '',
     phone_number: '',
@@ -52,12 +57,21 @@ export default function VendorOnboarding() {
     website_url: '',
     languages: ['English'],
   });
+  const [address, setAddress] = useState<AddressData>({
+    address_line_1: '',
+    address_line_2: '',
+    city: '',
+    state_province: '',
+    country: 'ZA',
+    postal_code: '',
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    const validation = vendorSchema.safeParse(formData);
+    const dataToValidate = { ...formData, ...address };
+    const validation = vendorSchema.safeParse(dataToValidate);
     
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
@@ -74,10 +88,14 @@ export default function VendorOnboarding() {
 
     setIsLoading(true);
 
+    // Compose location from city + state for backward compatibility
+    const locationParts = [address.city.trim(), address.state_province?.trim()].filter(Boolean);
+    const composedLocation = locationParts.join(', ') || null;
+
     const result = await createVendorProfile({
       name: formData.name.trim(),
       category: formData.category as VendorCategory,
-      location: formData.location.trim() || null,
+      location: composedLocation,
       about: formData.about.trim() || null,
       price_range_text: formData.price_range_text.trim() || null,
       phone_number: formData.phone_number.trim() || null,
@@ -86,6 +104,12 @@ export default function VendorOnboarding() {
       website_url: formData.website_url.trim() || null,
       languages: formData.languages,
       image_urls: [],
+      address_line_1: address.address_line_1.trim(),
+      address_line_2: address.address_line_2.trim() || null,
+      city: address.city.trim(),
+      state_province: address.state_province.trim() || null,
+      country: address.country,
+      postal_code: address.postal_code.trim(),
     });
 
     setIsLoading(false);
@@ -145,19 +169,10 @@ export default function VendorOnboarding() {
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    placeholder="e.g., Durban, KwaZulu-Natal"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className={`pl-10 h-12 ${errors.location ? 'border-destructive' : ''}`}
-                  />
-                </div>
-                {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
+              {/* Address Section */}
+              <div className="pt-2">
+                <h3 className="text-sm font-medium mb-3">Business Address</h3>
+                <AddressFields data={address} onChange={setAddress} errors={errors} />
               </div>
 
               <div className="space-y-2">

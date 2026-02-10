@@ -18,6 +18,12 @@ export interface Profile {
   first_name: string | null;
   surname: string | null;
   address: string | null;
+  address_line_1: string | null;
+  address_line_2: string | null;
+  city: string | null;
+  state_province: string | null;
+  country: string | null;
+  postal_code: string | null;
   email: string | null;
   preferred_language: PreferredLanguage;
   is_profile_complete: boolean;
@@ -41,6 +47,12 @@ export interface Vendor {
   location: string | null;
   latitude: number | null;
   longitude: number | null;
+  address_line_1: string | null;
+  address_line_2: string | null;
+  city: string | null;
+  state_province: string | null;
+  country: string | null;
+  postal_code: string | null;
   about: string | null;
   price_range_text: string | null;
   whatsapp_number: string | null;

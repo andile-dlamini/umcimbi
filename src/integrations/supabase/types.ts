@@ -463,7 +463,11 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          address_line_1: string | null
+          address_line_2: string | null
           avatar_url: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           email: string | null
           first_name: string | null
@@ -473,16 +477,22 @@ export type Database = {
           notifications_enabled: boolean | null
           phone_number: string | null
           phone_verified: boolean
+          postal_code: string | null
           preferred_language:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          state_province: string | null
           surname: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           address?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
@@ -492,16 +502,22 @@ export type Database = {
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean
+          postal_code?: string | null
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          state_province?: string | null
           surname?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           address?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
@@ -511,9 +527,11 @@ export type Database = {
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean
+          postal_code?: string | null
           preferred_language?:
             | Database["public"]["Enums"]["preferred_language"]
             | null
+          state_province?: string | null
           surname?: string | null
           updated_at?: string | null
           user_id?: string
@@ -763,7 +781,11 @@ export type Database = {
         Row: {
           about: string | null
           added_to_events_count: number | null
+          address_line_1: string | null
+          address_line_2: string | null
           category: Database["public"]["Enums"]["vendor_category"]
+          city: string | null
+          country: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -776,9 +798,11 @@ export type Database = {
           name: string
           owner_user_id: string | null
           phone_number: string | null
+          postal_code: string | null
           price_range_text: string | null
           rating: number | null
           review_count: number | null
+          state_province: string | null
           updated_at: string | null
           view_count: number | null
           website_url: string | null
@@ -787,7 +811,11 @@ export type Database = {
         Insert: {
           about?: string | null
           added_to_events_count?: number | null
+          address_line_1?: string | null
+          address_line_2?: string | null
           category?: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -800,9 +828,11 @@ export type Database = {
           name: string
           owner_user_id?: string | null
           phone_number?: string | null
+          postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
           review_count?: number | null
+          state_province?: string | null
           updated_at?: string | null
           view_count?: number | null
           website_url?: string | null
@@ -811,7 +841,11 @@ export type Database = {
         Update: {
           about?: string | null
           added_to_events_count?: number | null
+          address_line_1?: string | null
+          address_line_2?: string | null
           category?: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -824,9 +858,11 @@ export type Database = {
           name?: string
           owner_user_id?: string | null
           phone_number?: string | null
+          postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
           review_count?: number | null
+          state_province?: string | null
           updated_at?: string | null
           view_count?: number | null
           website_url?: string | null
