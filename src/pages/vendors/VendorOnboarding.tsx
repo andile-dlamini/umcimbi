@@ -457,7 +457,7 @@ export default function VendorOnboarding() {
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="website"
-                    type="url"
+                    type="text"
                     placeholder="https://..."
                     value={formData.website_url}
                     onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
