@@ -11,7 +11,8 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
 const profileSchema = z.object({
-  full_name: z.string().trim().min(1, 'Please enter your name').max(100),
+  first_name: z.string().trim().min(1, 'Please enter your name').max(50, 'Name must be less than 50 characters'),
+  surname: z.string().trim().min(1, 'Please enter your surname').max(50, 'Surname must be less than 50 characters'),
   phone_number: z.string().trim().optional().or(z.literal('')),
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
@@ -25,7 +26,8 @@ export default function CompleteProfile() {
   const navigate = useNavigate();
   const { profile, updateProfile, user } = useAuth();
   
-  const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [surname, setSurname] = useState(profile?.surname || '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number || '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +45,8 @@ export default function CompleteProfile() {
     setErrors({});
 
     const validation = profileSchema.safeParse({
-      full_name: fullName,
+      first_name: firstName,
+      surname: surname,
       phone_number: phoneNumber,
       ...address,
     });
@@ -66,7 +69,9 @@ export default function CompleteProfile() {
     const addressStr = [address.address_line_1, address.city, address.state_province].filter(Boolean).join(', ');
 
     const { error } = await updateProfile({
-      full_name: fullName.trim(),
+      first_name: firstName.trim(),
+      surname: surname.trim(),
+      full_name: `${firstName.trim()} ${surname.trim()}`.trim(),
       phone_number: phoneNumber.trim() || null,
       address: addressStr || null,
       address_line_1: address.address_line_1.trim(),
@@ -108,19 +113,33 @@ export default function CompleteProfile() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full name *</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="fullName"
-                  placeholder="Your full name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className={`pl-10 h-12 ${errors.full_name ? 'border-destructive' : ''}`}
-                />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Name *</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    placeholder="First name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className={`pl-10 h-12 ${errors.first_name ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.first_name && <p className="text-sm text-destructive">{errors.first_name}</p>}
               </div>
-              {errors.full_name && <p className="text-sm text-destructive">{errors.full_name}</p>}
+
+              <div className="space-y-2">
+                <Label htmlFor="surname">Surname *</Label>
+                <Input
+                  id="surname"
+                  placeholder="Surname"
+                  value={surname}
+                  onChange={(e) => setSurname(e.target.value)}
+                  className={`h-12 ${errors.surname ? 'border-destructive' : ''}`}
+                />
+                {errors.surname && <p className="text-sm text-destructive">{errors.surname}</p>}
+              </div>
             </div>
 
             <div className="space-y-2">
