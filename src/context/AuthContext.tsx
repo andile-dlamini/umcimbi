@@ -56,11 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('owner_user_id', userId)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(1);
     
-    if (vendorData) {
-      setVendorProfile(vendorData as Vendor);
+    if (vendorData && vendorData.length > 0) {
+      setVendorProfile(vendorData[0] as Vendor);
     } else {
       setVendorProfile(null);
     }
