@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isProfileComplete = profile?.is_profile_complete ?? false;
+  const isProfileComplete = true; // Required fields are now collected during registration
   const isVendor = roles.includes('vendor') || vendorProfile !== null;
   const isAdmin = roles.includes('admin');
 
