@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText } from 'lucide-react';
+import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText, Store } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -125,7 +125,7 @@ export default function VendorDetail() {
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {/* Header Info */}
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-3">
             <Badge variant="secondary">
               {getVendorCategoryLabel(vendor.category)}
             </Badge>
@@ -137,21 +137,32 @@ export default function VendorDetail() {
             )}
           </div>
 
-          <h1 className="text-2xl font-bold text-foreground mb-2">{vendor.name}</h1>
-          
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-warning text-warning" />
-              <span className="font-medium">{vendor.rating}</span>
-              <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
+          <div className="flex items-center gap-3">
+            {/* Vendor Logo */}
+            <div className="w-14 h-14 rounded-full bg-muted border border-card-border flex-shrink-0 overflow-hidden flex items-center justify-center">
+              {vendor.image_urls?.[0] ? (
+                <img src={vendor.image_urls[0]} alt={`${vendor.name} logo`} className="w-full h-full object-cover" />
+              ) : (
+                <Store className="h-6 w-6 text-muted-foreground" />
+              )}
             </div>
-            
-            {vendor.location && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{vendor.location}</span>
+
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-foreground leading-tight">{vendor.name}</h1>
+              <div className="flex items-center gap-4 text-sm mt-1">
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 fill-warning text-warning" />
+                  <span className="font-medium">{vendor.rating}</span>
+                  <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
+                </div>
+                {vendor.location && (
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{vendor.location}</span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
