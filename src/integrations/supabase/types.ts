@@ -59,11 +59,15 @@ export type Database = {
         Row: {
           agreed_price: number
           balance_amount: number | null
+          balance_due_at: string | null
+          balance_paid_at: string | null
           balance_status: Database["public"]["Enums"]["payment_status"]
           booking_status: Database["public"]["Enums"]["booking_status"]
           client_id: string
           created_at: string
           deposit_amount: number | null
+          deposit_due_at: string | null
+          deposit_paid_at: string | null
           deposit_status: Database["public"]["Enums"]["payment_status"]
           event_date_time: string | null
           event_id: string
@@ -76,11 +80,15 @@ export type Database = {
         Insert: {
           agreed_price: number
           balance_amount?: number | null
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
           balance_status?: Database["public"]["Enums"]["payment_status"]
           booking_status?: Database["public"]["Enums"]["booking_status"]
           client_id: string
           created_at?: string
           deposit_amount?: number | null
+          deposit_due_at?: string | null
+          deposit_paid_at?: string | null
           deposit_status?: Database["public"]["Enums"]["payment_status"]
           event_date_time?: string | null
           event_id: string
@@ -93,11 +101,15 @@ export type Database = {
         Update: {
           agreed_price?: number
           balance_amount?: number | null
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
           balance_status?: Database["public"]["Enums"]["payment_status"]
           booking_status?: Database["public"]["Enums"]["booking_status"]
           client_id?: string
           created_at?: string
           deposit_amount?: number | null
+          deposit_due_at?: string | null
+          deposit_paid_at?: string | null
           deposit_status?: Database["public"]["Enums"]["payment_status"]
           event_date_time?: string | null
           event_id?: string
@@ -611,6 +623,7 @@ export type Database = {
           guest_count: number | null
           id: string
           message: string | null
+          origin: string
           quoted_amount: number | null
           requester_user_id: string
           responded_at: string | null
@@ -628,6 +641,7 @@ export type Database = {
           guest_count?: number | null
           id?: string
           message?: string | null
+          origin?: string
           quoted_amount?: number | null
           requester_user_id: string
           responded_at?: string | null
@@ -645,6 +659,7 @@ export type Database = {
           guest_count?: number | null
           id?: string
           message?: string | null
+          origin?: string
           quoted_amount?: number | null
           requester_user_id?: string
           responded_at?: string | null
@@ -845,6 +860,7 @@ export type Database = {
           is_super_vendor: boolean
           languages: string[] | null
           latitude: number | null
+          letterhead_enabled: boolean
           location: string | null
           logo_url: string | null
           longitude: number | null
@@ -888,6 +904,7 @@ export type Database = {
           is_super_vendor?: boolean
           languages?: string[] | null
           latitude?: number | null
+          letterhead_enabled?: boolean
           location?: string | null
           logo_url?: string | null
           longitude?: number | null
@@ -931,6 +948,7 @@ export type Database = {
           is_super_vendor?: boolean
           languages?: string[] | null
           latitude?: number | null
+          letterhead_enabled?: boolean
           location?: string | null
           logo_url?: string | null
           longitude?: number | null

@@ -36,9 +36,15 @@ export function useClientBookings() {
   }, [fetchBookings]);
 
   const createBooking = async (bookingData: CreateBooking): Promise<Booking | null> => {
+    // FIX 7: Set deposit_due_at on creation
+    const dataWithTimestamps = {
+      ...bookingData,
+      deposit_due_at: new Date().toISOString(),
+    };
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert(bookingData)
+      .insert(dataWithTimestamps as any)
       .select()
       .single();
 
@@ -58,12 +64,18 @@ export function useClientBookings() {
     field: 'deposit_status' | 'balance_status',
     status: PaymentStatus
   ): Promise<boolean> => {
-    const updates: Record<string, PaymentStatus | BookingStatus> = { [field]: status };
+    const updates: Record<string, any> = { [field]: status };
     
-    // If deposit is paid, mark booking as confirmed
+    // FIX 7: Set payment timestamps for audit trail
     if (field === 'deposit_status' && status === 'paid') {
       updates.booking_status = 'confirmed';
       updates.balance_status = 'due';
+      updates.deposit_paid_at = new Date().toISOString();
+      updates.balance_due_at = new Date().toISOString();
+    }
+
+    if (field === 'balance_status' && status === 'paid') {
+      updates.balance_paid_at = new Date().toISOString();
     }
 
     const { error } = await supabase

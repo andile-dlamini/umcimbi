@@ -16,6 +16,7 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showRegOnPdf, setShowRegOnPdf] = useState(vendor?.show_registration_on_pdf ?? false);
   const [showVatOnPdf, setShowVatOnPdf] = useState(vendor?.show_vat_on_pdf ?? false);
+  const [letterheadEnabled, setLetterheadEnabled] = useState(vendor?.letterhead_enabled ?? false);
   const logoUrl = vendor?.logo_url;
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +105,23 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
           </div>
         </div>
 
+        {/* Letterhead toggle */}
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Enable Letterhead on PDFs</Label>
+            <p className="text-xs text-muted-foreground">
+              Use your branding (logo + business details) on Final Offer documents
+            </p>
+          </div>
+          <Switch
+            checked={letterheadEnabled}
+            onCheckedChange={async (v) => {
+              setLetterheadEnabled(v);
+              await onUpdate({ letterhead_enabled: v } as any);
+            }}
+          />
+        </div>
+
         {/* PDF toggles */}
         {vendor?.registration_number && (
           <div className="flex items-center justify-between">
@@ -138,9 +156,9 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
         {/* Preview info */}
         <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
           <p>
-            {logoUrl || vendor?.registered_business_name
+            {letterheadEnabled || logoUrl || vendor?.registered_business_name
               ? '✓ Your Final Offer documents will use your branded letterhead.'
-              : 'No logo or business name set — documents will use the default UMCIMBI template.'}
+              : 'Letterhead is disabled — documents will use the default UMCIMBI template. Enable the toggle above to use your branding.'}
           </p>
         </div>
       </CardContent>

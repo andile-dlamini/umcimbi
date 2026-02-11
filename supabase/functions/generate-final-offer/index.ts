@@ -15,6 +15,7 @@ interface VendorBranding {
   vat_number: string | null;
   show_registration_on_pdf: boolean;
   show_vat_on_pdf: boolean;
+  letterhead_enabled: boolean;
   phone_number: string | null;
   email: string | null;
   website_url: string | null;
@@ -110,7 +111,8 @@ function generatePdfHtml(
   clientProfile: any,
   offerNumber: string
 ): string {
-  const hasLetterhead = !!(vendor.logo_url || vendor.registered_business_name);
+  // FIX 3: Use explicit letterhead_enabled flag if available, fallback to legacy check
+  const hasLetterhead = !!(vendor.letterhead_enabled || vendor.logo_url || vendor.registered_business_name);
   const header = hasLetterhead
     ? renderLetterheadHeader(vendor, logoDataUrl)
     : renderFallbackHeader(vendor.name);
@@ -281,6 +283,16 @@ serve(async (req) => {
       });
     }
 
+    // FIX 5: Enforce expiry server-side
+    if (quote.expires_at && new Date(quote.expires_at) < new Date()) {
+      // Mark as expired in DB
+      await supabase.from("quotes").update({ status: "expired" }).eq("id", quote_id);
+      return new Response(JSON.stringify({ error: "Quote has expired and can no longer be accepted" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Generate offer number
     const { data: offerNumResult } = await supabase.rpc("generate_offer_number" as any);
     const offerNumber = (offerNumResult as unknown as string) || `UMC-Q-${Date.now()}`;
@@ -288,7 +300,7 @@ serve(async (req) => {
     // Fetch vendor branding
     const { data: vendor } = await supabase
       .from("vendors")
-      .select("name, logo_url, registered_business_name, registration_number, vat_number, show_registration_on_pdf, show_vat_on_pdf, phone_number, email, website_url, address_line_1, address_line_2, city, state_province, postal_code, country")
+      .select("name, logo_url, registered_business_name, registration_number, vat_number, show_registration_on_pdf, show_vat_on_pdf, letterhead_enabled, phone_number, email, website_url, address_line_1, address_line_2, city, state_province, postal_code, country")
       .eq("id", quote.vendor_id)
       .single();
 
