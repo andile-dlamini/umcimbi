@@ -141,7 +141,10 @@ export function CreateQuoteDialog({
         .eq('requester_user_id', selectedClient.userId)
         .maybeSingle();
 
+      let requestId: string;
+
       if (existingRequest) {
+        requestId = existingRequest.id;
         // Update existing request
         const { error: updateError } = await supabase
           .from('service_requests')
@@ -155,8 +158,8 @@ export function CreateQuoteDialog({
 
         if (updateError) throw updateError;
       } else {
-        // Create a new service request as 'quoted' directly
-        const { error: createError } = await supabase
+        // Create a new service request as 'quoted' directly with vendor origin
+        const { data: newRequest, error: createError } = await supabase
           .from('service_requests')
           .insert({
             event_id: selectedClient.eventId,
@@ -166,9 +169,28 @@ export function CreateQuoteDialog({
             vendor_response: message,
             quoted_amount: parseFloat(quotedAmount),
             responded_at: new Date().toISOString(),
-          });
+            origin: 'vendor_initiated',
+          } as any)
+          .select('id')
+          .single();
 
         if (createError) throw createError;
+        requestId = newRequest.id;
+      }
+
+      // FIX 2: Also create a proper quotes record so it appears in MyQuotes
+      const { error: quoteError } = await supabase
+        .from('quotes')
+        .insert({
+          request_id: requestId,
+          vendor_id: vendorProfile.id,
+          price: parseFloat(quotedAmount),
+          notes: message,
+        });
+
+      if (quoteError) {
+        console.error('Error creating quote record:', quoteError);
+        // Non-fatal: the service request was already created
       }
 
       // Send chat notification to user

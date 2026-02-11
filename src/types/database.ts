@@ -7,7 +7,8 @@ export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'cate
 export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'funeral_services' | 'healer_services' | 'music' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
 export type SenderType = 'user' | 'vendor' | 'system';
-export type ServiceRequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled';
+export type ServiceRequestStatus = 'pending' | 'quoted' | 'accepted' | 'declined' | 'completed' | 'cancelled' | 'expired' | 'vendor_declined';
+export type ServiceRequestOrigin = 'client_initiated' | 'vendor_initiated';
 export type VendorBusinessType = 'independent' | 'registered_business';
 export type BusinessVerificationStatus = 'not_applicable' | 'pending' | 'verified' | 'rejected';
 export type VerificationDocType = 'cipc_registration' | 'proof_of_address' | 'bank_confirmation' | 'vat_certificate' | 'other';
@@ -81,6 +82,7 @@ export interface Vendor {
   verification_reviewed_at: string | null;
   verification_reviewed_by: string | null;
   logo_url: string | null;
+  letterhead_enabled: boolean;
   show_registration_on_pdf: boolean;
   show_vat_on_pdf: boolean;
   created_at: string;
@@ -185,6 +187,7 @@ export interface ServiceRequest {
   vendor_id: string;
   requester_user_id: string;
   status: ServiceRequestStatus;
+  origin: ServiceRequestOrigin;
   message: string | null;
   event_date: string | null;
   guest_count: number | null;
@@ -237,11 +240,11 @@ export const getEventTypeInfo = (type: EventType): EventTypeInfo => {
 };
 
 // Form types for creating/updating
-export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude' | 'is_super_vendor' | 'super_vendor_awarded_at' | 'super_vendor_reason' | 'verification_reviewed_at' | 'verification_reviewed_by' | 'logo_url' | 'show_registration_on_pdf' | 'show_vat_on_pdf'> & { logo_url?: string | null; show_registration_on_pdf?: boolean; show_vat_on_pdf?: boolean; };
+export type CreateVendor = Omit<Vendor, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'view_count' | 'added_to_events_count' | 'latitude' | 'longitude' | 'is_super_vendor' | 'super_vendor_awarded_at' | 'super_vendor_reason' | 'verification_reviewed_at' | 'verification_reviewed_by' | 'logo_url' | 'show_registration_on_pdf' | 'show_vat_on_pdf' | 'letterhead_enabled'> & { logo_url?: string | null; show_registration_on_pdf?: boolean; show_vat_on_pdf?: boolean; letterhead_enabled?: boolean; };
 export type CreateEvent = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'latitude' | 'longitude' | 'estimated_budget'>;
 export type CreateTask = Omit<Task, 'id' | 'created_at' | 'updated_at' | 'sort_order'>;
 export type CreateBudgetItem = Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>;
 export type CreateGuest = Omit<Guest, 'id' | 'created_at' | 'updated_at'>;
 export type CreateConversation = Omit<Conversation, 'id' | 'created_at' | 'updated_at' | 'last_message_at'>;
 export type CreateMessage = Omit<Message, 'id' | 'created_at' | 'read_at'>;
-export type CreateServiceRequest = Omit<ServiceRequest, 'id' | 'created_at' | 'updated_at' | 'responded_at' | 'vendor_response' | 'quoted_amount' | 'status'>;
+export type CreateServiceRequest = Omit<ServiceRequest, 'id' | 'created_at' | 'updated_at' | 'responded_at' | 'vendor_response' | 'quoted_amount' | 'status' | 'origin'>;
