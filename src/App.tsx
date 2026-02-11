@@ -37,6 +37,7 @@ import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
 import NotFound from "@/pages/NotFound";
+import { AdminGuard } from "@/components/layout/AdminGuard";
 
 const queryClient = new QueryClient();
 
@@ -88,10 +89,10 @@ function AppRoutes() {
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/bulk-vendors" element={<BulkVendorUpload />} />
-        <Route path="/admin/verification-queue" element={<VendorVerificationQueue />} />
-        <Route path="/admin/super-vendors" element={<SuperVendorManagement />} />
+        <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+        <Route path="/admin/bulk-vendors" element={<AdminGuard><BulkVendorUpload /></AdminGuard>} />
+        <Route path="/admin/verification-queue" element={<AdminGuard><VendorVerificationQueue /></AdminGuard>} />
+        <Route path="/admin/super-vendors" element={<AdminGuard><SuperVendorManagement /></AdminGuard>} />
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
