@@ -134,44 +134,44 @@ export default function OnboardingLanguage() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
           style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
         />
-        {/* Dark overlay for contrast */}
-        <div className="absolute inset-0 bg-[hsl(220_25%_8%/0.75)]" />
+        {/* Dark overlay for contrast — stronger to keep text crisp */}
+        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.82)]" />
         {/* Gradient fade at bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(220_25%_8%)] to-transparent" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-24 pb-16 grid md:grid-cols-2 gap-12 md:gap-20 items-center w-full">
-          <div className="space-y-8 text-center md:text-left">
+          <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-secondary" />
               <span className="text-xs font-medium text-white/80">Traditional ceremonies, made simpler</span>
             </div>
 
-            <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white">
+            <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
               Make ceremony<br className="hidden sm:block" /> planning feel{' '}
               <span className="text-secondary">lighter.</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/70 leading-relaxed max-w-lg mx-auto md:mx-0">
+            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
               Find trusted vendors, compare quotes, and keep everything organised — in one place.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
               <Link to="/auth?mode=signup">
                 <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all">
                   Get started — it's free
                 </Button>
               </Link>
               <Link to="/auth?mode=login">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/20 text-white hover:bg-white/10">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/25 text-white hover:bg-white/10 backdrop-blur-sm">
                   Login
                 </Button>
               </Link>
             </div>
 
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2" style={{ textShadow: 'none' }}>
               <Badge className="bg-secondary/25 text-secondary border-secondary/30 text-[11px] font-medium backdrop-blur-sm">Umembeso</Badge>
               <Badge className="bg-accent/25 text-accent border-accent/30 text-[11px] font-medium backdrop-blur-sm">Umabo</Badge>
               <Badge className="border-white/20 text-white/60 text-[11px] backdrop-blur-sm">Umbondo</Badge>
@@ -216,7 +216,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_25%_8%/0.88)]" />
+        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.85)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
           {/* Illustration */}
@@ -249,7 +249,7 @@ export default function OnboardingLanguage() {
           </div>
 
           <div className="order-1 md:order-2 space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold leading-snug text-white">
+            <h2 className="text-3xl sm:text-4xl font-bold leading-snug text-white drop-shadow-lg">
               Planning shouldn't become chaos.
             </h2>
             <ul className="space-y-5">
@@ -310,12 +310,12 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_30%_10%/0.85)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.82)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Keep the meaning. Lose the stress.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Keep the meaning. Lose the stress.</h2>
             <p className="text-lg text-white/60 mt-3">Plan your ceremony with tools that actually help.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
@@ -356,13 +356,13 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(20_30%_8%/0.88)]" />
+        <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.84)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
               <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white">Win better work with less back-and-forth.</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better work with less back-and-forth.</h2>
               <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {([
@@ -531,10 +531,10 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_30%_10%/0.82)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_6%/0.80)]" />
 
         <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Start planning with confidence.</h2>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">Start planning with confidence.</h2>
           <p className="text-white/60 text-lg max-w-md mx-auto leading-relaxed">
             Join families and vendors already using UMCIMBI to bring their ceremonies together.
           </p>
