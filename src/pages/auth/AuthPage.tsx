@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Phone, ArrowLeft, ArrowRight, CheckCircle2, Loader2, Shield, ChevronsUpDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,8 +62,12 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signIn } = useAuth();
-  const [step, setStep] = useState<'details' | 'otp' | 'success' | 'login'>('login');
+
+  // Read ?mode=signup or ?mode=login from URL to set initial view
+  const initialStep = searchParams.get('mode') === 'signup' ? 'details' : 'login';
+  const [step, setStep] = useState<'details' | 'otp' | 'success' | 'login'>(initialStep);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -367,7 +371,7 @@ export default function AuthPage() {
             <div>
               <h2 className="text-2xl font-bold mb-2">Phone Verified!</h2>
               <p className="text-muted-foreground">
-                Your account has been created successfully. Welcome to Isiko Planner, {form.first_name}!
+                Your account has been created successfully. Welcome to UMCIMBI, {form.first_name}!
               </p>
             </div>
             <Button className="w-full h-12" onClick={() => navigate('/')}>
