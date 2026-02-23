@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,6 +27,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
+  Play,
 } from 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import StepIllustration from '@/components/illustrations/StepIllustration';
@@ -50,7 +51,11 @@ export default function OnboardingLanguage() {
   // Remove shweshwe background on this page
   useEffect(() => {
     document.body.style.backgroundImage = 'none';
-    return () => { document.body.style.backgroundImage = ''; };
+    document.body.style.backgroundColor = 'transparent';
+    return () => {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundColor = '';
+    };
   }, []);
 
   const handleLangSelect = (lang: 'en' | 'zu') => {
@@ -63,13 +68,13 @@ export default function OnboardingLanguage() {
   };
 
   return (
-    <div className="min-h-screen text-foreground" style={{ backgroundImage: 'none' }}>
+    <div className="min-h-screen" style={{ backgroundImage: 'none' }}>
 
       {/* ── NAV ── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-background/95 backdrop-blur-md border-b border-border/50 shadow-sm'
+            ? 'bg-[hsl(220_25%_12%/0.95)] backdrop-blur-md border-b border-[hsl(0_0%_100%/0.08)] shadow-lg'
             : 'bg-transparent'
         }`}
       >
@@ -78,12 +83,12 @@ export default function OnboardingLanguage() {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <span className="text-sm font-bold text-primary-foreground">U</span>
             </div>
-            <span className="font-bold text-lg tracking-tight">UMCIMBI</span>
+            <span className="font-bold text-lg tracking-tight text-white">UMCIMBI</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
             {[['How', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) => (
-              <button key={id} onClick={() => scrollTo(id)} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+              <button key={id} onClick={() => scrollTo(id)} className="text-[13px] text-white/60 hover:text-white transition-colors">
                 {label}
               </button>
             ))}
@@ -91,32 +96,32 @@ export default function OnboardingLanguage() {
 
           <div className="flex items-center gap-2.5">
             <TooltipProvider>
-              <div className="hidden sm:flex rounded-full border border-border overflow-hidden text-xs">
-                <button onClick={() => handleLangSelect('en')} className="px-3 py-1.5 bg-primary text-primary-foreground font-medium">EN</button>
+              <div className="hidden sm:flex rounded-full border border-white/20 overflow-hidden text-xs">
+                <button onClick={() => handleLangSelect('en')} className="px-3 py-1.5 bg-white/15 text-white font-medium">EN</button>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button disabled className="px-3 py-1.5 text-muted-foreground cursor-not-allowed">ZU</button>
+                    <button disabled className="px-3 py-1.5 text-white/30 cursor-not-allowed">ZU</button>
                   </TooltipTrigger>
                   <TooltipContent>Coming soon</TooltipContent>
                 </Tooltip>
               </div>
             </TooltipProvider>
             <Link to="/auth?mode=login">
-              <Button variant="ghost" size="sm" className="text-[13px]">Login</Button>
+              <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
             <Link to="/auth?mode=signup" className="hidden sm:inline-flex">
               <Button size="sm" className="text-[13px] font-semibold rounded-full px-5 shadow-md shadow-primary/15">Register</Button>
             </Link>
-            <button className="md:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-background px-5 py-3 space-y-1">
+          <div className="md:hidden border-t border-white/10 bg-[hsl(220_25%_12%/0.97)] backdrop-blur-md px-5 py-3 space-y-1">
             {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) => (
-              <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-muted-foreground hover:text-foreground">{label}</button>
+              <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
             ))}
             <Link to="/auth?mode=signup" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
@@ -125,49 +130,52 @@ export default function OnboardingLanguage() {
         )}
       </header>
 
-      {/* ═══ HERO — Full-viewport immersive ═══ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-primary/[0.06] via-background to-background">
-        {/* Decorative background shapes */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-[500px] h-[500px] rounded-full bg-primary/[0.04]" />
-          <div className="absolute top-1/3 -left-32 w-[400px] h-[400px] rounded-full bg-secondary/[0.03]" />
-          <div className="absolute bottom-10 right-1/4 w-[200px] h-[200px] rounded-full bg-accent/[0.03]" />
-        </div>
+      {/* ═══ HERO — Full-viewport with background image ═══ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
+        />
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-[hsl(220_25%_8%/0.75)]" />
+        {/* Gradient fade at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(220_25%_8%)] to-transparent" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-24 pb-16 grid md:grid-cols-2 gap-12 md:gap-20 items-center w-full">
           <div className="space-y-8 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/[0.08] border border-primary/[0.12]">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-medium text-primary">Traditional ceremonies, made simpler</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5 text-secondary" />
+              <span className="text-xs font-medium text-white/80">Traditional ceremonies, made simpler</span>
             </div>
 
-            <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06]">
+            <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white">
               Make ceremony<br className="hidden sm:block" /> planning feel{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">lighter.</span>
+              <span className="text-secondary">lighter.</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto md:mx-0">
+            <p className="text-lg sm:text-xl text-white/70 leading-relaxed max-w-lg mx-auto md:mx-0">
               Find trusted vendors, compare quotes, and keep everything organised — in one place.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
               <Link to="/auth?mode=signup">
-                <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/25 transition-all">
+                <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all">
                   Get started — it's free
                 </Button>
               </Link>
               <Link to="/auth?mode=login">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full hover:bg-primary/[0.04]">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/20 text-white hover:bg-white/10">
                   Login
                 </Button>
               </Link>
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
-              <Badge className="bg-secondary/15 text-secondary border-secondary/20 text-[11px] font-medium">Umembeso</Badge>
-              <Badge className="bg-accent/15 text-accent border-accent/20 text-[11px] font-medium">Umabo</Badge>
-              <Badge variant="outline" className="text-[11px]">Umbondo</Badge>
-              <Badge variant="outline" className="text-[11px]">Umemulo</Badge>
+              <Badge className="bg-secondary/25 text-secondary border-secondary/30 text-[11px] font-medium backdrop-blur-sm">Umembeso</Badge>
+              <Badge className="bg-accent/25 text-accent border-accent/30 text-[11px] font-medium backdrop-blur-sm">Umabo</Badge>
+              <Badge className="border-white/20 text-white/60 text-[11px] backdrop-blur-sm">Umbondo</Badge>
+              <Badge className="border-white/20 text-white/60 text-[11px] backdrop-blur-sm">Umemulo</Badge>
             </div>
           </div>
 
@@ -177,9 +185,13 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ 3 PILLARS — Bold color-backed cards ═══ */}
-      <section className="relative py-24 bg-background">
+      {/* ═══ 3 PILLARS — Light cream band ═══ */}
+      <section className="relative py-28 bg-background">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">Why UMCIMBI</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Everything you need in one place</h2>
+          </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {([
               { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
@@ -190,7 +202,7 @@ export default function OnboardingLanguage() {
                 <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center mb-5`}>
                   <Icon className={`h-7 w-7 ${iconColor}`} />
                 </div>
-                <h3 className="font-bold text-lg mb-2">{title}</h3>
+                <h3 className="font-bold text-lg mb-2 text-foreground">{title}</h3>
                 <p className="text-[15px] text-muted-foreground leading-relaxed">{body}</p>
               </div>
             ))}
@@ -198,31 +210,37 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ PROBLEM — Rich colored band ═══ */}
-      <section className="relative py-24 bg-primary/[0.04]">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
+      {/* ═══ PROBLEM — Dark cinematic band with background image ═══ */}
+      <section className="relative py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-[hsl(220_25%_8%/0.88)]" />
+
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
           {/* Illustration */}
           <div className="order-2 md:order-1 flex justify-center">
             <div className="relative w-72 h-72">
-              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-destructive/[0.06] to-primary/[0.06]" />
+              <div className="absolute inset-0 rounded-[2rem] bg-white/[0.05] backdrop-blur-sm border border-white/10" />
               {/* Messy side */}
               <div className="absolute top-6 left-4 w-[44%] h-[80%] space-y-2.5">
-                <div className="h-7 rounded-lg bg-destructive/12 border border-destructive/15 rotate-[-3deg] shadow-sm" />
-                <div className="h-6 rounded-lg bg-warning/12 border border-warning/15 rotate-[2deg] ml-3 shadow-sm" />
-                <div className="h-8 rounded-lg bg-destructive/10 border border-destructive/12 rotate-[-1deg] shadow-sm" />
-                <div className="h-5 rounded-lg bg-warning/10 border border-warning/12 rotate-[3deg] ml-1 shadow-sm" />
+                <div className="h-7 rounded-lg bg-destructive/25 border border-destructive/30 rotate-[-3deg] shadow-sm" />
+                <div className="h-6 rounded-lg bg-warning/25 border border-warning/30 rotate-[2deg] ml-3 shadow-sm" />
+                <div className="h-8 rounded-lg bg-destructive/20 border border-destructive/25 rotate-[-1deg] shadow-sm" />
+                <div className="h-5 rounded-lg bg-warning/20 border border-warning/25 rotate-[3deg] ml-1 shadow-sm" />
                 <div className="text-center text-2xl mt-2">😩</div>
               </div>
               {/* Arrow */}
               <div className="absolute top-1/2 left-[48%] -translate-y-1/2">
-                <ArrowRight className="h-6 w-6 text-primary/30" />
+                <ArrowRight className="h-6 w-6 text-white/30" />
               </div>
               {/* Organised side */}
-              <div className="absolute top-8 right-3 w-[42%] h-[72%] rounded-2xl bg-card border border-border shadow-lg p-3 space-y-2.5">
+              <div className="absolute top-8 right-3 w-[42%] h-[72%] rounded-2xl bg-[hsl(220_25%_15%)] border border-white/10 shadow-lg p-3 space-y-2.5">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-primary/40" />
-                    <div className={`h-1.5 rounded bg-primary/${15 - i * 3}`} style={{ width: `${60 + i * 8}%` }} />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary/60" />
+                    <div className={`h-1.5 rounded bg-primary/30`} style={{ width: `${60 + i * 8}%` }} />
                   </div>
                 ))}
                 <div className="text-center text-2xl mt-3">😌</div>
@@ -231,7 +249,7 @@ export default function OnboardingLanguage() {
           </div>
 
           <div className="order-1 md:order-2 space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold leading-snug">
+            <h2 className="text-3xl sm:text-4xl font-bold leading-snug text-white">
               Planning shouldn't become chaos.
             </h2>
             <ul className="space-y-5">
@@ -240,8 +258,8 @@ export default function OnboardingLanguage() {
                 'Quotes come in different formats, and comparing options is hard.',
                 'Coordinating deliveries, tasks, and family expectations gets stressful fast.',
               ].map((text) => (
-                <li key={text} className="flex gap-3.5 items-start text-[15px] text-muted-foreground leading-relaxed">
-                  <span className="mt-2 w-2 h-2 rounded-full bg-accent shrink-0" />
+                <li key={text} className="flex gap-3.5 items-start text-[15px] text-white/65 leading-relaxed">
+                  <span className="mt-2 w-2 h-2 rounded-full bg-secondary shrink-0" />
                   {text}
                 </li>
               ))}
@@ -250,11 +268,12 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ HOW IT WORKS ═══ */}
-      <section id="how" className="py-24 bg-background scroll-mt-20">
+      {/* ═══ HOW IT WORKS — Light band ═══ */}
+      <section id="how" className="py-28 bg-background scroll-mt-20">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">How UMCIMBI works</h2>
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Simple process</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">How UMCIMBI works</h2>
             <p className="text-muted-foreground mt-3 text-lg">Three simple steps to your ceremony.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-8">
@@ -270,7 +289,7 @@ export default function OnboardingLanguage() {
                 <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold mx-auto shadow-lg shadow-primary/20">
                   {step}
                 </div>
-                <h3 className="font-bold text-[17px]">{title}</h3>
+                <h3 className="font-bold text-[17px] text-foreground">{title}</h3>
                 <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xs mx-auto">{body}</p>
               </div>
             ))}
@@ -285,31 +304,38 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FOR ORGANISERS — Rich warm band ═══ */}
-      <section id="organisers" className="py-24 bg-gradient-to-b from-primary/[0.05] to-primary/[0.02] scroll-mt-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      {/* ═══ FOR ORGANISERS — Immersive dark band with background image ═══ */}
+      <section id="organisers" className="relative py-28 scroll-mt-20 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-[hsl(220_30%_10%/0.85)]" />
+
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">For Organisers</h2>
-            <p className="text-lg text-muted-foreground mt-3">Keep the meaning. Lose the stress.</p>
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Keep the meaning. Lose the stress.</h2>
+            <p className="text-lg text-white/60 mt-3">Plan your ceremony with tools that actually help.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {([
               { icon: ShieldCheck, title: 'Trusted vendors you can rely on', body: 'Verified profiles, real reviews, and clearer accountability.' },
               { icon: BarChart3, title: 'Quotes you can actually compare', body: 'Clear scope and pricing so you can choose what fits your budget.' },
               { icon: Inbox, title: 'Everything organised in one place', body: 'Checklist, timelines, and messages — less chaos, more meaning.' },
-            ]).map(({ icon, title, body }) => (
-              <Card key={title} className="border border-border/50 bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-2xl">
-                <CardContent className="p-7 space-y-4">
-                  <FeatureIcon icon={icon} />
-                  <h3 className="font-semibold text-[15px]">{title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
-                </CardContent>
-              </Card>
+            ]).map(({ icon: Icon, title, body }) => (
+              <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 rounded-xl bg-primary/25 flex items-center justify-center mb-5">
+                  <Icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-[15px] text-white">{title}</h3>
+                <p className="text-sm text-white/55 leading-relaxed mt-2">{body}</p>
+              </div>
             ))}
           </div>
           <div className="text-center mt-10">
             <Link to="/auth?mode=signup">
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
+              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                 Register to start planning
               </Button>
             </Link>
@@ -317,41 +343,49 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FOR VENDORS — Warm override band ═══ */}
+      {/* ═══ FOR VENDORS — Warm override band with background image ═══ */}
       <section
         id="vendors"
-        className="py-24 scroll-mt-20"
+        className="relative py-28 scroll-mt-20 overflow-hidden"
         style={{
           '--primary': '20 75% 40%',
           '--accent': '20 65% 50%',
-          background: 'linear-gradient(to bottom, hsl(20 75% 40% / 0.06), hsl(20 75% 40% / 0.02))',
         } as React.CSSProperties}
       >
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-[hsl(20_30%_8%/0.88)]" />
+
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3">For Vendors</h2>
-              <p className="text-lg text-muted-foreground mb-10">Win better work with less back-and-forth.</p>
+              <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Vendors</p>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white">Win better work with less back-and-forth.</h2>
+              <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {([
                   { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
                   { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
                   { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' },
-                ]).map(({ icon, title, body }) => (
-                  <Card key={title} className="border border-border/50 bg-card/80 backdrop-blur hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-2xl">
-                    <CardContent className="flex gap-5 items-start p-6">
-                      <FeatureIcon icon={icon} />
-                      <div>
-                        <h3 className="font-semibold text-[15px]">{title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
+                ]).map(({ icon: Icon, title, body }) => (
+                  <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+                    <div className="flex gap-5 items-start">
+                      <div className="w-11 h-11 rounded-xl bg-primary/25 flex items-center justify-center shrink-0">
+                        <Icon className="h-5 w-5 text-primary" />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div>
+                        <h3 className="font-semibold text-[15px] text-white">{title}</h3>
+                        <p className="text-sm text-white/55 mt-1 leading-relaxed">{body}</p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
               <div className="mt-10">
                 <Link to="/auth?mode=signup">
-                  <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
+                  <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                     I'm a vendor — Register
                   </Button>
                 </Link>
@@ -361,35 +395,35 @@ export default function OnboardingLanguage() {
             {/* Vendor illustration */}
             <div className="hidden md:flex justify-center items-center">
               <div className="relative w-80 h-80">
-                <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary/[0.08] to-accent/[0.04]" />
-                <div className="absolute top-10 left-10 right-10 bottom-10 rounded-2xl bg-card border border-border shadow-xl overflow-hidden">
+                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.05] backdrop-blur-sm border border-white/10" />
+                <div className="absolute top-10 left-10 right-10 bottom-10 rounded-2xl bg-[hsl(20_20%_12%)] border border-white/10 shadow-xl overflow-hidden">
                   <div className="h-7 bg-primary flex items-center px-3">
                     <div className="w-2 h-2 rounded-full bg-primary-foreground/30" />
                     <div className="ml-2 h-1.5 w-12 rounded bg-primary-foreground/20" />
                   </div>
                   <div className="p-4 space-y-3">
-                    <div className="rounded-xl border border-primary/15 p-3 bg-primary/[0.04] space-y-1.5">
+                    <div className="rounded-xl border border-primary/20 p-3 bg-primary/[0.08] space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <div className="h-2 w-20 rounded bg-primary/15" />
-                        <div className="px-2 py-0.5 rounded-full bg-primary/15 text-[7px] font-bold text-primary">New</div>
+                        <div className="h-2 w-20 rounded bg-white/15" />
+                        <div className="px-2 py-0.5 rounded-full bg-primary/20 text-[7px] font-bold text-primary">New</div>
                       </div>
-                      <div className="h-1.5 w-24 rounded bg-muted-foreground/10" />
+                      <div className="h-1.5 w-24 rounded bg-white/8" />
                     </div>
-                    <div className="rounded-xl border border-border p-3 space-y-1.5">
+                    <div className="rounded-xl border border-white/10 p-3 space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <div className="h-2 w-16 rounded bg-foreground/10" />
-                        <div className="px-2 py-0.5 rounded-full bg-primary/10 text-[7px] font-bold text-primary">Sent</div>
+                        <div className="h-2 w-16 rounded bg-white/10" />
+                        <div className="px-2 py-0.5 rounded-full bg-primary/15 text-[7px] font-bold text-primary">Sent</div>
                       </div>
-                      <div className="h-1.5 w-20 rounded bg-muted-foreground/8" />
+                      <div className="h-1.5 w-20 rounded bg-white/6" />
                     </div>
                     <div className="flex gap-2 pt-1">
-                      <div className="flex-1 rounded-xl bg-primary/[0.08] p-2.5 text-center">
+                      <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
                         <div className="text-sm font-bold text-primary">12</div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">Leads</div>
+                        <div className="text-[8px] text-white/40 mt-0.5">Leads</div>
                       </div>
-                      <div className="flex-1 rounded-xl bg-primary/[0.08] p-2.5 text-center">
+                      <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
                         <div className="text-sm font-bold text-primary">8</div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">Booked</div>
+                        <div className="text-[8px] text-white/40 mt-0.5">Booked</div>
                       </div>
                     </div>
                   </div>
@@ -400,12 +434,19 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ CEREMONY TILES ═══ */}
-      <section className="py-24 bg-background">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      {/* ═══ CEREMONY TILES — Light band with subtle background ═══ */}
+      <section className="relative py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.92)]" />
+
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">Ceremonies we support</h2>
-            <p className="text-lg text-muted-foreground mt-3">Built for the moments that matter most.</p>
+            <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Ceremonies</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Built for the moments that matter most</h2>
+            <p className="text-lg text-muted-foreground mt-3">Supporting the ceremonies your family treasures.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-secondary" icon="🎁" />
@@ -416,12 +457,20 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ SOCIAL PROOF ═══ */}
-      <section className="py-24 bg-primary/[0.03]">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      {/* ═══ SOCIAL PROOF — Dark cinematic band ═══ */}
+      <section className="relative py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[hsl(220_25%_8%)]" />
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+          backgroundSize: '32px 32px'
+        }} />
+
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold">Loved by families and vendors</h2>
-            <p className="text-xs text-muted-foreground mt-3">Pilot testimonials will appear here after launch.</p>
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Testimonials</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Loved by families and vendors</h2>
+            <p className="text-xs text-white/40 mt-3">Pilot testimonials will appear here after launch.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
@@ -429,35 +478,34 @@ export default function OnboardingLanguage() {
               { name: 'Thabo K.', role: 'Catering vendor', quote: '"I get real ceremony requests with dates and details — no more guessing."' },
               { name: 'Zanele D.', role: 'Organiser, Gauteng', quote: '"Comparing quotes side-by-side saved us time and money."' },
             ].map((t) => (
-              <Card key={t.name} className="border border-border/40 bg-card rounded-2xl hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-7 space-y-5">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="h-4 w-4 fill-warning text-warning" />
-                    ))}
+              <div key={t.name} className="rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.08] transition-all duration-300">
+                <div className="flex gap-0.5 mb-5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="h-4 w-4 fill-warning text-warning" />
+                  ))}
+                </div>
+                <p className="text-[15px] text-white/70 italic leading-relaxed mb-6">{t.quote}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">{t.name[0]}</span>
                   </div>
-                  <p className="text-[15px] text-muted-foreground italic leading-relaxed">{t.quote}</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-bold text-primary">{t.name[0]}</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{t.name}</p>
+                    <p className="text-xs text-white/40">{t.role}</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ FAQ ═══ */}
-      <section id="faq" className="py-24 bg-background scroll-mt-20">
+      {/* ═══ FAQ — Light band ═══ */}
+      <section id="faq" className="py-28 bg-background scroll-mt-20">
         <div className="mx-auto max-w-2xl px-5 sm:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold">Frequently asked questions</h2>
+            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">FAQ</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Frequently asked questions</h2>
           </div>
           <Accordion type="single" collapsible className="space-y-3">
             {[
@@ -477,21 +525,27 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FINAL CTA — Bold band ═══ */}
-      <section className="py-24 bg-primary">
-        <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground">Start planning with confidence.</h2>
-          <p className="text-primary-foreground/70 text-lg max-w-md mx-auto leading-relaxed">
+      {/* ═══ FINAL CTA — Cinematic background image band ═══ */}
+      <section className="relative py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-[hsl(220_30%_10%/0.82)]" />
+
+        <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Start planning with confidence.</h2>
+          <p className="text-white/60 text-lg max-w-md mx-auto leading-relaxed">
             Join families and vendors already using UMCIMBI to bring their ceremonies together.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/auth?mode=signup">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-xl">
+              <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30">
                 Get started — it's free
               </Button>
             </Link>
             <Link to="/auth?mode=login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/20 text-white hover:bg-white/10">
                 Login
               </Button>
             </Link>
@@ -500,16 +554,16 @@ export default function OnboardingLanguage() {
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="border-t border-border/40 bg-background">
+      <footer className="bg-[hsl(220_25%_8%)] border-t border-white/5">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-[9px] font-bold text-primary-foreground">U</span>
             </div>
-            <span className="font-semibold text-sm">UMCIMBI</span>
+            <span className="font-semibold text-sm text-white">UMCIMBI</span>
           </div>
-          <p className="text-xs text-muted-foreground">Privacy · Terms · Contact</p>
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} UMCIMBI</p>
+          <p className="text-xs text-white/30">Privacy · Terms · Contact</p>
+          <p className="text-xs text-white/30">© {new Date().getFullYear()} UMCIMBI</p>
         </div>
       </footer>
     </div>
