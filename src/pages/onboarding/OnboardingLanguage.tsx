@@ -7,14 +7,14 @@ import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+  AccordionTrigger } from
+'@/components/ui/accordion';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  TooltipTrigger } from
+'@/components/ui/tooltip';
 import {
   ShieldCheck,
   BarChart3,
@@ -27,8 +27,8 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
-  Play,
-} from 'lucide-react';
+  Play } from
+'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import StepIllustration from '@/components/illustrations/StepIllustration';
 import CeremonyTile from '@/components/illustrations/CeremonyTile';
@@ -73,11 +73,11 @@ export default function OnboardingLanguage() {
       {/* ── NAV ── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'bg-[hsl(220_25%_12%/0.95)] backdrop-blur-md border-b border-[hsl(0_0%_100%/0.08)] shadow-lg'
-            : 'bg-transparent'
-        }`}
-      >
+        scrolled ?
+        'bg-[hsl(220_25%_12%/0.95)] backdrop-blur-md border-b border-[hsl(0_0%_100%/0.08)] shadow-lg' :
+        'bg-transparent'}`
+        }>
+
         <div className="mx-auto max-w-6xl flex items-center justify-between px-5 sm:px-8 h-16">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
@@ -87,11 +87,11 @@ export default function OnboardingLanguage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            {[['How', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) => (
-              <button key={id} onClick={() => scrollTo(id)} className="text-[13px] text-white/60 hover:text-white transition-colors">
+            {[['How', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
+            <button key={id} onClick={() => scrollTo(id)} className="text-[13px] text-white/60 hover:text-white transition-colors">
                 {label}
               </button>
-            ))}
+            )}
           </nav>
 
           <div className="flex items-center gap-2.5">
@@ -118,16 +118,16 @@ export default function OnboardingLanguage() {
           </div>
         </div>
 
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/10 bg-[hsl(220_25%_12%/0.97)] backdrop-blur-md px-5 py-3 space-y-1">
-            {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) => (
-              <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
-            ))}
+        {mobileMenuOpen &&
+        <div className="md:hidden border-t border-white/10 bg-[hsl(220_25%_12%/0.97)] backdrop-blur-md px-5 py-3 space-y-1">
+            {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
+          <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
+          )}
             <Link to="/auth?mode=signup" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
           </div>
-        )}
+        }
       </header>
 
       {/* ═══ HERO — Full-viewport with background image ═══ */}
@@ -135,8 +135,8 @@ export default function OnboardingLanguage() {
         {/* Background image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }} />
+
         {/* Dark overlay for contrast — stronger to keep text crisp */}
         <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.62)]" />
         {/* Gradient fade at bottom */}
@@ -183,19 +183,19 @@ export default function OnboardingLanguage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Everything you need in one place</h2>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
-            {([
-              { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
-              { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side — scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary/15', iconColor: 'text-secondary' },
-              { icon: Inbox, title: 'One organised plan', body: 'Tasks, messages, and confirmations in one flow.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15', iconColor: 'text-accent' },
-            ]).map(({ icon: Icon, title, body, gradient, iconBg, iconColor }) => (
-              <div key={title} className={`group rounded-3xl bg-gradient-to-b ${gradient} border border-border/40 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
+            {[
+            { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
+            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side — scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary/15', iconColor: 'text-secondary' },
+            { icon: Inbox, title: 'One organised plan', body: 'Tasks, messages, and confirmations in one flow.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15', iconColor: 'text-accent' }].
+            map(({ icon: Icon, title, body, gradient, iconBg, iconColor }) =>
+            <div key={title} className={`group rounded-3xl bg-gradient-to-b ${gradient} border border-border/40 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
                 <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center mb-5`}>
                   <Icon className={`h-7 w-7 ${iconColor}`} />
                 </div>
                 <h3 className="font-bold text-lg mb-2 text-foreground">{title}</h3>
                 <p className="text-[15px] text-muted-foreground leading-relaxed">{body}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -204,8 +204,8 @@ export default function OnboardingLanguage() {
       <section className="relative py-28 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }} />
+
         <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.65)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
@@ -215,8 +215,8 @@ export default function OnboardingLanguage() {
               {/* Before: WhatsApp-style chaos */}
               <div
                 className="absolute top-2 left-0 w-[46%] h-[92%] rounded-2xl bg-[hsl(140_40%_12%)] border border-white/8 shadow-lg overflow-hidden"
-                style={{ transform: 'rotate(-3deg)' }}
-              >
+                style={{ transform: 'rotate(-3deg)' }}>
+
                 <div className="h-6 bg-[hsl(140_40%_20%)] flex items-center px-2 gap-1.5">
                   <div className="w-3.5 h-3.5 rounded-full bg-white/20" />
                   <span className="text-[7px] font-semibold text-white/70">Family Group</span>
@@ -255,8 +255,8 @@ export default function OnboardingLanguage() {
               {/* After: Umcimbi organised view (LIGHT) */}
               <div
                 className="absolute top-2 right-0 w-[46%] h-[92%] rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden"
-                style={{ transform: 'rotate(2deg)' }}
-              >
+                style={{ transform: 'rotate(2deg)' }}>
+
                 <div className="h-6 bg-primary flex items-center px-2 gap-1.5">
                   <div className="w-3.5 h-3.5 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
                     <span className="text-[5px] font-bold text-primary-foreground">U</span>
@@ -266,19 +266,19 @@ export default function OnboardingLanguage() {
                 <div className="p-2.5 space-y-2">
                   <div className="text-[6px] text-gray-400 font-medium">Tasks</div>
                   {[
-                    { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
-                    { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
-                    { done: false, label: 'Send guest invites', tag: '86 guests' },
-                    { done: false, label: 'Finalise decor quote', tag: 'Pending' },
-                  ].map((task, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
+                  { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
+                  { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
+                  { done: false, label: 'Send guest invites', tag: '86 guests' },
+                  { done: false, label: 'Finalise decor quote', tag: 'Pending' }].
+                  map((task, i) =>
+                  <div key={i} className="flex items-center gap-1.5">
                       <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center shrink-0`}>
                         {task.done && <span className="text-[6px] text-primary-foreground">✓</span>}
                       </div>
                       <span className={`text-[6.5px] flex-1 ${task.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.label}</span>
                       <span className={`text-[5.5px] px-1 py-0.5 rounded ${task.done ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>{task.tag}</span>
                     </div>
-                  ))}
+                  )}
 
                   <div className="mt-1 pt-2 border-t border-gray-100">
                     <div className="flex justify-between text-[6px] text-gray-400 mb-1">
@@ -303,15 +303,15 @@ export default function OnboardingLanguage() {
             </h2>
             <ul className="space-y-5">
               {[
-                'Finding reliable vendors takes time — recommendations can be inconsistent.',
-                'Quotes come in different formats, and comparing options is hard.',
-                'Coordinating deliveries, tasks, and family expectations gets stressful fast.',
-              ].map((text) => (
-                <li key={text} className="flex gap-3.5 items-start text-[15px] text-white/65 leading-relaxed">
+              'Finding reliable vendors takes time — recommendations can be inconsistent.',
+              'Quotes come in different formats, and comparing options is hard.',
+              'Coordinating deliveries, tasks, and family expectations gets stressful fast.'].
+              map((text) =>
+              <li key={text} className="flex gap-3.5 items-start text-[15px] text-white/65 leading-relaxed">
                   <span className="mt-2 w-2 h-2 rounded-full bg-secondary shrink-0" />
                   {text}
                 </li>
-              ))}
+              )}
             </ul>
           </div>
         </div>
@@ -326,12 +326,12 @@ export default function OnboardingLanguage() {
             <p className="text-muted-foreground mt-3 text-lg">Three simple steps to your ceremony.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-8">
-            {([
-              { step: 1 as const, title: 'Share your ceremony needs', body: 'Type, date, location, and what you need.' },
-              { step: 2 as const, title: 'Receive & compare quotes', body: 'Vendors respond with structured quotes you can review.' },
-              { step: 3 as const, title: 'Book & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' },
-            ]).map(({ step, title, body }) => (
-              <div key={step} className="group text-center space-y-5">
+            {[
+            { step: 1 as const, title: 'Share your ceremony needs', body: 'Type, date, location, and what you need.' },
+            { step: 2 as const, title: 'Receive & compare quotes', body: 'Vendors respond with structured quotes you can review.' },
+            { step: 3 as const, title: 'Book & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' }].
+            map(({ step, title, body }) =>
+            <div key={step} className="group text-center space-y-5">
                 <div className="mx-auto w-20 h-20 rounded-3xl bg-primary/[0.08] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
                   <StepIllustration step={step} />
                 </div>
@@ -341,7 +341,7 @@ export default function OnboardingLanguage() {
                 <h3 className="font-bold text-[17px] text-foreground">{title}</h3>
                 <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xs mx-auto">{body}</p>
               </div>
-            ))}
+            )}
           </div>
           <div className="text-center mt-12">
             <Link to="/auth?mode=signup">
@@ -357,30 +357,30 @@ export default function OnboardingLanguage() {
       <section id="organisers" className="relative py-28 scroll-mt-20 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }} />
+
         <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.62)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Concentrate on planning UMCIMBI. Lose the stress.</h2>
-            <p className="text-lg text-white/60 mt-3">Plan your ceremony with tools that actually help.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Use you time to plan UMCIMBI. Lose the stress.</h2>
+            <p className="text-lg text-white/60 mt-3">Plan your UMCIMBI with tools that actually help.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
-            {([
-              { icon: ShieldCheck, title: 'Trusted vendors you can rely on', body: 'Verified profiles, real reviews, and clearer accountability.' },
-              { icon: BarChart3, title: 'Quotes you can actually compare', body: 'Clear scope and pricing so you can choose what fits your budget.' },
-              { icon: Inbox, title: 'Everything organised in one place', body: 'Checklist, timelines, and messages — less chaos, more meaning.' },
-            ]).map(({ icon: Icon, title, body }) => (
-              <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+            {[
+            { icon: ShieldCheck, title: 'Trusted vendors you can rely on', body: 'Verified profiles, real reviews, and clearer accountability.' },
+            { icon: BarChart3, title: 'Quotes you can actually compare', body: 'Clear scope and pricing so you can choose what fits your budget.' },
+            { icon: Inbox, title: 'Everything organised in one place', body: 'Checklist, timelines, and messages — less chaos, more meaning.' }].
+            map(({ icon: Icon, title, body }) =>
+            <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
                 <div className="w-12 h-12 rounded-xl bg-primary/25 flex items-center justify-center mb-5">
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold text-[15px] text-white">{title}</h3>
                 <p className="text-sm text-white/55 leading-relaxed mt-2">{body}</p>
               </div>
-            ))}
+            )}
           </div>
           <div className="text-center mt-10">
             <Link to="/auth?mode=signup">
@@ -398,13 +398,13 @@ export default function OnboardingLanguage() {
         className="relative py-28 scroll-mt-20 overflow-hidden"
         style={{
           '--primary': '20 75% 40%',
-          '--accent': '20 65% 50%',
-        } as React.CSSProperties}
-      >
+          '--accent': '20 65% 50%'
+        } as React.CSSProperties}>
+
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }} />
+
         <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.64)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
@@ -414,12 +414,12 @@ export default function OnboardingLanguage() {
               <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better work with less back-and-forth.</h2>
               <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
-                {([
-                  { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
-                  { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
-                  { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' },
-                ]).map(({ icon: Icon, title, body }) => (
-                  <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+                {[
+                { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
+                { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
+                { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' }].
+                map(({ icon: Icon, title, body }) =>
+                <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
                     <div className="flex gap-5 items-start">
                       <div className="w-11 h-11 rounded-xl bg-primary/25 flex items-center justify-center shrink-0">
                         <Icon className="h-5 w-5 text-primary" />
@@ -430,7 +430,7 @@ export default function OnboardingLanguage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
               <div className="mt-10">
                 <Link to="/auth?mode=signup">
@@ -539,8 +539,8 @@ export default function OnboardingLanguage() {
       <section className="relative py-28 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }} />
+
         <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.82)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
@@ -561,16 +561,16 @@ export default function OnboardingLanguage() {
             <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Also supporting</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
-                { icon: '🤝', name: 'Lobola' },
-                { icon: '👶', name: 'Imbeleko' },
-                { icon: '👨‍👩‍👦', name: 'Family Introduction' },
-                { icon: '🕯️', name: 'Funeral' },
-                { icon: '🙏', name: 'Ancestral Ritual' },
-              ].map((c) => (
-                <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground shadow-sm">
+              { icon: '🤝', name: 'Lobola' },
+              { icon: '👶', name: 'Imbeleko' },
+              { icon: '👨‍👩‍👦', name: 'Family Introduction' },
+              { icon: '🕯️', name: 'Funeral' },
+              { icon: '🙏', name: 'Ancestral Ritual' }].
+              map((c) =>
+              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground shadow-sm">
                   <span>{c.icon}</span> {c.name}
                 </span>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -593,15 +593,15 @@ export default function OnboardingLanguage() {
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { name: 'Nomsa M.', role: 'Organiser, KZN', quote: '"Made planning our Umembeso so much easier. Finally, one place for everything."' },
-              { name: 'Thabo K.', role: 'Catering vendor', quote: '"I get real ceremony requests with dates and details — no more guessing."' },
-              { name: 'Zanele D.', role: 'Organiser, Gauteng', quote: '"Comparing quotes side-by-side saved us time and money."' },
-            ].map((t) => (
-              <div key={t.name} className="rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.08] transition-all duration-300">
+            { name: 'Nomsa M.', role: 'Organiser, KZN', quote: '"Made planning our Umembeso so much easier. Finally, one place for everything."' },
+            { name: 'Thabo K.', role: 'Catering vendor', quote: '"I get real ceremony requests with dates and details — no more guessing."' },
+            { name: 'Zanele D.', role: 'Organiser, Gauteng', quote: '"Comparing quotes side-by-side saved us time and money."' }].
+            map((t) =>
+            <div key={t.name} className="rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.08] transition-all duration-300">
                 <div className="flex gap-0.5 mb-5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className="h-4 w-4 fill-warning text-warning" />
-                  ))}
+                  {[1, 2, 3, 4, 5].map((s) =>
+                <Star key={s} className="h-4 w-4 fill-warning text-warning" />
+                )}
                 </div>
                 <p className="text-[15px] text-white/70 italic leading-relaxed mb-6">{t.quote}</p>
                 <div className="flex items-center gap-3">
@@ -614,7 +614,7 @@ export default function OnboardingLanguage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -628,18 +628,18 @@ export default function OnboardingLanguage() {
           </div>
           <Accordion type="single" collapsible className="space-y-3">
             {[
-              { q: 'What is UMCIMBI?', a: 'UMCIMBI is a platform that helps you plan traditional South African ceremonies by connecting you with trusted, verified vendors. You can request quotes, compare options, and manage your entire ceremony plan in one place.' },
-              { q: 'Is it free?', a: 'Creating an account and browsing vendors is free for organisers. Vendors can join and respond to requests at no cost during our launch period.' },
-              { q: 'How do quotes work?', a: 'You submit a service request describing what you need. Vendors respond with structured quotes including scope, pricing, and terms — making it easy to compare.' },
-              { q: 'How do vendors get verified?', a: 'Vendors can submit verification documents including business registration, proof of address, and bank confirmation. Our team reviews submissions to ensure accountability.' },
-              { q: 'When will isiZulu be available?', a: 'We\'re actively working on full isiZulu language support. It\'s coming soon — you\'ll be able to switch languages in your settings.' },
-              { q: 'Can organisers and vendors use the same account?', a: 'Yes! You can register as an organiser and later add a vendor profile to the same account.' },
-            ].map(({ q, a }, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="border border-border/50 rounded-2xl px-6 bg-card">
+            { q: 'What is UMCIMBI?', a: 'UMCIMBI is a platform that helps you plan traditional South African ceremonies by connecting you with trusted, verified vendors. You can request quotes, compare options, and manage your entire ceremony plan in one place.' },
+            { q: 'Is it free?', a: 'Creating an account and browsing vendors is free for organisers. Vendors can join and respond to requests at no cost during our launch period.' },
+            { q: 'How do quotes work?', a: 'You submit a service request describing what you need. Vendors respond with structured quotes including scope, pricing, and terms — making it easy to compare.' },
+            { q: 'How do vendors get verified?', a: 'Vendors can submit verification documents including business registration, proof of address, and bank confirmation. Our team reviews submissions to ensure accountability.' },
+            { q: 'When will isiZulu be available?', a: 'We\'re actively working on full isiZulu language support. It\'s coming soon — you\'ll be able to switch languages in your settings.' },
+            { q: 'Can organisers and vendors use the same account?', a: 'Yes! You can register as an organiser and later add a vendor profile to the same account.' }].
+            map(({ q, a }, i) =>
+            <AccordionItem key={i} value={`faq-${i}`} className="border border-border/50 rounded-2xl px-6 bg-card">
                 <AccordionTrigger className="text-[15px] font-medium hover:no-underline py-5">{q}</AccordionTrigger>
                 <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed pb-5">{a}</AccordionContent>
               </AccordionItem>
-            ))}
+            )}
           </Accordion>
         </div>
       </section>
@@ -648,8 +648,8 @@ export default function OnboardingLanguage() {
       <section className="relative py-28 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }}
-        />
+          style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }} />
+
         <div className="absolute inset-0 bg-[hsl(220_30%_6%/0.60)]" />
 
         <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
@@ -685,6 +685,6 @@ export default function OnboardingLanguage() {
           <p className="text-xs text-white/30">© {new Date().getFullYear()} UMCIMBI</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
