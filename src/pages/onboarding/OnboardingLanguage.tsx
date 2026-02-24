@@ -417,8 +417,7 @@ export default function OnboardingLanguage() {
                 {[
                 { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
                 { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
-                { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' },
-                { icon: Star, title: 'Build your reputation', body: 'Earn reviews, showcase past work, and stand out to new clients.' }].
+                { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' }].
                 map(({ icon: Icon, title, body }) =>
                 <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
                     <div className="flex gap-5 items-start">
