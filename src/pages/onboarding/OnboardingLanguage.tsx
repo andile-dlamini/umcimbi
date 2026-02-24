@@ -95,17 +95,7 @@ export default function OnboardingLanguage() {
           </nav>
 
           <div className="flex items-center gap-2.5">
-            <TooltipProvider>
-              <div className="hidden sm:flex rounded-full border border-white/20 overflow-hidden text-xs">
-                <button onClick={() => handleLangSelect('en')} className="px-3 py-1.5 bg-white/15 text-white font-medium">EN</button>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button disabled className="px-3 py-1.5 text-white/30 cursor-not-allowed">ZU</button>
-                  </TooltipTrigger>
-                  <TooltipContent>Coming soon</TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
+            
             <Link to="/auth?mode=login">
               <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
