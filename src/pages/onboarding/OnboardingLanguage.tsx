@@ -219,31 +219,92 @@ export default function OnboardingLanguage() {
         <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.85)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
-          {/* Illustration */}
+          {/* Illustration — WhatsApp chaos vs Umcimbi organised */}
           <div className="order-2 md:order-1 flex justify-center">
-            <div className="relative w-72 h-72">
-              <div className="absolute inset-0 rounded-[2rem] bg-white/[0.05] backdrop-blur-sm border border-white/10" />
-              {/* Messy side */}
-              <div className="absolute top-6 left-4 w-[44%] h-[80%] space-y-2.5">
-                <div className="h-7 rounded-lg bg-destructive/25 border border-destructive/30 rotate-[-3deg] shadow-sm" />
-                <div className="h-6 rounded-lg bg-warning/25 border border-warning/30 rotate-[2deg] ml-3 shadow-sm" />
-                <div className="h-8 rounded-lg bg-destructive/20 border border-destructive/25 rotate-[-1deg] shadow-sm" />
-                <div className="h-5 rounded-lg bg-warning/20 border border-warning/25 rotate-[3deg] ml-1 shadow-sm" />
-                <div className="text-center text-2xl mt-2">😩</div>
-              </div>
-              {/* Arrow */}
-              <div className="absolute top-1/2 left-[48%] -translate-y-1/2">
-                <ArrowRight className="h-6 w-6 text-white/30" />
-              </div>
-              {/* Organised side */}
-              <div className="absolute top-8 right-3 w-[42%] h-[72%] rounded-2xl bg-[hsl(220_25%_15%)] border border-white/10 shadow-lg p-3 space-y-2.5">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-primary/60" />
-                    <div className={`h-1.5 rounded bg-primary/30`} style={{ width: `${60 + i * 8}%` }} />
+            <div className="relative w-80 h-80">
+              {/* Before: WhatsApp-style chaos */}
+              <div
+                className="absolute top-2 left-0 w-[46%] h-[92%] rounded-2xl bg-[hsl(140_40%_12%)] border border-white/8 shadow-lg overflow-hidden"
+                style={{ transform: 'rotate(-3deg)' }}
+              >
+                <div className="h-6 bg-[hsl(140_40%_20%)] flex items-center px-2 gap-1.5">
+                  <div className="w-3.5 h-3.5 rounded-full bg-white/20" />
+                  <span className="text-[7px] font-semibold text-white/70">Family Group</span>
+                </div>
+                <div className="p-2 space-y-1.5">
+                  {/* Chat bubbles — messy planning */}
+                  <div className="ml-auto w-[80%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
+                    <span className="text-[6px] text-white/80">Does anyone have a tent guy? Need one urgently 😩</span>
                   </div>
-                ))}
-                <div className="text-center text-2xl mt-3">😌</div>
+                  <div className="w-[75%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
+                    <span className="text-[6px] text-white/60">My cousin knows someone but he's expensive</span>
+                  </div>
+                  <div className="ml-auto w-[70%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
+                    <span className="text-[6px] text-white/80">How much is the catering?? No one sent me the quote</span>
+                  </div>
+                  <div className="w-[65%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
+                    <span className="text-[6px] text-white/60">Check the other group</span>
+                  </div>
+                  <div className="ml-auto w-[85%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
+                    <span className="text-[6px] text-white/80">What's the budget again? I'm lost 😭</span>
+                  </div>
+                  <div className="w-[60%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
+                    <span className="text-[6px] text-white/60">Ask MaZulu she has the list</span>
+                  </div>
+                </div>
+                <div className="absolute bottom-2 left-2 right-2 text-center">
+                  <span className="text-[7px] font-semibold text-destructive/80 bg-destructive/10 px-2 py-0.5 rounded">Before</span>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="absolute top-1/2 left-[46%] -translate-y-1/2 z-10">
+                <ArrowRight className="h-6 w-6 text-white/25" />
+              </div>
+
+              {/* After: Umcimbi organised view */}
+              <div
+                className="absolute top-2 right-0 w-[46%] h-[92%] rounded-2xl bg-[hsl(220_20%_13%)] border border-white/10 shadow-xl overflow-hidden"
+                style={{ transform: 'rotate(2deg)' }}
+              >
+                <div className="h-6 bg-primary flex items-center px-2 gap-1.5">
+                  <div className="w-3.5 h-3.5 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
+                    <span className="text-[5px] font-bold text-primary-foreground">U</span>
+                  </div>
+                  <span className="text-[7px] font-semibold text-primary-foreground/80">Umembeso Plan</span>
+                </div>
+                <div className="p-2.5 space-y-2">
+                  {/* Task checklist */}
+                  <div className="text-[6px] text-white/40 font-medium">Tasks</div>
+                  {[
+                    { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
+                    { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
+                    { done: false, label: 'Send guest invites', tag: '86 guests' },
+                    { done: false, label: 'Finalise decor quote', tag: 'Pending' },
+                  ].map((task, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-white/20'} flex items-center justify-center shrink-0`}>
+                        {task.done && <span className="text-[6px] text-primary-foreground">✓</span>}
+                      </div>
+                      <span className={`text-[6.5px] flex-1 ${task.done ? 'text-white/40 line-through' : 'text-white/70'}`}>{task.label}</span>
+                      <span className={`text-[5.5px] px-1 py-0.5 rounded ${task.done ? 'bg-primary/15 text-primary' : 'bg-white/8 text-white/35'}`}>{task.tag}</span>
+                    </div>
+                  ))}
+
+                  {/* Mini budget bar */}
+                  <div className="mt-1 pt-2 border-t border-white/6">
+                    <div className="flex justify-between text-[6px] text-white/40 mb-1">
+                      <span>Budget</span>
+                      <span className="text-primary font-semibold">R 28,500 / R 45,000</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-white/10">
+                      <div className="h-1.5 rounded-full bg-primary w-[63%]" />
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute bottom-2 left-2 right-2 text-center">
+                  <span className="text-[7px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded">After</span>
+                </div>
               </div>
             </div>
           </div>
@@ -392,38 +453,90 @@ export default function OnboardingLanguage() {
               </div>
             </div>
 
-            {/* Vendor illustration */}
+            {/* Vendor illustration — Vendor Dashboard */}
             <div className="hidden md:flex justify-center items-center">
-              <div className="relative w-80 h-80">
-                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.05] backdrop-blur-sm border border-white/10" />
-                <div className="absolute top-10 left-10 right-10 bottom-10 rounded-2xl bg-[hsl(20_20%_12%)] border border-white/10 shadow-xl overflow-hidden">
-                  <div className="h-7 bg-primary flex items-center px-3">
-                    <div className="w-2 h-2 rounded-full bg-primary-foreground/30" />
-                    <div className="ml-2 h-1.5 w-12 rounded bg-primary-foreground/20" />
+              <div className="relative w-80 h-96">
+                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.04] border border-white/8" />
+                <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-[hsl(20_15%_11%)] border border-white/10 shadow-xl overflow-hidden">
+                  {/* Header */}
+                  <div className="h-8 bg-primary flex items-center justify-between px-3">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
+                        <span className="text-[6px] font-bold text-primary-foreground">U</span>
+                      </div>
+                      <span className="text-[8px] font-semibold text-primary-foreground/80">Vendor Dashboard</span>
+                    </div>
+                    <div className="w-5 h-5 rounded-full bg-primary-foreground/15 flex items-center justify-center">
+                      <span className="text-[7px] text-primary-foreground/60">🔔</span>
+                    </div>
                   </div>
-                  <div className="p-4 space-y-3">
-                    <div className="rounded-xl border border-primary/20 p-3 bg-primary/[0.08] space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <div className="h-2 w-20 rounded bg-white/15" />
-                        <div className="px-2 py-0.5 rounded-full bg-primary/20 text-[7px] font-bold text-primary">New</div>
-                      </div>
-                      <div className="h-1.5 w-24 rounded bg-white/8" />
+
+                  {/* Stats row */}
+                  <div className="flex gap-2 p-3">
+                    <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
+                      <div className="text-[14px] font-bold text-primary">12</div>
+                      <div className="text-[7px] text-white/40">New Leads</div>
                     </div>
-                    <div className="rounded-xl border border-white/10 p-3 space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <div className="h-2 w-16 rounded bg-white/10" />
-                        <div className="px-2 py-0.5 rounded-full bg-primary/15 text-[7px] font-bold text-primary">Sent</div>
-                      </div>
-                      <div className="h-1.5 w-20 rounded bg-white/6" />
+                    <div className="flex-1 rounded-xl bg-secondary/[0.12] p-2.5 text-center">
+                      <div className="text-[14px] font-bold text-secondary">8</div>
+                      <div className="text-[7px] text-white/40">Booked</div>
                     </div>
-                    <div className="flex gap-2 pt-1">
-                      <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
-                        <div className="text-sm font-bold text-primary">12</div>
-                        <div className="text-[8px] text-white/40 mt-0.5">Leads</div>
+                    <div className="flex-1 rounded-xl bg-white/[0.06] p-2.5 text-center">
+                      <div className="text-[14px] font-bold text-white/70">R 94k</div>
+                      <div className="text-[7px] text-white/40">Revenue</div>
+                    </div>
+                  </div>
+
+                  {/* Incoming requests */}
+                  <div className="px-3 pb-1">
+                    <div className="text-[7px] text-white/40 font-medium mb-2">Incoming Requests</div>
+                    
+                    {/* Request 1 — new */}
+                    <div className="rounded-xl border border-primary/20 p-2.5 bg-primary/[0.06] mb-2">
+                      <div className="flex justify-between items-start mb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span className="text-[7px] font-bold text-primary">N</span>
+                          </div>
+                          <div>
+                            <div className="text-[7px] font-semibold text-white">Nomsa M.</div>
+                            <div className="text-[5.5px] text-white/35">Umembeso · 15 Mar · 100 guests</div>
+                          </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 rounded-full bg-primary/20">
+                          <span className="text-[6px] font-bold text-primary">New</span>
+                        </div>
                       </div>
-                      <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
-                        <div className="text-sm font-bold text-primary">8</div>
-                        <div className="text-[8px] text-white/40 mt-0.5">Booked</div>
+                      <div className="text-[6px] text-white/45 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
+                      <div className="flex gap-1.5">
+                        <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
+                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quote</span>
+                        </div>
+                        <div className="h-5 px-2 rounded-lg bg-white/8 flex items-center justify-center">
+                          <span className="text-[6px] text-white/40">Decline</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Request 2 — quoted */}
+                    <div className="rounded-xl border border-white/8 p-2.5 bg-white/[0.03]">
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-secondary/20 flex items-center justify-center">
+                            <span className="text-[7px] font-bold text-secondary">Z</span>
+                          </div>
+                          <div>
+                            <div className="text-[7px] font-semibold text-white">Zanele D.</div>
+                            <div className="text-[5.5px] text-white/35">Umabo · 22 Apr · 80 guests</div>
+                          </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 rounded-full bg-secondary/15">
+                          <span className="text-[6px] font-bold text-secondary">Quoted</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[6px] text-white/35">Your quote: R 9,800</span>
+                        <span className="text-[6px] text-white/25">Awaiting response</span>
                       </div>
                     </div>
                   </div>
