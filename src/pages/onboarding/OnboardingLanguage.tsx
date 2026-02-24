@@ -740,7 +740,7 @@ export default function OnboardingLanguage() {
               </Button>
             </Link>
             <Link to="/auth?mode=login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/20 text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/30 !text-white bg-white/10 hover:bg-white/15">
                 Login
               </Button>
             </Link>
