@@ -441,9 +441,9 @@ export default function OnboardingLanguage() {
               </div>
             </div>
 
-            {/* Vendor illustration — Vendor Dashboard */}
-            <div className="hidden md:flex justify-center items-center">
-              <div className="relative w-80 h-96">
+            {/* Vendor illustration — Vendor Dashboard + Bookings */}
+            <div className="hidden md:flex flex-col justify-center items-center gap-5">
+              <div className="relative w-80 h-80">
                 <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
                 <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Header */}
@@ -525,6 +525,82 @@ export default function OnboardingLanguage() {
                       <div className="flex justify-between items-center">
                         <span className="text-[6px] text-gray-500">Your quote: R 9,800</span>
                         <span className="text-[6px] text-gray-400">Awaiting response</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bookings & Quotes mockup */}
+              <div className="relative w-80 h-64">
+                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
+                <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
+                  {/* Header */}
+                  <div className="h-7 bg-primary flex items-center justify-between px-3">
+                    <span className="text-[8px] font-semibold text-primary-foreground/80">My Bookings</span>
+                    <div className="px-1.5 py-0.5 rounded-full bg-primary-foreground/15">
+                      <span className="text-[6px] font-bold text-primary-foreground/70">3 Active</span>
+                    </div>
+                  </div>
+
+                  <div className="px-3 py-2 space-y-2">
+                    {/* Booking 1 — confirmed */}
+                    <div className="rounded-xl border border-green-200 p-2 bg-green-50/60">
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                            <span className="text-[7px]">✓</span>
+                          </div>
+                          <div>
+                            <div className="text-[7px] font-semibold text-gray-800">Thandi K. — Umabo</div>
+                            <div className="text-[5.5px] text-gray-400">22 Mar · Durban</div>
+                          </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 rounded-full bg-green-100">
+                          <span className="text-[6px] font-bold text-green-700">Confirmed</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[6px] text-gray-500">R 12,500</span>
+                        <span className="text-[6px] text-green-600 font-medium">Deposit paid</span>
+                      </div>
+                    </div>
+
+                    {/* Booking 2 — pending deposit */}
+                    <div className="rounded-xl border border-amber-200 p-2 bg-amber-50/60">
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
+                            <span className="text-[7px]">⏳</span>
+                          </div>
+                          <div>
+                            <div className="text-[7px] font-semibold text-gray-800">Sipho N. — Lobola</div>
+                            <div className="text-[5.5px] text-gray-400">5 Apr · Pretoria</div>
+                          </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 rounded-full bg-amber-100">
+                          <span className="text-[6px] font-bold text-amber-700">Pending</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[6px] text-gray-500">R 8,200</span>
+                        <span className="text-[6px] text-amber-600 font-medium">Awaiting deposit</span>
+                      </div>
+                    </div>
+
+                    {/* Booking 3 — completed */}
+                    <div className="rounded-xl border border-gray-100 p-2 bg-gray-50">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                            <span className="text-[7px]">★</span>
+                          </div>
+                          <div>
+                            <div className="text-[7px] font-semibold text-gray-600">Busi M. — Umemulo</div>
+                            <div className="text-[5.5px] text-gray-400">Completed · ★ 5.0 review</div>
+                          </div>
+                        </div>
+                        <span className="text-[6px] text-gray-400">R 6,500</span>
                       </div>
                     </div>
                   </div>
