@@ -146,7 +146,7 @@ export default function OnboardingLanguage() {
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-secondary" />
-              <span className="text-xs font-medium text-white/80">Traditional ceremonies, made simpler</span>
+              <span className="text-xs font-medium text-white/80">UMCIMBI, made simpler</span>
             </div>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
