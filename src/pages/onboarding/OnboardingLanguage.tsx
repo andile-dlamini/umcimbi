@@ -134,7 +134,7 @@ export default function OnboardingLanguage() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
         />
         {/* Dark overlay for contrast — stronger to keep text crisp */}
