@@ -138,9 +138,9 @@ export default function OnboardingLanguage() {
           style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
         />
         {/* Dark overlay for contrast — stronger to keep text crisp */}
-        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.82)]" />
+        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.62)]" />
         {/* Gradient fade at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(220_25%_8%)] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(220_25%_8%/0.7)] to-transparent" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-24 pb-16 grid md:grid-cols-2 gap-12 md:gap-20 items-center w-full">
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
@@ -216,7 +216,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.85)]" />
+        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.65)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
           {/* Illustration — WhatsApp chaos vs Umcimbi organised */}
@@ -369,7 +369,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.82)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.62)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
@@ -415,7 +415,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.84)]" />
+        <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.64)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
@@ -551,7 +551,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.92)]" />
+        <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.82)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
@@ -642,7 +642,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }}
         />
-        <div className="absolute inset-0 bg-[hsl(220_30%_6%/0.80)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_6%/0.60)]" />
 
         <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">Start planning with confidence.</h2>
