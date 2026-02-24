@@ -150,7 +150,7 @@ export default function OnboardingLanguage() {
             </div>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Make ceremony<br className="hidden sm:block" /> planning feel{' '}
+              Make UMCIMBI<br className="hidden sm:block" /> planning feel{' '}
               <span className="text-secondary">lighter.</span>
             </h1>
 
