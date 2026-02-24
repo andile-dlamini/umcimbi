@@ -565,6 +565,24 @@ export default function OnboardingLanguage() {
             <CeremonyTile name="Umbondo" description="The bride's family delivers groceries and essentials." categories={['Transport', 'Groceries', 'Planning']} accentClass="bg-muted" icon="🧺" />
             <CeremonyTile name="Umemulo" description="A coming-of-age celebration for a young woman." categories={['Catering', 'Attire', 'Music']} accentClass="bg-muted" icon="🌸" />
           </div>
+
+          {/* Additional ceremony types */}
+          <div className="mt-8 text-center">
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Also supporting</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { icon: '🤝', name: 'Lobola' },
+                { icon: '👶', name: 'Imbeleko' },
+                { icon: '👨‍👩‍👦', name: 'Family Introduction' },
+                { icon: '🕯️', name: 'Funeral' },
+                { icon: '🙏', name: 'Ancestral Ritual' },
+              ].map((c) => (
+                <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground shadow-sm">
+                  <span>{c.icon}</span> {c.name}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
