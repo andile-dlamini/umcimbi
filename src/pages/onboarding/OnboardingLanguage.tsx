@@ -262,9 +262,9 @@ export default function OnboardingLanguage() {
                 <ArrowRight className="h-6 w-6 text-white/25" />
               </div>
 
-              {/* After: Umcimbi organised view */}
+              {/* After: Umcimbi organised view (LIGHT) */}
               <div
-                className="absolute top-2 right-0 w-[46%] h-[92%] rounded-2xl bg-[hsl(220_20%_13%)] border border-white/10 shadow-xl overflow-hidden"
+                className="absolute top-2 right-0 w-[46%] h-[92%] rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden"
                 style={{ transform: 'rotate(2deg)' }}
               >
                 <div className="h-6 bg-primary flex items-center px-2 gap-1.5">
@@ -274,8 +274,7 @@ export default function OnboardingLanguage() {
                   <span className="text-[7px] font-semibold text-primary-foreground/80">Umembeso Plan</span>
                 </div>
                 <div className="p-2.5 space-y-2">
-                  {/* Task checklist */}
-                  <div className="text-[6px] text-white/40 font-medium">Tasks</div>
+                  <div className="text-[6px] text-gray-400 font-medium">Tasks</div>
                   {[
                     { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
                     { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
@@ -283,27 +282,26 @@ export default function OnboardingLanguage() {
                     { done: false, label: 'Finalise decor quote', tag: 'Pending' },
                   ].map((task, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-white/20'} flex items-center justify-center shrink-0`}>
+                      <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center shrink-0`}>
                         {task.done && <span className="text-[6px] text-primary-foreground">✓</span>}
                       </div>
-                      <span className={`text-[6.5px] flex-1 ${task.done ? 'text-white/40 line-through' : 'text-white/70'}`}>{task.label}</span>
-                      <span className={`text-[5.5px] px-1 py-0.5 rounded ${task.done ? 'bg-primary/15 text-primary' : 'bg-white/8 text-white/35'}`}>{task.tag}</span>
+                      <span className={`text-[6.5px] flex-1 ${task.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.label}</span>
+                      <span className={`text-[5.5px] px-1 py-0.5 rounded ${task.done ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>{task.tag}</span>
                     </div>
                   ))}
 
-                  {/* Mini budget bar */}
-                  <div className="mt-1 pt-2 border-t border-white/6">
-                    <div className="flex justify-between text-[6px] text-white/40 mb-1">
+                  <div className="mt-1 pt-2 border-t border-gray-100">
+                    <div className="flex justify-between text-[6px] text-gray-400 mb-1">
                       <span>Budget</span>
                       <span className="text-primary font-semibold">R 28,500 / R 45,000</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-white/10">
+                    <div className="h-1.5 rounded-full bg-gray-100">
                       <div className="h-1.5 rounded-full bg-primary w-[63%]" />
                     </div>
                   </div>
                 </div>
                 <div className="absolute bottom-2 left-2 right-2 text-center">
-                  <span className="text-[7px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded">After</span>
+                  <span className="text-[7px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">After</span>
                 </div>
               </div>
             </div>
@@ -456,8 +454,8 @@ export default function OnboardingLanguage() {
             {/* Vendor illustration — Vendor Dashboard */}
             <div className="hidden md:flex justify-center items-center">
               <div className="relative w-80 h-96">
-                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.04] border border-white/8" />
-                <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-[hsl(20_15%_11%)] border border-white/10 shadow-xl overflow-hidden">
+                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
+                <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Header */}
                   <div className="h-8 bg-primary flex items-center justify-between px-3">
                     <div className="flex items-center gap-1.5">
@@ -472,71 +470,71 @@ export default function OnboardingLanguage() {
                   </div>
 
                   {/* Stats row */}
-                  <div className="flex gap-2 p-3">
-                    <div className="flex-1 rounded-xl bg-primary/[0.12] p-2.5 text-center">
+                  <div className="flex gap-2 p-3 bg-gray-50">
+                    <div className="flex-1 rounded-xl bg-primary/10 p-2.5 text-center">
                       <div className="text-[14px] font-bold text-primary">12</div>
-                      <div className="text-[7px] text-white/40">New Leads</div>
+                      <div className="text-[7px] text-gray-400">New Leads</div>
                     </div>
-                    <div className="flex-1 rounded-xl bg-secondary/[0.12] p-2.5 text-center">
+                    <div className="flex-1 rounded-xl bg-secondary/10 p-2.5 text-center">
                       <div className="text-[14px] font-bold text-secondary">8</div>
-                      <div className="text-[7px] text-white/40">Booked</div>
+                      <div className="text-[7px] text-gray-400">Booked</div>
                     </div>
-                    <div className="flex-1 rounded-xl bg-white/[0.06] p-2.5 text-center">
-                      <div className="text-[14px] font-bold text-white/70">R 94k</div>
-                      <div className="text-[7px] text-white/40">Revenue</div>
+                    <div className="flex-1 rounded-xl bg-gray-100 p-2.5 text-center">
+                      <div className="text-[14px] font-bold text-gray-700">R 94k</div>
+                      <div className="text-[7px] text-gray-400">Revenue</div>
                     </div>
                   </div>
 
                   {/* Incoming requests */}
                   <div className="px-3 pb-1">
-                    <div className="text-[7px] text-white/40 font-medium mb-2">Incoming Requests</div>
+                    <div className="text-[7px] text-gray-400 font-medium mb-2">Incoming Requests</div>
                     
                     {/* Request 1 — new */}
-                    <div className="rounded-xl border border-primary/20 p-2.5 bg-primary/[0.06] mb-2">
+                    <div className="rounded-xl border border-primary/15 p-2.5 bg-primary/[0.04] mb-2">
                       <div className="flex justify-between items-start mb-1.5">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
                             <span className="text-[7px] font-bold text-primary">N</span>
                           </div>
                           <div>
-                            <div className="text-[7px] font-semibold text-white">Nomsa M.</div>
-                            <div className="text-[5.5px] text-white/35">Umembeso · 15 Mar · 100 guests</div>
+                            <div className="text-[7px] font-semibold text-gray-800">Nomsa M.</div>
+                            <div className="text-[5.5px] text-gray-400">Umembeso · 15 Mar · 100 guests</div>
                           </div>
                         </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-primary/20">
+                        <div className="px-1.5 py-0.5 rounded-full bg-primary/15">
                           <span className="text-[6px] font-bold text-primary">New</span>
                         </div>
                       </div>
-                      <div className="text-[6px] text-white/45 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
+                      <div className="text-[6px] text-gray-500 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
                       <div className="flex gap-1.5">
                         <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
                           <span className="text-[6px] font-semibold text-primary-foreground">Send Quote</span>
                         </div>
-                        <div className="h-5 px-2 rounded-lg bg-white/8 flex items-center justify-center">
-                          <span className="text-[6px] text-white/40">Decline</span>
+                        <div className="h-5 px-2 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <span className="text-[6px] text-gray-400">Decline</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Request 2 — quoted */}
-                    <div className="rounded-xl border border-white/8 p-2.5 bg-white/[0.03]">
+                    <div className="rounded-xl border border-gray-100 p-2.5 bg-gray-50">
                       <div className="flex justify-between items-center mb-1">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-secondary/20 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-secondary/15 flex items-center justify-center">
                             <span className="text-[7px] font-bold text-secondary">Z</span>
                           </div>
                           <div>
-                            <div className="text-[7px] font-semibold text-white">Zanele D.</div>
-                            <div className="text-[5.5px] text-white/35">Umabo · 22 Apr · 80 guests</div>
+                            <div className="text-[7px] font-semibold text-gray-800">Zanele D.</div>
+                            <div className="text-[5.5px] text-gray-400">Umabo · 22 Apr · 80 guests</div>
                           </div>
                         </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-secondary/15">
+                        <div className="px-1.5 py-0.5 rounded-full bg-secondary/10">
                           <span className="text-[6px] font-bold text-secondary">Quoted</span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[6px] text-white/35">Your quote: R 9,800</span>
-                        <span className="text-[6px] text-white/25">Awaiting response</span>
+                        <span className="text-[6px] text-gray-500">Your quote: R 9,800</span>
+                        <span className="text-[6px] text-gray-400">Awaiting response</span>
                       </div>
                     </div>
                   </div>
