@@ -195,7 +195,7 @@ export default function HeroSereneIllustration() {
           animation: visible ? 'serene-float 5.5s ease-in-out 2s infinite' : 'none',
         }}
       >
-        <div className="px-2.5 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20 shadow-md text-[9px] font-semibold text-secondary">
+        <div className="px-2.5 py-1.5 rounded-lg bg-white border border-secondary/30 shadow-lg text-[9px] font-bold text-secondary">
           💬 New quote: R 3,200
         </div>
       </div>
