@@ -165,7 +165,7 @@ export default function Home() {
       <div className="bg-primary text-primary-foreground px-4 pt-8 pb-6">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold">
-            Hi, {profile?.full_name?.split(' ')[0] || 'there'}
+            Hi, {profile?.first_name || profile?.full_name?.split(' ')[0] || 'there'}
           </h1>
           {canSwitchRole && <RoleSwitcher />}
         </div>
