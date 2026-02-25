@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, Calendar, BarChart3, TrendingUp, DollarSign, Clock, FileText } from 'lucide-react';
+import { Users, Store, Calendar, BarChart3, TrendingUp, Clock, FileText, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,12 +16,12 @@ interface Stats {
 }
 
 const kpiCards = [
-  { key: 'totalUsers' as const, label: 'Total Users', icon: Users, color: 'text-primary' },
-  { key: 'totalVendors' as const, label: 'Active Vendors', icon: Store, color: 'text-secondary' },
-  { key: 'totalEvents' as const, label: 'Ceremonies', icon: Calendar, color: 'text-accent-foreground' },
-  { key: 'totalBookings' as const, label: 'Bookings', icon: FileText, color: 'text-primary' },
-  { key: 'totalRequests' as const, label: 'Service Requests', icon: TrendingUp, color: 'text-secondary' },
-  { key: 'pendingRequests' as const, label: 'Pending Requests', icon: Clock, color: 'text-destructive' },
+  { key: 'totalUsers' as const, label: 'Total Users', icon: Users, color: 'text-primary', tooltip: 'All registered accounts — includes both ceremony organisers and vendors.' },
+  { key: 'totalVendors' as const, label: 'Active Vendors', icon: Store, color: 'text-secondary', tooltip: 'Vendors with an active listing currently visible to organisers.' },
+  { key: 'totalEvents' as const, label: 'Ceremonies', icon: Calendar, color: 'text-accent-foreground', tooltip: 'Total ceremonies created by organisers (all types, any status).' },
+  { key: 'totalBookings' as const, label: 'Bookings', icon: FileText, color: 'text-primary', tooltip: 'Confirmed vendor bookings across all ceremonies (any payment status).' },
+  { key: 'totalRequests' as const, label: 'Service Requests', icon: TrendingUp, color: 'text-secondary', tooltip: 'Quote requests sent by organisers to vendors (all statuses).' },
+  { key: 'pendingRequests' as const, label: 'Pending Requests', icon: Clock, color: 'text-destructive', tooltip: 'Requests still awaiting a vendor response — may need attention.' },
 ];
 
 const categoryLabels: Record<string, string> = {
@@ -122,27 +123,39 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {kpiCards.map((kpi) => (
-          <Card key={kpi.key}>
-            <CardContent className="p-4 text-center">
-              {isLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-6 w-6 mx-auto rounded bg-muted" />
-                  <div className="h-7 w-10 mx-auto rounded bg-muted" />
-                  <div className="h-3 w-16 mx-auto rounded bg-muted" />
-                </div>
-              ) : (
-                <>
-                  <kpi.icon className={`h-6 w-6 mx-auto mb-2 ${kpi.color}`} />
-                  <p className="text-2xl font-bold">{stats[kpi.key]}</p>
-                  <p className="text-xs text-muted-foreground">{kpi.label}</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {kpiCards.map((kpi) => (
+            <Card key={kpi.key}>
+              <CardContent className="p-4 text-center relative">
+                {isLoading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-6 w-6 mx-auto rounded bg-muted" />
+                    <div className="h-7 w-10 mx-auto rounded bg-muted" />
+                    <div className="h-3 w-16 mx-auto rounded bg-muted" />
+                  </div>
+                ) : (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors">
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[200px] text-xs">
+                        {kpi.tooltip}
+                      </TooltipContent>
+                    </Tooltip>
+                    <kpi.icon className={`h-6 w-6 mx-auto mb-2 ${kpi.color}`} />
+                    <p className="text-2xl font-bold">{stats[kpi.key]}</p>
+                    <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </TooltipProvider>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Events by Type */}
