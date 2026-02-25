@@ -14,12 +14,13 @@ interface EftPaymentDialogProps {
   bookingId: string;
   kind: 'deposit' | 'balance';
   amount: number;
+  offerNumber?: string | null;
   onSuccess: () => void;
 }
 
-export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, onSuccess }: EftPaymentDialogProps) {
+export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, offerNumber, onSuccess }: EftPaymentDialogProps) {
   const { user } = useAuth();
-  const [reference, setReference] = useState('');
+  const [reference, setReference] = useState(offerNumber || '');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,11 +56,22 @@ export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, 
 
       if (insertError) throw insertError;
 
-      // Update booking status to pending_verification
-      const field = kind === 'deposit' ? 'deposit_status' : 'balance_status';
+      // Auto-confirm: mark payment as paid directly
+      const updates: Record<string, any> = {};
+      if (kind === 'deposit') {
+        updates.deposit_status = 'paid';
+        updates.deposit_paid_at = new Date().toISOString();
+        updates.booking_status = 'confirmed';
+        updates.balance_status = 'due';
+        updates.balance_due_at = new Date().toISOString();
+      } else {
+        updates.balance_status = 'paid';
+        updates.balance_paid_at = new Date().toISOString();
+        updates.booking_status = 'completed';
+      }
       await supabase
         .from('bookings')
-        .update({ [field]: 'pending_verification' })
+        .update(updates)
         .eq('id', bookingId);
 
       // Post system message to conversation
@@ -86,7 +98,7 @@ export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, 
             sender_type: 'system' as any,
             sender_user_id: user.id,
             message_type: 'system',
-            content: `📎 ${label} proof of payment uploaded (R${amount.toLocaleString()}). Awaiting vendor confirmation.`,
+            content: `✅ ${label} payment confirmed (R${amount.toLocaleString()}).${offerNumber ? ` Ref: ${offerNumber}` : ''}`,
           });
           await supabase.from('conversations')
             .update({ last_message_at: new Date().toISOString() })

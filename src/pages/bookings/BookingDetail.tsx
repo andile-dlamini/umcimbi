@@ -12,7 +12,7 @@ import { Calendar, MapPin, DollarSign, MessageCircle, CheckCircle, AlertTriangle
 import { format } from 'date-fns';
 import { BookingStatus, PaymentStatus } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EftPaymentDialog } from '@/components/chat/EftPaymentDialog';
 import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
@@ -40,6 +40,19 @@ export default function BookingDetail() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [offerNumber, setOfferNumber] = useState<string | null>(null);
+
+  // Fetch offer number from linked quote
+  useEffect(() => {
+    if (booking?.quote_id) {
+      supabase
+        .from('quotes')
+        .select('offer_number')
+        .eq('id', booking.quote_id)
+        .single()
+        .then(({ data }) => setOfferNumber(data?.offer_number || null));
+    }
+  }, [booking?.quote_id]);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -341,6 +354,7 @@ export default function BookingDetail() {
           bookingId={booking.id}
           kind={showEftDialog}
           amount={showEftDialog === 'deposit' ? booking.deposit_amount : booking.balance_amount}
+          offerNumber={offerNumber}
           onSuccess={() => { setShowEftDialog(null); refreshDetails(); }}
         />
       )}
