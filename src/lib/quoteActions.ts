@@ -25,7 +25,6 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
 
     console.log('[VIEW_PDF] raw data', data, typeof data);
 
-    // Accept both { url: "..." } and raw string responses
     const url =
       typeof data === 'string'
         ? data
@@ -38,14 +37,27 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
       return null;
     }
 
-    // Navigate the already-opened tab to the signed URL
-    if (win) {
-      win.location.href = url;
-    } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    // Fetch the HTML content from the signed URL, then open as a blob
+    // so the browser renders it with the correct content-type
+    const fileRes = await fetch(url);
+    if (!fileRes.ok) {
+      console.error('[VIEW_PDF] fetch failed', fileRes.status);
+      toast.error('Failed to download document');
+      if (win) win.close();
+      return null;
     }
 
-    return url;
+    const htmlContent = await fileRes.text();
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    if (win) {
+      win.location.href = blobUrl;
+    } else {
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    return blobUrl;
   } catch (err: any) {
     console.error('[VIEW_PDF] exception:', err);
     toast.error(err?.message || 'Failed to load PDF');
