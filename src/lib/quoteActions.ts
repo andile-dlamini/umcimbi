@@ -2,6 +2,43 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 /**
+ * Fetch a signed URL for the quote's final offer PDF and open it.
+ * Returns the URL on success, null on failure.
+ */
+export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
+  console.log('[VIEW_PDF] clicked', quoteId);
+  try {
+    const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
+      body: { quote_id: quoteId },
+    });
+
+    if (error) {
+      console.error('[VIEW_PDF] invoke error:', { error, data });
+      toast.error(data?.error || error?.message || 'Failed to load PDF');
+      return null;
+    }
+    if (data?.error) {
+      console.error('[VIEW_PDF] server error:', data.error);
+      toast.error(data.error);
+      return null;
+    }
+    if (!data?.url) {
+      console.error('[VIEW_PDF] no URL in response:', data);
+      toast.error('Could not load PDF');
+      return null;
+    }
+
+    console.log('[VIEW_PDF] success, opening URL');
+    window.open(data.url, '_blank');
+    return data.url;
+  } catch (err: any) {
+    console.error('[VIEW_PDF] exception:', err);
+    toast.error(err?.message || 'Failed to load PDF');
+    return null;
+  }
+}
+
+/**
  * Shared helpers for accepting / declining quotes.
  * Used by both MyQuotes page and chat QuoteCard so behaviour is identical.
  */
