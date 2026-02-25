@@ -47,6 +47,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Restrict to South African numbers only
+    if (!normalized.startsWith("+27")) {
+      return new Response(
+        JSON.stringify({ error: "SMS verification is currently only available for South African phone numbers." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const connectMobileKey = Deno.env.get("CONNECT_MOBILE_API_KEY");
