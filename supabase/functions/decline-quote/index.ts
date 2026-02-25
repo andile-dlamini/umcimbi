@@ -33,25 +33,35 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "quote_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    console.log("decline-quote called by user:", user.id, "for quote:", quote_id);
+
     const { data: quote, error: quoteError } = await supabase
       .from("quotes")
       .select("id, status, vendor_id, request_id")
       .eq("id", quote_id)
-      .single();
+      .maybeSingle();
 
     if (quoteError || !quote) {
+      console.error("Quote not found:", quote_id, quoteError);
       return new Response(JSON.stringify({ error: "Quote not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Fetch the service request separately to validate ownership
-    const { data: serviceReq } = await supabase
+    const { data: serviceReq, error: srError } = await supabase
       .from("service_requests")
       .select("id, requester_user_id")
       .eq("id", quote.request_id)
-      .single();
+      .maybeSingle();
 
-    if (!serviceReq || serviceReq.requester_user_id !== user.id) {
-      return new Response(JSON.stringify({ error: "Only the client can decline this quote" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.log("Service request lookup:", { request_id: quote.request_id, serviceReq, srError, user_id: user.id });
+
+    if (!serviceReq) {
+      return new Response(JSON.stringify({ error: "Service request not found for this quote" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (serviceReq.requester_user_id !== user.id) {
+      console.error("Ownership mismatch:", { requester: serviceReq.requester_user_id, caller: user.id });
+      return new Response(JSON.stringify({ error: `Only the client can decline this quote. You are ${user.id} but the requester is ${serviceReq.requester_user_id}` }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (quote.status !== "pending_client") {
