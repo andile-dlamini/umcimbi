@@ -109,18 +109,16 @@ Deno.serve(async (req) => {
 
     if (insertError) throw insertError;
 
-    // Send SMS via Connect Mobile API
+    // Send SMS via Connect Mobile API (GET with query params)
     const smsPhone = normalized.replace("+", "");
-    const smsResponse = await fetch("https://sms.connect-mobile.co.za/submit/single/", {
-      method: "POST",
+    const smsMessage = encodeURIComponent(`UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`);
+    const msgId = `otp_${Date.now()}`;
+    const smsUrl = `https://sms.connect-mobile.co.za/submit/single/?da=${smsPhone}&ud=${smsMessage}&id=${msgId}`;
+    const smsResponse = await fetch(smsUrl, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${connectMobileKey}`,
       },
-      body: JSON.stringify({
-        da: smsPhone,
-        ud: `UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`,
-      }),
     });
 
     if (!smsResponse.ok) {
