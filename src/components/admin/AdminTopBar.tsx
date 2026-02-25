@@ -13,7 +13,7 @@ export function AdminTopBar() {
   });
 
   return (
-    <div className="h-14 border-b border-border bg-card px-4 sm:px-6 flex items-center gap-3 shrink-0 overflow-x-auto">
+    <div className="flex items-center gap-3 overflow-x-auto flex-1">
       {/* Date range */}
       <Popover>
         <PopoverTrigger asChild>
