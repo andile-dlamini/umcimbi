@@ -49,10 +49,10 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const clickatellKey = Deno.env.get("CLICKATELL_API_KEY");
+    const connectMobileKey = Deno.env.get("CONNECT_MOBILE_API_KEY");
 
-    if (!clickatellKey) {
-      throw new Error("CLICKATELL_API_KEY is not configured");
+    if (!connectMobileKey) {
+      throw new Error("CONNECT_MOBILE_API_KEY is not configured");
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -109,24 +109,23 @@ Deno.serve(async (req) => {
 
     if (insertError) throw insertError;
 
-    // Send SMS via Clickatell One API
-    const smsResponse = await fetch("https://platform.clickatell.com/v1/message", {
+    // Send SMS via Connect Mobile API
+    const smsPhone = normalized.replace("+", "");
+    const smsResponse = await fetch("https://sms.connect-mobile.co.za/submit/single/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: clickatellKey,
+        Authorization: `Bearer ${connectMobileKey}`,
       },
       body: JSON.stringify({
-        channel: "sms",
-        content: `UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`,
-        to: [normalized.replace("+", "")],
+        da: smsPhone,
+        ud: `UMCIMBI: Your verification code is ${otp}. It expires in 5 minutes. Don't share this code.`,
       }),
     });
 
     if (!smsResponse.ok) {
       const errBody = await smsResponse.text();
-      console.error("Clickatell error:", errBody);
+      console.error("Connect Mobile error:", errBody);
       // Still return success to prevent enumeration
     }
 
