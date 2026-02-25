@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Users, Store, Calendar, BarChart3, Upload, BadgeCheck, Star } from 'lucide-react';
+import { Users, Store, Calendar, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Stats {
@@ -15,7 +12,6 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalVendors: 0,
@@ -90,10 +86,13 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen pb-safe bg-background">
-      <PageHeader title="Admin Dashboard" subtitle="Data overview" showBack />
+    <div className="space-y-6 max-w-4xl">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Overview</h1>
+        <p className="text-sm text-muted-foreground mt-1">Platform metrics at a glance</p>
+      </div>
 
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
+      <div className="space-y-6">
         {isLoading ? (
           <p className="text-center text-muted-foreground py-8">Loading stats...</p>
         ) : (
@@ -194,52 +193,6 @@ export default function AdminDashboard() {
                     </p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Admin Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Admin Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/admin/bulk-vendors')}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Bulk Upload Vendors
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/admin/verification-queue')}
-                >
-                  <BadgeCheck className="h-4 w-4 mr-2" />
-                  Vendor Verification Queue
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/admin/super-vendors')}
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  Super Vendor Management
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Data Note */}
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-4">
-                <p className="text-sm text-center">
-                  <span className="font-semibold">💡 Data is the new gold</span>
-                  <br />
-                  <span className="text-muted-foreground">
-                    This dashboard shows real-time platform metrics
-                  </span>
-                </p>
               </CardContent>
             </Card>
           </>
