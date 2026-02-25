@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { acceptQuoteAction, declineQuoteAction } from '@/lib/quoteActions';
 
 interface QuoteCardMetadata {
   quote_id: string;
@@ -40,7 +41,6 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [depositPaid, setDepositPaid] = useState(false);
 
-  // Refresh status from DB on mount
   useEffect(() => {
     const refreshStatus = async () => {
       const { data: quote } = await supabase
@@ -50,7 +50,6 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
         .single();
       if (quote) setCurrentStatus(quote.status);
 
-      // Check if booking exists
       const { data: booking } = await supabase
         .from('bookings')
         .select('id, deposit_status')
@@ -89,59 +88,23 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
 
   const handleAccept = async () => {
     setIsAccepting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('accept-quote', {
-        body: { quote_id: metadata.quote_id },
-      });
-      // supabase.functions.invoke puts non-2xx responses in error, real message in data
-      if (error) {
-        // Try to extract the actual error message from the response
-        const errorMsg = data?.error || error?.message || 'Failed to accept quote';
-        console.error('Accept quote error:', { error, data });
-        toast.error(errorMsg);
-        return;
-      }
-      if (data?.error) {
-        toast.error(data.error);
-        return;
-      }
+    const result = await acceptQuoteAction(metadata.quote_id);
+    if (result.success) {
       setCurrentStatus('client_accepted');
-      setBookingId(data.booking_id);
-      toast.success('Quote accepted! Pay deposit to confirm booking.');
+      setBookingId(result.bookingId || null);
       onStatusChange?.();
-    } catch (err: any) {
-      console.error('Accept quote exception:', err);
-      toast.error(err?.message || 'Failed to accept quote');
-    } finally {
-      setIsAccepting(false);
     }
+    setIsAccepting(false);
   };
 
   const handleDecline = async () => {
     setIsDeclining(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('decline-quote', {
-        body: { quote_id: metadata.quote_id },
-      });
-      if (error) {
-        const errorMsg = data?.error || error?.message || 'Failed to decline quote';
-        console.error('Decline quote error:', { error, data });
-        toast.error(errorMsg);
-        return;
-      }
-      if (data?.error) {
-        toast.error(data.error);
-        return;
-      }
+    const success = await declineQuoteAction(metadata.quote_id);
+    if (success) {
       setCurrentStatus('client_declined');
-      toast.info('Quote declined');
       onStatusChange?.();
-    } catch (err: any) {
-      console.error('Decline quote exception:', err);
-      toast.error(err?.message || 'Failed to decline quote');
-    } finally {
-      setIsDeclining(false);
     }
+    setIsDeclining(false);
   };
 
   const handlePayDeposit = () => {
@@ -161,7 +124,6 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
 
   return (
     <div className="w-full max-w-[85%] rounded-xl border-2 border-primary/30 bg-card overflow-hidden">
-      {/* Header */}
       <div className="bg-primary/10 px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-primary" />
@@ -172,7 +134,6 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
         </Badge>
       </div>
 
-      {/* Body */}
       <div className="px-4 py-3 space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">Ref</span>
@@ -188,9 +149,9 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-4 py-3 border-t border-border space-y-2">
         <Button
+          type="button"
           variant="outline"
           size="sm"
           className="w-full"
@@ -204,6 +165,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
         {!isVendorView && isPending && (
           <div className="flex gap-2">
             <Button
+              type="button"
               size="sm"
               className="flex-1"
               onClick={handleAccept}
@@ -213,6 +175,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
               Accept
             </Button>
             <Button
+              type="button"
               variant="destructive"
               size="sm"
               className="flex-1"
@@ -227,6 +190,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
 
         {!isVendorView && isAccepted && !depositPaid && (
           <Button
+            type="button"
             size="sm"
             className="w-full"
             variant="default"
