@@ -66,7 +66,6 @@ export function useClientBookings() {
   ): Promise<boolean> => {
     const updates: Record<string, any> = { [field]: status };
     
-    // FIX 7: Set payment timestamps for audit trail
     if (field === 'deposit_status' && status === 'paid') {
       updates.booking_status = 'confirmed';
       updates.balance_status = 'due';
@@ -87,6 +86,41 @@ export function useClientBookings() {
       toast.error('Failed to update payment status');
       console.error('Error updating payment:', error);
       return false;
+    }
+
+    // Post system message to conversation so both parties see the update
+    try {
+      // Get booking to find vendor_id
+      const { data: bk } = await supabase
+        .from('bookings')
+        .select('vendor_id, client_id')
+        .eq('id', bookingId)
+        .single();
+      if (bk && user) {
+        const { data: conv } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('user_id', bk.client_id)
+          .eq('vendor_id', bk.vendor_id)
+          .order('last_message_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (conv) {
+          const label = field === 'deposit_status' ? 'Deposit' : 'Balance';
+          await supabase.from('messages').insert({
+            conversation_id: conv.id,
+            sender_type: 'system' as any,
+            sender_user_id: user.id,
+            message_type: 'system',
+            content: `💰 ${label} has been marked as paid.`,
+          });
+          await supabase.from('conversations')
+            .update({ last_message_at: new Date().toISOString() })
+            .eq('id', conv.id);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to post payment chat message:', e);
     }
 
     toast.success('Payment status updated!');

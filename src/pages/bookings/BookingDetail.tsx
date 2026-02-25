@@ -12,7 +12,7 @@ import { Calendar, MapPin, DollarSign, Phone, MessageCircle, CheckCircle, AlertT
 import { format } from 'date-fns';
 import { BookingStatus, PaymentStatus } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -35,6 +35,8 @@ export default function BookingDetail() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPayingDeposit, setIsPayingDeposit] = useState(false);
+  const [isPayingBalance, setIsPayingBalance] = useState(false);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -42,12 +44,14 @@ export default function BookingDetail() {
   const canReview = booking?.booking_status === 'completed' && !hasReviewed;
 
   const handlePayDeposit = async () => {
-    if (!bookingId) return;
+    if (!bookingId || isPayingDeposit) return;
+    setIsPayingDeposit(true);
     await updatePaymentStatus(bookingId, 'deposit_status', 'paid');
   };
 
   const handlePayBalance = async () => {
-    if (!bookingId) return;
+    if (!bookingId || isPayingBalance) return;
+    setIsPayingBalance(true);
     await updatePaymentStatus(bookingId, 'balance_status', 'paid');
   };
 
@@ -201,10 +205,14 @@ export default function BookingDetail() {
                     {paymentStatusCfg[booking.deposit_status].label}
                   </span>
                   {isClient && booking.deposit_status === 'due' && (
-                    <Button size="sm" onClick={handlePayDeposit}>Mark Paid</Button>
+                    <Button size="sm" onClick={handlePayDeposit} disabled={isPayingDeposit}>
+                      {isPayingDeposit ? 'Processing...' : 'Mark Paid'}
+                    </Button>
                   )}
                   {isClient && booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit' && (
-                    <Button size="sm" onClick={handlePayDeposit}>Pay Deposit</Button>
+                    <Button size="sm" onClick={handlePayDeposit} disabled={isPayingDeposit}>
+                      {isPayingDeposit ? 'Processing...' : 'Pay Deposit'}
+                    </Button>
                   )}
                 </div>
               </div>
@@ -219,7 +227,9 @@ export default function BookingDetail() {
                     {paymentStatusCfg[booking.balance_status].label}
                   </span>
                   {isClient && booking.balance_status === 'due' && (
-                    <Button size="sm" onClick={handlePayBalance}>Mark Paid</Button>
+                    <Button size="sm" onClick={handlePayBalance} disabled={isPayingBalance}>
+                      {isPayingBalance ? 'Processing...' : 'Mark Paid'}
+                    </Button>
                   )}
                 </div>
               </div>
