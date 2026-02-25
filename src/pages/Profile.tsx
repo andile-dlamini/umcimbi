@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar, Edit2, Save, X, LayoutDashboard, ArrowRight } from 'lucide-react';
+import { Globe, Bell, Info, LogOut, Store, Shield, FileText, Receipt, Calendar, Edit2, Save, X, LayoutDashboard, ArrowRight, KeyRound, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -35,6 +35,15 @@ export default function Profile() {
     full_name: '',
     phone_number: '',
   });
+
+  // Change password state
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const pendingQuotes = quotes.filter(q => q.status === 'pending_client').length;
   const activeBookings = bookings.filter(b => b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed').length;
@@ -93,6 +102,46 @@ export default function Profile() {
 
   const handleNotificationToggle = async (checked: boolean) => {
     await updateNotifications(checked);
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      // Re-authenticate with current password first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast.error('Current password is incorrect');
+        setIsChangingPassword(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password changed successfully');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setShowPasswordSection(false);
+      }
+    } catch (err) {
+      toast.error('Failed to change password');
+    }
+    setIsChangingPassword(false);
   };
 
   const handleLanguageChange = async (value: string) => {
@@ -310,6 +359,64 @@ export default function Profile() {
                 disabled={settingsLoading}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Change Password */}
+        <Card className="border-card-border">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <KeyRound className="h-5 w-5" />
+              Change Password
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!showPasswordSection ? (
+              <Button variant="outline" className="w-full" onClick={() => setShowPasswordSection(true)}>
+                <KeyRound className="h-4 w-4 mr-2" />
+                Change my password
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input
+                    type={showCurrentPw ? 'text' : 'password'}
+                    placeholder="Current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowCurrentPw(!showCurrentPw)}>
+                    {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showNewPw ? 'text' : 'password'}
+                    placeholder="New password (min 6 characters)"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowNewPw(!showNewPw)}>
+                    {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => { setShowPasswordSection(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); }}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={handleChangePassword} disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}>
+                    {isChangingPassword ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {isChangingPassword ? 'Changing...' : 'Update Password'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
