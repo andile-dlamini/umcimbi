@@ -37,6 +37,8 @@ export default function BookingDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -56,13 +58,17 @@ export default function BookingDetail() {
   };
 
   const handleMarkComplete = async () => {
-    if (!bookingId) return;
+    if (!bookingId || isCompleting) return;
+    setIsCompleting(true);
     await markAsCompleted(bookingId);
+    setIsCompleting(false);
   };
 
   const handleReportProblem = async () => {
-    if (!bookingId) return;
+    if (!bookingId || isReporting) return;
+    setIsReporting(true);
     await reportProblem(bookingId);
+    setIsReporting(false);
   };
 
   const handleSubmitReview = async () => {
@@ -266,13 +272,13 @@ export default function BookingDetail() {
         {/* Actions */}
         {isClient && booking.booking_status === 'confirmed' && (
           <div className="space-y-2">
-            <Button className="w-full" onClick={handleMarkComplete}>
+            <Button className="w-full" onClick={handleMarkComplete} disabled={isCompleting || isReporting}>
               <CheckCircle className="h-4 w-4 mr-2" />
-              Everything Delivered as Agreed
+              {isCompleting ? 'Processing...' : 'Everything Delivered as Agreed'}
             </Button>
-            <Button variant="destructive" className="w-full" onClick={handleReportProblem}>
+            <Button variant="destructive" className="w-full" onClick={handleReportProblem} disabled={isReporting || isCompleting}>
               <AlertTriangle className="h-4 w-4 mr-2" />
-              Report a Problem
+              {isReporting ? 'Reporting...' : 'Report a Problem'}
             </Button>
           </div>
         )}
