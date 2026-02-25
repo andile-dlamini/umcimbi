@@ -33,10 +33,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "quote_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Fetch quote with request
+    // Fetch quote
     const { data: quote, error: quoteError } = await supabase
       .from("quotes")
-      .select("*, request:service_requests(id, requester_user_id, event_id, event_date)")
+      .select("id, status, vendor_id, request_id, price, deposit_percentage, expires_at")
       .eq("id", quote_id)
       .single();
 
@@ -44,8 +44,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Quote not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Validate requester
-    if (quote.request.requester_user_id !== user.id) {
+    // Fetch the service request separately
+    const { data: serviceReq } = await supabase
+      .from("service_requests")
+      .select("id, requester_user_id, event_id, event_date")
+      .eq("id", quote.request_id)
+      .single();
+
+    if (!serviceReq || serviceReq.requester_user_id !== user.id) {
       return new Response(JSON.stringify({ error: "Only the client can accept this quote" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -75,8 +81,8 @@ serve(async (req) => {
 
     // Get event date for booking
     let eventDateTime = null;
-    if (quote.request.event_id) {
-      const { data: event } = await supabase.from("events").select("date").eq("id", quote.request.event_id).single();
+    if (serviceReq.event_id) {
+      const { data: event } = await supabase.from("events").select("date").eq("id", serviceReq.event_id).single();
       if (event?.date) {
         eventDateTime = new Date(event.date + "T12:00:00").toISOString();
       }
@@ -85,7 +91,7 @@ serve(async (req) => {
     const { data: booking, error: bookingErr } = await supabase
       .from("bookings")
       .insert({
-        event_id: quote.request.event_id,
+        event_id: serviceReq.event_id,
         client_id: user.id,
         vendor_id: quote.vendor_id,
         quote_id: quote_id,

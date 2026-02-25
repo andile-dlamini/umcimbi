@@ -35,7 +35,7 @@ serve(async (req) => {
 
     const { data: quote, error: quoteError } = await supabase
       .from("quotes")
-      .select("*, request:service_requests(id, requester_user_id)")
+      .select("id, status, vendor_id, request_id")
       .eq("id", quote_id)
       .single();
 
@@ -43,7 +43,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Quote not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    if (quote.request.requester_user_id !== user.id) {
+    // Fetch the service request separately to validate ownership
+    const { data: serviceReq } = await supabase
+      .from("service_requests")
+      .select("id, requester_user_id")
+      .eq("id", quote.request_id)
+      .single();
+
+    if (!serviceReq || serviceReq.requester_user_id !== user.id) {
       return new Response(JSON.stringify({ error: "Only the client can decline this quote" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
