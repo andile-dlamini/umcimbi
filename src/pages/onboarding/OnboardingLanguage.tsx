@@ -136,8 +136,8 @@ export default function OnboardingLanguage() {
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Make UMCIMBI<br className="hidden sm:block" /> planning feel{' '}
-              <span className="text-secondary">lighter.</span>
+              Planning UMCIMBI has<br className="hidden sm:block" /> never felt so{' '}
+              <span className="text-secondary">light.</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
