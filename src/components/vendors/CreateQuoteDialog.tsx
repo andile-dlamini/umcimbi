@@ -193,12 +193,13 @@ export function CreateQuoteDialog({
         // Non-fatal: the service request was already created
       }
 
-      // Send chat notification to user
+      // Send chat notification to user (sender = vendor's owner user)
       await sendChatNotification(
         selectedClient.userId,
         vendorProfile.id,
         notificationMessages.quoteReceived(vendorProfile.name, parseFloat(quotedAmount)),
-        selectedClient.eventId
+        selectedClient.eventId,
+        vendorProfile.owner_user_id || undefined
       );
 
       toast.success('Quote sent successfully!');

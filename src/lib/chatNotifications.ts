@@ -3,12 +3,20 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Sends a system notification message to the chat between a user and vendor.
  * Creates a conversation if one doesn't exist.
+ * 
+ * @param userId - The organiser's user ID (used to find/create conversation)
+ * @param vendorId - The vendor ID (used to find/create conversation)
+ * @param message - The notification message content
+ * @param eventId - Optional event ID to scope the conversation
+ * @param senderUserId - The user who triggered the action (for unread tracking).
+ *                       Defaults to userId for backward compatibility.
  */
 export async function sendChatNotification(
   userId: string,
   vendorId: string,
   message: string,
-  eventId?: string
+  eventId?: string,
+  senderUserId?: string
 ): Promise<boolean> {
   try {
     // Find or create conversation
@@ -66,11 +74,11 @@ export async function sendChatNotification(
 
     if (!conversationId) return false;
 
-    // Send system message
+    // Send system message — use senderUserId so unread tracking works correctly
     const { error: msgError } = await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_type: 'system',
-      sender_user_id: userId,
+      sender_user_id: senderUserId ?? userId,
       content: message,
     });
 

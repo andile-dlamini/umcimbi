@@ -136,15 +136,19 @@ const ChatThread = () => {
               
               // Check clickable notifications for clients
               const isQuoteReceivedNotification = message.content.includes('💰') && message.content.includes('quote');
+              const isQuoteRequestedNotification = message.content.includes('📩') && message.content.includes('Quote request');
               const isQuoteAcceptedNotification = message.content.includes('✅') && message.content.includes('Quote accepted');
               const isBookingConfirmedNotification = message.content.includes('🎉') && message.content.includes('Booking confirmed');
               const isBookingCompletedNotification = message.content.includes('✨') && message.content.includes('completed');
+              const isVendorDeclinedNotification = message.content.includes('⚠️') && message.content.includes('declined');
               
               const isClientClickable = !isVendorView && (
                 isQuoteReceivedNotification || 
+                isQuoteRequestedNotification ||
                 isQuoteAcceptedNotification || 
                 isBookingConfirmedNotification || 
-                isBookingCompletedNotification
+                isBookingCompletedNotification ||
+                isVendorDeclinedNotification
               );
               
               const isClickable = isVendorClickable || isClientClickable;
@@ -156,6 +160,12 @@ const ChatThread = () => {
               if (isVendorClickable) {
                 navigateTo = '/vendor-dashboard/requests';
                 tapText = 'Tap to view request →';
+              } else if (isQuoteReceivedNotification) {
+                navigateTo = '/quotes';
+                tapText = 'Tap to view quote →';
+              } else if (isQuoteRequestedNotification || isVendorDeclinedNotification) {
+                navigateTo = '/profile/requests';
+                tapText = 'Tap to view requests →';
               } else if (isQuoteAcceptedNotification || isBookingConfirmedNotification || isBookingCompletedNotification) {
                 navigateTo = '/bookings';
                 tapText = 'Tap to view booking →';
