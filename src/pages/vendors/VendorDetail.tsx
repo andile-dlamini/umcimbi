@@ -11,8 +11,9 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEvents } from '@/hooks/useEvents';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -26,7 +27,9 @@ export default function VendorDetail() {
   const { vendor, isLoading } = useVendor(id);
   const { addVendorToEvent, removeVendorFromEvent, isVendorSelected } = useEventVendors(eventId || undefined);
   const { startConversation } = useStartConversation();
+  const { events } = useEvents();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedEventId, setSelectedEventId] = useState(eventId || '');
 
   const isSelected = id ? isVendorSelected(id) : false;
   const displayImage = vendor?.image_urls?.[selectedImageIndex] || vendor?.image_urls?.[0] || '/placeholder.svg';
@@ -40,7 +43,7 @@ export default function VendorDetail() {
 
     if (!id) return;
 
-    const conversationId = await startConversation(id, eventId || undefined);
+    const conversationId = await startConversation(id, selectedEventId || undefined);
     if (conversationId) {
       navigate(`/chat/${conversationId}`);
     } else {
@@ -207,16 +210,30 @@ export default function VendorDetail() {
         {/* Reviews Section */}
         <VendorRating vendorId={id!} />
 
-        {/* Start Chat - primary action replaces old Request Quote */}
-        <Button
-          size="lg"
-          className="w-full"
-          variant="default"
-          onClick={handleChatWithVendor}
-        >
-          <Send className="h-4 w-4 mr-2" />
-          Start Chat & Request Quote
-        </Button>
+        {/* Event selector + Start Chat */}
+        <div className="space-y-3">
+          {events.length > 0 && (
+            <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Link to an event (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {events.map((evt) => (
+                  <SelectItem key={evt.id} value={evt.id}>{evt.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button
+            size="lg"
+            className="w-full"
+            variant="default"
+            onClick={handleChatWithVendor}
+          >
+            <Send className="h-4 w-4 mr-2" />
+            Start Chat
+          </Button>
+        </div>
 
 
         {/* Contact Actions */}

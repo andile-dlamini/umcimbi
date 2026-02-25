@@ -209,6 +209,8 @@ export interface ConversationWithDetails extends Conversation {
   user_profile?: Profile;
   last_message?: Message;
   unread_count?: number;
+  booking_status?: string | null;
+  quote_status?: string | null;
 }
 
 export interface ServiceRequestWithDetails extends ServiceRequest {
