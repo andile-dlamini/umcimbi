@@ -2,18 +2,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useClientQuotes } from '@/hooks/useQuotes';
-import { useClientBookings } from '@/hooks/useBookings';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, Clock, Star, CheckCircle, XCircle, FileText, Download } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { QuoteWithDetails, QuoteStatus } from '@/types/booking';
+import { formatDistanceToNow } from 'date-fns';
+import { QuoteWithDetails } from '@/types/booking';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { quoteStatusConfig } from '@/lib/statusConfig';
+import { acceptQuoteAction, declineQuoteAction } from '@/lib/quoteActions';
 
 const statusConfig = quoteStatusConfig;
 
@@ -24,7 +24,7 @@ function QuoteCard({
 }: { 
   quote: QuoteWithDetails; 
   onAccept: () => Promise<void>;
-  onDecline: () => Promise<boolean>;
+  onDecline: () => Promise<void>;
 }) {
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -99,6 +99,7 @@ function QuoteCard({
       {isPending && (
         <CardFooter className="p-4 pt-0 gap-2">
           <Button 
+            type="button"
             variant="outline" 
             className="flex-1"
             onClick={handleDecline}
@@ -108,6 +109,7 @@ function QuoteCard({
             {isDeclining ? 'Declining...' : 'Decline'}
           </Button>
           <Button 
+            type="button"
             className="flex-1"
             onClick={handleAccept}
             disabled={isAccepting}
@@ -121,6 +123,7 @@ function QuoteCard({
       {isAccepted && quote.final_offer_pdf_key && (
         <CardFooter className="p-4 pt-0 gap-2">
           <Button
+            type="button"
             variant="outline"
             className="flex-1"
             disabled={isLoadingPdf}
@@ -149,6 +152,7 @@ function QuoteCard({
             {isLoadingPdf ? 'Loading...' : 'View Final Offer'}
           </Button>
           <Button
+            type="button"
             variant="outline"
             className="flex-1"
             disabled={isLoadingPdf}
@@ -195,39 +199,26 @@ function QuoteCard({
 }
 
 export default function MyQuotes() {
-  const { quotes, isLoading, acceptQuote, declineQuote, refreshQuotes } = useClientQuotes();
-  const { createBooking } = useClientBookings();
+  const { quotes, isLoading, refreshQuotes } = useClientQuotes();
   const navigate = useNavigate();
 
   const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
   const decidedQuotes = quotes.filter(q => q.status !== 'pending_client');
 
   const handleAcceptQuote = async (quote: QuoteWithDetails) => {
-    const success = await acceptQuote(quote.id);
-    if (success && quote.request) {
-      // Add vendor to event_vendors
-      await supabase.from('event_vendors').upsert({
-        event_id: quote.request.event_id,
-        vendor_id: quote.vendor_id,
-        role_or_note: 'Booked via quote',
-      }, { onConflict: 'event_id,vendor_id' });
-
-      // Create the booking
-      const booking = await createBooking({
-        event_id: quote.request.event_id,
-        client_id: '', // Will be set by RLS
-        vendor_id: quote.vendor_id,
-        quote_id: quote.id,
-        agreed_price: quote.price,
-        deposit_amount: Math.round(quote.price * 0.3), // 30% deposit
-        balance_amount: Math.round(quote.price * 0.7), // 70% balance
-        event_date_time: quote.request.event_date || undefined,
-      });
-      
-      if (booking) {
-        toast.success('Booking created successfully!');
-        navigate(`/bookings/${booking.id}`);
+    const result = await acceptQuoteAction(quote.id);
+    if (result.success) {
+      await refreshQuotes();
+      if (result.bookingId) {
+        navigate(`/bookings/${result.bookingId}`);
       }
+    }
+  };
+
+  const handleDeclineQuote = async (quote: QuoteWithDetails) => {
+    const success = await declineQuoteAction(quote.id);
+    if (success) {
+      await refreshQuotes();
     }
   };
 
@@ -270,7 +261,7 @@ export default function MyQuotes() {
                       key={quote.id}
                       quote={quote}
                       onAccept={() => handleAcceptQuote(quote)}
-                      onDecline={() => declineQuote(quote.id)}
+                      onDecline={() => handleDeclineQuote(quote)}
                     />
                   ))}
                 </div>
@@ -286,7 +277,7 @@ export default function MyQuotes() {
                       key={quote.id}
                       quote={quote}
                       onAccept={() => handleAcceptQuote(quote)}
-                      onDecline={() => declineQuote(quote.id)}
+                      onDecline={() => handleDeclineQuote(quote)}
                     />
                   ))}
                 </div>
