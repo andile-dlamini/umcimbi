@@ -75,6 +75,7 @@ export function useClientBookings() {
 
     if (field === 'balance_status' && status === 'paid') {
       updates.balance_paid_at = new Date().toISOString();
+      updates.booking_status = 'completed';
     }
 
     const { error } = await supabase
