@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
@@ -10,6 +10,7 @@ import { QuoteCard } from '@/components/chat/QuoteCard';
 import { MakeQuotationSheet } from '@/components/chat/MakeQuotationSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ChatDetailsDrawer } from '@/components/chat/ChatDetailsDrawer';
 
 const ChatThread = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -20,6 +21,7 @@ const ChatThread = () => {
   const { sendMessage, isSending } = useSendMessage();
   const [newMessage, setNewMessage] = useState('');
   const [showQuotationSheet, setShowQuotationSheet] = useState(false);
+  const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,6 +161,9 @@ const ChatThread = () => {
               <p className="text-xs text-muted-foreground capitalize">{headerSubtitle}</p>
             )}
           </div>
+          <Button variant="ghost" size="icon" onClick={() => setShowDetailsDrawer(true)} className="shrink-0">
+            <Info className="h-5 w-5" />
+          </Button>
         </div>
         {conversation.event && (
           <div className="mt-2 ml-11">
@@ -312,6 +317,14 @@ const ChatThread = () => {
         eventDate={conversation.event?.date ? format(new Date(conversation.event.date), 'dd MMM yyyy') : undefined}
         eventLocation={conversation.event?.location || undefined}
         onSuccess={refreshMessages}
+      />
+
+      {/* Chat Details Drawer */}
+      <ChatDetailsDrawer
+        open={showDetailsDrawer}
+        onOpenChange={setShowDetailsDrawer}
+        conversationId={conversationId || ''}
+        isVendorView={isVendorView}
       />
     </div>
   );

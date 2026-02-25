@@ -2,7 +2,7 @@
 
 export type QuoteStatus = 'pending_client' | 'client_accepted' | 'client_declined' | 'expired';
 export type BookingStatus = 'pending_deposit' | 'confirmed' | 'cancelled' | 'completed' | 'disputed';
-export type PaymentStatus = 'not_due' | 'due' | 'paid';
+export type PaymentStatus = 'not_due' | 'due' | 'paid' | 'pending_verification';
 
 export interface Quote {
   id: string;
@@ -50,6 +50,10 @@ export interface Booking {
   booking_status: BookingStatus;
   deposit_status: PaymentStatus;
   balance_status: PaymentStatus;
+  deposit_paid_at: string | null;
+  balance_paid_at: string | null;
+  deposit_due_at: string | null;
+  balance_due_at: string | null;
   created_at: string;
   updated_at: string;
 }
