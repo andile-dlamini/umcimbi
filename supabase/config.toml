@@ -11,3 +11,12 @@ verify_jwt = false
 
 [functions.get-final-offer-url]
 verify_jwt = false
+
+[functions.send-quote]
+verify_jwt = false
+
+[functions.accept-quote]
+verify_jwt = false
+
+[functions.decline-quote]
+verify_jwt = false

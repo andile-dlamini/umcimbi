@@ -397,28 +397,37 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachments: Json
           content: string
           conversation_id: string
           created_at: string
           id: string
+          message_type: string
+          metadata: Json | null
           read_at: string | null
           sender_type: Database["public"]["Enums"]["sender_type"]
           sender_user_id: string | null
         }
         Insert: {
+          attachments?: Json
           content: string
           conversation_id: string
           created_at?: string
           id?: string
+          message_type?: string
+          metadata?: Json | null
           read_at?: string | null
           sender_type: Database["public"]["Enums"]["sender_type"]
           sender_user_id?: string | null
         }
         Update: {
+          attachments?: Json
           content?: string
           conversation_id?: string
           created_at?: string
           id?: string
+          message_type?: string
+          metadata?: Json | null
           read_at?: string | null
           sender_type?: Database["public"]["Enums"]["sender_type"]
           sender_user_id?: string | null
@@ -550,9 +559,48 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_line_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          quantity: number
+          quote_id: string
+          sort_order: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          quantity?: number
+          quote_id: string
+          sort_order?: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          quantity?: number
+          quote_id?: string
+          sort_order?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_line_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           created_at: string
+          deposit_percentage: number
           expires_at: string | null
           final_offer_pdf_generated_at: string | null
           final_offer_pdf_key: string | null
@@ -562,12 +610,14 @@ export type Database = {
           price: number
           proposed_date_time_window: string | null
           request_id: string
+          sent_at: string | null
           status: Database["public"]["Enums"]["quote_status"]
           updated_at: string
           vendor_id: string
         }
         Insert: {
           created_at?: string
+          deposit_percentage?: number
           expires_at?: string | null
           final_offer_pdf_generated_at?: string | null
           final_offer_pdf_key?: string | null
@@ -577,12 +627,14 @@ export type Database = {
           price: number
           proposed_date_time_window?: string | null
           request_id: string
+          sent_at?: string | null
           status?: Database["public"]["Enums"]["quote_status"]
           updated_at?: string
           vendor_id: string
         }
         Update: {
           created_at?: string
+          deposit_percentage?: number
           expires_at?: string | null
           final_offer_pdf_generated_at?: string | null
           final_offer_pdf_key?: string | null
@@ -592,6 +644,7 @@ export type Database = {
           price?: number
           proposed_date_time_window?: string | null
           request_id?: string
+          sent_at?: string | null
           status?: Database["public"]["Enums"]["quote_status"]
           updated_at?: string
           vendor_id?: string
