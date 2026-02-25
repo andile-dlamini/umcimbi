@@ -34,6 +34,10 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
 import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
 import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
+import AdminInsights from "@/pages/admin/AdminInsights";
+import AdminOperations from "@/pages/admin/AdminOperations";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminLayout from "@/components/admin/AdminLayout";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
 import NotFound from "@/pages/NotFound";
@@ -89,10 +93,15 @@ function AppRoutes() {
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
-        <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
-        <Route path="/admin/bulk-vendors" element={<AdminGuard><BulkVendorUpload /></AdminGuard>} />
-        <Route path="/admin/verification-queue" element={<AdminGuard><VendorVerificationQueue /></AdminGuard>} />
-        <Route path="/admin/super-vendors" element={<AdminGuard><SuperVendorManagement /></AdminGuard>} />
+        <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="insights" element={<AdminInsights />} />
+          <Route path="operations" element={<AdminOperations />} />
+          <Route path="bulk-vendors" element={<BulkVendorUpload />} />
+          <Route path="verification-queue" element={<VendorVerificationQueue />} />
+          <Route path="super-vendors" element={<SuperVendorManagement />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
