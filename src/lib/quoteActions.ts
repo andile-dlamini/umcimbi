@@ -7,33 +7,49 @@ import { toast } from 'sonner';
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
   console.log('[VIEW_PDF] clicked', quoteId);
+
+  // Open a blank tab immediately to prevent popup blockers
+  const win = window.open('', '_blank', 'noopener,noreferrer');
+
   try {
     const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
       body: { quote_id: quoteId },
     });
 
     if (error) {
-      console.error('[VIEW_PDF] invoke error:', { error, data });
-      toast.error(data?.error || error?.message || 'Failed to load PDF');
-      return null;
-    }
-    if (data?.error) {
-      console.error('[VIEW_PDF] server error:', data.error);
-      toast.error(data.error);
-      return null;
-    }
-    if (!data?.url) {
-      console.error('[VIEW_PDF] no URL in response:', data);
-      toast.error('Could not load PDF');
+      console.error('[VIEW_PDF] invoke error', error);
+      toast.error('Failed to load PDF');
+      if (win) win.close();
       return null;
     }
 
-    console.log('[VIEW_PDF] success, opening URL');
-    window.open(data.url, '_blank');
-    return data.url;
+    console.log('[VIEW_PDF] raw data', data, typeof data);
+
+    // Accept both { url: "..." } and raw string responses
+    const url =
+      typeof data === 'string'
+        ? data
+        : (data as any)?.url;
+
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+      console.error('[VIEW_PDF] unexpected response shape', data);
+      toast.error(typeof data === 'object' && data?.error ? data.error : 'Could not load PDF');
+      if (win) win.close();
+      return null;
+    }
+
+    // Navigate the already-opened tab to the signed URL
+    if (win) {
+      win.location.href = url;
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    return url;
   } catch (err: any) {
     console.error('[VIEW_PDF] exception:', err);
     toast.error(err?.message || 'Failed to load PDF');
+    if (win) win.close();
     return null;
   }
 }
