@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Store, Calendar, BarChart3 } from 'lucide-react';
+import { Users, Store, Calendar, BarChart3, TrendingUp, DollarSign, Clock, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -7,54 +7,91 @@ interface Stats {
   totalUsers: number;
   totalVendors: number;
   totalEvents: number;
-  eventsByType: { umembeso: number; umabo: number };
+  totalBookings: number;
+  totalRequests: number;
+  pendingRequests: number;
+  eventsByType: Record<string, number>;
   vendorsByCategory: Record<string, number>;
 }
+
+const kpiCards = [
+  { key: 'totalUsers' as const, label: 'Total Users', icon: Users, color: 'text-primary' },
+  { key: 'totalVendors' as const, label: 'Active Vendors', icon: Store, color: 'text-secondary' },
+  { key: 'totalEvents' as const, label: 'Ceremonies', icon: Calendar, color: 'text-accent-foreground' },
+  { key: 'totalBookings' as const, label: 'Bookings', icon: FileText, color: 'text-primary' },
+  { key: 'totalRequests' as const, label: 'Service Requests', icon: TrendingUp, color: 'text-secondary' },
+  { key: 'pendingRequests' as const, label: 'Pending Requests', icon: Clock, color: 'text-destructive' },
+];
+
+const categoryLabels: Record<string, string> = {
+  decor: 'Decor',
+  catering: 'Catering',
+  livestock: 'Livestock',
+  tents: 'Tents',
+  transport: 'Transport',
+  attire: 'Attire',
+  photographer: 'Photography',
+  invitations_stationery: 'Invitations',
+  makeup_beauty: 'Makeup & Beauty',
+  cold_room_hire: 'Cold Room Hire',
+  mobile_toilets: 'Mobile Toilets',
+  attire_tailoring: 'Attire Tailoring',
+  drinks_ice_delivery: 'Drinks & Ice',
+  cakes_baking: 'Cakes & Baking',
+  other: 'Other',
+};
+
+const eventTypeLabels: Record<string, string> = {
+  umembeso: 'Umembeso',
+  umabo: 'Umabo',
+  imbeleko: 'Imbeleko',
+  family_introduction: 'Family Introduction',
+  lobola: 'Lobola',
+  umbondo: 'Umbondo',
+  umemulo: 'Umemulo',
+  funeral: 'Funeral',
+  ancestral_ritual: 'Ancestral Ritual',
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalVendors: 0,
     totalEvents: 0,
-    eventsByType: { umembeso: 0, umabo: 0 },
+    totalBookings: 0,
+    totalRequests: 0,
+    pendingRequests: 0,
+    eventsByType: {},
     vendorsByCategory: {},
   });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
-      // Fetch profiles count
-      const { count: usersCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      const [
+        { count: usersCount },
+        { count: vendorsCount },
+        { count: eventsCount },
+        { count: bookingsCount },
+        { count: requestsCount },
+        { count: pendingCount },
+        { data: events },
+        { data: vendors },
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('events').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase.from('service_requests').select('*', { count: 'exact', head: true }),
+        supabase.from('service_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('events').select('type'),
+        supabase.from('vendors').select('category').eq('is_active', true),
+      ]);
 
-      // Fetch vendors count
-      const { count: vendorsCount } = await supabase
-        .from('vendors')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
-
-      // Fetch events count
-      const { count: eventsCount } = await supabase
-        .from('events')
-        .select('*', { count: 'exact', head: true });
-
-      // Fetch events by type
-      const { data: events } = await supabase
-        .from('events')
-        .select('type');
-
-      const eventsByType = { umembeso: 0, umabo: 0 };
+      const eventsByType: Record<string, number> = {};
       events?.forEach(e => {
-        if (e.type === 'umembeso') eventsByType.umembeso++;
-        else if (e.type === 'umabo') eventsByType.umabo++;
+        eventsByType[e.type] = (eventsByType[e.type] || 0) + 1;
       });
-
-      // Fetch vendors by category
-      const { data: vendors } = await supabase
-        .from('vendors')
-        .select('category')
-        .eq('is_active', true);
 
       const vendorsByCategory: Record<string, number> = {};
       vendors?.forEach(v => {
@@ -65,6 +102,9 @@ export default function AdminDashboard() {
         totalUsers: usersCount || 0,
         totalVendors: vendorsCount || 0,
         totalEvents: eventsCount || 0,
+        totalBookings: bookingsCount || 0,
+        totalRequests: requestsCount || 0,
+        pendingRequests: pendingCount || 0,
         eventsByType,
         vendorsByCategory,
       });
@@ -74,129 +114,118 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  const categoryLabels: Record<string, string> = {
-    decor: 'Decor',
-    catering: 'Catering',
-    livestock: 'Livestock',
-    tents: 'Tents',
-    transport: 'Transport',
-    attire: 'Attire',
-    photographer: 'Photography',
-    other: 'Other',
-  };
-
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-5xl">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Overview</h1>
         <p className="text-sm text-muted-foreground mt-1">Platform metrics at a glance</p>
       </div>
 
-      <div className="space-y-6">
-        {isLoading ? (
-          <p className="text-center text-muted-foreground py-8">Loading stats...</p>
-        ) : (
-          <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-3">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Users className="h-6 w-6 mx-auto text-primary mb-2" />
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                  <p className="text-xs text-muted-foreground">Users</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Store className="h-6 w-6 mx-auto text-secondary mb-2" />
-                  <p className="text-2xl font-bold">{stats.totalVendors}</p>
-                  <p className="text-xs text-muted-foreground">Vendors</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Calendar className="h-6 w-6 mx-auto text-accent mb-2" />
-                  <p className="text-2xl font-bold">{stats.totalEvents}</p>
-                  <p className="text-xs text-muted-foreground">Events</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Events by Type */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Events by Type
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Umembeso</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-secondary rounded-full"
-                          style={{ 
-                            width: `${stats.totalEvents > 0 ? (stats.eventsByType.umembeso / stats.totalEvents) * 100 : 0}%` 
-                          }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium w-8 text-right">{stats.eventsByType.umembeso}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Umabo</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-accent rounded-full"
-                          style={{ 
-                            width: `${stats.totalEvents > 0 ? (stats.eventsByType.umabo / stats.totalEvents) * 100 : 0}%` 
-                          }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium w-8 text-right">{stats.eventsByType.umabo}</span>
-                    </div>
-                  </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {kpiCards.map((kpi) => (
+          <Card key={kpi.key}>
+            <CardContent className="p-4 text-center">
+              {isLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-6 w-6 mx-auto rounded bg-muted" />
+                  <div className="h-7 w-10 mx-auto rounded bg-muted" />
+                  <div className="h-3 w-16 mx-auto rounded bg-muted" />
                 </div>
-              </CardContent>
-            </Card>
+              ) : (
+                <>
+                  <kpi.icon className={`h-6 w-6 mx-auto mb-2 ${kpi.color}`} />
+                  <p className="text-2xl font-bold">{stats[kpi.key]}</p>
+                  <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-            {/* Vendors by Category */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Store className="h-5 w-5" />
-                  Vendors by Category
-                </CardTitle>
-                <CardDescription>
-                  Distribution of service providers
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(stats.vendorsByCategory)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([category, count]) => (
-                      <div key={category} className="flex justify-between items-center py-1">
-                        <span className="text-sm">{categoryLabels[category] || category}</span>
-                        <span className="text-sm font-medium">{count}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Events by Type */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Ceremonies by Type
+            </CardTitle>
+            <CardDescription>Distribution of ceremony types</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3 animate-pulse">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="h-4 w-20 rounded bg-muted" />
+                    <div className="h-2 w-24 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
+            ) : Object.keys(stats.eventsByType).length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No ceremonies created yet</p>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(stats.eventsByType)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([type, count]) => (
+                    <div key={type} className="flex justify-between items-center">
+                      <span className="text-sm">{eventTypeLabels[type] || type}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full"
+                            style={{
+                              width: `${stats.totalEvents > 0 ? (count / stats.totalEvents) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-8 text-right">{count}</span>
                       </div>
-                    ))}
-                  {Object.keys(stats.vendorsByCategory).length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No vendors registered yet
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Vendors by Category */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Store className="h-5 w-5" />
+              Vendors by Category
+            </CardTitle>
+            <CardDescription>Distribution of service providers</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3 animate-pulse">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="h-4 w-20 rounded bg-muted" />
+                    <div className="h-4 w-6 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
+            ) : Object.keys(stats.vendorsByCategory).length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No vendors registered yet</p>
+            ) : (
+              <div className="space-y-2">
+                {Object.entries(stats.vendorsByCategory)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([category, count]) => (
+                    <div key={category} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{categoryLabels[category] || category}</span>
+                      <span className="text-sm font-medium">{count}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
