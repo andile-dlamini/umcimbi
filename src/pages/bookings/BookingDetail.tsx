@@ -1,67 +1,60 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { useBookingDetails, useClientBookings } from '@/hooks/useBookings';
+import { useBookingDetails } from '@/hooks/useBookings';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, DollarSign, Phone, MessageCircle, CheckCircle, AlertTriangle, Star, Camera } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, MessageCircle, CheckCircle, AlertTriangle, Star, Camera, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingStatus, PaymentStatus } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { EftPaymentDialog } from '@/components/chat/EftPaymentDialog';
+import { ReviewDialog } from '@/components/chat/ReviewDialog';
+import { useClientBookings } from '@/hooks/useBookings';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const statusConfig = bookingStatusConfig;
 
-const paymentStatusCfg: Record<PaymentStatus, { label: string; color: string }> = {
+const paymentStatusCfg: Record<string, { label: string; color: string }> = {
   not_due: { label: 'Not Due', color: 'text-muted-foreground' },
   due: { label: 'Due', color: 'text-amber-600 dark:text-amber-400' },
   paid: { label: 'Paid', color: 'text-emerald-600 dark:text-emerald-400' },
+  pending_verification: { label: 'Pending Verification', color: 'text-blue-600 dark:text-blue-400' },
 };
 
 export default function BookingDetail() {
   const { bookingId } = useParams<{ bookingId: string }>();
+  const navigate = useNavigate();
   const { user, vendorProfile } = useAuth();
-  const { booking, deliveryProofs, reviews, isLoading, submitReview } = useBookingDetails(bookingId);
-  const { updatePaymentStatus, markAsCompleted, reportProblem } = useClientBookings();
+  const { booking, deliveryProofs, reviews, isLoading, refreshDetails } = useBookingDetails(bookingId);
+  const { reportProblem, markAsCompleted } = useClientBookings();
   
+  const [showEftDialog, setShowEftDialog] = useState<'deposit' | 'balance' | null>(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPayingDeposit, setIsPayingDeposit] = useState(false);
-  const [isPayingBalance, setIsPayingBalance] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
   const hasReviewed = reviews.some(r => r.reviewer_id === user?.id);
-  const canReview = booking?.booking_status === 'completed' && !hasReviewed;
-
-  const handlePayDeposit = async () => {
-    if (!bookingId || isPayingDeposit) return;
-    setIsPayingDeposit(true);
-    await updatePaymentStatus(bookingId, 'deposit_status', 'paid');
-  };
-
-  const handlePayBalance = async () => {
-    if (!bookingId || isPayingBalance) return;
-    setIsPayingBalance(true);
-    await updatePaymentStatus(bookingId, 'balance_status', 'paid');
-  };
+  const canReview = booking?.booking_status === 'completed'
+    && booking?.deposit_paid_at
+    && booking?.balance_paid_at
+    && !hasReviewed;
 
   const handleMarkComplete = async () => {
     if (!bookingId || isCompleting) return;
     setIsCompleting(true);
     await markAsCompleted(bookingId);
     setIsCompleting(false);
+    refreshDetails();
   };
 
   const handleReportProblem = async () => {
@@ -69,13 +62,74 @@ export default function BookingDetail() {
     setIsReporting(true);
     await reportProblem(bookingId);
     setIsReporting(false);
+    refreshDetails();
   };
 
-  const handleSubmitReview = async () => {
-    setIsSubmitting(true);
-    await submitReview(rating, comment);
-    setIsSubmitting(false);
-    setShowReviewDialog(false);
+  const handleConfirmPayment = async (kind: 'deposit' | 'balance') => {
+    if (!bookingId) return;
+    setIsConfirmingPayment(true);
+    try {
+      // Update payment proof status
+      await supabase
+        .from('payment_proofs')
+        .update({ status: 'verified', reviewed_by: user?.id, reviewed_at: new Date().toISOString() })
+        .eq('booking_id', bookingId)
+        .eq('kind', kind)
+        .eq('status', 'submitted');
+
+      // Update booking payment status
+      const field = kind === 'deposit' ? 'deposit_status' : 'balance_status';
+      const updates: Record<string, any> = { [field]: 'paid' };
+      
+      if (kind === 'deposit') {
+        updates.booking_status = 'confirmed';
+        updates.balance_status = 'due';
+        updates.deposit_paid_at = new Date().toISOString();
+        updates.balance_due_at = new Date().toISOString();
+      } else {
+        updates.balance_paid_at = new Date().toISOString();
+        updates.booking_status = 'completed';
+      }
+
+      await supabase.from('bookings').update(updates).eq('id', bookingId);
+
+      // Post system message
+      if (booking) {
+        const { data: conv } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('user_id', booking.client_id)
+          .eq('vendor_id', booking.vendor_id)
+          .order('last_message_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (conv) {
+          const label = kind === 'deposit' ? 'Deposit' : 'Balance';
+          const content = kind === 'balance'
+            ? `✅ ${label} payment confirmed. Booking is now completed! Please rate each other.`
+            : `✅ ${label} payment confirmed. Booking is now active!`;
+          await supabase.from('messages').insert({
+            conversation_id: conv.id,
+            sender_type: 'system' as any,
+            sender_user_id: user?.id,
+            message_type: 'system',
+            content,
+          });
+          await supabase.from('conversations')
+            .update({ last_message_at: new Date().toISOString() })
+            .eq('id', conv.id);
+        }
+      }
+
+      toast.success('Payment confirmed!');
+      refreshDetails();
+    } catch (err) {
+      console.error('Confirm payment error:', err);
+      toast.error('Failed to confirm payment');
+    } finally {
+      setIsConfirmingPayment(false);
+    }
   };
 
   if (isLoading) {
@@ -108,13 +162,15 @@ export default function BookingDetail() {
   }
 
   const status = statusConfig[booking.booking_status];
+  const depositDue = booking.deposit_status === 'due' || (booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit');
+  const balanceDue = booking.balance_status === 'due';
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <PageHeader title="Booking Details" showBack />
       
       <div className="p-4 space-y-4">
-        {/* Status Banner */}
+        {/* Review Banner */}
         {canReview && (
           <Card className="bg-primary/10 border-primary/20">
             <CardContent className="p-4 flex items-center justify-between">
@@ -123,10 +179,14 @@ export default function BookingDetail() {
                 <span className="font-medium">Ready to review!</span>
               </div>
               <Button size="sm" onClick={() => setShowReviewDialog(true)}>
-                Rate Vendor
+                {isVendor ? 'Rate Client' : 'Rate Vendor'}
               </Button>
             </CardContent>
           </Card>
+        )}
+
+        {hasReviewed && (
+          <p className="text-sm text-center text-muted-foreground">✅ Your rating has been submitted</p>
         )}
 
         {/* Main Info Card */}
@@ -159,28 +219,6 @@ export default function BookingDetail() {
                 </div>
               )}
             </div>
-
-            <Separator />
-
-            {/* Contact Actions */}
-            <div className="flex gap-2">
-              {booking.vendor?.phone_number && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={`tel:${booking.vendor.phone_number}`}>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call
-                  </a>
-                </Button>
-              )}
-              {booking.vendor?.whatsapp_number && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={`https://wa.me/${booking.vendor.whatsapp_number.replace(/\D/g, '')}`} target="_blank">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    WhatsApp
-                  </a>
-                </Button>
-              )}
-            </div>
           </CardContent>
         </Card>
 
@@ -201,44 +239,55 @@ export default function BookingDetail() {
             <Separator />
             
             <div className="space-y-3">
+              {/* Deposit */}
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-medium">Deposit</p>
                   <p className="text-sm text-muted-foreground">R{booking.deposit_amount.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={paymentStatusCfg[booking.deposit_status].color}>
-                    {paymentStatusCfg[booking.deposit_status].label}
+                  <span className={paymentStatusCfg[booking.deposit_status]?.color || 'text-muted-foreground'}>
+                    {paymentStatusCfg[booking.deposit_status]?.label || booking.deposit_status}
                   </span>
-                  {isClient && booking.deposit_status === 'due' && (
-                    <Button size="sm" onClick={handlePayDeposit} disabled={isPayingDeposit}>
-                      {isPayingDeposit ? 'Processing...' : 'Mark Paid'}
-                    </Button>
-                  )}
-                  {isClient && booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit' && (
-                    <Button size="sm" onClick={handlePayDeposit} disabled={isPayingDeposit}>
-                      {isPayingDeposit ? 'Processing...' : 'Pay Deposit'}
-                    </Button>
-                  )}
                 </div>
               </div>
-              
+              {isClient && depositDue && booking.deposit_status !== 'paid' && booking.deposit_status !== 'pending_verification' && (
+                <Button size="sm" className="w-full" onClick={() => setShowEftDialog('deposit')}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Pay Deposit (EFT)
+                </Button>
+              )}
+              {isVendor && booking.deposit_status === 'pending_verification' && (
+                <Button size="sm" variant="outline" className="w-full" onClick={() => handleConfirmPayment('deposit')} disabled={isConfirmingPayment}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {isConfirmingPayment ? 'Confirming...' : 'Confirm Deposit Received'}
+                </Button>
+              )}
+
+              {/* Balance */}
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-medium">Balance</p>
                   <p className="text-sm text-muted-foreground">R{booking.balance_amount.toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={paymentStatusCfg[booking.balance_status].color}>
-                    {paymentStatusCfg[booking.balance_status].label}
+                  <span className={paymentStatusCfg[booking.balance_status]?.color || 'text-muted-foreground'}>
+                    {paymentStatusCfg[booking.balance_status]?.label || booking.balance_status}
                   </span>
-                  {isClient && booking.balance_status === 'due' && (
-                    <Button size="sm" onClick={handlePayBalance} disabled={isPayingBalance}>
-                      {isPayingBalance ? 'Processing...' : 'Mark Paid'}
-                    </Button>
-                  )}
                 </div>
               </div>
+              {isClient && balanceDue && booking.balance_status !== 'paid' && booking.balance_status !== 'pending_verification' && (
+                <Button size="sm" className="w-full" onClick={() => setShowEftDialog('balance')}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Pay Balance (EFT)
+                </Button>
+              )}
+              {isVendor && booking.balance_status === 'pending_verification' && (
+                <Button size="sm" variant="outline" className="w-full" onClick={() => handleConfirmPayment('balance')} disabled={isConfirmingPayment}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {isConfirmingPayment ? 'Confirming...' : 'Confirm Balance Received'}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -255,7 +304,7 @@ export default function BookingDetail() {
             <CardContent>
               <div className="grid grid-cols-3 gap-2">
                 {deliveryProofs.flatMap(proof => 
-                  proof.photos.map((photo, idx) => (
+                  proof.photos.map((photo: string, idx: number) => (
                     <img
                       key={`${proof.id}-${idx}`}
                       src={photo}
@@ -284,47 +333,26 @@ export default function BookingDetail() {
         )}
       </div>
 
+      {/* EFT Payment Dialog */}
+      {showEftDialog && booking && (
+        <EftPaymentDialog
+          open={!!showEftDialog}
+          onOpenChange={(o) => { if (!o) setShowEftDialog(null); }}
+          bookingId={booking.id}
+          kind={showEftDialog}
+          amount={showEftDialog === 'deposit' ? booking.deposit_amount : booking.balance_amount}
+          onSuccess={() => { setShowEftDialog(null); refreshDetails(); }}
+        />
+      )}
+
       {/* Review Dialog */}
-      <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rate Your Experience</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label>Rating</Label>
-              <div className="flex gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setRating(star)}
-                    className={`p-1 ${star <= rating ? 'text-yellow-500' : 'text-muted-foreground'}`}
-                  >
-                    <Star className="h-8 w-8 fill-current" />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label>Comment (optional)</Label>
-              <Textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Share your experience..."
-                className="mt-2"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowReviewDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitReview} disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Review'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReviewDialog
+        open={showReviewDialog}
+        onOpenChange={setShowReviewDialog}
+        bookingId={bookingId || ''}
+        isVendorView={!!isVendor}
+        onSuccess={() => { setShowReviewDialog(false); refreshDetails(); }}
+      />
       
       <BottomNav />
     </div>

@@ -481,6 +481,53 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_proofs: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          kind: string
+          payer_user_id: string
+          reference_text: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          storage_key: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          payer_user_id: string
+          reference_text?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_key: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          payer_user_id?: string
+          reference_text?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_proofs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -1079,7 +1126,7 @@ export type Database = {
         | "umemulo"
         | "funeral"
         | "ancestral_ritual"
-      payment_status: "not_due" | "due" | "paid"
+      payment_status: "not_due" | "due" | "paid" | "pending_verification"
       preferred_language: "zulu" | "english"
       quote_status:
         | "pending_client"
@@ -1296,7 +1343,7 @@ export const Constants = {
         "funeral",
         "ancestral_ritual",
       ],
-      payment_status: ["not_due", "due", "paid"],
+      payment_status: ["not_due", "due", "paid", "pending_verification"],
       preferred_language: ["zulu", "english"],
       quote_status: [
         "pending_client",

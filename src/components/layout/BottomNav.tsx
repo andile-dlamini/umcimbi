@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Store, MessageCircle, BookOpen, User, LayoutDashboard, Calendar } from 'lucide-react';
+import { Home, Store, MessageCircle, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -147,16 +147,16 @@ export function BottomNav() {
   // Role-specific navigation items
   const organiserNavItems = [
     { to: '/', icon: Home, label: 'Home' },
+    { to: '/chats', icon: MessageCircle, label: 'Inbox', showDot: hasUnread, isNew: isNewMessage },
     { to: '/vendors', icon: Store, label: 'Vendors' },
-    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
-    { to: '/learn', icon: BookOpen, label: 'Learn' },
+    { to: '/bookings', icon: Calendar, label: 'Bookings' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
   const vendorNavItems = [
+    { to: '/chats', icon: MessageCircle, label: 'Inbox', showDot: hasUnread, isNew: isNewMessage },
+    { to: '/vendor-dashboard/bookings', icon: Calendar, label: 'Bookings' },
     { to: '/', icon: Home, label: 'Home' },
-    { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/chats', icon: MessageCircle, label: 'Chats', showDot: hasUnread, isNew: isNewMessage },
     { to: '/vendors', icon: Store, label: 'Browse' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];

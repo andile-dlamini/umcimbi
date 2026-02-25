@@ -1,4 +1,3 @@
-import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useClientQuotes } from '@/hooks/useQuotes';
@@ -6,44 +5,33 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, Star, CheckCircle, XCircle, FileText, Download } from 'lucide-react';
+import { DollarSign, Clock, Star, FileText, MessageCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails } from '@/types/booking';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { quoteStatusConfig } from '@/lib/statusConfig';
-import { acceptQuoteAction, declineQuoteAction, viewQuotePdfAction } from '@/lib/quoteActions';
+import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { useStartConversation } from '@/hooks/useChat';
+import { toast } from 'sonner';
 
 const statusConfig = quoteStatusConfig;
 
-function QuoteCard({ 
-  quote, 
-  onAccept, 
-  onDecline 
-}: { 
-  quote: QuoteWithDetails; 
-  onAccept: () => Promise<void>;
-  onDecline: () => Promise<void>;
-}) {
-  const [isAccepting, setIsAccepting] = useState(false);
-  const [isDeclining, setIsDeclining] = useState(false);
+function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
-  const isAccepted = quote.status === 'client_accepted';
+  const navigate = useNavigate();
+  const { startConversation } = useStartConversation();
   const status = statusConfig[quote.status];
   const isExpired = new Date(quote.expires_at) < new Date();
-  const isPending = quote.status === 'pending_client' && !isExpired;
 
-  const handleAccept = async () => {
-    setIsAccepting(true);
-    await onAccept();
-    setIsAccepting(false);
-  };
-
-  const handleDecline = async () => {
-    setIsDeclining(true);
-    await onDecline();
-    setIsDeclining(false);
+  const handleOpenChat = async () => {
+    if (!quote.vendor?.id) return;
+    const convId = await startConversation(quote.vendor.id);
+    if (convId) {
+      navigate(`/chat/${convId}`);
+    } else {
+      toast.error('Could not open chat');
+    }
   };
 
   return (
@@ -80,51 +68,24 @@ function QuoteCard({
           {quote.notes && (
             <p className="text-sm text-muted-foreground">{quote.notes}</p>
           )}
-          
-          {quote.proposed_date_time_window && (
-            <p className="text-sm text-muted-foreground">
-              Available: {quote.proposed_date_time_window}
+
+          {quote.offer_number && (
+            <p className="text-xs text-muted-foreground font-mono">
+              Ref: {quote.offer_number}
             </p>
           )}
-          
-          {isPending && (
-            <div className="flex items-center gap-2 text-sm text-warning">
-              <Clock className="h-4 w-4" />
-              <span>Expires {formatDistanceToNow(new Date(quote.expires_at), { addSuffix: true })}</span>
-            </div>
-          )}
-       </div>
+        </div>
       </CardContent>
       
-      {isPending && (
-        <CardFooter className="p-4 pt-0 gap-2">
-          <Button 
-            type="button"
-            variant="outline" 
-            className="flex-1"
-            onClick={handleDecline}
-            disabled={isDeclining}
-          >
-            <XCircle className="h-4 w-4 mr-2" />
-            {isDeclining ? 'Declining...' : 'Decline'}
-          </Button>
-          <Button 
-            type="button"
-            className="flex-1"
-            onClick={handleAccept}
-            disabled={isAccepting}
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {isAccepting ? 'Accepting...' : 'Accept & Book'}
-          </Button>
-        </CardFooter>
-      )}
-
-      {isAccepted && quote.final_offer_pdf_key && (
-        <CardFooter className="p-4 pt-0 gap-2">
+      <CardFooter className="p-4 pt-0 gap-2">
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenChat}>
+          <MessageCircle className="h-4 w-4 mr-2" />
+          Open Chat
+        </Button>
+        {quote.final_offer_pdf_key && (
           <Button
-            type="button"
             variant="outline"
+            size="sm"
             className="flex-1"
             disabled={isLoadingPdf}
             onClick={async () => {
@@ -134,50 +95,21 @@ function QuoteCard({
             }}
           >
             <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'View Final Offer'}
+            {isLoadingPdf ? 'Loading...' : 'View PDF'}
           </Button>
-        </CardFooter>
-      )}
-
-      {isAccepted && quote.offer_number && (
-        <div className="px-4 pb-3">
-          <p className="text-xs text-muted-foreground">
-            Offer #{quote.offer_number}
-          </p>
-        </div>
-      )}
+        )}
+      </CardFooter>
     </Card>
   );
 }
 
 export default function MyQuotes() {
-  const { quotes, isLoading, refreshQuotes } = useClientQuotes();
-  const navigate = useNavigate();
-
-  const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
-  const decidedQuotes = quotes.filter(q => q.status !== 'pending_client');
-
-  const handleAcceptQuote = async (quote: QuoteWithDetails) => {
-    const result = await acceptQuoteAction(quote.id);
-    if (result.success) {
-      await refreshQuotes();
-      if (result.bookingId) {
-        navigate(`/bookings/${result.bookingId}`);
-      }
-    }
-  };
-
-  const handleDeclineQuote = async (quote: QuoteWithDetails) => {
-    const success = await declineQuoteAction(quote.id);
-    if (success) {
-      await refreshQuotes();
-    }
-  };
+  const { quotes, isLoading } = useClientQuotes();
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="My Quotes" showBack />
+        <PageHeader title="Quotes Archive" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-48 w-full" />
@@ -190,52 +122,22 @@ export default function MyQuotes() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="My Quotes" showBack />
+      <PageHeader title="Quotes Archive" showBack />
       
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-4">
+        <p className="text-sm text-muted-foreground">
+          All your quotes in one place. To accept or negotiate, open the chat.
+        </p>
         {quotes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">No quotes yet</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Send quote requests to vendors to receive quotes
-              </p>
             </CardContent>
           </Card>
         ) : (
-          <>
-            {pendingQuotes.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-lg mb-3">Awaiting Your Decision</h2>
-                <div className="space-y-4">
-                  {pendingQuotes.map((quote) => (
-                    <QuoteCard
-                      key={quote.id}
-                      quote={quote}
-                      onAccept={() => handleAcceptQuote(quote)}
-                      onDecline={() => handleDeclineQuote(quote)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {decidedQuotes.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-lg mb-3">Past Quotes</h2>
-                <div className="space-y-4">
-                  {decidedQuotes.map((quote) => (
-                    <QuoteCard
-                      key={quote.id}
-                      quote={quote}
-                      onAccept={() => handleAcceptQuote(quote)}
-                      onDecline={() => handleDeclineQuote(quote)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
+          quotes.map((quote) => (
+            <QuoteCard key={quote.id} quote={quote} />
+          ))
         )}
       </div>
       
