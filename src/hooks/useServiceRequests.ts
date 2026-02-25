@@ -64,8 +64,14 @@ export function useMyServiceRequests() {
       .eq('id', request.event_id)
       .single();
 
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('name')
+      .eq('id', request.vendor_id)
+      .single();
+
     if (event) {
-      // Send vendor-facing notification about new request
+      // Send vendor-facing notification about new request (sender = user)
       await sendChatNotification(
         user.id,
         request.vendor_id,
@@ -74,7 +80,17 @@ export function useMyServiceRequests() {
           event.type.charAt(0).toUpperCase() + event.type.slice(1).replace('_', ' '),
           request.guest_count || event.estimated_guest_count || undefined
         ),
-        request.event_id
+        request.event_id,
+        user.id
+      );
+
+      // Send user-facing confirmation (sender = user, so it won't show as unread for them)
+      await sendChatNotification(
+        user.id,
+        request.vendor_id,
+        notificationMessages.quoteRequested(event.name, vendor?.name || 'the vendor'),
+        request.event_id,
+        user.id
       );
     }
 
@@ -261,13 +277,14 @@ export function useVendorServiceRequests() {
       return false;
     }
 
-    // Send chat notification to user
+    // Send chat notification to user (sender = vendor's owner user)
     if (requestData && vendorProfile) {
       await sendChatNotification(
         requestData.requester_user_id,
         vendorProfile.id,
         notificationMessages.quoteReceived(vendorProfile.name, quotedAmount),
-        requestData.event_id
+        requestData.event_id,
+        vendorProfile.owner_user_id || undefined
       );
     }
 
@@ -299,13 +316,14 @@ export function useVendorServiceRequests() {
       return false;
     }
 
-    // Send chat notification to user
+    // Send chat notification to user (sender = vendor's owner user)
     if (requestData && vendorProfile) {
       await sendChatNotification(
         requestData.requester_user_id,
         vendorProfile.id,
         notificationMessages.vendorDeclinedRequest(reason),
-        requestData.event_id
+        requestData.event_id,
+        vendorProfile.owner_user_id || undefined
       );
     }
 

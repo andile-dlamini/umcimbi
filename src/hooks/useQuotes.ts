@@ -195,13 +195,14 @@ export function useVendorQuotes() {
       .eq('id', quoteData.request_id)
       .single();
 
-    // Send chat notification to client
+    // Send chat notification to client (sender = vendor's owner user)
     if (request) {
       await sendChatNotification(
         request.requester_user_id,
         vendorProfile.id,
         notificationMessages.quoteReceived(vendorProfile.name, quoteData.price),
-        request.event_id
+        request.event_id,
+        user.id
       );
     }
 
