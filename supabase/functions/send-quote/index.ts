@@ -248,24 +248,31 @@ serve(async (req) => {
     // 2) Find or create service_request
     let serviceRequestId = request_id;
     if (!serviceRequestId) {
-      // Try to find existing pending/quoted request
+      // Try to find existing request (any status - we'll reuse it for new quotes)
       const { data: existingReq } = await supabase
         .from("service_requests")
-        .select("id")
+        .select("id, status")
         .eq("vendor_id", conv.vendor_id)
         .eq("requester_user_id", conv.user_id)
         .eq("event_id", effectiveEventId)
-        .in("status", ["pending", "quoted"])
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      serviceRequestId = existingReq?.id;
+      if (existingReq) {
+        serviceRequestId = existingReq.id;
+        // Reset status to pending if it was in a terminal state, so new quote flow works
+        if (!["pending", "quoted"].includes(existingReq.status)) {
+          await supabase
+            .from("service_requests")
+            .update({ status: "pending", responded_at: null })
+            .eq("id", existingReq.id);
+        }
+      }
     }
 
     if (!serviceRequestId) {
       // Create minimal service request
-
       const { data: newReq, error: reqErr } = await supabase
         .from("service_requests")
         .insert({
