@@ -189,6 +189,19 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
             ✅ Deposit paid
           </div>
         )}
+
+        {isAccepted && bookingId && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => navigate(`/bookings/${bookingId}`)}
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            View Booking
+          </Button>
+        )}
       </div>
     </div>
   );
