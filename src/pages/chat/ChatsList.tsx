@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { ConversationStatusChip } from '@/components/chat/ConversationStatusChip';
 import { useConversations } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -78,7 +79,6 @@ const ChatsList = () => {
       group.conversations.push(conv);
       group.totalUnread += conv.unread_count || 0;
 
-      // Track the latest message time across all conversations in the group
       if (conv.last_message_at) {
         if (!group.latestMessageAt || new Date(conv.last_message_at) > new Date(group.latestMessageAt)) {
           group.latestMessageAt = conv.last_message_at;
@@ -86,7 +86,6 @@ const ChatsList = () => {
       }
     });
 
-    // Sort conversations within each group by last message time
     groups.forEach((group) => {
       group.conversations.sort((a, b) => {
         const aTime = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
@@ -95,7 +94,6 @@ const ChatsList = () => {
       });
     });
 
-    // Convert to array and sort groups: unread first, then by latest message time
     return Array.from(groups.values()).sort((a, b) => {
       const aUnread = a.totalUnread > 0;
       const bUnread = b.totalUnread > 0;
@@ -145,9 +143,17 @@ const ChatsList = () => {
               {getTimeAgo(conv.last_message_at)}
             </span>
           </div>
-          <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
-            {getLastMessageSnippet(conv)}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <p className={`text-sm truncate ${hasUnread ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+              {getLastMessageSnippet(conv)}
+            </p>
+          </div>
+          <div className="mt-1">
+            <ConversationStatusChip
+              bookingStatus={(conv as any).booking_status}
+              quoteStatus={(conv as any).quote_status}
+            />
+          </div>
         </div>
       </button>
     );
@@ -184,7 +190,6 @@ const ChatsList = () => {
               const hasUnread = group.totalUnread > 0;
 
               if (!hasMultiple) {
-                // Single conversation - render directly
                 return (
                   <button
                     key={group.key}
@@ -217,17 +222,22 @@ const ChatsList = () => {
                           {getLastMessageSnippet(latestConv)}
                         </p>
                       </div>
-                      {latestConv.event && (
-                        <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
-                          {latestConv.event.name}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        {latestConv.event && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-accent/20 text-accent border border-accent/50">
+                            {latestConv.event.name}
+                          </span>
+                        )}
+                        <ConversationStatusChip
+                          bookingStatus={(latestConv as any).booking_status}
+                          quoteStatus={(latestConv as any).quote_status}
+                        />
+                      </div>
                     </div>
                   </button>
                 );
               }
 
-              // Multiple conversations - render as expandable group
               return (
                 <div key={group.key} className="space-y-2">
                   <button

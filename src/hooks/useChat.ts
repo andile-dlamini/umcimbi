@@ -86,6 +86,31 @@ export const useConversations = () => {
           
           const totalCount = (regularCount || 0) + (systemCount || 0);
 
+          // Fetch latest booking status for this conversation's user+vendor
+          let bookingStatus: string | null = null;
+          const { data: latestBooking } = await supabase
+            .from('bookings')
+            .select('booking_status')
+            .eq('client_id', conv.user_id)
+            .eq('vendor_id', conv.vendor_id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (latestBooking) bookingStatus = latestBooking.booking_status;
+
+          // Fetch latest quote status if no booking
+          let quoteStatus: string | null = null;
+          if (!bookingStatus) {
+            const { data: latestQuote } = await supabase
+              .from('quotes')
+              .select('status')
+              .eq('vendor_id', conv.vendor_id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (latestQuote) quoteStatus = latestQuote.status;
+          }
+
           return {
             ...conv,
             vendor: vendor || undefined,
@@ -93,6 +118,8 @@ export const useConversations = () => {
             user_profile: profile || undefined,
             last_message: lastMsg || undefined,
             unread_count: totalCount,
+            booking_status: bookingStatus,
+            quote_status: quoteStatus,
           } as ConversationWithDetails;
         })
       );
