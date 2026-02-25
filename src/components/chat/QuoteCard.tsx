@@ -93,7 +93,14 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
       const { data, error } = await supabase.functions.invoke('accept-quote', {
         body: { quote_id: metadata.quote_id },
       });
-      if (error) throw error;
+      // supabase.functions.invoke puts non-2xx responses in error, real message in data
+      if (error) {
+        // Try to extract the actual error message from the response
+        const errorMsg = data?.error || error?.message || 'Failed to accept quote';
+        console.error('Accept quote error:', { error, data });
+        toast.error(errorMsg);
+        return;
+      }
       if (data?.error) {
         toast.error(data.error);
         return;
@@ -102,8 +109,9 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
       setBookingId(data.booking_id);
       toast.success('Quote accepted! Pay deposit to confirm booking.');
       onStatusChange?.();
-    } catch (err) {
-      toast.error('Failed to accept quote');
+    } catch (err: any) {
+      console.error('Accept quote exception:', err);
+      toast.error(err?.message || 'Failed to accept quote');
     } finally {
       setIsAccepting(false);
     }
@@ -115,7 +123,12 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
       const { data, error } = await supabase.functions.invoke('decline-quote', {
         body: { quote_id: metadata.quote_id },
       });
-      if (error) throw error;
+      if (error) {
+        const errorMsg = data?.error || error?.message || 'Failed to decline quote';
+        console.error('Decline quote error:', { error, data });
+        toast.error(errorMsg);
+        return;
+      }
       if (data?.error) {
         toast.error(data.error);
         return;
@@ -123,8 +136,9 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
       setCurrentStatus('client_declined');
       toast.info('Quote declined');
       onStatusChange?.();
-    } catch (err) {
-      toast.error('Failed to decline quote');
+    } catch (err: any) {
+      console.error('Decline quote exception:', err);
+      toast.error(err?.message || 'Failed to decline quote');
     } finally {
       setIsDeclining(false);
     }
