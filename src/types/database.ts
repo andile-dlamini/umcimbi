@@ -177,6 +177,9 @@ export interface Message {
   sender_type: SenderType;
   sender_user_id: string | null;
   content: string;
+  message_type: string;
+  attachments: any;
+  metadata: any | null;
   created_at: string;
   read_at: string | null;
 }

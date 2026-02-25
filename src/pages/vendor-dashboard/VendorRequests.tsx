@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useVendorServiceRequests } from '@/hooks/useServiceRequests';
@@ -10,12 +11,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CreateQuoteDialog } from '@/components/vendors/CreateQuoteDialog';
+import { useStartConversation } from '@/hooks/useChat';
+import { toast } from 'sonner';
 
 export default function VendorRequests() {
+  const navigate = useNavigate();
   const { requests, isLoading, respondToRequest, declineRequest, refreshRequests } = useVendorServiceRequests();
   const { createQuote } = useVendorQuotes();
-  const [showCreateQuoteDialog, setShowCreateQuoteDialog] = useState(false);
+  const { startConversation } = useStartConversation();
 
   const newRequests = requests.filter(r => r.status === 'pending');
   const respondedRequests = requests.filter(r => r.status === 'quoted');
@@ -54,13 +57,13 @@ export default function VendorRequests() {
       <PageHeader title="Quote Requests" showBack />
       
       <div className="p-4">
-        {/* Create Quote Button */}
+        {/* Open Chat - primary action */}
         <Button 
-          onClick={() => setShowCreateQuoteDialog(true)}
+          onClick={() => navigate('/chats')}
           className="w-full mb-4"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Quote
+          <MessageCircle className="h-4 w-4 mr-2" />
+          Open Chats
         </Button>
 
         <Tabs defaultValue="new" className="w-full">
@@ -138,12 +141,7 @@ export default function VendorRequests() {
         </Tabs>
       </div>
 
-      {/* Create Quote Dialog */}
-      <CreateQuoteDialog
-        open={showCreateQuoteDialog}
-        onOpenChange={setShowCreateQuoteDialog}
-        onSuccess={refreshRequests}
-      />
+      {/* Quote creation now happens in chat */}
       
       <BottomNav />
     </div>

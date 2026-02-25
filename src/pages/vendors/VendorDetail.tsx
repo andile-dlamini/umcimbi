@@ -207,15 +207,7 @@ export default function VendorDetail() {
         {/* Reviews Section */}
         <VendorRating vendorId={id!} />
 
-        {/* Request Quote Button */}
-        <RequestQuoteDialog vendor={vendor}>
-          <Button size="lg" variant="secondary" className="w-full">
-            <FileText className="h-4 w-4 mr-2" />
-            Request a quote
-          </Button>
-        </RequestQuoteDialog>
-
-        {/* Chat with Vendor Button */}
+        {/* Start Chat - primary action replaces old Request Quote */}
         <Button
           size="lg"
           className="w-full"
@@ -223,8 +215,9 @@ export default function VendorDetail() {
           onClick={handleChatWithVendor}
         >
           <Send className="h-4 w-4 mr-2" />
-          Chat with this vendor
+          Start Chat & Request Quote
         </Button>
+
 
         {/* Contact Actions */}
         <div className="flex gap-3">
