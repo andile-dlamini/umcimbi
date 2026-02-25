@@ -89,6 +89,8 @@ export default function AuthPage() {
     terms_accepted: false as any,
   });
 
+  const isNonSACountry = form.country !== 'ZA';
+
   const selectedCountry = COUNTRIES.find(c => c.code === form.country) || COUNTRIES[0];
 
   // OTP state
@@ -549,6 +551,11 @@ export default function AuthPage() {
                   </PopoverContent>
                 </Popover>
                 {errors.country && <p className="text-xs text-destructive">{errors.country}</p>}
+                {isNonSACountry && (
+                  <p className="text-sm text-destructive bg-destructive/10 rounded-md p-3 border border-destructive/20">
+                    📱 SMS verification is currently only available for South African phone numbers. Please select South Africa as your country to register.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -624,7 +631,7 @@ export default function AuthPage() {
               </div>
               {errors.terms_accepted && <p className="text-xs text-destructive">{errors.terms_accepted}</p>}
 
-              <Button type="submit" className="w-full h-12 mt-2" disabled={isLoading}>
+              <Button type="submit" className="w-full h-12 mt-2" disabled={isLoading || isNonSACountry}>
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
                 {isLoading ? 'Sending code...' : 'Send Verification Code'}
               </Button>
