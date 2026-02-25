@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { acceptQuoteAction, declineQuoteAction } from '@/lib/quoteActions';
+import { acceptQuoteAction, declineQuoteAction, viewQuotePdfAction } from '@/lib/quoteActions';
 
 interface QuoteCardMetadata {
   quote_id: string;
@@ -65,25 +65,8 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
 
   const handleViewPdf = async () => {
     setIsLoadingPdf(true);
-    try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${metadata.quote_id}`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-      });
-      const result = await response.json();
-      if (result.url) {
-        window.open(result.url, '_blank');
-      } else {
-        toast.error('Could not load PDF');
-      }
-    } catch (err) {
-      toast.error('Failed to load PDF');
-    } finally {
-      setIsLoadingPdf(false);
-    }
+    await viewQuotePdfAction(metadata.quote_id);
+    setIsLoadingPdf(false);
   };
 
   const handleAccept = async () => {

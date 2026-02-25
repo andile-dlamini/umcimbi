@@ -39,8 +39,16 @@ serve(async (req) => {
       });
     }
 
+    // Accept quote_id from query string (GET) or body (POST)
+    let quoteId: string | null = null;
     const url = new URL(req.url);
-    const quoteId = url.searchParams.get("quote_id");
+    quoteId = url.searchParams.get("quote_id");
+    if (!quoteId && req.method === "POST") {
+      try {
+        const body = await req.json();
+        quoteId = body.quote_id || null;
+      } catch { /* ignore parse errors */ }
+    }
     if (!quoteId) {
       return new Response(JSON.stringify({ error: "quote_id required" }), {
         status: 400,

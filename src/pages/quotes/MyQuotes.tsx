@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { quoteStatusConfig } from '@/lib/statusConfig';
-import { acceptQuoteAction, declineQuoteAction } from '@/lib/quoteActions';
+import { acceptQuoteAction, declineQuoteAction, viewQuotePdfAction } from '@/lib/quoteActions';
 
 const statusConfig = quoteStatusConfig;
 
@@ -129,60 +129,12 @@ function QuoteCard({
             disabled={isLoadingPdf}
             onClick={async () => {
               setIsLoadingPdf(true);
-              try {
-                const { data: sessionData } = await supabase.auth.getSession();
-                const token = sessionData?.session?.access_token;
-                const res = await fetch(
-                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${quote.id}`,
-                  {
-                    headers: {
-                      'Authorization': `Bearer ${token}`,
-                      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                    },
-                  }
-                );
-                const data = await res.json();
-                if (data.url) window.open(data.url, '_blank');
-                else toast.error('Could not load document');
-              } catch { toast.error('Failed to load document'); }
-              finally { setIsLoadingPdf(false); }
+              await viewQuotePdfAction(quote.id);
+              setIsLoadingPdf(false);
             }}
           >
             <FileText className="h-4 w-4 mr-2" />
             {isLoadingPdf ? 'Loading...' : 'View Final Offer'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            disabled={isLoadingPdf}
-            onClick={async () => {
-              setIsLoadingPdf(true);
-              try {
-                const { data: sessionData } = await supabase.auth.getSession();
-                const token = sessionData?.session?.access_token;
-                const res = await fetch(
-                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${quote.id}`,
-                  {
-                    headers: {
-                      'Authorization': `Bearer ${token}`,
-                      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                    },
-                  }
-                );
-                const data = await res.json();
-                if (data.url) {
-                  const a = document.createElement('a');
-                  a.href = data.url;
-                  a.download = `${data.offer_number || 'final-offer'}.html`;
-                  a.click();
-                } else toast.error('Could not load document');
-              } catch { toast.error('Failed to download'); }
-              finally { setIsLoadingPdf(false); }
-            }}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download
           </Button>
         </CardFooter>
       )}
