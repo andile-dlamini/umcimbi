@@ -289,6 +289,7 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
           bookingId={booking.id}
           kind={showEftDialog}
           amount={showEftDialog === 'deposit' ? booking.deposit_amount : booking.balance_amount}
+          offerNumber={latestQuote?.offer_number}
           onSuccess={() => { setShowEftDialog(null); fetchDetails(); }}
         />
       )}
