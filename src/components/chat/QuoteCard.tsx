@@ -67,14 +67,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
   const handleViewPdf = async () => {
     setIsLoadingPdf(true);
     try {
-      const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
-        body: null,
-        headers: { 'Content-Type': 'application/json' },
-        method: 'GET',
-      });
-      // Use query param approach since get-final-offer-url uses GET with query params
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const url = `https://${projectId}.supabase.co/functions/v1/get-final-offer-url?quote_id=${metadata.quote_id}`;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-final-offer-url?quote_id=${metadata.quote_id}`;
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
