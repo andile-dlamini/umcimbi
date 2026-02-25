@@ -154,9 +154,9 @@ export function BottomNav() {
   ];
 
   const vendorNavItems = [
+    { to: '/', icon: Home, label: 'Home' },
     { to: '/chats', icon: MessageCircle, label: 'Inbox', showDot: hasUnread, isNew: isNewMessage },
     { to: '/vendor-dashboard/bookings', icon: Calendar, label: 'Bookings' },
-    { to: '/', icon: Home, label: 'Home' },
     { to: '/vendors', icon: Store, label: 'Browse' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];

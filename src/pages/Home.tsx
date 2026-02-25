@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Calendar, Gift, Heart, Handshake, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { EventCard } from '@/components/shared/EventCard';
 import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
 import { EventType } from '@/types/database';
+import VendorCalendarHome from '@/pages/vendor-dashboard/VendorCalendarHome';
 
 const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }>; colorClass: string }[] = [
   { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift, colorClass: 'bg-accent/20 text-accent' },
@@ -29,10 +29,9 @@ export default function Home() {
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
 
-  // Vendor: redirect to Inbox
+  // Vendor: show calendar home
   if (activeRole === 'vendor' && isVendor) {
-    navigate('/chats', { replace: true });
-    return null;
+    return <VendorCalendarHome />;
   }
 
   // Organiser View (default)
