@@ -141,6 +141,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       budget_items: {
@@ -230,6 +237,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "conversations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       delivery_proofs: {
@@ -302,6 +316,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -711,6 +732,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       service_requests: {
@@ -781,6 +809,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -899,6 +934,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendor_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vendor_verification_documents: {
@@ -938,6 +980,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_verification_documents_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1079,7 +1128,138 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vendors_public: {
+        Row: {
+          about: string | null
+          added_to_events_count: number | null
+          address_line_1: string | null
+          address_line_2: string | null
+          business_verification_status:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category: Database["public"]["Enums"]["vendor_category"] | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          image_urls: string[] | null
+          is_active: boolean | null
+          is_super_vendor: boolean | null
+          languages: string[] | null
+          latitude: number | null
+          letterhead_enabled: boolean | null
+          location: string | null
+          logo_url: string | null
+          longitude: number | null
+          name: string | null
+          owner_user_id: string | null
+          phone_number: string | null
+          postal_code: string | null
+          price_range_text: string | null
+          rating: number | null
+          review_count: number | null
+          show_registration_on_pdf: boolean | null
+          show_vat_on_pdf: boolean | null
+          state_province: string | null
+          super_vendor_awarded_at: string | null
+          super_vendor_reason: string | null
+          updated_at: string | null
+          vendor_business_type:
+            | Database["public"]["Enums"]["vendor_business_type"]
+            | null
+          view_count: number | null
+          website_url: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          about?: string | null
+          added_to_events_count?: number | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          business_verification_status?:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category?: Database["public"]["Enums"]["vendor_category"] | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_super_vendor?: boolean | null
+          languages?: string[] | null
+          latitude?: number | null
+          letterhead_enabled?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          owner_user_id?: string | null
+          phone_number?: string | null
+          postal_code?: string | null
+          price_range_text?: string | null
+          rating?: number | null
+          review_count?: number | null
+          show_registration_on_pdf?: boolean | null
+          show_vat_on_pdf?: boolean | null
+          state_province?: string | null
+          super_vendor_awarded_at?: string | null
+          super_vendor_reason?: string | null
+          updated_at?: string | null
+          vendor_business_type?:
+            | Database["public"]["Enums"]["vendor_business_type"]
+            | null
+          view_count?: number | null
+          website_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          about?: string | null
+          added_to_events_count?: number | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          business_verification_status?:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category?: Database["public"]["Enums"]["vendor_category"] | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_super_vendor?: boolean | null
+          languages?: string[] | null
+          latitude?: number | null
+          letterhead_enabled?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          owner_user_id?: string | null
+          phone_number?: string | null
+          postal_code?: string | null
+          price_range_text?: string | null
+          rating?: number | null
+          review_count?: number | null
+          show_registration_on_pdf?: boolean | null
+          show_vat_on_pdf?: boolean | null
+          state_province?: string | null
+          super_vendor_awarded_at?: string | null
+          super_vendor_reason?: string | null
+          updated_at?: string | null
+          vendor_business_type?:
+            | Database["public"]["Enums"]["vendor_business_type"]
+            | null
+          view_count?: number | null
+          website_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_offer_number: { Args: never; Returns: string }
