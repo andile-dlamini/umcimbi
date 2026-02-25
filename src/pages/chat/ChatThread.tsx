@@ -183,6 +183,13 @@ const ChatThread = () => {
             const metadata = (message as any).metadata;
             const attachments = (message as any).attachments || [];
 
+            // Filter visibility-tagged system messages
+            if (isSystem && metadata?.visibility) {
+              const vis = metadata.visibility;
+              if (vis === 'client' && isVendorView) return null;
+              if (vis === 'vendor' && !isVendorView) return null;
+            }
+
             // Quote Card
             if (messageType === 'quote_card' && metadata) {
               return (

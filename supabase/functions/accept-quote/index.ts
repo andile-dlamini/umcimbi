@@ -133,13 +133,23 @@ serve(async (req) => {
       .maybeSingle();
 
     if (conv) {
+      // Client-facing message
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_type: "system",
         sender_user_id: user.id,
         message_type: "system",
         content: "✅ Quote accepted! Please pay the deposit to confirm the booking.",
-        metadata: { quote_id, booking_id: booking.id },
+        metadata: { quote_id, booking_id: booking.id, visibility: "client" },
+      });
+      // Vendor-facing message
+      await supabase.from("messages").insert({
+        conversation_id: conv.id,
+        sender_type: "system",
+        sender_user_id: user.id,
+        message_type: "system",
+        content: "✅ Quote accepted! Awaiting client to pay the deposit.",
+        metadata: { quote_id, booking_id: booking.id, visibility: "vendor" },
       });
       await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", conv.id);
     }
