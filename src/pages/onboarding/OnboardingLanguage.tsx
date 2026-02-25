@@ -401,7 +401,7 @@ export default function OnboardingLanguage() {
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
               <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better work with less back-and-forth.</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better. Work with less back-and-forth.</h2>
               <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {[
