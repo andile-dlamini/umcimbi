@@ -222,34 +222,49 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "You do not own this conversation's vendor" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const effectiveEventId = event_id || conv.event_id;
+    let effectiveEventId = event_id || conv.event_id;
+
+    // If no event_id, find the seeker's latest event
+    if (!effectiveEventId) {
+      const { data: latestEvent } = await supabase
+        .from("events")
+        .select("id")
+        .eq("owner_user_id", conv.user_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestEvent) {
+        effectiveEventId = latestEvent.id;
+        // Link conversation to this event for future use
+        await supabase.from("conversations").update({ event_id: effectiveEventId }).eq("id", conversation_id);
+      }
+    }
+
+    if (!effectiveEventId) {
+      return new Response(JSON.stringify({ error: "No event found. The client must create an event first." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // 2) Find or create service_request
     let serviceRequestId = request_id;
     if (!serviceRequestId) {
       // Try to find existing pending/quoted request
-      let query = supabase
+      const { data: existingReq } = await supabase
         .from("service_requests")
         .select("id")
         .eq("vendor_id", conv.vendor_id)
         .eq("requester_user_id", conv.user_id)
+        .eq("event_id", effectiveEventId)
         .in("status", ["pending", "quoted"])
         .order("created_at", { ascending: false })
-        .limit(1);
+        .limit(1)
+        .maybeSingle();
 
-      if (effectiveEventId) {
-        query = query.eq("event_id", effectiveEventId);
-      }
-
-      const { data: existingReq } = await query.maybeSingle();
       serviceRequestId = existingReq?.id;
     }
 
     if (!serviceRequestId) {
       // Create minimal service request
-      if (!effectiveEventId) {
-        return new Response(JSON.stringify({ error: "No event_id available. Either pass event_id or ensure the conversation has one." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
 
       const { data: newReq, error: reqErr } = await supabase
         .from("service_requests")
