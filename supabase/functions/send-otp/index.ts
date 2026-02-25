@@ -121,9 +121,22 @@ Deno.serve(async (req) => {
       },
     });
 
+    const smsResponseBody = await smsResponse.text();
+    const compactResponseBody = smsResponseBody.slice(0, 500);
+
+    console.log("Connect Mobile response:", {
+      msgId,
+      status: smsResponse.status,
+      ok: smsResponse.ok,
+      phone: smsPhone,
+      body: compactResponseBody,
+    });
+
     if (!smsResponse.ok) {
-      const errBody = await smsResponse.text();
-      console.error("Connect Mobile error:", errBody);
+      console.error("Connect Mobile HTTP error:", compactResponseBody);
+      // Still return success to prevent enumeration
+    } else if (/(error|invalid|failed|denied|unauthorized)/i.test(smsResponseBody)) {
+      console.error("Connect Mobile provider-level issue in 200 response:", compactResponseBody);
       // Still return success to prevent enumeration
     }
 
