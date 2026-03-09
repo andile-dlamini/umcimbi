@@ -318,8 +318,8 @@ export default function OnboardingLanguage() {
           <div className="grid sm:grid-cols-3 gap-8">
             {[
             { step: 1 as const, title: 'Share your ceremony needs', body: 'Type, date, location, and what you need.' },
-            { step: 2 as const, title: 'Receive & compare quotes', body: 'Vendors respond with structured quotes you can review.' },
-            { step: 3 as const, title: 'Book & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' }].
+            { step: 2 as const, title: 'Receive & compare quotations', body: 'Vendors respond with structured quotations you can review.' },
+            { step: 3 as const, title: 'Confirm & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' }].
             map(({ step, title, body }) =>
             <div key={step} className="group text-center space-y-5">
                 <div className="mx-auto w-20 h-20 rounded-3xl bg-primary/[0.08] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
@@ -433,43 +433,74 @@ export default function OnboardingLanguage() {
 
             {/* Vendor illustration — Vendor Dashboard + Bookings */}
             <div className="hidden md:flex flex-col justify-center items-center gap-5">
+              {/* Vendor Dashboard mockup — matches actual VendorDashboard layout */}
               <div className="relative w-80 h-80">
                 <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
                 <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
-                  {/* Header */}
+                  {/* Page header */}
                   <div className="h-8 bg-primary flex items-center justify-between px-3">
                     <div className="flex items-center gap-1.5">
                       <div className="w-4 h-4 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
                         <span className="text-[6px] font-bold text-primary-foreground">U</span>
                       </div>
-                      <span className="text-[8px] font-semibold text-primary-foreground/80">Vendor Dashboard</span>
+                      <span className="text-[8px] font-semibold text-primary-foreground/80">Dashboard</span>
                     </div>
                     <div className="w-5 h-5 rounded-full bg-primary-foreground/15 flex items-center justify-center">
                       <span className="text-[7px] text-primary-foreground/60">🔔</span>
                     </div>
                   </div>
 
-                  {/* Stats row */}
-                  <div className="flex gap-2 p-3 bg-gray-50">
-                    <div className="flex-1 rounded-xl bg-primary/10 p-2.5 text-center">
-                      <div className="text-[14px] font-bold text-primary">12</div>
-                      <div className="text-[7px] text-gray-400">New Leads</div>
-                    </div>
-                    <div className="flex-1 rounded-xl bg-secondary/10 p-2.5 text-center">
-                      <div className="text-[14px] font-bold text-secondary">8</div>
-                      <div className="text-[7px] text-gray-400">Booked</div>
-                    </div>
-                    <div className="flex-1 rounded-xl bg-gray-100 p-2.5 text-center">
-                      <div className="text-[14px] font-bold text-gray-700">R 94k</div>
-                      <div className="text-[7px] text-gray-400">Revenue</div>
+                  {/* KPI heading */}
+                  <div className="px-3 pt-2.5 pb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[7px] text-gray-400">📈</span>
+                      <span className="text-[7px] font-medium text-gray-400">Last 30 days</span>
                     </div>
                   </div>
 
-                  {/* Incoming requests */}
+                  {/* KPI 2×2 grid — matches actual dashboard */}
+                  <div className="px-3 grid grid-cols-2 gap-2 mb-2.5">
+                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-[7px]">👁</span>
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-bold text-gray-900">48</div>
+                        <div className="text-[5.5px] text-gray-400">Profile views</div>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                        <span className="text-[7px]">📄</span>
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-bold text-gray-900">12</div>
+                        <div className="text-[5.5px] text-gray-400">Quotations sent</div>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                        <span className="text-[7px]">✓</span>
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-bold text-gray-900">8</div>
+                        <div className="text-[5.5px] text-gray-400">Orders completed</div>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                        <span className="text-[7px]">💵</span>
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-bold text-gray-900">R 94k</div>
+                        <div className="text-[5.5px] text-gray-400">Total payout</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Incoming request card */}
                   <div className="px-3 pb-1">
                     <div className="text-[7px] text-gray-400 font-medium mb-2">Incoming Requests</div>
-                    
-                    {/* Request 1 — new */}
                     <div className="rounded-xl border border-primary/15 p-2.5 bg-primary/[0.04] mb-2">
                       <div className="flex justify-between items-start mb-1.5">
                         <div className="flex items-center gap-1.5">
@@ -485,43 +516,20 @@ export default function OnboardingLanguage() {
                           <span className="text-[6px] font-bold text-primary">New</span>
                         </div>
                       </div>
-                      <div className="text-[6px] text-gray-500 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
                       <div className="flex gap-1.5">
                         <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
-                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quotationtion</span>
+                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quotation</span>
                         </div>
                         <div className="h-5 px-2 rounded-lg bg-gray-100 flex items-center justify-center">
                           <span className="text-[6px] text-gray-400">Decline</span>
                         </div>
                       </div>
                     </div>
-
-                    {/* Request 2 — quoted */}
-                    <div className="rounded-xl border border-gray-100 p-2.5 bg-gray-50">
-                      <div className="flex justify-between items-center mb-1">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-secondary/15 flex items-center justify-center">
-                            <span className="text-[7px] font-bold text-secondary">Z</span>
-                          </div>
-                          <div>
-                            <div className="text-[7px] font-semibold text-gray-800">Zanele D.</div>
-                            <div className="text-[5.5px] text-gray-400">Umabo · 22 Apr · 80 guests</div>
-                          </div>
-                        </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-secondary/10">
-                          <span className="text-[6px] font-bold text-secondary">Quoted</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[6px] text-gray-500">Your ationuote: R 9,800</span>
-                        <span className="text-[6px] text-gray-400">Awaiting response</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bookings & Quotes mockup */}
+              {/* Orders mockup */}
               <div className="relative w-80 h-64">
                 <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
                 <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
@@ -533,8 +541,21 @@ export default function OnboardingLanguage() {
                     </div>
                   </div>
 
+                  {/* 3-tab bar — Active / Completed / Other */}
+                  <div className="flex border-b border-gray-100">
+                    <div className="flex-1 text-center py-1.5 border-b-2 border-primary">
+                      <span className="text-[6px] font-semibold text-primary">Active</span>
+                    </div>
+                    <div className="flex-1 text-center py-1.5">
+                      <span className="text-[6px] text-gray-400">Completed</span>
+                    </div>
+                    <div className="flex-1 text-center py-1.5">
+                      <span className="text-[6px] text-gray-400">Other</span>
+                    </div>
+                  </div>
+
                   <div className="px-3 py-2 space-y-2">
-                    {/* Booking 1 — confirmed */}
+                    {/* Order 1 — confirmed */}
                     <div className="rounded-xl border border-green-200 p-2 bg-green-50/60">
                       <div className="flex justify-between items-center mb-1">
                         <div className="flex items-center gap-1.5">
@@ -556,7 +577,7 @@ export default function OnboardingLanguage() {
                       </div>
                     </div>
 
-                    {/* Booking 2 — pending deposit */}
+                    {/* Order 2 — pending deposit */}
                     <div className="rounded-xl border border-amber-200 p-2 bg-amber-50/60">
                       <div className="flex justify-between items-center mb-1">
                         <div className="flex items-center gap-1.5">
@@ -575,22 +596,6 @@ export default function OnboardingLanguage() {
                       <div className="flex justify-between items-center">
                         <span className="text-[6px] text-gray-500">R 8,200</span>
                         <span className="text-[6px] text-amber-600 font-medium">Awaiting deposit</span>
-                      </div>
-                    </div>
-
-                    {/* Booking 3 — completed */}
-                    <div className="rounded-xl border border-gray-100 p-2 bg-gray-50">
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
-                            <span className="text-[7px]">★</span>
-                          </div>
-                          <div>
-                            <div className="text-[7px] font-semibold text-gray-600">Busi M. — Umemulo</div>
-                            <div className="text-[5.5px] text-gray-400">Completed · ★ 5.0 review</div>
-                          </div>
-                        </div>
-                        <span className="text-[6px] text-gray-400">R 6,500</span>
                       </div>
                     </div>
                   </div>
