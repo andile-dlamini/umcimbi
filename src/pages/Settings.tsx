@@ -132,7 +132,9 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {isVendor ? (
+            {isLoading ? (
+              <div className="h-10 bg-muted animate-pulse rounded" />
+            ) : isVendor ? (
               <>
                 {canSwitchRole && (
                   <Button variant="outline" className="w-full justify-between" onClick={() => { setActiveRole(activeRole === 'vendor' ? 'organiser' : 'vendor'); }}>
