@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText, Store } from 'lucide-react';
+import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText, Store, Briefcase } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -160,12 +160,18 @@ export default function VendorDetail() {
                   size="md"
                 />
               </div>
-              <div className="flex items-center gap-4 text-sm mt-1">
+              <div className="flex items-center gap-4 text-sm mt-1 flex-wrap">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-warning text-warning" />
                   <span className="font-medium">{vendor.rating}</span>
                   <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
                 </div>
+                {(vendor as any).jobs_completed > 0 && (
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Briefcase className="h-4 w-4" />
+                    <span>{(vendor as any).jobs_completed} jobs done</span>
+                  </div>
+                )}
                 {vendor.location && (
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
