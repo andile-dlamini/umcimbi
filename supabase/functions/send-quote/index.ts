@@ -433,7 +433,7 @@ serve(async (req) => {
     );
 
     const htmlBytes = new TextEncoder().encode(html);
-    const pdfKey = `offers/${quoteI}/${offerNumber}.html`;
+    const pdfKey = `offers/${quoteId}/${offerNumber}.html`;
 
     const { error: uploadError } = await supabase.storage
       .from("quote-pdfs")
