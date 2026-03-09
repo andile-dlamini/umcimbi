@@ -36,12 +36,8 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
 
   const handleViewPdf = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!booking.quote_id) {
-      toast.error('No linked quotation found');
-      return;
-    }
     setIsLoadingPdf(true);
-    await viewQuotePdfAction(booking.quote_id);
+    await viewOrderPdfAction(booking.id);
     setIsLoadingPdf(false);
   };
 
