@@ -15,7 +15,7 @@ import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { viewQuotePdfAction, viewOrderPdfAction } from '@/lib/quoteActions';
 
 const statusConfig = bookingStatusConfig;
 
@@ -40,7 +40,7 @@ export default function BookingDetail() {
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
-  const [offerNumber, setOfferNumber] = useState<string | null>(null);
+  const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
 
   // Handle Yoco redirect back
   useEffect(() => {
@@ -55,19 +55,6 @@ export default function BookingDetail() {
       navigate(`/bookings/${bookingId}`, { replace: true });
     }
   }, [searchParams, bookingId, navigate, refreshDetails]);
-
-  // Fetch linked quote's offer_number
-  useEffect(() => {
-    if (!booking?.quote_id) return;
-    supabase
-      .from('quotes')
-      .select('offer_number')
-      .eq('id', booking.quote_id)
-      .single()
-      .then(({ data }) => {
-        if (data) setOfferNumber(data.offer_number);
-      });
-  }, [booking?.quote_id]);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -93,14 +80,18 @@ export default function BookingDetail() {
     refreshDetails();
   };
 
-  const handleViewPdf = async () => {
-    if (!booking?.quote_id) {
-      toast.error('No linked quotation found');
-      return;
-    }
+  const handleViewOrderPdf = async () => {
+    if (!bookingId) return;
     setIsLoadingPdf(true);
-    await viewQuotePdfAction(booking.quote_id);
+    await viewOrderPdfAction(bookingId);
     setIsLoadingPdf(false);
+  };
+
+  const handleViewQuotePdf = async () => {
+    if (!booking?.quote_id) return;
+    setIsLoadingQuotePdf(true);
+    await viewQuotePdfAction(booking.quote_id);
+    setIsLoadingQuotePdf(false);
   };
 
   const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
@@ -220,9 +211,9 @@ export default function BookingDetail() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {offerNumber && (
+            {(booking as any).order_number && (
               <p className="text-xs text-muted-foreground font-mono">
-                Ref: {offerNumber}
+                Order: {(booking as any).order_number}
               </p>
             )}
             <div className="space-y-2">
@@ -244,17 +235,29 @@ export default function BookingDetail() {
               )}
             </div>
 
-            {/* View PDF button */}
+            {/* View Order PDF */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleViewOrderPdf}
+              disabled={isLoadingPdf}
+            >
+              {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+              View Order PDF
+            </Button>
+
+            {/* View original Quotation PDF */}
             {booking.quote_id && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="w-full"
-                onClick={handleViewPdf}
-                disabled={isLoadingPdf}
+                className="w-full text-muted-foreground"
+                onClick={handleViewQuotePdf}
+                disabled={isLoadingQuotePdf}
               >
-                {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
-                View Order PDF
+                {isLoadingQuotePdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
+                View Original Quotation
               </Button>
             )}
           </CardContent>

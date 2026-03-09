@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { viewOrderPdfAction } from '@/lib/quoteActions';
 import { useStartConversation } from '@/hooks/useChat';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -36,12 +36,8 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
 
   const handleViewPdf = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!booking.quote_id) {
-      toast.error('No linked quotation found');
-      return;
-    }
     setIsLoadingPdf(true);
-    await viewQuotePdfAction(booking.quote_id);
+    await viewOrderPdfAction(booking.id);
     setIsLoadingPdf(false);
   };
 
@@ -105,18 +101,16 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
           <MessageCircle className="h-4 w-4 mr-2" />
           Open Chat
         </Button>
-        {booking.quote_id && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            disabled={isLoadingPdf}
-            onClick={handleViewPdf}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'View PDF'}
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          disabled={isLoadingPdf}
+          onClick={handleViewPdf}
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          {isLoadingPdf ? 'Loading...' : 'Order PDF'}
+        </Button>
       </CardFooter>
     </Card>
   );
