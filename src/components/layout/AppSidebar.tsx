@@ -161,8 +161,8 @@ export function AppSidebar() {
                   'flex items-center gap-3 w-full text-sm font-medium transition-all tap-highlight-none relative',
                   collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
                   active
-                    ? 'text-primary bg-primary/8'
-                    : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'
+                    ? 'text-sidebar-primary bg-sidebar-primary/15'
+                    : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                 )}
               >
                 {active && (
