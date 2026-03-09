@@ -208,7 +208,7 @@ export function AppSidebar() {
                 className={cn(
                   'flex items-center gap-3 w-full text-sm font-medium transition-colors tap-highlight-none',
                   collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
-                  active ? 'text-primary bg-primary/8' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'
+                  active ? 'text-sidebar-primary bg-sidebar-primary/15' : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                 )}
               >
                 <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]')} />
