@@ -55,7 +55,7 @@ export function MakeQuotationSheet({
     if (field === 'description') {
       updated[index].description = value as string;
     } else if (field === 'quantity') {
-      updated[index].quantity = Math.max(1, Number(value) || 1);
+      updated[index].quantity = value === '' ? ('' as unknown as number) : Math.max(0, Number(value));
     } else {
       updated[index].unit_price = Math.max(0, Number(value) || 0);
     }
