@@ -460,7 +460,7 @@ serve(async (req) => {
       message_type: "quote_card",
       content: `📋 Quotation ${offerNumber} — ${formatCurrency(total)}`,
       metadata: {
-        quote_id: quote.id,
+        quote_id: quoteId,
         offer_number: offerNumber,
         total: total,
         deposit_percentage: deposit_percentage,
