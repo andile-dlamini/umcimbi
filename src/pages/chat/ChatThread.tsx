@@ -27,6 +27,25 @@ const ChatThread = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+  const [adjustmentQuoteId, setAdjustmentQuoteId] = useState<string | null>(null);
+  const [adjustmentNote, setAdjustmentNote] = useState('');
+  const [showAdjustmentInput, setShowAdjustmentInput] = useState(false);
+
+  const handleRequestAdjustment = (quoteId: string) => {
+    setAdjustmentQuoteId(quoteId);
+    setShowAdjustmentInput(true);
+  };
+
+  const handleSendAdjustment = async () => {
+    if (!adjustmentNote.trim() || !conversationId) return;
+    const msg = `📝 Adjustment requested: ${adjustmentNote.trim()}`;
+    const success = await sendMessage(conversationId, msg);
+    if (success) {
+      setAdjustmentNote('');
+      setShowAdjustmentInput(false);
+      setAdjustmentQuoteId(null);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
