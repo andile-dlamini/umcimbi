@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText, Store } from 'lucide-react';
+import { Star, MapPin, Phone, MessageCircle, Check, Send, FileText, Store, Briefcase } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
