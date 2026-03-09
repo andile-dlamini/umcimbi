@@ -376,7 +376,7 @@ export default function CompareQuotes() {
 
               {selectedQuoteIds.size >= 2 && (
                 <Button className="w-full mt-4" onClick={() => setStep('compare')}>
-                  Compare {selectedQuoteIds.size} Quotes
+                  Compare {selectedQuoteIds.size} Quotations
                 </Button>
               )}
             </div>
