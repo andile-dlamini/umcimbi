@@ -40,7 +40,7 @@ export default function BookingDetail() {
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
-  const [offerNumber, setOfferNumber] = useState<string | null>(null);
+  const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
 
   // Handle Yoco redirect back
   useEffect(() => {
