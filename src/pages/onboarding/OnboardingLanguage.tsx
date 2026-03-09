@@ -259,7 +259,7 @@ export default function OnboardingLanguage() {
                   { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
                   { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
                   { done: false, label: 'Send guest invites', tag: '86 guests' },
-                  { done: false, label: 'Finalise decor quote', tag: 'Pending' }].
+                  { done: false, label: 'Finalise decor quotation', tag: 'Pending' }].
                   map((task, i) =>
                   <div key={i} className="flex items-center gap-1.5">
                       <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center shrink-0`}>
@@ -488,7 +488,7 @@ export default function OnboardingLanguage() {
                       <div className="text-[6px] text-gray-500 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
                       <div className="flex gap-1.5">
                         <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
-                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quote</span>
+                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quotationtion</span>
                         </div>
                         <div className="h-5 px-2 rounded-lg bg-gray-100 flex items-center justify-center">
                           <span className="text-[6px] text-gray-400">Decline</span>
@@ -513,7 +513,7 @@ export default function OnboardingLanguage() {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[6px] text-gray-500">Your quote: R 9,800</span>
+                        <span className="text-[6px] text-gray-500">Your ationuote: R 9,800</span>
                         <span className="text-[6px] text-gray-400">Awaiting response</span>
                       </div>
                     </div>
@@ -527,7 +527,7 @@ export default function OnboardingLanguage() {
                 <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Header */}
                   <div className="h-7 bg-primary flex items-center justify-between px-3">
-                    <span className="text-[8px] font-semibold text-primary-foreground/80">My Bookings</span>
+                    <span className="text-[8px] font-semibold text-primary-foreground/80">Orders</span>
                     <div className="px-1.5 py-0.5 rounded-full bg-primary-foreground/15">
                       <span className="text-[6px] font-bold text-primary-foreground/70">3 Active</span>
                     </div>
