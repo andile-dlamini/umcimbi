@@ -284,6 +284,23 @@ const ChatThread = () => {
 
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        {/* Adjustment request bar */}
+        {showAdjustmentInput && (
+          <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
+            <Input
+              value={adjustmentNote}
+              onChange={(e) => setAdjustmentNote(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendAdjustment(); } }}
+              placeholder="e.g. Change guests from 80 to 100…"
+              className="flex-1"
+              autoFocus
+            />
+            <Button size="sm" onClick={handleSendAdjustment} disabled={!adjustmentNote.trim() || isSending}>Send</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setShowAdjustmentInput(false); setAdjustmentNote(''); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         {/* Vendor actions toolbar */}
         {isVendorView && (
           <div className="flex gap-2 mb-2">
