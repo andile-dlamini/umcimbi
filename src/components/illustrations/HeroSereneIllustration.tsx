@@ -89,8 +89,7 @@ export default function HeroSereneIllustration() {
 
         {/* Vendor cards */}
         <div className="px-3.5 space-y-1.5 bg-white">
-          <div className="text-[6px] text-gray-400 mb-1">
-          <div className="rounded-lg border border-primary/15 p-2 bg-primary/[0.03] flex items-center gap-2">
+          <div className="text-[6px] text-gray-400 mb-1">    <div className="rounded-lg border border-primary/15 p-2 bg-primary/[0.03] flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-[10px]">🍲</span>
             </div>
@@ -112,7 +111,7 @@ export default function HeroSereneIllustration() {
               <div className="text-[6px] text-gray-400">Decor · Traditional</div>
             </div>
             <div className="px-1.5 py-0.5 rounded bg-secondary/10">
-              <span className="text-[6px] font-bold text-secondary">R 8,5-foreground00</span>
+              <span className="text-[6px] font-bold text-secondary">R 8,5-foregr-foregroundound00</span>
             </div>
           </div>
 
@@ -195,7 +194,7 @@ export default function HeroSereneIllustration() {
         }}
       >
         <div className="px-2.5 py-1.5 rounded-lg bg-white border border-secondary/30 shadow-lg text-[9px] font-bold text-secondary">
-          💬 New quote: R 3,200
+          💬 New ationuote: R 3,200
         </div>
       </div>
 
