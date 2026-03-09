@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, Star, FileText, MessageCircle } from 'lucide-react';
+import { DollarSign, Clock, Star, FileText, MessageCircle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails } from '@/types/booking';
 import { useState } from 'react';
