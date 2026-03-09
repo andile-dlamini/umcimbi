@@ -299,34 +299,76 @@ serve(async (req) => {
     // 3) Compute total
     const total = line_items.reduce((sum: number, item: LineItem) => sum + item.quantity * item.unit_price, 0);
 
-    // 4) Generate offer number
-    const { data: offerNumResult } = await supabase.rpc("generate_offer_number" as any);
-    const offerNumber = (offerNumResult as unknown as string) || `UMC-Q-${Date.now()}`;
+    let quoteId: string;
+    let offerNumber: string;
 
-    // 5) Insert quote
-    const { data: quote, error: quoteErr } = await supabase
-      .from("quotes")
-      .insert({
-        request_id: serviceRequestId,
-        vendor_id: conv.vendor_id,
-        price: total,
-        notes: notes || null,
-        deposit_percentage: deposit_percentage,
-        status: "pending_client",
-        sent_at: new Date().toISOString(),
-        offer_number: offerNumber,
-      })
-      .select("id")
-      .single();
+    if (quote_id) {
+      // ADJUSTMENT: Update existing quote in-place
+      const { data: existingQuote, error: fetchErr } = await supabase
+        .from("quotes")
+        .select("id, offer_number, vendor_id")
+        .eq("id", quote_id)
+        .single();
 
-    if (quoteErr) {
-      console.error("Error creating quote:", quoteErr);
-      return new Response(JSON.stringify({ error: "Failed to create quote" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (fetchErr || !existingQuote || existingQuote.vendor_id !== conv.vendor_id) {
+        return new Response(JSON.stringify({ error: "Quote not found or unauthorized" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      quoteId = existingQuote.id;
+      offerNumber = existingQuote.offer_number || `UMC-Q-${Date.now()}`;
+
+      // Update quote record
+      const { error: updateErr } = await supabase
+        .from("quotes")
+        .update({
+          price: total,
+          notes: notes || null,
+          deposit_percentage: deposit_percentage,
+          status: "pending_client",
+          sent_at: new Date().toISOString(),
+          adjustment_reason: null,
+        })
+        .eq("id", quoteId);
+
+      if (updateErr) {
+        console.error("Error updating quote:", updateErr);
+        return new Response(JSON.stringify({ error: "Failed to update quote" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // Delete old line items and insert new ones
+      await supabase.from("quote_line_items").delete().eq("quote_id", quoteId);
+
+    } else {
+      // NEW QUOTE: Generate offer number and insert
+      const { data: offerNumResult } = await supabase.rpc("generate_offer_number" as any);
+      offerNumber = (offerNumResult as unknown as string) || `UMC-Q-${Date.now()}`;
+
+      const { data: quote, error: quoteErr } = await supabase
+        .from("quotes")
+        .insert({
+          request_id: serviceRequestId,
+          vendor_id: conv.vendor_id,
+          price: total,
+          notes: notes || null,
+          deposit_percentage: deposit_percentage,
+          status: "pending_client",
+          sent_at: new Date().toISOString(),
+          offer_number: offerNumber,
+        })
+        .select("id")
+        .single();
+
+      if (quoteErr) {
+        console.error("Error creating quote:", quoteErr);
+        return new Response(JSON.stringify({ error: "Failed to create quote" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      quoteId = quote.id;
     }
 
     // 6) Insert line items
     const lineItemRows = line_items.map((item: LineItem, idx: number) => ({
-      quote_id: quote.id,
+      quote_id: quoteId,
       description: item.description,
       quantity: item.quantity,
       unit_price: item.unit_price,
