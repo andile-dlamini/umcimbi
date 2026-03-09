@@ -204,6 +204,7 @@ const ChatThread = () => {
                     isVendorView={isVendorView}
                     messageId={message.id}
                     onStatusChange={refreshMessages}
+                    onRequestAdjustment={!isVendorView ? handleRequestAdjustment : undefined}
                   />
                 </div>
               );
