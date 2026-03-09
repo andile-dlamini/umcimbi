@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, FileText, CheckCircle, DollarSign, Store, TrendingUp } from 'lucide-react';
+import { Eye, FileText, CheckCircle, Store, TrendingUp, Banknote } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
