@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Check, X, CreditCard, ExternalLink, Loader2 } from 'lucide-react';
+import { FileText, Check, X, CreditCard, ExternalLink, Loader2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,7 @@ interface QuoteCardMetadata {
   pdf_key: string;
   status: string;
   booking_id: string | null;
+  adjustment_count?: number;
 }
 
 interface QuoteCardProps {
@@ -26,18 +27,23 @@ interface QuoteCardProps {
   messageId: string;
   onStatusChange?: () => void;
   onRequestAdjustment?: (quoteId: string) => void;
+  onAdjustQuote?: (quoteId: string) => void;
 }
+
+const MAX_ADJUSTMENTS = 3;
 
 const statusLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending_client: { label: 'Pending', variant: 'outline' },
+  adjustment_requested: { label: 'Adjust Requested', variant: 'secondary' },
   client_accepted: { label: 'Accepted', variant: 'default' },
   client_declined: { label: 'Declined', variant: 'destructive' },
   expired: { label: 'Expired', variant: 'secondary' },
 };
 
-export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, onRequestAdjustment }: QuoteCardProps) {
+export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, onRequestAdjustment, onAdjustQuote }: QuoteCardProps) {
   const navigate = useNavigate();
   const [currentStatus, setCurrentStatus] = useState(metadata.status);
+  const [adjustmentCount, setAdjustmentCount] = useState(metadata.adjustment_count || 0);
   const [bookingId, setBookingId] = useState(metadata.booking_id);
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -48,10 +54,13 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
     const refreshStatus = async () => {
       const { data: quote } = await supabase
         .from('quotes')
-        .select('status')
+        .select('status, adjustment_count')
         .eq('id', metadata.quote_id)
         .single();
-      if (quote) setCurrentStatus(quote.status);
+      if (quote) {
+        setCurrentStatus(quote.status);
+        setAdjustmentCount(quote.adjustment_count || 0);
+      }
 
       const { data: booking } = await supabase
         .from('bookings')
@@ -106,7 +115,9 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
 
   const statusInfo = statusLabels[currentStatus] || statusLabels.pending_client;
   const isPending = currentStatus === 'pending_client';
+  const isAdjustmentRequested = currentStatus === 'adjustment_requested';
   const isAccepted = currentStatus === 'client_accepted';
+  const canRequestAdjustment = adjustmentCount < MAX_ADJUSTMENTS;
 
   return (
     <div className="w-full max-w-[85%] rounded-xl border-2 border-primary/30 bg-card overflow-hidden">
@@ -171,6 +182,20 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
           View PDF
         </Button>
 
+        {/* Vendor: Adjust Quote button when adjustment is requested */}
+        {isVendorView && isAdjustmentRequested && onAdjustQuote && (
+          <Button
+            type="button"
+            size="sm"
+            className="w-full"
+            onClick={() => onAdjustQuote(metadata.quote_id)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Adjust Quote
+          </Button>
+        )}
+
+        {/* Client: Accept / Decline / Request Adjustment */}
         {!isVendorView && isPending && (
           <div className="space-y-2">
             <div className="flex gap-2">
@@ -196,7 +221,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
                 Decline
               </Button>
             </div>
-            {onRequestAdjustment && (
+            {onRequestAdjustment && canRequestAdjustment && (
               <Button
                 type="button"
                 variant="outline"
@@ -204,7 +229,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
                 className="w-full"
                 onClick={() => onRequestAdjustment(metadata.quote_id)}
               >
-                Request Adjustment
+                Request Adjustment ({MAX_ADJUSTMENTS - adjustmentCount} left)
               </Button>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Minus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,13 @@ interface LineItem {
   unit_price: number;
 }
 
+export interface QuotePrefillData {
+  quoteId: string;
+  lineItems: LineItem[];
+  depositPercentage: number;
+  notes: string;
+}
+
 interface MakeQuotationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,6 +30,7 @@ interface MakeQuotationSheetProps {
   eventDate?: string;
   eventLocation?: string;
   onSuccess?: () => void;
+  prefillData?: QuotePrefillData | null;
 }
 
 export function MakeQuotationSheet({
@@ -33,6 +41,7 @@ export function MakeQuotationSheet({
   eventDate,
   eventLocation,
   onSuccess,
+  prefillData,
 }: MakeQuotationSheetProps) {
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: '', quantity: 1, unit_price: 0 },
@@ -40,6 +49,22 @@ export function MakeQuotationSheet({
   const [depositPercentage, setDepositPercentage] = useState(50);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pre-fill when editing an existing quote
+  useEffect(() => {
+    if (open && prefillData) {
+      setLineItems(prefillData.lineItems.length > 0 ? prefillData.lineItems : [{ description: '', quantity: 1, unit_price: 0 }]);
+      setDepositPercentage(prefillData.depositPercentage);
+      setNotes(prefillData.notes || '');
+    } else if (open && !prefillData) {
+      // Reset for new quote
+      setLineItems([{ description: '', quantity: 1, unit_price: 0 }]);
+      setDepositPercentage(50);
+      setNotes('');
+    }
+  }, [open, prefillData]);
+
+  const isAdjustment = !!prefillData?.quoteId;
 
   const addLineItem = () => {
     setLineItems([...lineItems, { description: '', quantity: 1, unit_price: 0 }]);
@@ -63,7 +88,7 @@ export function MakeQuotationSheet({
   };
 
   const PLATFORM_FEE_RATE = 0.08;
-  const subtotal = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const subtotal = lineItems.reduce((sum, item) => sum + (Number(item.quantity) || 0) * item.unit_price, 0);
   const platformFee = subtotal * PLATFORM_FEE_RATE;
   const clientTotal = subtotal + platformFee;
   const depositAmount = clientTotal * (depositPercentage / 100);
@@ -82,9 +107,10 @@ export function MakeQuotationSheet({
           conversation_id: conversationId,
           deposit_percentage: depositPercentage,
           notes: notes.trim() || null,
+          quote_id: prefillData?.quoteId || null,
           line_items: validItems.map((item, idx) => ({
             description: item.description.trim(),
-            quantity: item.quantity,
+            quantity: Number(item.quantity),
             unit_price: item.unit_price,
             sort_order: idx,
           })),
@@ -97,12 +123,8 @@ export function MakeQuotationSheet({
         return;
       }
 
-      toast.success(`Quotation ${data.offer_number} sent!`);
+      toast.success(isAdjustment ? `Quotation ${data.offer_number} updated!` : `Quotation ${data.offer_number} sent!`);
       onOpenChange(false);
-      // Reset form
-      setLineItems([{ description: '', quantity: 1, unit_price: 0 }]);
-      setDepositPercentage(50);
-      setNotes('');
       onSuccess?.();
     } catch (err) {
       console.error('Error sending quote:', err);
@@ -119,7 +141,7 @@ export function MakeQuotationSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Make Quotation</SheetTitle>
+          <SheetTitle>{isAdjustment ? 'Adjust Quotation' : 'Make Quotation'}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-4 py-4">
@@ -129,6 +151,14 @@ export function MakeQuotationSheet({
               <p className="text-sm font-medium">{eventName}</p>
               {eventDate && <p className="text-xs text-muted-foreground">{eventDate}</p>}
               {eventLocation && <p className="text-xs text-muted-foreground">{eventLocation}</p>}
+            </div>
+          )}
+
+          {isAdjustment && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <p className="text-sm text-amber-800 dark:text-amber-300">
+                ✏️ Adjusting existing quotation. Update the line items below and send the revised quote.
+              </p>
             </div>
           )}
 
@@ -179,7 +209,7 @@ export function MakeQuotationSheet({
                     </div>
                   </div>
                   <p className="text-xs text-right text-muted-foreground">
-                    Subtotal: {formatCurrency(item.quantity * item.unit_price)}
+                    Subtotal: {formatCurrency((Number(item.quantity) || 0) * item.unit_price)}
                   </p>
                 </div>
               ))}
@@ -251,9 +281,9 @@ export function MakeQuotationSheet({
         <SheetFooter className="mt-4">
           <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || subtotal === 0}>
             {isSubmitting ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {isAdjustment ? 'Updating...' : 'Sending...'}</>
             ) : (
-              'Send Quotation'
+              isAdjustment ? 'Send Adjusted Quotation' : 'Send Quotation'
             )}
           </Button>
         </SheetFooter>
