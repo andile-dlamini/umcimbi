@@ -15,6 +15,9 @@ export default function VendorDashboard() {
   const { quotes, isLoading: quotesLoading } = useVendorQuotes();
   const { bookings, isLoading: bookingsLoading } = useVendorBookings();
 
+  const isLoading = quotesLoading || bookingsLoading;
+  const thirtyDaysAgo = subDays(new Date(), 30);
+
   if (!vendorProfile) {
     return (
       <div className="min-h-screen">
@@ -28,9 +31,6 @@ export default function VendorDashboard() {
       </div>
     );
   }
-
-  const isLoading = quotesLoading || bookingsLoading;
-  const thirtyDaysAgo = subDays(new Date(), 30);
 
   const kpis = useMemo(() => {
     // Profile views (all-time since we don't have date tracking on views)

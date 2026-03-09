@@ -77,7 +77,7 @@ export default function VendorQuotations() {
   const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
   const acceptedQuotes = quotes.filter(q => q.status === 'client_accepted');
   const declinedOrExpired = quotes.filter(q =>
-    q.status === 'client_declined' || q.status === 'expired' || q.status === 'adjustment_requested'
+    q.status === 'client_declined' || q.status === 'expired'
   );
 
   if (isLoading) {
