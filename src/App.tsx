@@ -23,6 +23,8 @@ import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
 import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
 import VendorBookings from "@/pages/vendor-dashboard/VendorBookings";
+import VendorQuotations from "@/pages/vendor-dashboard/VendorQuotations";
+import VendorOrders from "@/pages/vendor-dashboard/VendorOrders";
 import MyRequests from "@/pages/profile/MyRequests";
 import MyQuotes from "@/pages/quotes/MyQuotes";
 import CompareQuotes from "@/pages/quotes/CompareQuotes";
