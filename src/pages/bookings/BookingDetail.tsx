@@ -56,19 +56,6 @@ export default function BookingDetail() {
     }
   }, [searchParams, bookingId, navigate, refreshDetails]);
 
-  // Fetch linked quote's offer_number
-  useEffect(() => {
-    if (!booking?.quote_id) return;
-    supabase
-      .from('quotes')
-      .select('offer_number')
-      .eq('id', booking.quote_id)
-      .single()
-      .then(({ data }) => {
-        if (data) setOfferNumber(data.offer_number);
-      });
-  }, [booking?.quote_id]);
-
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
   const hasReviewed = reviews.some(r => r.reviewer_id === user?.id);
