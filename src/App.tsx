@@ -89,6 +89,7 @@ function AppRoutes() {
         <Route path="/profile/vendor" element={<VendorProfile />} />
         <Route path="/profile/requests" element={<MyRequests />} />
         <Route path="/quotes" element={<MyQuotes />} />
+        <Route path="/quotes/compare" element={<CompareQuotes />} />
         <Route path="/bookings" element={<ClientBookings />} />
         <Route path="/bookings/:bookingId" element={<BookingDetail />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
