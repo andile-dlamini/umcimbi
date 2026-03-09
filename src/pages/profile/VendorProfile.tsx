@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle } from 'lucide-react';
+import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,7 +105,7 @@ export default function VendorProfile() {
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -113,7 +113,7 @@ export default function VendorProfile() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{vendor.view_count}</p>
-                <p className="text-xs text-muted-foreground">Profile views</p>
+                <p className="text-xs text-muted-foreground">Views</p>
               </div>
             </CardContent>
           </Card>
@@ -125,7 +125,19 @@ export default function VendorProfile() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{vendor.added_to_events_count}</p>
-                <p className="text-xs text-muted-foreground">Added to events</p>
+                <p className="text-xs text-muted-foreground">Events</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <Briefcase className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{vendor.jobs_completed}</p>
+                <p className="text-xs text-muted-foreground">Jobs done</p>
               </div>
             </CardContent>
           </Card>

@@ -99,8 +99,8 @@ export function AppSidebar() {
   const vendorItems = [
     { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
-    { to: '/vendor-dashboard/bookings', icon: ShoppingBag, label: 'Bookings' },
-    { to: '/vendors', icon: Store, label: 'Browse' },
+    { to: '/vendor-dashboard/quotations', icon: Receipt, label: 'Quotations' },
+    { to: '/vendor-dashboard/orders', icon: ShoppingBag, label: 'Orders' },
   ];
 
   const navItems = activeRole === 'vendor' && canSwitchRole ? vendorItems : organiserItems;

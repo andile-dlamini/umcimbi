@@ -23,6 +23,8 @@ import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
 import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
 import VendorBookings from "@/pages/vendor-dashboard/VendorBookings";
+import VendorQuotations from "@/pages/vendor-dashboard/VendorQuotations";
+import VendorOrders from "@/pages/vendor-dashboard/VendorOrders";
 import MyRequests from "@/pages/profile/MyRequests";
 import MyQuotes from "@/pages/quotes/MyQuotes";
 import CompareQuotes from "@/pages/quotes/CompareQuotes";
@@ -97,6 +99,8 @@ function AppRoutes() {
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
+        <Route path="/vendor-dashboard/quotations" element={<VendorQuotations />} />
+        <Route path="/vendor-dashboard/orders" element={<VendorOrders />} />
         <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
           <Route index element={<AdminDashboard />} />
           <Route path="insights" element={<AdminInsights />} />
