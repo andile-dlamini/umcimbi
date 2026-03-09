@@ -59,14 +59,15 @@ export default function VendorOnboarding() {
   const navigate = useNavigate();
   const { createVendorProfile, vendor: existingVendor, isLoading: isLoadingVendor } = useMyVendorProfile();
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [justCreated, setJustCreated] = useState(false);
 
-  // Redirect if user already has a vendor profile
+  // Redirect if user already has a vendor profile (but not if we just created one)
   useEffect(() => {
-    if (!isLoadingVendor && existingVendor) {
+    if (!isLoadingVendor && existingVendor && !justCreated) {
       toast.info('You already have a vendor profile');
       navigate('/profile/vendor', { replace: true });
     }
-  }, [existingVendor, isLoadingVendor, navigate]);
+  }, [existingVendor, isLoadingVendor, navigate, justCreated]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -205,6 +206,7 @@ export default function VendorOnboarding() {
     const vendorBusinessType = formData.is_registered_business ? 'registered_business' as const : 'independent' as const;
     const verificationStatus = formData.is_registered_business ? 'pending' as const : 'not_applicable' as const;
 
+    setJustCreated(true);
     const result = await createVendorProfile({
       name: formData.name.trim(),
       category: formData.category as VendorCategory,
