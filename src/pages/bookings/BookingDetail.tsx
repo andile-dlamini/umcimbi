@@ -235,17 +235,19 @@ export default function BookingDetail() {
               )}
             </div>
 
-            {/* View Order PDF */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleViewOrderPdf}
-              disabled={isLoadingPdf}
-            >
-              {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
-              View Order PDF
-            </Button>
+            {/* View Order PDF - only if generated */}
+            {(booking as any).order_pdf_key && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handleViewOrderPdf}
+                disabled={isLoadingPdf}
+              >
+                {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                View Order PDF
+              </Button>
+            )}
 
             {/* View original Quotation PDF */}
             {booking.quote_id && (
