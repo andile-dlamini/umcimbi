@@ -98,8 +98,10 @@ function generateQuotePdfHtml(
   const clientName = clientProfile?.full_name || clientProfile?.first_name || "Client";
   const eventAddress = event?.location || "";
   const eventTypePretty = event?.type ? event.type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) : "";
-  const depositAmount = total * (depositPercentage / 100);
-  const balanceAmount = total - depositAmount;
+  const platformFee = total * 0.08;
+  const clientTotal = total + platformFee;
+  const depositAmount = clientTotal * (depositPercentage / 100);
+  const balanceAmount = clientTotal - depositAmount;
 
   const lineItemsHtml = lineItems.map(item => `
     <tr>
