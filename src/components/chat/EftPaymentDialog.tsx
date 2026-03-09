@@ -150,14 +150,30 @@ export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, 
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {file ? file.name : 'Upload screenshot or PDF'}
-            </Button>
+            {!file ? (
+              <Button
+                variant="outline"
+                className="w-full border-dashed border-2"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload screenshot or PDF
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                <span className="text-sm font-medium truncate flex-1">{file.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-muted-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Change
+                </Button>
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or PDF. Max 5MB.</p>
           </div>
         </div>
