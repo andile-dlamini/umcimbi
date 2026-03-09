@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Banknote, CheckCircle } from 'lucide-react';
+import { Calendar, MapPin, BanknoteCheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails, BookingStatus } from '@/types/booking';
@@ -48,7 +48,7 @@ function VendorBookingCard({
             </div>
           )}
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <DoBanknotelassName="h-4 w-4" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>
