@@ -103,9 +103,9 @@ export default function VendorBookings() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="My Bookings" showBack />
+      <PageHeader title="Orders" showBack />
       
-      <div className="p-4">
+      <div className="px-4 py-4 max-w-lg mx-auto">
         {bookings.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">

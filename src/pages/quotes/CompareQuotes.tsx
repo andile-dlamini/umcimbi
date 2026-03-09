@@ -389,7 +389,7 @@ export default function CompareQuotes() {
   // Step: comparison view
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Compare Quotes" showBack />
+      <PageHeader title="Compare Quotations" showBack />
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>

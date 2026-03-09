@@ -5,7 +5,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, Star, FileText, MessageCircle, BarChart3 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Banknote, Clock, Star, FileText, MessageCircle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails } from '@/types/booking';
 import { useState } from 'react';
@@ -61,7 +62,7 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
         
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <DollarSign className="h-5 w-5" />
+            <Banknote className="h-5 w-5" />
             <span>R{quote.price.toLocaleString()}</span>
           </div>
           
@@ -107,10 +108,16 @@ export default function MyQuotes() {
   const { quotes, isLoading } = useClientQuotes();
   const navigate = useNavigate();
 
+  const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
+  const acceptedQuotes = quotes.filter(q => q.status === 'client_accepted');
+  const otherQuotes = quotes.filter(q =>
+    q.status === 'client_declined' || q.status === 'expired'
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Quotes Archive" showBack />
+        <PageHeader title="Quotations" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-48 w-full" />
@@ -122,12 +129,12 @@ export default function MyQuotes() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Quotes Archive" showBack />
+      <PageHeader title="Quotations" showBack />
       
-      <div className="p-4 space-y-4">
+      <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            All your quotes in one place.
+            All your quotations in one place.
           </p>
           {quotes.length >= 2 && (
             <Button variant="outline" size="sm" onClick={() => navigate('/quotes/compare')}>
@@ -136,20 +143,41 @@ export default function MyQuotes() {
             </Button>
           )}
         </div>
+
         {quotes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No quotes yet</p>
+              <p className="text-muted-foreground">No quotations yet</p>
             </CardContent>
           </Card>
         ) : (
-          quotes.map((quote) => (
-            <QuoteCard key={quote.id} quote={quote} />
-          ))
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="pending">Pending ({pendingQuotes.length})</TabsTrigger>
+              <TabsTrigger value="accepted">Accepted ({acceptedQuotes.length})</TabsTrigger>
+              <TabsTrigger value="other">Other ({otherQuotes.length})</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="mt-4 space-y-3">
+              {pendingQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No pending quotations</p>
+              ) : pendingQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
+            </TabsContent>
+
+            <TabsContent value="accepted" className="mt-4 space-y-3">
+              {acceptedQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No accepted quotations</p>
+              ) : acceptedQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
+            </TabsContent>
+
+            <TabsContent value="other" className="mt-4 space-y-3">
+              {otherQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No declined or expired quotations</p>
+              ) : otherQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
-      
-      
     </div>
   );
 }
