@@ -69,15 +69,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Store payment record
+    // Store payment record with full Yoco metadata
+    const checkoutId = payload?.id || body?.id || null;
+    const amountCents = payload?.amount || null;
+    const paymentMethod = payload?.paymentMethodDetails?.type
+      || payload?.payment_method_details?.type
+      || payload?.paymentMethod?.type
+      || null;
+    const yocoProcessedAt = payload?.createdDate || payload?.created_date || body?.createdDate || null;
+
     await supabase.from("payment_proofs").insert({
       booking_id: bookingId,
       payer_user_id: metadata.userId,
       kind,
-      storage_key: `yoco:${payload.id || body.id}`,
-      reference_text: `Yoco payment ${payload.id || body.id}`,
+      storage_key: `yoco:${checkoutId}`,
+      reference_text: `Yoco payment ${checkoutId}`,
       status: "verified",
       reviewed_at: new Date().toISOString(),
+      yoco_checkout_id: checkoutId,
+      amount_cents: amountCents,
+      payment_method: paymentMethod,
+      yoco_processed_at: yocoProcessedAt,
     });
 
     // Post system message to conversation
