@@ -10,7 +10,7 @@ import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
 import { useVendorBookings } from '@/hooks/useBookings';
 import { BookingWithDetails } from '@/types/booking';
 import { format, isSameDay, parseISO, isAfter, startOfToday } from 'date-fns';
-import { MessageCircle, Calendar as CalendarIcon, Banknote, Star } from 'lucide-react';
+import { MessageCircle, Calendar as CalendarIcon, Banknote from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function getStatusColor(status: string) {
@@ -71,7 +71,7 @@ export default function VendorCalendarHome() {
         <div className="grid grid-cols-3 gap-3">
           <Card className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/vendor-dashboard/bookings')}>
             <CardContent className="py-4 px-2">
-              <CircleDollarSign className="h-5 w-5 mx-auto text-warning mb-1" />
+              <CircleDoBanknoteme="h-5 w-5 mx-auto text-warning mb-1" />
               <p className="text-2xl font-bold text-foreground">{stats.pendingDeposit}</p>
               <p className="text-xs text-muted-foreground">Deposit due</p>
             </CardContent>
