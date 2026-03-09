@@ -127,6 +127,20 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Failed to create booking" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Generate Order Confirmation PDF (fire-and-forget)
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/generate-order-confirmation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({ booking_id: booking.id, order_number: orderNumber }),
+      });
+    } catch (e) {
+      console.error("Order PDF generation failed (non-blocking):", e);
+    }
+
     // Post system message to conversation
     const { data: conv } = await supabase
       .from("conversations")
@@ -138,23 +152,21 @@ serve(async (req) => {
       .maybeSingle();
 
     if (conv) {
-      // Client-facing message
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_type: "system",
         sender_user_id: user.id,
         message_type: "system",
-        content: "✅ Quote accepted! Please pay the deposit to confirm the booking.",
-        metadata: { quote_id, booking_id: booking.id, visibility: "client" },
+        content: `✅ Quote accepted! Order ${orderNumber} created. Please pay the deposit to confirm.`,
+        metadata: { quote_id, booking_id: booking.id, order_number: orderNumber, visibility: "client" },
       });
-      // Vendor-facing message
       await supabase.from("messages").insert({
         conversation_id: conv.id,
         sender_type: "system",
         sender_user_id: user.id,
         message_type: "system",
-        content: "✅ Quote accepted! Awaiting client to pay the deposit.",
-        metadata: { quote_id, booking_id: booking.id, visibility: "vendor" },
+        content: `✅ Quote accepted! Order ${orderNumber} created. Awaiting deposit payment.`,
+        metadata: { quote_id, booking_id: booking.id, order_number: orderNumber, visibility: "vendor" },
       });
       await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", conv.id);
     }
