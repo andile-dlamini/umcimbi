@@ -488,7 +488,7 @@ export default function OnboardingLanguage() {
                       <div className="text-[6px] text-gray-500 mb-2">Looking for catering, traditional menu for Umembeso ceremony in Durban area.</div>
                       <div className="flex gap-1.5">
                         <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
-                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quote</span>
+                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quotation</span>
                         </div>
                         <div className="h-5 px-2 rounded-lg bg-gray-100 flex items-center justify-center">
                           <span className="text-[6px] text-gray-400">Decline</span>
@@ -527,7 +527,7 @@ export default function OnboardingLanguage() {
                 <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Header */}
                   <div className="h-7 bg-primary flex items-center justify-between px-3">
-                    <span className="text-[8px] font-semibold text-primary-foreground/80">Orders</span>
+                    <span className="text-[8px] font-semibold text-primary-foreground/80">Orderan>
                     <div className="px-1.5 py-0.5 rounded-full bg-primary-foreground/15">
                       <span className="text-[6px] font-bold text-primary-foreground/70">3 Active</span>
                     </div>
