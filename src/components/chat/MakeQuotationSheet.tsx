@@ -62,7 +62,10 @@ export function MakeQuotationSheet({
     setLineItems(updated);
   };
 
+  const PLATFORM_FEE_RATE = 0.08;
   const total = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const platformFee = total * PLATFORM_FEE_RATE;
+  const vendorPayout = total - platformFee;
   const depositAmount = total * (depositPercentage / 100);
 
   const handleSubmit = async () => {
