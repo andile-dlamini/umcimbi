@@ -69,9 +69,9 @@ export function MakeQuotationSheet({
   const depositAmount = clientTotal * (depositPercentage / 100);
 
   const handleSubmit = async () => {
-    const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0);
+    const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0 && (Number(i.quantity) || 0) >= 1);
     if (validItems.length === 0) {
-      toast.error('Add at least one line item with description and price');
+      toast.error('Add at least one line item with description, quantity (≥1) and price');
       return;
     }
 
