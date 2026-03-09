@@ -248,7 +248,7 @@ export function MakeQuotationSheet({
         </div>
 
         <SheetFooter className="mt-4">
-          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || total === 0}>
+          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || subtotal === 0}>
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
             ) : (
