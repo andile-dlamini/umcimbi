@@ -128,7 +128,7 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
                     interactive 
                   />
                   <Textarea
-                    placeholder="Share your experience (optional)"
+                    placeholder="Share your experience"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     rows={3}
