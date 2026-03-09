@@ -302,11 +302,14 @@ serve(async (req) => {
     let quoteId: string;
     let offerNumber: string;
 
+    let isAdjustment = false;
+    let currentAdjustmentCount = 0;
+
     if (quote_id) {
       // ADJUSTMENT: Update existing quote in-place
       const { data: existingQuote, error: fetchErr } = await supabase
         .from("quotes")
-        .select("id, offer_number, vendor_id")
+        .select("id, offer_number, vendor_id, adjustment_count")
         .eq("id", quote_id)
         .single();
 
@@ -316,6 +319,8 @@ serve(async (req) => {
 
       quoteId = existingQuote.id;
       offerNumber = existingQuote.offer_number || `UMC-Q-${Date.now()}`;
+      isAdjustment = true;
+      currentAdjustmentCount = existingQuote.adjustment_count || 0;
 
       // Update quote record
       const { error: updateErr } = await supabase
