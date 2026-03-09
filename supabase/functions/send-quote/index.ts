@@ -406,6 +406,8 @@ serve(async (req) => {
 
     // 9) Insert quote_card message into chat
     const depositAmount = total * (deposit_percentage / 100);
+    const platformFee = total * 0.08;
+    const vendorPayout = total - platformFee;
     await supabase.from("messages").insert({
       conversation_id: conversation_id,
       sender_type: "vendor",
@@ -418,6 +420,8 @@ serve(async (req) => {
         total: total,
         deposit_percentage: deposit_percentage,
         deposit_amount: depositAmount,
+        platform_fee: platformFee,
+        vendor_payout: vendorPayout,
         pdf_key: pdfKey,
         status: "pending_client",
         booking_id: null,
