@@ -81,6 +81,9 @@ export type Database = {
           event_date_time: string | null
           event_id: string
           id: string
+          order_number: string | null
+          order_pdf_generated_at: string | null
+          order_pdf_key: string | null
           quote_id: string | null
           service_category: string | null
           updated_at: string
@@ -102,6 +105,9 @@ export type Database = {
           event_date_time?: string | null
           event_id: string
           id?: string
+          order_number?: string | null
+          order_pdf_generated_at?: string | null
+          order_pdf_key?: string | null
           quote_id?: string | null
           service_category?: string | null
           updated_at?: string
@@ -123,6 +129,9 @@ export type Database = {
           event_date_time?: string | null
           event_id?: string
           id?: string
+          order_number?: string | null
+          order_pdf_generated_at?: string | null
+          order_pdf_key?: string | null
           quote_id?: string | null
           service_category?: string | null
           updated_at?: string
@@ -1293,6 +1302,7 @@ export type Database = {
     }
     Functions: {
       generate_offer_number: { Args: never; Returns: string }
+      generate_order_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
