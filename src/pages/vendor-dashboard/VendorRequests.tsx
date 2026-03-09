@@ -1,7 +1,7 @@
 import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { useVendorServiceRequests } from '@/hooks/useServiceRequests';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,7 +64,6 @@ export default function VendorRequests() {
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -124,7 +123,7 @@ export default function VendorRequests() {
         </Tabs>
       </div>
       
-      <BottomNav />
+      
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { ConversationStatusChip } from '@/components/chat/ConversationStatusChip';
 import { useConversations } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
@@ -292,7 +292,7 @@ const ChatsList = () => {
         )}
       </div>
 
-      <BottomNav />
+      
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { useVendorBookings } from '@/hooks/useBookings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -97,7 +97,6 @@ export default function VendorBookings() {
             <Skeleton key={i} className="h-40 w-full" />
           ))}
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -167,7 +166,7 @@ export default function VendorBookings() {
         )}
       </div>
       
-      <BottomNav />
+      
     </div>
   );
 }
