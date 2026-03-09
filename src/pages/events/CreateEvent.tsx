@@ -102,16 +102,17 @@ export default function CreateEvent() {
 
     setValidationErrors({});
     setIsCreating(true);
-    const selectedSize = sizeOptions.find(s => s.value === size);
     const typeInfo = getEventTypeInfo(eventType);
+    const parsedCount = parseInt(guestCount) || 50;
+    const sizeLabel = parsedCount <= 80 ? 'small' : parsedCount <= 200 ? 'medium' : 'large';
     
     const event = await createEvent({
       name: result.data?.name || name.trim() || `My ${typeInfo.shortLabel}`,
       type: eventType,
       date: date || null,
       location: result.data?.location || location.trim() || null,
-      estimated_guest_count: selectedSize?.count || 150,
-      size,
+      estimated_guest_count: parsedCount,
+      size: sizeLabel,
       notes: null,
     });
 
