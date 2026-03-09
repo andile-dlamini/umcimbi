@@ -80,7 +80,7 @@ export function TopBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-lg border-b border-border">
+      <header className="sticky top-0 z-40 glass border-b border-border/30">
         <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
           {/* Left: hamburger */}
           <Button variant="ghost" size="icon" className="shrink-0 -ml-2" onClick={() => setDrawerOpen(true)}>
