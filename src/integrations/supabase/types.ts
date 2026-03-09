@@ -513,40 +513,52 @@ export type Database = {
       }
       payment_proofs: {
         Row: {
+          amount_cents: number | null
           booking_id: string
           created_at: string
           id: string
           kind: string
           payer_user_id: string
+          payment_method: string | null
           reference_text: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
           storage_key: string
+          yoco_checkout_id: string | null
+          yoco_processed_at: string | null
         }
         Insert: {
+          amount_cents?: number | null
           booking_id: string
           created_at?: string
           id?: string
           kind: string
           payer_user_id: string
+          payment_method?: string | null
           reference_text?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           storage_key: string
+          yoco_checkout_id?: string | null
+          yoco_processed_at?: string | null
         }
         Update: {
+          amount_cents?: number | null
           booking_id?: string
           created_at?: string
           id?: string
           kind?: string
           payer_user_id?: string
+          payment_method?: string | null
           reference_text?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           storage_key?: string
+          yoco_checkout_id?: string | null
+          yoco_processed_at?: string | null
         }
         Relationships: [
           {
