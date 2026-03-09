@@ -133,7 +133,7 @@ export function AppSidebar() {
         >
           <Avatar className={cn('border border-border shrink-0', collapsed ? 'h-8 w-8' : 'h-9 w-9')}>
             <AvatarImage src={(profile as any)?.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+            <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
