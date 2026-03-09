@@ -125,24 +125,37 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
           <span className="text-xs text-muted-foreground">Ref</span>
           <span className="text-sm font-mono font-medium">{metadata.offer_number}</span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Total</span>
-          <span className="text-lg font-bold">{formatCurrency(metadata.total)}</span>
-        </div>
+        {isVendorView ? (
+          <>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-muted-foreground">Your quote</span>
+              <span className="text-lg font-bold">{formatCurrency(metadata.total)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Client pays (incl. 8% fee)</span>
+              <span>{formatCurrency(metadata.total * 1.08)}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Subtotal</span>
+              <span>{formatCurrency(metadata.total)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Service fee (8%)</span>
+              <span>{formatCurrency(metadata.platform_fee || metadata.total * 0.08)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium">Total</span>
+              <span className="text-lg font-bold">{formatCurrency(metadata.total + (metadata.platform_fee || metadata.total * 0.08))}</span>
+            </div>
+          </>
+        )}
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">Deposit ({metadata.deposit_percentage}%)</span>
-          <span className="text-sm font-medium">{formatCurrency(metadata.deposit_amount)}</span>
+          <span className="text-sm font-medium">{formatCurrency((metadata.total + (metadata.platform_fee || metadata.total * 0.08)) * (metadata.deposit_percentage / 100))}</span>
         </div>
-        <div className="flex justify-between items-center text-xs text-muted-foreground">
-          <span>Incl. 8% service fee</span>
-          <span>{formatCurrency(metadata.platform_fee || metadata.total * 0.08)}</span>
-        </div>
-        {isVendorView && (
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-emerald-600">You receive</span>
-            <span className="font-medium text-emerald-600">{formatCurrency(metadata.vendor_payout || metadata.total * 0.92)}</span>
-          </div>
-        )}
       </div>
 
       <div className="px-4 py-3 border-t border-border space-y-2">

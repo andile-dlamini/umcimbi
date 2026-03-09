@@ -98,8 +98,10 @@ function generateQuotePdfHtml(
   const clientName = clientProfile?.full_name || clientProfile?.first_name || "Client";
   const eventAddress = event?.location || "";
   const eventTypePretty = event?.type ? event.type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) : "";
-  const depositAmount = total * (depositPercentage / 100);
-  const balanceAmount = total - depositAmount;
+  const platformFee = total * 0.08;
+  const clientTotal = total + platformFee;
+  const depositAmount = clientTotal * (depositPercentage / 100);
+  const balanceAmount = clientTotal - depositAmount;
 
   const lineItemsHtml = lineItems.map(item => `
     <tr>
@@ -160,9 +162,9 @@ function generateQuotePdfHtml(
     <thead><tr><th>Description</th><th style="text-align:center;width:10%;">Qty</th><th style="text-align:right;width:20%;">Unit Price</th><th style="text-align:right;width:20%;">Amount</th></tr></thead>
     <tbody>
       ${lineItemsHtml}
-      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Subtotal</td><td style="text-align:right;font-size:11px;">${formatCurrency(total)}</td></tr>
-      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Service fee (8%)</td><td style="text-align:right;font-size:11px;">${formatCurrency(total * 0.08)}</td></tr>
-      <tr class="total-row"><td colspan="3">Total incl. fee (ZAR)</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;font-size:12px;">Subtotal</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Service fee (8%)</td><td style="text-align:right;font-size:11px;">${formatCurrency(platformFee)}</td></tr>
+      <tr class="total-row"><td colspan="3">Total (ZAR)</td><td style="text-align:right;">${formatCurrency(clientTotal)}</td></tr>
     </tbody>
   </table>
   <p class="section-title">Payment Terms</p>
@@ -407,9 +409,8 @@ serve(async (req) => {
     }).eq("id", quote.id);
 
     // 9) Insert quote_card message into chat
-    const depositAmount = total * (deposit_percentage / 100);
-    const platformFee = total * 0.08;
-    const vendorPayout = total - platformFee;
+    const depositAmountChat = total * 1.08 * (deposit_percentage / 100);
+    const platformFeeChat = total * 0.08;
     await supabase.from("messages").insert({
       conversation_id: conversation_id,
       sender_type: "vendor",
@@ -421,9 +422,9 @@ serve(async (req) => {
         offer_number: offerNumber,
         total: total,
         deposit_percentage: deposit_percentage,
-        deposit_amount: depositAmount,
-        platform_fee: platformFee,
-        vendor_payout: vendorPayout,
+        deposit_amount: depositAmountChat,
+        platform_fee: platformFeeChat,
+        vendor_payout: total,
         pdf_key: pdfKey,
         status: "pending_client",
         booking_id: null,

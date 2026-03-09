@@ -63,10 +63,10 @@ export function MakeQuotationSheet({
   };
 
   const PLATFORM_FEE_RATE = 0.08;
-  const total = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
-  const platformFee = total * PLATFORM_FEE_RATE;
-  const vendorPayout = total - platformFee;
-  const depositAmount = total * (depositPercentage / 100);
+  const subtotal = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const platformFee = subtotal * PLATFORM_FEE_RATE;
+  const clientTotal = subtotal + platformFee;
+  const depositAmount = clientTotal * (depositPercentage / 100);
 
   const handleSubmit = async () => {
     const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0);
@@ -218,9 +218,18 @@ export function MakeQuotationSheet({
 
           {/* Totals */}
           <div className="bg-primary/5 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Service fee (8%)</span>
+              <span className="font-medium">{formatCurrency(platformFee)}</span>
+            </div>
+            <Separator className="my-1" />
             <div className="flex justify-between items-center">
               <span className="font-medium">Client pays</span>
-              <span className="text-lg font-bold">{formatCurrency(total)}</span>
+              <span className="text-lg font-bold">{formatCurrency(clientTotal)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Deposit ({depositPercentage}%)</span>
@@ -228,22 +237,18 @@ export function MakeQuotationSheet({
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Balance ({100 - depositPercentage}%)</span>
-              <span className="font-medium">{formatCurrency(total - depositAmount)}</span>
+              <span className="font-medium">{formatCurrency(clientTotal - depositAmount)}</span>
             </div>
             <Separator className="my-1" />
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Platform fee (8%)</span>
-              <span className="font-medium text-destructive">−{formatCurrency(platformFee)}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium text-emerald-600">You receive</span>
-              <span className="font-medium text-emerald-600">{formatCurrency(vendorPayout)}</span>
+              <span className="font-medium">You receive</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
           </div>
         </div>
 
         <SheetFooter className="mt-4">
-          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || total === 0}>
+          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || subtotal === 0}>
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
             ) : (
