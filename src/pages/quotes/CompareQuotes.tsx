@@ -289,7 +289,7 @@ export default function CompareQuotes() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Compare Quotes" showBack />
+        <PageHeader title="Compare Quotations" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}
         </div>
