@@ -12,6 +12,10 @@ interface PageHeaderProps {
   className?: string;
 }
 
+/**
+ * Inline page title bar — no sticky chrome, just a flex row
+ * with optional back button and right-side actions.
+ */
 export function PageHeader({ 
   title, 
   subtitle, 
@@ -22,28 +26,26 @@ export function PageHeader({
   const navigate = useNavigate();
 
   return (
-    <header className={cn('sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border', className)}>
-      <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
-        <div className="flex items-center gap-3">
-          {showBack && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 -ml-2"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+    <div className={cn('flex items-center justify-between px-4 pt-6 pb-2 max-w-4xl mx-auto', className)}>
+      <div className="flex items-center gap-3 min-w-0">
+        {showBack && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 -ml-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-foreground leading-tight truncate">{title}</h1>
+          {subtitle && (
+            <p className="text-xs text-muted-foreground">{subtitle}</p>
           )}
-          <div>
-            <h1 className="font-semibold text-foreground leading-tight">{title}</h1>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
-            )}
-          </div>
         </div>
-        {rightAction && <div>{rightAction}</div>}
       </div>
-    </header>
+      {rightAction && <div className="shrink-0">{rightAction}</div>}
+    </div>
   );
 }
