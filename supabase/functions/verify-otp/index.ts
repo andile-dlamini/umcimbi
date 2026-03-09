@@ -19,7 +19,7 @@ interface RegisterData {
   otp: string;
   first_name: string;
   surname: string;
-  address: string;
+  address?: string;
   email?: string;
   password: string;
 }
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     const body: RegisterData = await req.json();
     const { phone_number, otp, first_name, surname, address, email, password } = body;
 
-    if (!phone_number || !otp || !first_name || !surname || !address || !password) {
+    if (!phone_number || !otp || !first_name || !surname || !password) {
       return new Response(
         JSON.stringify({ error: "All required fields must be provided" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
         full_name: `${first_name.trim()} ${surname.trim()}`,
         phone_number: normalized,
         phone_verified: true,
-        address: address.trim(),
+        address: address?.trim() || null,
         email: email?.trim() || null,
       })
       .eq("user_id", authData.user.id);
@@ -170,18 +170,11 @@ Deno.serve(async (req) => {
       console.error("Profile update error:", profileError);
     }
 
-    // Sign in the user to return a session
-    const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
-      type: "magiclink",
-      email: signUpEmail,
-    });
-
     return new Response(
       JSON.stringify({
         success: true,
         message: "Account created successfully!",
         user_id: authData.user.id,
-        // Client should sign in with email+password after this
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
