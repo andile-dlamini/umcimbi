@@ -61,7 +61,7 @@ serve(async (req) => {
 
     if (serviceReq.requester_user_id !== user.id) {
       console.error("Ownership mismatch:", { requester: serviceReq.requester_user_id, caller: user.id });
-      return new Response(JSON.stringify({ error: `Only the client can decline this quote. You are ${user.id} but the requester is ${serviceReq.requester_user_id}` }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Only the original requester can perform this action." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (quote.status !== "pending_client") {
