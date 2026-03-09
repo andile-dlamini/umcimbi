@@ -140,8 +140,8 @@ export default function OnboardingLanguage() {
               <span className="text-secondary">light.</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
-              Find trusted vendors, compare quotes, and keep everything organised — in one place.
+            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">Find trusted vendors, compare quotes, and keep everything organised. All in one place.
+
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
