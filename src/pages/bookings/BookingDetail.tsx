@@ -80,14 +80,18 @@ export default function BookingDetail() {
     refreshDetails();
   };
 
-  const handleViewPdf = async () => {
-    if (!booking?.quote_id) {
-      toast.error('No linked quotation found');
-      return;
-    }
+  const handleViewOrderPdf = async () => {
+    if (!bookingId) return;
     setIsLoadingPdf(true);
-    await viewQuotePdfAction(booking.quote_id);
+    await viewOrderPdfAction(bookingId);
     setIsLoadingPdf(false);
+  };
+
+  const handleViewQuotePdf = async () => {
+    if (!booking?.quote_id) return;
+    setIsLoadingQuotePdf(true);
+    await viewQuotePdfAction(booking.quote_id);
+    setIsLoadingQuotePdf(false);
   };
 
   const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
