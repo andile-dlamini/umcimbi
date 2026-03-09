@@ -2,136 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Isiko — Clean Editorial Design System */
+/* Isiko — Soft Glassmorphism Design System */
 
 @layer base {
   :root {
-    /* Near-white background */
-    --background: 0 0% 98%;
-    --foreground: 220 20% 12%;
+    /* Soft gradient base */
+    --background: 225 25% 96%;
+    --foreground: 222 20% 14%;
 
-    /* Card surfaces */
+    /* Frosted card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 12%;
+    --card-foreground: 222 20% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
+    --popover-foreground: 222 20% 14%;
 
-    /* Primary: Deep Indigo */
-    --primary: 220 65% 30%;
+    /* Primary: Shweshwe Indigo */
+    --primary: 224 60% 38%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Warm earth */
-    --secondary: 30 12% 93%;
-    --secondary-foreground: 220 20% 20%;
+    /* Secondary: Warm Sand */
+    --secondary: 32 20% 93%;
+    --secondary-foreground: 222 20% 22%;
 
-    /* Muted tones */
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 10% 50%;
+    /* Muted */
+    --muted: 225 15% 93%;
+    --muted-foreground: 222 8% 52%;
 
-    /* Accent: Warm terracotta gold */
-    --accent: 25 80% 52%;
+    /* Accent: Terracotta Gold */
+    --accent: 22 82% 52%;
     --accent-foreground: 0 0% 100%;
 
     /* Success */
-    --success: 152 55% 42%;
+    --success: 155 50% 42%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
-    --warning: 45 90% 50%;
-    --warning-foreground: 220 20% 12%;
+    --warning: 42 92% 52%;
+    --warning-foreground: 222 20% 14%;
 
-    --destructive: 0 65% 50%;
+    --destructive: 0 62% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
-    --ring: 220 65% 30%;
+    --border: 225 15% 90%;
+    --input: 225 15% 90%;
+    --ring: 224 60% 38%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    /* Ceremony type colors */
-    --umembeso: 25 80% 52%;
-    --umabo: 350 55% 48%;
+    /* Ceremony colors */
+    --umembeso: 22 82% 52%;
+    --umabo: 348 52% 50%;
 
-    /* Card border */
-    --card-border: 220 10% 88%;
+    /* Card border — translucent for glass effect */
+    --card-border: 225 15% 88%;
+
+    /* Glass-specific tokens */
+    --glass-bg: 0 0% 100% / 0.65;
+    --glass-border: 0 0% 100% / 0.25;
+    --glass-shadow: 224 60% 38% / 0.06;
 
     /* Sidebar / Drawer */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 12%;
-    --sidebar-primary: 220 65% 30%;
+    --sidebar-foreground: 222 20% 14%;
+    --sidebar-primary: 224 60% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 96%;
-    --sidebar-accent-foreground: 220 20% 12%;
-    --sidebar-border: 220 10% 92%;
-    --sidebar-ring: 220 65% 30%;
+    --sidebar-accent: 225 15% 96%;
+    --sidebar-accent-foreground: 222 20% 14%;
+    --sidebar-border: 225 15% 92%;
+    --sidebar-ring: 224 60% 38%;
   }
 
   .dark {
-    --background: 220 20% 7%;
-    --foreground: 220 10% 92%;
+    --background: 222 22% 8%;
+    --foreground: 225 12% 92%;
 
-    --card: 220 18% 11%;
-    --card-foreground: 220 10% 92%;
+    --card: 222 20% 12%;
+    --card-foreground: 225 12% 92%;
 
-    --popover: 220 18% 11%;
-    --popover-foreground: 220 10% 92%;
+    --popover: 222 20% 12%;
+    --popover-foreground: 225 12% 92%;
 
-    --primary: 220 55% 55%;
+    --primary: 224 52% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 12% 18%;
-    --secondary-foreground: 220 10% 85%;
+    --secondary: 222 14% 18%;
+    --secondary-foreground: 225 12% 85%;
 
-    --muted: 220 12% 16%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 222 14% 16%;
+    --muted-foreground: 222 10% 55%;
 
-    --accent: 25 75% 50%;
+    --accent: 22 75% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 152 50% 45%;
+    --success: 155 48% 46%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 85% 55%;
-    --warning-foreground: 220 20% 7%;
+    --warning: 42 86% 55%;
+    --warning-foreground: 222 22% 8%;
 
-    --destructive: 0 60% 45%;
+    --destructive: 0 58% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 12% 20%;
-    --input: 220 12% 20%;
-    --ring: 220 55% 55%;
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 224 52% 58%;
 
-    --umembeso: 25 75% 50%;
-    --umabo: 350 50% 50%;
+    --umembeso: 22 75% 52%;
+    --umabo: 348 48% 52%;
 
-    --card-border: 220 12% 22%;
+    --card-border: 222 14% 22%;
 
-    --sidebar-background: 220 18% 9%;
-    --sidebar-foreground: 220 10% 92%;
-    --sidebar-primary: 220 55% 55%;
+    --glass-bg: 222 20% 12% / 0.7;
+    --glass-border: 222 14% 28% / 0.4;
+    --glass-shadow: 0 0% 0% / 0.2;
+
+    --sidebar-background: 222 20% 10%;
+    --sidebar-foreground: 225 12% 92%;
+    --sidebar-primary: 224 52% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 12% 14%;
-    --sidebar-accent-foreground: 220 10% 92%;
-    --sidebar-border: 220 12% 20%;
-    --sidebar-ring: 220 55% 55%;
+    --sidebar-accent: 222 14% 15%;
+    --sidebar-accent-foreground: 225 12% 92%;
+    --sidebar-border: 222 14% 20%;
+    --sidebar-ring: 224 52% 58%;
   }
 
-  /* Vendor mode overrides */
+  /* Vendor mode */
   .vendor-mode {
-    --primary: 25 75% 40%;
+    --primary: 22 75% 42%;
     --primary-foreground: 0 0% 100%;
-    --ring: 25 75% 40%;
-    --accent: 25 65% 50%;
+    --ring: 22 75% 42%;
+    --accent: 22 65% 52%;
     --accent-foreground: 0 0% 100%;
   }
 
   .dark.vendor-mode {
-    --primary: 25 70% 50%;
+    --primary: 22 70% 52%;
     --primary-foreground: 0 0% 100%;
-    --ring: 25 70% 50%;
-    --accent: 25 60% 55%;
+    --ring: 22 70% 52%;
+    --accent: 22 60% 55%;
     --accent-foreground: 0 0% 100%;
   }
 }
@@ -142,10 +151,23 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Soft gradient background */
+    background:
+      radial-gradient(ellipse at 20% 0%, hsl(224 60% 38% / 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(22 82% 52% / 0.05) 0%, transparent 50%),
+      hsl(var(--background));
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(ellipse at 20% 0%, hsl(224 52% 58% / 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(22 75% 52% / 0.06) 0%, transparent 50%),
+      hsl(var(--background));
   }
 
   html, body, #root {
@@ -154,6 +176,15 @@
 }
 
 @layer components {
+  /* Glass card utility */
+  .glass {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 0 4px 24px -4px hsl(var(--glass-shadow));
+  }
+
   /* Ceremony type badges */
   .badge-umembeso {
     @apply bg-secondary text-secondary-foreground;
@@ -163,7 +194,6 @@
     @apply bg-accent text-accent-foreground;
   }
 
-  /* Safe area for mobile — no bottom nav anymore, just safe inset */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
