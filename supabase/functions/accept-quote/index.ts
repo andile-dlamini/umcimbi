@@ -172,7 +172,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ booking_id: booking.id, quote_status: "client_accepted" }),
+      JSON.stringify({ booking_id: booking.id, quote_status: "client_accepted", order_number: orderNumber }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
