@@ -219,7 +219,7 @@ export function MakeQuotationSheet({
           {/* Totals */}
           <div className="bg-primary/5 rounded-lg p-4 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">Client pays</span>
               <span className="text-lg font-bold">{formatCurrency(total)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
@@ -229,6 +229,15 @@ export function MakeQuotationSheet({
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Balance ({100 - depositPercentage}%)</span>
               <span className="font-medium">{formatCurrency(total - depositAmount)}</span>
+            </div>
+            <Separator className="my-1" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Platform fee (8%)</span>
+              <span className="font-medium text-destructive">−{formatCurrency(platformFee)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="font-medium text-emerald-600">You receive</span>
+              <span className="font-medium text-emerald-600">{formatCurrency(vendorPayout)}</span>
             </div>
           </div>
         </div>
