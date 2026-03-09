@@ -63,7 +63,7 @@ export default function AdminSettings() {
             {webhookStatus === 'success' && (
               <span className="flex items-center gap-1 text-sm text-green-600">
                 <CheckCircle2 className="h-4 w-4" />
-                Registered
+                <span>Registered</span>
               </span>
             )}
             {webhookStatus === 'error' && (
