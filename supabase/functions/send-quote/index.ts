@@ -453,7 +453,7 @@ serve(async (req) => {
     await supabase.from("quotes").update({
       final_offer_pdf_key: pdfKey,
       final_offer_pdf_generated_at: new Date().toISOString(),
-    }).eq("id", quote.I);
+    }).eq("id", quoteId);
 
     // 9) Insert quote_card message into chat
     const depositAmountChat = total * 1.08 * (deposit_percentage / 100);
