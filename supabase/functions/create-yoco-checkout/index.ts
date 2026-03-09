@@ -101,7 +101,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create Yoco checkout
+    // Create Yoco checkout with order number as reference
+    const paymentRef = booking.order_number || bookingId;
     const yocoRes = await fetch("https://payments.yoco.com/api/checkouts", {
       method: "POST",
       headers: {
@@ -111,12 +112,14 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         amount: amountInCents,
         currency: "ZAR",
+        externalId: `${paymentRef}-${kind}`,
         successUrl: successUrl || `${req.headers.get("origin")}/bookings/${bookingId}?payment=success&kind=${kind}`,
         cancelUrl: cancelUrl || `${req.headers.get("origin")}/bookings/${bookingId}?payment=cancelled`,
         metadata: {
           bookingId,
           kind,
           userId: user.id,
+          orderNumber: booking.order_number,
         },
       }),
     });
