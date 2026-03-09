@@ -164,6 +164,7 @@ export function MakeQuotationSheet({
                         min={1}
                         value={item.quantity}
                         onChange={(e) => updateLineItem(index, 'quantity', e.target.value)}
+                        onBlur={(e) => { if (!e.target.value || Number(e.target.value) < 1) updateLineItem(index, 'quantity', 1); }}
                       />
                     </div>
                     <div>
