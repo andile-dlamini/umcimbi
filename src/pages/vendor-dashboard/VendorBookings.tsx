@@ -48,7 +48,7 @@ function VendorBookingCard({
             </div>
           )}
           <div className="flex items-center gap-2">
-            <DoBanknotelassName="h-4 w-4" />
+            <Banknote className="h-4 w-4" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>

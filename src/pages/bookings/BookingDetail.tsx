@@ -237,7 +237,7 @@ export default function BookingDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <DoBanknotelassName="h-5 w-5" />
+              <Banknote className="h-5 w-5" />
               Payment
             </CardTitle>
           </CardHeader>

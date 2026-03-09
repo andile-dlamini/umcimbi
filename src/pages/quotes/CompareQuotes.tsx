@@ -49,7 +49,7 @@ function ScoreBadge({ badge }: { badge: string }) {
     case 'cheapest':
       return (
         <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 gap-1">
-          <DoBanknotelassName="h-3 w-3" /> Cheapest
+          <Banknote className="h-3 w-3" /> Cheapest
         </Badge>
       );
     case 'highest_trust':

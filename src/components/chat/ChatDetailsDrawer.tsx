@@ -163,7 +163,7 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
                       )}
                       {event.estimated_budget && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <DoBanknotelassName="h-3 w-3" /> R{event.estimated_budget.toLocaleString()}
+                          <Banknote className="h-3 w-3" /> R{event.estimated_budget.toLocaleString()}
                         </span>
                       )}
                     </div>
