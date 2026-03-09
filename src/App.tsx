@@ -99,6 +99,8 @@ function AppRoutes() {
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
+        <Route path="/vendor-dashboard/quotations" element={<VendorQuotations />} />
+        <Route path="/vendor-dashboard/orders" element={<VendorOrders />} />
         <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
           <Route index element={<AdminDashboard />} />
           <Route path="insights" element={<AdminInsights />} />
