@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { profile, user, isVendor, isAdmin, refreshProfile } = useAuth();
+  const { profile, user, isVendor, isAdmin, isLoading, refreshProfile } = useAuth();
   const { activeRole, setActiveRole, canSwitchRole } = useRole();
   const { settings, isLoading: settingsLoading, updateNotifications, updateLanguage } = useProfileSettings();
 
@@ -132,7 +132,9 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {isVendor ? (
+            {isLoading ? (
+              <div className="h-10 bg-muted animate-pulse rounded" />
+            ) : isVendor ? (
               <>
                 {canSwitchRole && (
                   <Button variant="outline" className="w-full justify-between" onClick={() => { setActiveRole(activeRole === 'vendor' ? 'organiser' : 'vendor'); }}>
