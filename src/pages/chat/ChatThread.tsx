@@ -7,7 +7,7 @@ import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { format, isToday, isYesterday } from 'date-fns';
 import { QuoteCard } from '@/components/chat/QuoteCard';
-import { MakeQuotationSheet } from '@/components/chat/MakeQuotationSheet';
+import { MakeQuotationSheet, QuotePrefillData } from '@/components/chat/MakeQuotationSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ChatDetailsDrawer } from '@/components/chat/ChatDetailsDrawer';
@@ -23,10 +23,13 @@ const ChatThread = () => {
   const [showQuotationSheet, setShowQuotationSheet] = useState(false);
   const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [quotePrefill, setQuotePrefill] = useState<QuotePrefillData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+
+  // Adjustment request state (client side)
   const [adjustmentQuoteId, setAdjustmentQuoteId] = useState<string | null>(null);
   const [adjustmentNote, setAdjustmentNote] = useState('');
   const [showAdjustmentInput, setShowAdjustmentInput] = useState(false);
@@ -37,13 +40,72 @@ const ChatThread = () => {
   };
 
   const handleSendAdjustment = async () => {
-    if (!adjustmentNote.trim() || !conversationId) return;
+    if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
+
+    // Update quote status to adjustment_requested and increment count
+    const { error: updateError } = await supabase
+      .from('quotes')
+      .update({
+        status: 'adjustment_requested' as any,
+        adjustment_reason: adjustmentNote.trim(),
+        adjustment_count: supabase.rpc as any, // handled below
+      })
+      .eq('id', adjustmentQuoteId);
+
+    // Use raw update for increment
+    await supabase.rpc('increment_adjustment_count' as any, { quote_id_param: adjustmentQuoteId }).catch(() => {
+      // Fallback: just update status and reason
+    });
+
+    // Update status and reason directly
+    await supabase
+      .from('quotes')
+      .update({
+        status: 'adjustment_requested' as any,
+        adjustment_reason: adjustmentNote.trim(),
+      })
+      .eq('id', adjustmentQuoteId);
+
+    // Send chat message
     const msg = `📝 Adjustment requested: ${adjustmentNote.trim()}`;
     const success = await sendMessage(conversationId, msg);
     if (success) {
       setAdjustmentNote('');
       setShowAdjustmentInput(false);
       setAdjustmentQuoteId(null);
+      refreshMessages();
+    }
+  };
+
+  // Vendor: handle "Adjust Quote" - fetch existing line items and open pre-filled sheet
+  const handleAdjustQuote = async (quoteId: string) => {
+    try {
+      const { data: quote } = await supabase
+        .from('quotes')
+        .select('deposit_percentage, notes')
+        .eq('id', quoteId)
+        .single();
+
+      const { data: lineItems } = await supabase
+        .from('quote_line_items')
+        .select('description, quantity, unit_price, sort_order')
+        .eq('quote_id', quoteId)
+        .order('sort_order', { ascending: true });
+
+      setQuotePrefill({
+        quoteId,
+        lineItems: (lineItems || []).map(li => ({
+          description: li.description,
+          quantity: li.quantity,
+          unit_price: Number(li.unit_price),
+        })),
+        depositPercentage: quote?.deposit_percentage || 50,
+        notes: quote?.notes || '',
+      });
+      setShowQuotationSheet(true);
+    } catch (err) {
+      console.error('Error fetching quote for adjustment:', err);
+      toast.error('Failed to load quote details');
     }
   };
 
@@ -101,7 +163,6 @@ const ChatThread = () => {
         name: file.name,
       };
 
-      // Insert message with attachment
       const { error: msgError } = await supabase.from('messages').insert({
         conversation_id: conversationId,
         sender_type: isVendorView ? 'vendor' : 'user',
@@ -224,6 +285,7 @@ const ChatThread = () => {
                     messageId={message.id}
                     onStatusChange={refreshMessages}
                     onRequestAdjustment={!isVendorView ? handleRequestAdjustment : undefined}
+                    onAdjustQuote={isVendorView ? handleAdjustQuote : undefined}
                   />
                 </div>
               );
@@ -284,7 +346,7 @@ const ChatThread = () => {
 
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
-        {/* Adjustment request bar */}
+        {/* Adjustment request bar (client) */}
         {showAdjustmentInput && (
           <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
             <Input
@@ -307,7 +369,7 @@ const ChatThread = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowQuotationSheet(true)}
+              onClick={() => { setQuotePrefill(null); setShowQuotationSheet(true); }}
             >
               <FileText className="h-4 w-4 mr-1" />
               Make Quotation
@@ -354,6 +416,7 @@ const ChatThread = () => {
         eventDate={conversation.event?.date ? format(new Date(conversation.event.date), 'dd MMM yyyy') : undefined}
         eventLocation={conversation.event?.location || undefined}
         onSuccess={refreshMessages}
+        prefillData={quotePrefill}
       />
 
       {/* Chat Details Drawer */}
