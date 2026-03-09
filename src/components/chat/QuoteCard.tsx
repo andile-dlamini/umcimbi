@@ -269,7 +269,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
             onClick={() => navigate(`/bookings/${bookingId}`)}
           >
             <ExternalLink className="h-4 w-4 mr-2" />
-            View Booking
+            View Order
           </Button>
         )}
       </div>

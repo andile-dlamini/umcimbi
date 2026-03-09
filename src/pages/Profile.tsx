@@ -227,7 +227,7 @@ export default function Profile() {
             >
               <span className="flex items-center gap-2">
                 <Receipt className="h-4 w-4" />
-                My Quotes
+                My Quotations
               </span>
               {pendingQuotes > 0 && (
                 <Badge variant="destructive" className="ml-2">{pendingQuotes} pending</Badge>
@@ -240,7 +240,7 @@ export default function Profile() {
             >
               <span className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                My Bookings
+                My Orders
               </span>
               {activeBookings > 0 && (
                 <Badge className="ml-2">{activeBookings} active</Badge>

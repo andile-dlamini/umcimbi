@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, DollarSign, CheckCircle } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails, BookingStatus } from '@/types/booking';
@@ -48,7 +48,7 @@ function VendorBookingCard({
             </div>
           )}
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <Banknote className="h-4 w-4" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function VendorBookings() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="My Bookings" showBack />
+        <PageHeader title="Orders" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-40 w-full" />
@@ -103,9 +103,9 @@ export default function VendorBookings() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="My Bookings" showBack />
+      <PageHeader title="Orders" showBack />
       
-      <div className="p-4">
+      <div className="px-4 py-4 max-w-lg mx-auto">
         {bookings.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">

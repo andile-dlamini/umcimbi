@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, DollarSign, MessageCircle, CheckCircle, AlertTriangle, Star, Camera, Upload } from 'lucide-react';
+import { Calendar, MapPin, Banknote, MessageCircle, CheckCircle, AlertTriangle, Star, Camera, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingStatus, PaymentStatus } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
@@ -237,7 +237,7 @@ export default function BookingDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+              <Banknote className="h-5 w-5" />
               Payment
             </CardTitle>
           </CardHeader>

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, DollarSign, CheckCircle, ShoppingBag } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails } from '@/types/booking';
@@ -46,7 +46,7 @@ function OrderCard({
             </div>
           )}
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <Banknote className="h-4 w-4" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>
@@ -73,6 +73,9 @@ export default function VendorOrders() {
     b => b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed'
   );
   const completedOrders = bookings.filter(b => b.booking_status === 'completed');
+  const otherOrders = bookings.filter(
+    b => b.booking_status === 'cancelled' || b.booking_status === 'disputed'
+  );
 
   if (isLoading) {
     return (
@@ -96,15 +99,16 @@ export default function VendorOrders() {
               <ShoppingBag className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">No orders yet</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Orders will appear here when clients accept your quotes
+                Orders will appear here when clients accept your quotations
               </p>
             </CardContent>
           </Card>
         ) : (
           <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="active">Active ({activeOrders.length})</TabsTrigger>
               <TabsTrigger value="completed">Completed ({completedOrders.length})</TabsTrigger>
+              <TabsTrigger value="other">Other ({otherOrders.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="active" className="mt-4 space-y-3">
@@ -122,6 +126,14 @@ export default function VendorOrders() {
                 <p className="text-center text-muted-foreground py-8">No completed orders</p>
               ) : (
                 completedOrders.map(b => <OrderCard key={b.id} booking={b} />)
+              )}
+            </TabsContent>
+
+            <TabsContent value="other" className="mt-4 space-y-3">
+              {otherOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No cancelled or disputed orders</p>
+              ) : (
+                otherOrders.map(b => <OrderCard key={b.id} booking={b} />)
               )}
             </TabsContent>
           </Tabs>

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails, BookingStatus } from '@/types/booking';
@@ -45,7 +45,7 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
             </div>
           )}
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <Banknote className="h-4 w-4" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>
@@ -66,18 +66,18 @@ export default function ClientBookings() {
   const { bookings, isLoading } = useClientBookings();
   const navigate = useNavigate();
 
-  const upcomingBookings = bookings.filter(b => 
+  const activeOrders = bookings.filter(b => 
     b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed'
   );
-  const completedBookings = bookings.filter(b => b.booking_status === 'completed');
-  const otherBookings = bookings.filter(b => 
+  const completedOrders = bookings.filter(b => b.booking_status === 'completed');
+  const otherOrders = bookings.filter(b => 
     b.booking_status === 'cancelled' || b.booking_status === 'disputed'
   );
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="My Bookings" showBack />
+        <PageHeader title="Orders" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-40 w-full" />
@@ -89,37 +89,37 @@ export default function ClientBookings() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader title="My Bookings" showBack />
+      <PageHeader title="Orders" showBack />
       
-      <div className="p-4">
+      <div className="px-4 py-4 max-w-lg mx-auto">
         {bookings.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No bookings yet</p>
+              <p className="text-muted-foreground">No orders yet</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Accept a quote from a vendor to create your first booking
+                Accept a quotation from a vendor to create your first order
               </p>
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="upcoming" className="w-full">
+          <Tabs defaultValue="active" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="upcoming">
-                Upcoming ({upcomingBookings.length})
+              <TabsTrigger value="active">
+                Active ({activeOrders.length})
               </TabsTrigger>
               <TabsTrigger value="completed">
-                Completed ({completedBookings.length})
+                Completed ({completedOrders.length})
               </TabsTrigger>
               <TabsTrigger value="other">
-                Other ({otherBookings.length})
+                Other ({otherOrders.length})
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="upcoming" className="mt-4 space-y-4">
-              {upcomingBookings.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No upcoming bookings</p>
+            <TabsContent value="active" className="mt-4 space-y-3">
+              {activeOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No active orders</p>
               ) : (
-                upcomingBookings.map((booking) => (
+                activeOrders.map((booking) => (
                   <BookingCard
                     key={booking.id}
                     booking={booking}
@@ -129,11 +129,11 @@ export default function ClientBookings() {
               )}
             </TabsContent>
             
-            <TabsContent value="completed" className="mt-4 space-y-4">
-              {completedBookings.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No completed bookings</p>
+            <TabsContent value="completed" className="mt-4 space-y-3">
+              {completedOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No completed orders</p>
               ) : (
-                completedBookings.map((booking) => (
+                completedOrders.map((booking) => (
                   <BookingCard
                     key={booking.id}
                     booking={booking}
@@ -143,11 +143,11 @@ export default function ClientBookings() {
               )}
             </TabsContent>
             
-            <TabsContent value="other" className="mt-4 space-y-4">
-              {otherBookings.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No cancelled or disputed bookings</p>
+            <TabsContent value="other" className="mt-4 space-y-3">
+              {otherOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No cancelled or disputed orders</p>
               ) : (
-                otherBookings.map((booking) => (
+                otherOrders.map((booking) => (
                   <BookingCard
                     key={booking.id}
                     booking={booking}
@@ -159,7 +159,6 @@ export default function ClientBookings() {
           </Tabs>
         )}
       </div>
-      
     </div>
   );
 }

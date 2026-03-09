@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
-  Star, BadgeCheck, Trophy, DollarSign, Shield, Sparkles, 
+  Star, BadgeCheck, Trophy, Banknote, Shield, Sparkles, 
   MessageCircle, Clock, ChevronRight 
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -49,7 +49,7 @@ function ScoreBadge({ badge }: { badge: string }) {
     case 'cheapest':
       return (
         <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 gap-1">
-          <DollarSign className="h-3 w-3" /> Cheapest
+          <Banknote className="h-3 w-3" /> Cheapest
         </Badge>
       );
     case 'highest_trust':
@@ -289,7 +289,7 @@ export default function CompareQuotes() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Compare Quotes" showBack />
+        <PageHeader title="Compare Quotations" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}
         </div>
@@ -301,7 +301,7 @@ export default function CompareQuotes() {
   if (step === 'select' || scoredVendors.length === 0) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Compare Quotes" showBack />
+        <PageHeader title="Compare Quotations" showBack />
         <div className="p-4 space-y-4">
           {/* Event selector */}
           {!eventId && (
@@ -376,7 +376,7 @@ export default function CompareQuotes() {
 
               {selectedQuoteIds.size >= 2 && (
                 <Button className="w-full mt-4" onClick={() => setStep('compare')}>
-                  Compare {selectedQuoteIds.size} Quotes
+                  Compare {selectedQuoteIds.size} Quotations
                 </Button>
               )}
             </div>
@@ -389,7 +389,7 @@ export default function CompareQuotes() {
   // Step: comparison view
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Compare Quotes" showBack />
+      <PageHeader title="Compare Quotations" showBack />
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>

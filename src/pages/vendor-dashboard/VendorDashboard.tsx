@@ -96,7 +96,7 @@ export default function VendorDashboard() {
                   <p className="text-2xl font-bold text-foreground">
                     {isLoading ? '–' : kpis.quotesSent}
                   </p>
-                  <p className="text-xs text-muted-foreground">Quotes sent</p>
+                  <p className="text-xs text-muted-foreground">Quotations sent</p>
                 </div>
               </CardContent>
             </Card>
