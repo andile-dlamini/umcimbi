@@ -21,12 +21,17 @@ export interface Quote {
 }
 
 export interface QuoteWithDetails extends Quote {
+  deposit_percentage?: number;
   vendor?: {
     id: string;
     name: string;
     category: string;
     rating: number | null;
+    review_count?: number | null;
     image_urls: string[] | null;
+    business_verification_status?: string;
+    is_super_vendor?: boolean;
+    jobs_completed?: number;
   };
   request?: {
     id: string;

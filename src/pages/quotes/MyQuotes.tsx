@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, Star, FileText, MessageCircle } from 'lucide-react';
+import { DollarSign, Clock, Star, FileText, MessageCircle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails } from '@/types/booking';
 import { useState } from 'react';
@@ -105,6 +105,7 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
 
 export default function MyQuotes() {
   const { quotes, isLoading } = useClientQuotes();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -125,9 +126,17 @@ export default function MyQuotes() {
       <PageHeader title="Quotes Archive" showBack />
       
       <div className="p-4 space-y-4">
-        <p className="text-sm text-muted-foreground">
-          All your quotes in one place. To accept or negotiate, open the chat.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            All your quotes in one place.
+          </p>
+          {quotes.length >= 2 && (
+            <Button variant="outline" size="sm" onClick={() => navigate('/quotes/compare')}>
+              <BarChart3 className="h-4 w-4 mr-1.5" />
+              Compare
+            </Button>
+          )}
+        </div>
         {quotes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">

@@ -1022,6 +1022,7 @@ export type Database = {
           image_urls: string[] | null
           is_active: boolean | null
           is_super_vendor: boolean
+          jobs_completed: number
           languages: string[] | null
           latitude: number | null
           letterhead_enabled: boolean
@@ -1066,6 +1067,7 @@ export type Database = {
           image_urls?: string[] | null
           is_active?: boolean | null
           is_super_vendor?: boolean
+          jobs_completed?: number
           languages?: string[] | null
           latitude?: number | null
           letterhead_enabled?: boolean
@@ -1110,6 +1112,7 @@ export type Database = {
           image_urls?: string[] | null
           is_active?: boolean | null
           is_super_vendor?: boolean
+          jobs_completed?: number
           languages?: string[] | null
           latitude?: number | null
           letterhead_enabled?: boolean
