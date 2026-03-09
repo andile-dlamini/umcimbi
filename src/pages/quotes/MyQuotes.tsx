@@ -125,9 +125,17 @@ export default function MyQuotes() {
       <PageHeader title="Quotes Archive" showBack />
       
       <div className="p-4 space-y-4">
-        <p className="text-sm text-muted-foreground">
-          All your quotes in one place. To accept or negotiate, open the chat.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            All your quotes in one place.
+          </p>
+          {quotes.length >= 2 && (
+            <Button variant="outline" size="sm" onClick={() => navigate('/quotes/compare')}>
+              <BarChart3 className="h-4 w-4 mr-1.5" />
+              Compare
+            </Button>
+          )}
+        </div>
         {quotes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
