@@ -259,7 +259,7 @@ export default function OnboardingLanguage() {
                   { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
                   { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
                   { done: false, label: 'Send guest invites', tag: '86 guests' },
-                  { done: false, label: 'Finalise decor quote', tag: 'Pending' }].
+                  { done: false, label: 'Finalise decor quotation', tag: 'Pending' }].
                   map((task, i) =>
                   <div key={i} className="flex items-center gap-1.5">
                       <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center shrink-0`}>
