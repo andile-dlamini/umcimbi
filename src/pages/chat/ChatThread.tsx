@@ -42,27 +42,22 @@ const ChatThread = () => {
   const handleSendAdjustment = async () => {
     if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
 
-    // Update quote status to adjustment_requested and increment count
-    const { error: updateError } = await supabase
+    // Fetch current adjustment_count first
+    const { data: quoteData } = await supabase
       .from('quotes')
-      .update({
-        status: 'adjustment_requested' as any,
-        adjustment_reason: adjustmentNote.trim(),
-        adjustment_count: supabase.rpc as any, // handled below
-      })
-      .eq('id', adjustmentQuoteId);
+      .select('adjustment_count')
+      .eq('id', adjustmentQuoteId)
+      .single();
 
-    // Use raw update for increment
-    await supabase.rpc('increment_adjustment_count' as any, { quote_id_param: adjustmentQuoteId }).catch(() => {
-      // Fallback: just update status and reason
-    });
+    const newCount = (quoteData?.adjustment_count || 0) + 1;
 
-    // Update status and reason directly
+    // Update quote status to adjustment_requested
     await supabase
       .from('quotes')
       .update({
         status: 'adjustment_requested' as any,
         adjustment_reason: adjustmentNote.trim(),
+        adjustment_count: newCount,
       })
       .eq('id', adjustmentQuoteId);
 
