@@ -95,7 +95,7 @@ export default function Home() {
               return (
                 <Card 
                   key={option.type}
-                  className="cursor-pointer hover:shadow-sm transition-all tap-highlight-none group"
+                  className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 tap-highlight-none group"
                   onClick={() => navigate(`/events/new?type=${option.type}`)}
                 >
                   <CardContent className="p-4">
