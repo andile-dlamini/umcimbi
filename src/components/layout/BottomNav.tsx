@@ -149,14 +149,14 @@ export function BottomNav() {
     { to: '/', icon: Home, label: 'Home' },
     { to: '/chats', icon: MessageCircle, label: 'Inbox', showDot: hasUnread, isNew: isNewMessage },
     { to: '/vendors', icon: Store, label: 'Vendors' },
-    { to: '/bookings', icon: Calendar, label: 'Orders',
+    { to: '/bookings', icon: Calendar, label: 'Orders' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
   const vendorNavItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/chats', icon: MessageCircle, label: 'Inbox', showDot: hasUnread, isNew: isNewMessage },
-    { to: '/vendor-dashboarord/orders', icon: Calendar, label: 'Orders',
+    { to: '/vendor-dashboard/orders', icon: Calendar, label: 'Orders' },
     { to: '/vendors', icon: Store, label: 'Browse' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
