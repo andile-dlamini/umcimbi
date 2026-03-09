@@ -162,9 +162,9 @@ function generateQuotePdfHtml(
     <thead><tr><th>Description</th><th style="text-align:center;width:10%;">Qty</th><th style="text-align:right;width:20%;">Unit Price</th><th style="text-align:right;width:20%;">Amount</th></tr></thead>
     <tbody>
       ${lineItemsHtml}
-      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Subtotal</td><td style="text-align:right;font-size:11px;">${formatCurrency(total)}</td></tr>
-      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Service fee (8%)</td><td style="text-align:right;font-size:11px;">${formatCurrency(total * 0.08)}</td></tr>
-      <tr class="total-row"><td colspan="3">Total incl. fee (ZAR)</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;font-size:12px;">Subtotal</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Service fee (8%)</td><td style="text-align:right;font-size:11px;">${formatCurrency(platformFee)}</td></tr>
+      <tr class="total-row"><td colspan="3">Total (ZAR)</td><td style="text-align:right;">${formatCurrency(clientTotal)}</td></tr>
     </tbody>
   </table>
   <p class="section-title">Payment Terms</p>
