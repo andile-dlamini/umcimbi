@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
@@ -27,6 +27,25 @@ const ChatThread = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+  const [adjustmentQuoteId, setAdjustmentQuoteId] = useState<string | null>(null);
+  const [adjustmentNote, setAdjustmentNote] = useState('');
+  const [showAdjustmentInput, setShowAdjustmentInput] = useState(false);
+
+  const handleRequestAdjustment = (quoteId: string) => {
+    setAdjustmentQuoteId(quoteId);
+    setShowAdjustmentInput(true);
+  };
+
+  const handleSendAdjustment = async () => {
+    if (!adjustmentNote.trim() || !conversationId) return;
+    const msg = `📝 Adjustment requested: ${adjustmentNote.trim()}`;
+    const success = await sendMessage(conversationId, msg);
+    if (success) {
+      setAdjustmentNote('');
+      setShowAdjustmentInput(false);
+      setAdjustmentQuoteId(null);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -204,6 +223,7 @@ const ChatThread = () => {
                     isVendorView={isVendorView}
                     messageId={message.id}
                     onStatusChange={refreshMessages}
+                    onRequestAdjustment={!isVendorView ? handleRequestAdjustment : undefined}
                   />
                 </div>
               );
@@ -264,6 +284,23 @@ const ChatThread = () => {
 
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        {/* Adjustment request bar */}
+        {showAdjustmentInput && (
+          <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
+            <Input
+              value={adjustmentNote}
+              onChange={(e) => setAdjustmentNote(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendAdjustment(); } }}
+              placeholder="e.g. Change guests from 80 to 100…"
+              className="flex-1"
+              autoFocus
+            />
+            <Button size="sm" onClick={handleSendAdjustment} disabled={!adjustmentNote.trim() || isSending}>Send</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setShowAdjustmentInput(false); setAdjustmentNote(''); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         {/* Vendor actions toolbar */}
         {isVendorView && (
           <div className="flex gap-2 mb-2">

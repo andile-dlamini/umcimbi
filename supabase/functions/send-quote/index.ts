@@ -160,7 +160,9 @@ function generateQuotePdfHtml(
     <thead><tr><th>Description</th><th style="text-align:center;width:10%;">Qty</th><th style="text-align:right;width:20%;">Unit Price</th><th style="text-align:right;width:20%;">Amount</th></tr></thead>
     <tbody>
       ${lineItemsHtml}
-      <tr class="total-row"><td colspan="3">Total (ZAR)</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Subtotal</td><td style="text-align:right;font-size:11px;">${formatCurrency(total)}</td></tr>
+      <tr><td colspan="3" style="text-align:right;color:#666;font-size:11px;">Service fee (8%)</td><td style="text-align:right;font-size:11px;">${formatCurrency(total * 0.08)}</td></tr>
+      <tr class="total-row"><td colspan="3">Total incl. fee (ZAR)</td><td style="text-align:right;">${formatCurrency(total)}</td></tr>
     </tbody>
   </table>
   <p class="section-title">Payment Terms</p>
@@ -406,6 +408,8 @@ serve(async (req) => {
 
     // 9) Insert quote_card message into chat
     const depositAmount = total * (deposit_percentage / 100);
+    const platformFee = total * 0.08;
+    const vendorPayout = total - platformFee;
     await supabase.from("messages").insert({
       conversation_id: conversation_id,
       sender_type: "vendor",
@@ -418,6 +422,8 @@ serve(async (req) => {
         total: total,
         deposit_percentage: deposit_percentage,
         deposit_amount: depositAmount,
+        platform_fee: platformFee,
+        vendor_payout: vendorPayout,
         pdf_key: pdfKey,
         status: "pending_client",
         booking_id: null,

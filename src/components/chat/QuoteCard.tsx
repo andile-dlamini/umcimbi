@@ -13,6 +13,8 @@ interface QuoteCardMetadata {
   total: number;
   deposit_percentage: number;
   deposit_amount: number;
+  platform_fee: number;
+  vendor_payout: number;
   pdf_key: string;
   status: string;
   booking_id: string | null;
@@ -23,6 +25,7 @@ interface QuoteCardProps {
   isVendorView: boolean;
   messageId: string;
   onStatusChange?: () => void;
+  onRequestAdjustment?: (quoteId: string) => void;
 }
 
 const statusLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -32,7 +35,7 @@ const statusLabels: Record<string, { label: string; variant: 'default' | 'second
   expired: { label: 'Expired', variant: 'secondary' },
 };
 
-export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }: QuoteCardProps) {
+export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, onRequestAdjustment }: QuoteCardProps) {
   const navigate = useNavigate();
   const [currentStatus, setCurrentStatus] = useState(metadata.status);
   const [bookingId, setBookingId] = useState(metadata.booking_id);
@@ -130,6 +133,16 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
           <span className="text-xs text-muted-foreground">Deposit ({metadata.deposit_percentage}%)</span>
           <span className="text-sm font-medium">{formatCurrency(metadata.deposit_amount)}</span>
         </div>
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <span>Incl. 8% service fee</span>
+          <span>{formatCurrency(metadata.platform_fee || metadata.total * 0.08)}</span>
+        </div>
+        {isVendorView && (
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-emerald-600">You receive</span>
+            <span className="font-medium text-emerald-600">{formatCurrency(metadata.vendor_payout || metadata.total * 0.92)}</span>
+          </div>
+        )}
       </div>
 
       <div className="px-4 py-3 border-t border-border space-y-2">
@@ -146,28 +159,41 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }:
         </Button>
 
         {!isVendorView && isPending && (
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              className="flex-1"
-              onClick={handleAccept}
-              disabled={isAccepting}
-            >
-              {isAccepting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
-              Accept
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              className="flex-1"
-              onClick={handleDecline}
-              disabled={isDeclining}
-            >
-              {isDeclining ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <X className="h-4 w-4 mr-2" />}
-              Decline
-            </Button>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                className="flex-1"
+                onClick={handleAccept}
+                disabled={isAccepting}
+              >
+                {isAccepting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                Accept
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="flex-1"
+                onClick={handleDecline}
+                disabled={isDeclining}
+              >
+                {isDeclining ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <X className="h-4 w-4 mr-2" />}
+                Decline
+              </Button>
+            </div>
+            {onRequestAdjustment && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => onRequestAdjustment(metadata.quote_id)}
+              >
+                Request Adjustment
+              </Button>
+            )}
           </div>
         )}
 

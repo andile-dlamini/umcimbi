@@ -62,7 +62,10 @@ export function MakeQuotationSheet({
     setLineItems(updated);
   };
 
+  const PLATFORM_FEE_RATE = 0.08;
   const total = lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+  const platformFee = total * PLATFORM_FEE_RATE;
+  const vendorPayout = total - platformFee;
   const depositAmount = total * (depositPercentage / 100);
 
   const handleSubmit = async () => {
@@ -216,7 +219,7 @@ export function MakeQuotationSheet({
           {/* Totals */}
           <div className="bg-primary/5 rounded-lg p-4 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">Client pays</span>
               <span className="text-lg font-bold">{formatCurrency(total)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
@@ -226,6 +229,15 @@ export function MakeQuotationSheet({
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Balance ({100 - depositPercentage}%)</span>
               <span className="font-medium">{formatCurrency(total - depositAmount)}</span>
+            </div>
+            <Separator className="my-1" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Platform fee (8%)</span>
+              <span className="font-medium text-destructive">−{formatCurrency(platformFee)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="font-medium text-emerald-600">You receive</span>
+              <span className="font-medium text-emerald-600">{formatCurrency(vendorPayout)}</span>
             </div>
           </div>
         </div>
