@@ -55,7 +55,7 @@ export function MakeQuotationSheet({
     if (field === 'description') {
       updated[index].description = value as string;
     } else if (field === 'quantity') {
-      updated[index].quantity = Math.max(1, Number(value) || 1);
+      updated[index].quantity = value === '' ? ('' as unknown as number) : Math.max(0, Number(value));
     } else {
       updated[index].unit_price = Math.max(0, Number(value) || 0);
     }
@@ -69,9 +69,9 @@ export function MakeQuotationSheet({
   const depositAmount = clientTotal * (depositPercentage / 100);
 
   const handleSubmit = async () => {
-    const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0);
+    const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0 && (Number(i.quantity) || 0) >= 1);
     if (validItems.length === 0) {
-      toast.error('Add at least one line item with description and price');
+      toast.error('Add at least one line item with description, quantity (≥1) and price');
       return;
     }
 
@@ -164,6 +164,7 @@ export function MakeQuotationSheet({
                         min={1}
                         value={item.quantity}
                         onChange={(e) => updateLineItem(index, 'quantity', e.target.value)}
+                        onBlur={(e) => { if (!e.target.value || Number(e.target.value) < 1) updateLineItem(index, 'quantity', 1); }}
                       />
                     </div>
                     <div>
