@@ -22,13 +22,6 @@ const getTodayString = () => {
   return today.toISOString().split('T')[0];
 };
 
-type EventSize = 'small' | 'medium' | 'large';
-
-const sizeOptions = [
-  { value: 'small', label: 'Small (up to 80 guests)', count: 80 },
-  { value: 'medium', label: 'Medium (80–200 guests)', count: 150 },
-  { value: 'large', label: 'Large (200+ guests)', count: 250 },
-];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Baby,
