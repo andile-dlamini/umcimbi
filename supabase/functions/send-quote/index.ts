@@ -433,7 +433,7 @@ serve(async (req) => {
     );
 
     const htmlBytes = new TextEncoder().encode(html);
-    const pdfKey = `offers/${quoteId}/${offerNumber}.html`;
+    const pdfKey = `offers/${quoteI}/${offerNumber}.html`;
 
     const { error: uploadError } = await supabase.storage
       .from("quote-pdfs")
@@ -448,7 +448,7 @@ serve(async (req) => {
     await supabase.from("quotes").update({
       final_offer_pdf_key: pdfKey,
       final_offer_pdf_generated_at: new Date().toISOString(),
-    }).eq("id", quote.id);
+    }).eq("id", quote.I);
 
     // 9) Insert quote_card message into chat
     const depositAmountChat = total * 1.08 * (deposit_percentage / 100);
