@@ -18,7 +18,7 @@ export function useClientQuotes(requestId?: string) {
       .from('quotes')
       .select(`
         *,
-        vendor:vendors(id, name, category, rating, image_urls),
+        vendor:vendors(id, name, category, rating, review_count, image_urls, business_verification_status, is_super_vendor, jobs_completed),
         request:service_requests(id, event_id, message, event_date)
       `)
       .order('created_at', { ascending: false });
