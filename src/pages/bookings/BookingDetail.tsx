@@ -1,6 +1,5 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
-
 import { useBookingDetails } from '@/hooks/useBookings';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Banknote, MessageCircle, CheckCircle, AlertTriangle, Star, Camera, Upload } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { BookingStatus, PaymentStatus } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
 import { useState, useEffect } from 'react';
-import { EftPaymentDialog } from '@/components/chat/EftPaymentDialog';
 import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,28 +28,32 @@ const paymentStatusCfg: Record<string, { label: string; color: string }> = {
 export default function BookingDetail() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, vendorProfile } = useAuth();
   const { booking, deliveryProofs, reviews, isLoading, refreshDetails } = useBookingDetails(bookingId);
   const { reportProblem, markAsCompleted } = useClientBookings();
   
-  const [showEftDialog, setShowEftDialog] = useState<'deposit' | 'balance' | null>(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
-  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
-  const [offerNumber, setOfferNumber] = useState<string | null>(null);
+  const [isPayingDeposit, setIsPayingDeposit] = useState(false);
+  const [isPayingBalance, setIsPayingBalance] = useState(false);
 
-  // Fetch offer number from linked quote
+  // Handle Yoco redirect back
   useEffect(() => {
-    if (booking?.quote_id) {
-      supabase
-        .from('quotes')
-        .select('offer_number')
-        .eq('id', booking.quote_id)
-        .single()
-        .then(({ data }) => setOfferNumber(data?.offer_number || null));
+    const paymentStatus = searchParams.get('payment');
+    const kind = searchParams.get('kind');
+    if (paymentStatus === 'success') {
+      toast.success(`${kind === 'deposit' ? 'Deposit' : 'Balance'} payment successful! It may take a moment to reflect.`);
+      // Clean URL
+      navigate(`/bookings/${bookingId}`, { replace: true });
+      // Refresh after a short delay to allow webhook processing
+      setTimeout(() => refreshDetails(), 2000);
+    } else if (paymentStatus === 'cancelled') {
+      toast.info('Payment was cancelled.');
+      navigate(`/bookings/${bookingId}`, { replace: true });
     }
-  }, [booking?.quote_id]);
+  }, [searchParams, bookingId, navigate, refreshDetails]);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -78,70 +79,41 @@ export default function BookingDetail() {
     refreshDetails();
   };
 
-  const handleConfirmPayment = async (kind: 'deposit' | 'balance') => {
-    if (!bookingId) return;
-    setIsConfirmingPayment(true);
+  const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
+    if (!bookingId || !user) return;
+
+    const setLoading = kind === 'deposit' ? setIsPayingDeposit : setIsPayingBalance;
+    setLoading(true);
+
     try {
-      // Update payment proof status
-      await supabase
-        .from('payment_proofs')
-        .update({ status: 'verified', reviewed_by: user?.id, reviewed_at: new Date().toISOString() })
-        .eq('booking_id', bookingId)
-        .eq('kind', kind)
-        .eq('status', 'submitted');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please log in to make a payment');
+        setLoading(false);
+        return;
+      }
 
-      // Update booking payment status
-      const field = kind === 'deposit' ? 'deposit_status' : 'balance_status';
-      const updates: Record<string, any> = { [field]: 'paid' };
-      
-      if (kind === 'deposit') {
-        updates.booking_status = 'confirmed';
-        updates.balance_status = 'due';
-        updates.deposit_paid_at = new Date().toISOString();
-        updates.balance_due_at = new Date().toISOString();
+      const { data, error } = await supabase.functions.invoke('create-yoco-checkout', {
+        body: {
+          bookingId,
+          kind,
+          successUrl: `${window.location.origin}/bookings/${bookingId}?payment=success&kind=${kind}`,
+          cancelUrl: `${window.location.origin}/bookings/${bookingId}?payment=cancelled`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
       } else {
-        updates.balance_paid_at = new Date().toISOString();
-        updates.booking_status = 'completed';
+        throw new Error('No redirect URL received');
       }
-
-      await supabase.from('bookings').update(updates).eq('id', bookingId);
-
-      // Post system message
-      if (booking) {
-        const { data: conv } = await supabase
-          .from('conversations')
-          .select('id')
-          .eq('user_id', booking.client_id)
-          .eq('vendor_id', booking.vendor_id)
-          .order('last_message_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (conv) {
-          const label = kind === 'deposit' ? 'Deposit' : 'Balance';
-          const content = kind === 'balance'
-            ? `✅ ${label} payment confirmed. Booking is now completed! Please rate each other.`
-            : `✅ ${label} payment confirmed. Booking is now active!`;
-          await supabase.from('messages').insert({
-            conversation_id: conv.id,
-            sender_type: 'system' as any,
-            sender_user_id: user?.id,
-            message_type: 'system',
-            content,
-          });
-          await supabase.from('conversations')
-            .update({ last_message_at: new Date().toISOString() })
-            .eq('id', conv.id);
-        }
-      }
-
-      toast.success('Payment confirmed!');
-      refreshDetails();
-    } catch (err) {
-      console.error('Confirm payment error:', err);
-      toast.error('Failed to confirm payment');
-    } finally {
-      setIsConfirmingPayment(false);
+    } catch (err: any) {
+      console.error('Yoco payment error:', err);
+      toast.error(err.message || 'Failed to start payment');
+      setLoading(false);
     }
   };
 
@@ -262,16 +234,19 @@ export default function BookingDetail() {
                   </span>
                 </div>
               </div>
-              {isClient && depositDue && booking.deposit_status !== 'paid' && booking.deposit_status !== 'pending_verification' && (
-                <Button size="sm" className="w-full" onClick={() => setShowEftDialog('deposit')}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Pay Deposit (EFT)
-                </Button>
-              )}
-              {isVendor && booking.deposit_status === 'pending_verification' && (
-                <Button size="sm" variant="outline" className="w-full" onClick={() => handleConfirmPayment('deposit')} disabled={isConfirmingPayment}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {isConfirmingPayment ? 'Confirming...' : 'Confirm Deposit Received'}
+              {isClient && depositDue && booking.deposit_status !== 'paid' && (
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => handleYocoPayment('deposit')}
+                  disabled={isPayingDeposit}
+                >
+                  {isPayingDeposit ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  {isPayingDeposit ? 'Redirecting to Yoco...' : 'Pay Deposit'}
                 </Button>
               )}
 
@@ -287,16 +262,19 @@ export default function BookingDetail() {
                   </span>
                 </div>
               </div>
-              {isClient && balanceDue && booking.balance_status !== 'paid' && booking.balance_status !== 'pending_verification' && (
-                <Button size="sm" className="w-full" onClick={() => setShowEftDialog('balance')}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Pay Balance (EFT)
-                </Button>
-              )}
-              {isVendor && booking.balance_status === 'pending_verification' && (
-                <Button size="sm" variant="outline" className="w-full" onClick={() => handleConfirmPayment('balance')} disabled={isConfirmingPayment}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {isConfirmingPayment ? 'Confirming...' : 'Confirm Balance Received'}
+              {isClient && balanceDue && booking.balance_status !== 'paid' && (
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => handleYocoPayment('balance')}
+                  disabled={isPayingBalance}
+                >
+                  {isPayingBalance ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  {isPayingBalance ? 'Redirecting to Yoco...' : 'Pay Balance'}
                 </Button>
               )}
             </div>
@@ -344,19 +322,6 @@ export default function BookingDetail() {
         )}
       </div>
 
-      {/* EFT Payment Dialog */}
-      {showEftDialog && booking && (
-        <EftPaymentDialog
-          open={!!showEftDialog}
-          onOpenChange={(o) => { if (!o) setShowEftDialog(null); }}
-          bookingId={booking.id}
-          kind={showEftDialog}
-          amount={showEftDialog === 'deposit' ? booking.deposit_amount : booking.balance_amount}
-          offerNumber={offerNumber}
-          onSuccess={() => { setShowEftDialog(null); refreshDetails(); }}
-        />
-      )}
-
       {/* Review Dialog */}
       <ReviewDialog
         open={showReviewDialog}
@@ -365,8 +330,6 @@ export default function BookingDetail() {
         isVendorView={!!isVendor}
         onSuccess={() => { setShowReviewDialog(false); refreshDetails(); }}
       />
-      
-      
     </div>
   );
 }
