@@ -59,7 +59,7 @@ export default function CreateEvent() {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [size, setSize] = useState<EventSize>('medium');
+  const [guestCount, setGuestCount] = useState('50');
   const [isCreating, setIsCreating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
