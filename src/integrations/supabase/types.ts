@@ -18,32 +18,41 @@ export type Database = {
         Row: {
           booking_id: string
           comment: string | null
+          communication_rating: number | null
           created_at: string
           id: string
+          payment_rating: number | null
           rating: number
           reviewed_party_id: string
           reviewer_id: string
           reviewer_type: string
+          service_rating: number | null
         }
         Insert: {
           booking_id: string
           comment?: string | null
+          communication_rating?: number | null
           created_at?: string
           id?: string
+          payment_rating?: number | null
           rating: number
           reviewed_party_id: string
           reviewer_id: string
           reviewer_type: string
+          service_rating?: number | null
         }
         Update: {
           booking_id?: string
           comment?: string | null
+          communication_rating?: number | null
           created_at?: string
           id?: string
+          payment_rating?: number | null
           rating?: number
           reviewed_party_id?: string
           reviewer_id?: string
           reviewer_type?: string
+          service_rating?: number | null
         }
         Relationships: [
           {
