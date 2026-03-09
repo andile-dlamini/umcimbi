@@ -35,7 +35,7 @@ const statusLabels: Record<string, { label: string; variant: 'default' | 'second
   expired: { label: 'Expired', variant: 'secondary' },
 };
 
-export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange }: QuoteCardProps) {
+export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, onRequestAdjustment }: QuoteCardProps) {
   const navigate = useNavigate();
   const [currentStatus, setCurrentStatus] = useState(metadata.status);
   const [bookingId, setBookingId] = useState(metadata.booking_id);
