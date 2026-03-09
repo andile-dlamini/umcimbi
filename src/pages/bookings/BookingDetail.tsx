@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { useBookingDetails } from '@/hooks/useBookings';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -153,7 +153,6 @@ export default function BookingDetail() {
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -169,7 +168,6 @@ export default function BookingDetail() {
             </CardContent>
           </Card>
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -368,7 +366,7 @@ export default function BookingDetail() {
         onSuccess={() => { setShowReviewDialog(false); refreshDetails(); }}
       />
       
-      <BottomNav />
+      
     </div>
   );
 }

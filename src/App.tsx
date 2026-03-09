@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { RoleProvider } from "@/context/RoleContext";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { AppShell } from "@/components/layout/AppShell";
 
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
@@ -30,7 +30,7 @@ import ClientBookings from "@/pages/bookings/ClientBookings";
 import BookingDetail from "@/pages/bookings/BookingDetail";
 import Learn from "@/pages/Learn";
 import ArticlePage from "@/pages/learn/ArticlePage";
-import Profile from "@/pages/Profile";
+import SettingsPage from "@/pages/Settings";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
 import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
@@ -70,7 +70,7 @@ function AppRoutes() {
 
   // Fully authenticated
   return (
-    <>
+    <AppShell>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<EventsList />} />
@@ -84,7 +84,9 @@ function AppRoutes() {
         <Route path="/chat/:conversationId" element={<ChatThread />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/learn/:articleId" element={<ArticlePage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        {/* Legacy profile route redirects to settings */}
+        <Route path="/profile" element={<Navigate to="/settings" replace />} />
         
         <Route path="/profile/vendor" element={<VendorProfile />} />
         <Route path="/profile/requests" element={<MyRequests />} />
@@ -108,8 +110,7 @@ function AppRoutes() {
         <Route path="/auth" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <BottomNav />
-    </>
+    </AppShell>
   );
 }
 

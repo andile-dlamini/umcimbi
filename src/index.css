@@ -2,138 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Isiko Planner Design System - Shweshwe Inspired */
-/* Bright, celebratory colors from traditional South African fabrics */
+/* Isiko — Clean Editorial Design System */
 
 @layer base {
   :root {
-    /* Warm cream background */
-    --background: 40 33% 96%;
-    --foreground: 220 25% 15%;
+    /* Near-white background */
+    --background: 0 0% 98%;
+    --foreground: 220 20% 12%;
 
     /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 15%;
+    --card-foreground: 220 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover-foreground: 220 20% 12%;
 
-    /* Primary: Deep Shweshwe Indigo Blue */
-    --primary: 220 65% 35%;
+    /* Primary: Deep Indigo */
+    --primary: 220 65% 30%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Warm Terracotta Orange */
-    --secondary: 20 75% 55%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary: Warm earth */
+    --secondary: 30 12% 93%;
+    --secondary-foreground: 220 20% 20%;
 
     /* Muted tones */
-    --muted: 40 20% 90%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 10% 50%;
 
-    /* Accent: Rich Burgundy Red */
-    --accent: 350 65% 45%;
+    /* Accent: Warm terracotta gold */
+    --accent: 25 80% 52%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success green for completed items */
-    --success: 145 60% 40%;
+    /* Success */
+    --success: 152 55% 42%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning/attention */
+    /* Warning */
     --warning: 45 90% 50%;
-    --warning-foreground: 220 25% 15%;
+    --warning-foreground: 220 20% 12%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 85%;
-    --input: 220 20% 85%;
-    --ring: 220 65% 35%;
+    --border: 220 10% 90%;
+    --input: 220 10% 90%;
+    --ring: 220 65% 30%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Ceremony type colors */
-    --umembeso: 20 75% 55%;
-    --umabo: 350 65% 45%;
+    --umembeso: 25 80% 52%;
+    --umabo: 350 55% 48%;
 
-    /* Card border color - Deep Teal */
-    --card-border: 195 35% 24%;
+    /* Card border */
+    --card-border: 220 10% 88%;
 
-    /* Sidebar (not used much in mobile-first) */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 25% 15%;
-    --sidebar-primary: 220 65% 35%;
+    /* Sidebar / Drawer */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 12%;
+    --sidebar-primary: 220 65% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 92%;
-    --sidebar-accent-foreground: 220 25% 15%;
-    --sidebar-border: 220 20% 85%;
-    --sidebar-ring: 220 65% 35%;
+    --sidebar-accent: 220 10% 96%;
+    --sidebar-accent-foreground: 220 20% 12%;
+    --sidebar-border: 220 10% 92%;
+    --sidebar-ring: 220 65% 30%;
   }
 
   .dark {
-    --background: 220 25% 10%;
-    --foreground: 40 20% 95%;
+    --background: 220 20% 7%;
+    --foreground: 220 10% 92%;
 
-    --card: 220 25% 14%;
-    --card-foreground: 40 20% 95%;
+    --card: 220 18% 11%;
+    --card-foreground: 220 10% 92%;
 
-    --popover: 220 25% 14%;
-    --popover-foreground: 40 20% 95%;
+    --popover: 220 18% 11%;
+    --popover-foreground: 220 10% 92%;
 
-    --primary: 220 60% 55%;
+    --primary: 220 55% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 20 70% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 220 12% 18%;
+    --secondary-foreground: 220 10% 85%;
 
-    --muted: 220 20% 20%;
-    --muted-foreground: 220 15% 65%;
+    --muted: 220 12% 16%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 350 60% 50%;
+    --accent: 25 75% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 145 55% 45%;
+    --success: 152 50% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 45 85% 55%;
-    --warning-foreground: 220 25% 10%;
+    --warning-foreground: 220 20% 7%;
 
-    --destructive: 0 65% 45%;
+    --destructive: 0 60% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
-    --ring: 220 60% 55%;
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 220 55% 55%;
 
-    --umembeso: 20 70% 50%;
-    --umabo: 350 60% 50%;
+    --umembeso: 25 75% 50%;
+    --umabo: 350 50% 50%;
 
-    /* Card border color - Deep Teal (lighter for dark mode) */
-    --card-border: 195 35% 40%;
+    --card-border: 220 12% 22%;
 
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 40 20% 95%;
-    --sidebar-primary: 220 60% 55%;
+    --sidebar-background: 220 18% 9%;
+    --sidebar-foreground: 220 10% 92%;
+    --sidebar-primary: 220 55% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 40 20% 95%;
-    --sidebar-border: 220 20% 25%;
-    --sidebar-ring: 220 60% 55%;
+    --sidebar-accent: 220 12% 14%;
+    --sidebar-accent-foreground: 220 10% 92%;
+    --sidebar-border: 220 12% 20%;
+    --sidebar-ring: 220 55% 55%;
   }
 
-  /* Vendor mode - warmer terracotta accent theme */
+  /* Vendor mode overrides */
   .vendor-mode {
-    --primary: 20 75% 40%;
+    --primary: 25 75% 40%;
     --primary-foreground: 0 0% 100%;
-    --ring: 20 75% 40%;
-    --accent: 20 65% 50%;
+    --ring: 25 75% 40%;
+    --accent: 25 65% 50%;
     --accent-foreground: 0 0% 100%;
   }
 
   .dark.vendor-mode {
-    --primary: 20 70% 50%;
+    --primary: 25 70% 50%;
     --primary-foreground: 0 0% 100%;
-    --ring: 20 70% 50%;
-    --accent: 20 60% 55%;
+    --ring: 25 70% 50%;
+    --accent: 25 60% 55%;
     --accent-foreground: 0 0% 100%;
   }
 }
@@ -144,44 +142,18 @@
   }
 
   body {
-    @apply text-foreground antialiased shweshwe-bg;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Mobile-first: ensure full height on mobile */
   html, body, #root {
     @apply min-h-screen;
   }
 }
 
 @layer components {
-  /* Shweshwe-inspired decorative border pattern */
-  .shweshwe-border {
-    background-image: repeating-linear-gradient(
-      90deg,
-      hsl(var(--primary)) 0px,
-      hsl(var(--primary)) 4px,
-      transparent 4px,
-      transparent 8px
-    );
-    background-size: 100% 3px;
-    background-position: bottom;
-    background-repeat: no-repeat;
-  }
-
-  /* Authentic Shweshwe stepped diamond pattern with center dots */
-  .shweshwe-bg {
-    background-color: hsl(var(--background));
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3C!-- Center dot --%3E%3Ccircle cx='20' cy='20' r='4' fill='%231e3a5f' fill-opacity='0.08'/%3E%3C!-- Stepped diamond outline --%3E%3Cpath d='M20 2 L22 2 L22 4 L24 4 L24 6 L26 6 L26 8 L28 8 L28 10 L30 10 L30 12 L32 12 L32 14 L34 14 L34 16 L36 16 L36 18 L38 18 L38 22 L36 22 L36 24 L34 24 L34 26 L32 26 L32 28 L30 28 L30 30 L28 30 L28 32 L26 32 L26 34 L24 34 L24 36 L22 36 L22 38 L18 38 L18 36 L16 36 L16 34 L14 34 L14 32 L12 32 L12 30 L10 30 L10 28 L8 28 L8 26 L6 26 L6 24 L4 24 L4 22 L2 22 L2 18 L4 18 L4 16 L6 16 L6 14 L8 14 L8 12 L10 12 L10 10 L12 10 L12 8 L14 8 L14 6 L16 6 L16 4 L18 4 L18 2 Z' fill='none' stroke='%231e3a5f' stroke-opacity='0.06' stroke-width='1'/%3E%3C!-- Corner dots --%3E%3Ccircle cx='0' cy='0' r='1.5' fill='%23c65d3b' fill-opacity='0.05'/%3E%3Ccircle cx='40' cy='0' r='1.5' fill='%23c65d3b' fill-opacity='0.05'/%3E%3Ccircle cx='0' cy='40' r='1.5' fill='%23c65d3b' fill-opacity='0.05'/%3E%3Ccircle cx='40' cy='40' r='1.5' fill='%23c65d3b' fill-opacity='0.05'/%3E%3C/svg%3E");
-    background-size: 40px 40px;
-  }
-
-  .dark .shweshwe-bg {
-    background-color: hsl(var(--background));
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3C!-- Center dot --%3E%3Ccircle cx='20' cy='20' r='4' fill='%234a7ab8' fill-opacity='0.12'/%3E%3C!-- Stepped diamond outline --%3E%3Cpath d='M20 2 L22 2 L22 4 L24 4 L24 6 L26 6 L26 8 L28 8 L28 10 L30 10 L30 12 L32 12 L32 14 L34 14 L34 16 L36 16 L36 18 L38 18 L38 22 L36 22 L36 24 L34 24 L34 26 L32 26 L32 28 L30 28 L30 30 L28 30 L28 32 L26 32 L26 34 L24 34 L24 36 L22 36 L22 38 L18 38 L18 36 L16 36 L16 34 L14 34 L14 32 L12 32 L12 30 L10 30 L10 28 L8 28 L8 26 L6 26 L6 24 L4 24 L4 22 L2 22 L2 18 L4 18 L4 16 L6 16 L6 14 L8 14 L8 12 L10 12 L10 10 L12 10 L12 8 L14 8 L14 6 L16 6 L16 4 L18 4 L18 2 Z' fill='none' stroke='%234a7ab8' stroke-opacity='0.10' stroke-width='1'/%3E%3C!-- Corner dots --%3E%3Ccircle cx='0' cy='0' r='1.5' fill='%23d97b4a' fill-opacity='0.08'/%3E%3Ccircle cx='40' cy='0' r='1.5' fill='%23d97b4a' fill-opacity='0.08'/%3E%3Ccircle cx='0' cy='40' r='1.5' fill='%23d97b4a' fill-opacity='0.08'/%3E%3Ccircle cx='40' cy='40' r='1.5' fill='%23d97b4a' fill-opacity='0.08'/%3E%3C/svg%3E");
-    background-size: 40px 40px;
-  }
-
   /* Ceremony type badges */
   .badge-umembeso {
     @apply bg-secondary text-secondary-foreground;
@@ -191,9 +163,9 @@
     @apply bg-accent text-accent-foreground;
   }
 
-  /* Safe area for mobile bottom nav */
+  /* Safe area for mobile — no bottom nav anymore, just safe inset */
   .pb-safe {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

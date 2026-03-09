@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { useClientBookings } from '@/hooks/useBookings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,13 +83,12 @@ export default function ClientBookings() {
             <Skeleton key={i} className="h-40 w-full" />
           ))}
         </div>
-        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background">
       <PageHeader title="My Bookings" showBack />
       
       <div className="p-4">
@@ -161,7 +160,6 @@ export default function ClientBookings() {
         )}
       </div>
       
-      <BottomNav />
     </div>
   );
 }

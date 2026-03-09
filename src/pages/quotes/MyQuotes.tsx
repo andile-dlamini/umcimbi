@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/layout/PageHeader';
-import { BottomNav } from '@/components/layout/BottomNav';
+
 import { useClientQuotes } from '@/hooks/useQuotes';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -116,7 +116,6 @@ export default function MyQuotes() {
             <Skeleton key={i} className="h-48 w-full" />
           ))}
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -150,7 +149,7 @@ export default function MyQuotes() {
         )}
       </div>
       
-      <BottomNav />
+      
     </div>
   );
 }
