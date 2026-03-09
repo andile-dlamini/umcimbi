@@ -527,7 +527,7 @@ export default function OnboardingLanguage() {
                 <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Header */}
                   <div className="h-7 bg-primary flex items-center justify-between px-3">
-                    <span className="text-[8px] font-semibold text-primary-foreground/Ordern>
+                    <span className="text-[8px] font-semibold text-primary-foreground/80">Orders</span>
                     <div className="px-1.5 py-0.5 rounded-full bg-primary-foreground/15">
                       <span className="text-[6px] font-bold text-primary-foreground/70">3 Active</span>
                     </div>

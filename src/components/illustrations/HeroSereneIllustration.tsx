@@ -111,7 +111,7 @@ export default function HeroSereneIllustration() {
               <div className="text-[6px] text-gray-400">Decor · Traditional</div>
             </div>
             <div className="px-1.5 py-0.5 rounded bg-secondary/10">
-              <span className="text-[6px] font-bold text-secondary">R 8,5-foregr-foregroundound00</span>
+              <span className="text-[6px] font-bold text-secondary-foreground">R 8,500</span>
             </div>
           </div>
 
