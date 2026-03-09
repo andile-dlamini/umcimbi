@@ -105,6 +105,7 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
 
 export default function MyQuotes() {
   const { quotes, isLoading } = useClientQuotes();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
