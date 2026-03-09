@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
-      .select("id, client_id, vendor_id, deposit_amount, balance_amount, deposit_status, balance_status, booking_status, agreed_price, quote_id")
+      .select("id, client_id, vendor_id, deposit_amount, balance_amount, deposit_status, balance_status, booking_status, agreed_price, quote_id, order_number")
       .eq("id", bookingId)
       .single();
 
