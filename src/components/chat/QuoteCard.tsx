@@ -25,6 +25,7 @@ interface QuoteCardProps {
   isVendorView: boolean;
   messageId: string;
   onStatusChange?: () => void;
+  onRequestAdjustment?: (quoteId: string) => void;
 }
 
 const statusLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
