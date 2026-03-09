@@ -1,0 +1,1 @@
+ALTER TABLE public.vendors ADD COLUMN IF NOT EXISTS jobs_completed integer NOT NULL DEFAULT 0;
