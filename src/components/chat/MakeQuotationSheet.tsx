@@ -218,9 +218,18 @@ export function MakeQuotationSheet({
 
           {/* Totals */}
           <div className="bg-primary/5 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Service fee (8%)</span>
+              <span className="font-medium">{formatCurrency(platformFee)}</span>
+            </div>
+            <Separator className="my-1" />
             <div className="flex justify-between items-center">
               <span className="font-medium">Client pays</span>
-              <span className="text-lg font-bold">{formatCurrency(total)}</span>
+              <span className="text-lg font-bold">{formatCurrency(clientTotal)}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Deposit ({depositPercentage}%)</span>
@@ -228,16 +237,12 @@ export function MakeQuotationSheet({
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Balance ({100 - depositPercentage}%)</span>
-              <span className="font-medium">{formatCurrency(total - depositAmount)}</span>
+              <span className="font-medium">{formatCurrency(clientTotal - depositAmount)}</span>
             </div>
             <Separator className="my-1" />
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Platform fee (8%)</span>
-              <span className="font-medium text-destructive">−{formatCurrency(platformFee)}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="font-medium text-emerald-600">You receive</span>
-              <span className="font-medium text-emerald-600">{formatCurrency(vendorPayout)}</span>
+              <span className="font-medium">You receive</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
           </div>
         </div>
