@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, MessageCircle, Banknote } from 'lucide-react';
+import { FileText, MessageCircle, Banknote } om 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { quoteStatusConfig } from '@/lib/statusConfig';
@@ -40,7 +40,7 @@ function VendorQuoteCard({ quote }: { quote: QuoteWithDetails }) {
         </div>
 
         <div className="flex items-center gap-2 text-lg font-bold text-foreground">
-         Banknote ctelassName="h-5 w-5" />
+         Ba<Banknote cssName="h-5 w-5" />
           <span>R{quote.price.toLocaleString()}</span>
         </div>
 
