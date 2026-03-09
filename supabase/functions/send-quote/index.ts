@@ -458,12 +458,13 @@ serve(async (req) => {
     // 9) Insert quote_card message into chat
     const depositAmountChat = total * 1.08 * (deposit_percentage / 100);
     const platformFeeChat = total * 0.08;
+    const cardLabel = isAdjustment ? `📋 Revised Quotation ${offerNumber} — ${formatCurrency(total)}` : `📋 Quotation ${offerNumber} — ${formatCurrency(total)}`;
     await supabase.from("messages").insert({
       conversation_id: conversation_id,
       sender_type: "vendor",
       sender_user_id: user.id,
       message_type: "quote_card",
-      content: `📋 Quotation ${offerNumber} — ${formatCurrency(total)}`,
+      content: cardLabel,
       metadata: {
         quote_id: quoteId,
         offer_number: offerNumber,
@@ -475,6 +476,7 @@ serve(async (req) => {
         pdf_key: pdfKey,
         status: "pending_client",
         booking_id: null,
+        adjustment_count: isAdjustment ? currentAdjustmentCount : 0,
       },
       attachments: [],
     });
