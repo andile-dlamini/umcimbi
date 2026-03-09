@@ -118,7 +118,7 @@ export default function VendorDashboard() {
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <DollarSign className="h-5 w-5 text-primary" />
+                  <Banknote className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
