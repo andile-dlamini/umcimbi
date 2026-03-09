@@ -91,7 +91,7 @@ export default function VendorBookings() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="My Bookings" showBack />
+        <PageHeader title="Orders" showBack />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-40 w-full" />
