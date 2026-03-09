@@ -667,6 +667,8 @@ export type Database = {
       }
       quotes: {
         Row: {
+          adjustment_count: number
+          adjustment_reason: string | null
           created_at: string
           deposit_percentage: number
           expires_at: string | null
@@ -684,6 +686,8 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          adjustment_count?: number
+          adjustment_reason?: string | null
           created_at?: string
           deposit_percentage?: number
           expires_at?: string | null
@@ -701,6 +705,8 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          adjustment_count?: number
+          adjustment_reason?: string | null
           created_at?: string
           deposit_percentage?: number
           expires_at?: string | null
@@ -1313,6 +1319,7 @@ export type Database = {
         | "client_accepted"
         | "client_declined"
         | "expired"
+        | "adjustment_requested"
       rsvp_status: "invited" | "yes" | "no" | "unknown"
       sender_type: "user" | "vendor" | "system"
       service_request_status:
@@ -1530,6 +1537,7 @@ export const Constants = {
         "client_accepted",
         "client_declined",
         "expired",
+        "adjustment_requested",
       ],
       rsvp_status: ["invited", "yes", "no", "unknown"],
       sender_type: ["user", "vendor", "system"],
