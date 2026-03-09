@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { BookingWithDetails } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { viewOrderPdfAction } from '@/lib/quoteActions';
 import { useStartConversation } from '@/hooks/useChat';
 import { toast } from 'sonner';
 import { useState } from 'react';
