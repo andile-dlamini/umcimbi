@@ -175,7 +175,7 @@ export default function OnboardingLanguage() {
           <div className="grid sm:grid-cols-3 gap-6">
             {[
             { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
-            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side — scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary/15', iconColor: 'text-secondary' },
+            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side i.e. scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary/15', iconColor: 'text-secondary' },
             { icon: Inbox, title: 'One organised plan', body: 'Tasks, messages, and confirmations in one flow.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15', iconColor: 'text-accent' }].
             map(({ icon: Icon, title, body, gradient, iconBg, iconColor }) =>
             <div key={title} className={`group rounded-3xl bg-gradient-to-b ${gradient} border border-border/40 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
@@ -293,7 +293,7 @@ export default function OnboardingLanguage() {
             </h2>
             <ul className="space-y-5">
               {[
-              'Finding reliable vendors takes time — recommendations can be inconsistent.',
+              'Finding reliable vendors takes time as personal recommendations can be inconsistent.',
               'Quotes come in different formats, and comparing options is hard.',
               'Coordinating deliveries, tasks, and family expectations gets stressful fast.'].
               map((text) =>
@@ -317,7 +317,7 @@ export default function OnboardingLanguage() {
           </div>
           <div className="grid sm:grid-cols-3 gap-8">
             {[
-            { step: 1 as const, title: 'Share your ceremony needs', body: 'Type, date, location, and what you need.' },
+            { step: 1 as const, title: 'Share your ceremony needs', body: 'The type, date, location, and what you need.' },
             { step: 2 as const, title: 'Receive & compare quotations', body: 'Vendors respond with structured quotations you can review.' },
             { step: 3 as const, title: 'Confirm & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' }].
             map(({ step, title, body }) =>
