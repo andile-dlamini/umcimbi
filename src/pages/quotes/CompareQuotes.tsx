@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
-  Star, BadgeCheck, Trophy, BanknoteShield, Sparkles, 
+  Star, BadgeCheck, Trophy, Banknote, Shield, Sparkles, 
   MessageCircle, Clock, ChevronRight 
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';

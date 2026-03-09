@@ -40,7 +40,7 @@ function VendorQuoteCard({ quote }: { quote: QuoteWithDetails }) {
         </div>
 
         <div className="flex items-center gap-2 text-lg font-bold text-foreground">
-         Ba<Banknote cssName="h-5 w-5" />
+         <Banknote className="h-5 w-5" />
           <span>R{quote.price.toLocaleString()}</span>
         </div>
 
