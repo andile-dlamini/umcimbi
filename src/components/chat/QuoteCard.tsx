@@ -125,7 +125,11 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold text-primary">
-            {(metadata.adjustment_count || 0) > 0 ? 'Revised Quotation' : 'Quotation'}
+            {depositPaid
+              ? 'Order'
+              : (metadata.adjustment_count || 0) > 0
+                ? 'Revised Quotation'
+                : 'Quotation'}
           </span>
         </div>
         <Badge variant={statusInfo.variant} className="text-xs">
