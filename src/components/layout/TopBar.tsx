@@ -98,7 +98,7 @@ export function TopBar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative shrink-0 -mr-2"
+              className="relative shrink-0 -mr-2 text-sidebar-foreground hover:bg-sidebar-accent/50"
               onClick={() => navigate('/chats')}
             >
               <MessageCircle className="h-5 w-5" />
