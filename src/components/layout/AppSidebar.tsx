@@ -267,7 +267,7 @@ export function AppSidebar() {
 
         {/* Full overlay when tapped */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
             <NavContent />
           </SheetContent>
         </Sheet>
