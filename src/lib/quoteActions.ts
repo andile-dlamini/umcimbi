@@ -119,8 +119,6 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
  * Fetch a signed URL for the order confirmation PDF and open it.
  */
 export async function viewOrderPdfAction(bookingId: string): Promise<string | null> {
-  const win = window.open('', '_blank', 'noopener,noreferrer');
-
   try {
     const { data, error } = await supabase.functions.invoke('get-order-pdf-url', {
       body: { booking_id: bookingId },
@@ -128,21 +126,18 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
 
     if (error || data?.error) {
       toast.error(data?.error || 'Failed to load Order PDF');
-      if (win) win.close();
       return null;
     }
 
     const url = typeof data === 'string' ? data : data?.url;
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
       toast.error('Could not load Order PDF');
-      if (win) win.close();
       return null;
     }
 
     const fileRes = await fetch(url);
     if (!fileRes.ok) {
       toast.error('Failed to download document');
-      if (win) win.close();
       return null;
     }
 
@@ -150,16 +145,10 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const blobUrl = URL.createObjectURL(blob);
 
-    if (win) {
-      win.location.href = blobUrl;
-    } else {
-      window.open(blobUrl, '_blank', 'noopener,noreferrer');
-    }
-
+    openBlobUrl(blobUrl);
     return blobUrl;
   } catch (err: any) {
     toast.error(err?.message || 'Failed to load Order PDF');
-    if (win) win.close();
     return null;
   }
 }
