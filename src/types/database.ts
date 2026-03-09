@@ -85,6 +85,7 @@ export interface Vendor {
   letterhead_enabled: boolean;
   show_registration_on_pdf: boolean;
   show_vat_on_pdf: boolean;
+  jobs_completed: number;
   created_at: string;
   updated_at: string;
 }
