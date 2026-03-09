@@ -261,7 +261,7 @@ export function AppSidebar() {
     return (
       <>
         {/* Narrow icon rail */}
-        <aside className="fixed left-0 top-0 bottom-0 z-40 w-14 glass border-r border-border/30 flex flex-col">
+        <aside className="fixed left-0 top-0 bottom-0 z-40 w-14 bg-sidebar border-r border-sidebar-border flex flex-col">
           <NavContent collapsed />
         </aside>
 
