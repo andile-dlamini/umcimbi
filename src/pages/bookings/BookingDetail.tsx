@@ -15,7 +15,7 @@ import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { viewQuotePdfAction, viewOrderPdfAction } from '@/lib/quoteActions';
 
 const statusConfig = bookingStatusConfig;
 
