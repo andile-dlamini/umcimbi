@@ -113,13 +113,13 @@ export function AppSidebar() {
   // Shared nav content
   function NavContent({ collapsed = false }: { collapsed?: boolean }) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
         {/* Logo / Brand */}
-        <div className={cn('flex items-center h-14 shrink-0 border-b border-border/50', collapsed ? 'justify-center px-2' : 'px-4')}>
+        <div className={cn('flex items-center h-14 shrink-0 border-b border-sidebar-border/50', collapsed ? 'justify-center px-2' : 'px-4')}>
           {collapsed ? (
-            <span className="text-lg font-bold text-primary">I</span>
+            <span className="text-lg font-bold text-sidebar-primary">I</span>
           ) : (
-            <span className="text-base font-semibold tracking-tight text-foreground">Isiko</span>
+            <span className="text-base font-semibold tracking-tight text-sidebar-foreground">Isiko</span>
           )}
         </div>
 
