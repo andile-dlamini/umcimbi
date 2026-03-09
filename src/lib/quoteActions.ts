@@ -1,6 +1,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+/** Open a blob URL in a new tab, with anchor-click fallback for iframe contexts */
+function openBlobUrl(blobUrl: string) {
+  const win = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+  if (!win) {
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
 /**
  * Fetch a signed URL for the quote's final offer PDF and open it.
  * Returns the URL on success, null on failure.
