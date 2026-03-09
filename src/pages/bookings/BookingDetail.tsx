@@ -259,7 +259,7 @@ export default function BookingDetail() {
                 {isLoadingQuotePdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
                 View Original Quotation
               </Button>
-            )
+            )}
           </CardContent>
         </Card>
 
