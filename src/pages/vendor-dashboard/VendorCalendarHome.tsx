@@ -10,7 +10,7 @@ import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
 import { useVendorBookings } from '@/hooks/useBookings';
 import { BookingWithDetails } from '@/types/booking';
 import { format, isSameDay, parseISO, isAfter, startOfToday } from 'date-fns';
-import { MessageCircle, Calendar as CalendarIcon, Banknote, Star }, Star } from 'lucide-react';
+import { MessageCircle, Calendar as CalendarIcon, Banknote, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function getStatusColor(status: string) {
