@@ -92,7 +92,7 @@ export function AppSidebar() {
     { to: '/events', icon: Calendar, label: 'My Events' },
     { to: '/vendors', icon: Store, label: 'Vendors' },
     { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
-    { to: '/quotes', icon: Receipt, label: 'Quotes' },
+    { to: '/quotes', icon: Receipt, label: 'Quotations' },
     { to: '/bookings', icon: ShoppingBag, label: 'Orders' },
   ];
 
