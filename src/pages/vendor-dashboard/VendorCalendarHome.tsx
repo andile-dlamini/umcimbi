@@ -71,7 +71,7 @@ export default function VendorCalendarHome() {
         <div className="grid grid-cols-3 gap-3">
           <Card className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/vendor-dashboard/bookings')}>
             <CardContent className="py-4 px-2">
-       Banknote classNaBanknoteme="h-5 w-5 mx-auto text-warning mb-1" />
+       <Banknote className="h-5 w-5 mx-auto text-warning mb-1" />
               <p className="text-2xl font-bold text-foreground">{stats.pendingDeposit}</p>
               <p className="text-xs text-muted-foreground">Deposit due</p>
             </CardContent>
