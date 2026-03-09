@@ -249,22 +249,17 @@ export default function CreateEvent() {
               </div>
 
               <div className="space-y-2">
-                <Label>Estimated size</Label>
-                <Select value={size} onValueChange={(v) => setSize(v as EventSize)}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          {option.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="guestCount">Estimated number of guests</Label>
+                <Input
+                  id="guestCount"
+                  type="number"
+                  placeholder="e.g., 100"
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(e.target.value)}
+                  min={1}
+                  max={10000}
+                  className="h-12"
+                />
               </div>
             </div>
 
