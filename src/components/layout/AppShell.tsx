@@ -1,27 +1,31 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { TopBar } from '@/components/layout/TopBar';
+import { AppSidebar } from '@/components/layout/AppSidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AppShellProps {
   children: ReactNode;
 }
 
-/** Pages that should NOT show the top bar */
-const HIDE_TOPBAR_ROUTES = ['/onboarding', '/auth', '/chat/'];
+/** Pages that should NOT show the sidebar */
+const HIDE_NAV_ROUTES = ['/onboarding', '/auth', '/chat/'];
 
 export function AppShell({ children }: AppShellProps) {
   const location = useLocation();
+  const isMobile = useIsMobile();
 
-  const hideTopBar = HIDE_TOPBAR_ROUTES.some(r =>
+  const hideNav = HIDE_NAV_ROUTES.some(r =>
     location.pathname === r || location.pathname.startsWith(r)
   );
 
-  if (hideTopBar) return <>{children}</>;
+  if (hideNav) return <>{children}</>;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBar />
-      <main className="flex-1">{children}</main>
+    <div className="flex min-h-screen w-full">
+      <AppSidebar />
+      <main className={`flex-1 min-w-0 ${isMobile ? 'ml-14' : ''}`}>
+        {children}
+      </main>
     </div>
   );
 }
