@@ -1,13 +1,22 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar } from 'lucide-react';
+import { Plus, Calendar, Gift, Heart, Handshake, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
+import { useAuth } from '@/context/AuthContext';
 import { EventCard } from '@/components/shared/EventCard';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { EventType } from '@/types/database';
+
+const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift },
+  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart },
+  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake },
+  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles },
+];
 
 export default function EventsList() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const { events, isLoading } = useEvents();
 
   const sortedEvents = [...events].sort((a, b) => {
@@ -18,40 +27,76 @@ export default function EventsList() {
 
   return (
     <div className="min-h-screen pb-safe">
-      <PageHeader 
-        title="My Events" 
-        rightAction={
-          <Button size="sm" onClick={() => navigate('/events/new')}>
-            <Plus className="h-4 w-4 mr-1" />
-            New
-          </Button>
-        }
-      />
+      {/* Greeting */}
+      <div className="px-4 pt-6 pb-2 max-w-lg mx-auto">
+        <h2 className="text-2xl font-semibold text-foreground tracking-tight">
+          Hi, {profile?.first_name || profile?.full_name?.split(' ')[0] || 'there'}
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Let's plan your ceremony
+        </p>
+      </div>
 
-      <div className="px-4 py-6 max-w-lg mx-auto">
-        {isLoading ? (
-          <p className="text-center text-muted-foreground py-8">Loading...</p>
-        ) : sortedEvents.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="py-12 text-center">
-              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-              <h3 className="font-semibold text-foreground mb-2">No ceremonies yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Start planning your first ceremony
-              </p>
-              <Button onClick={() => navigate('/events/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create event
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {sortedEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+      <div className="px-4 py-4 space-y-8 max-w-lg mx-auto">
+        {/* Upcoming Ceremonies */}
+        <section>
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Upcoming
+          </h3>
+
+          {isLoading ? (
+            <p className="text-muted-foreground text-center py-8 text-sm">Loading...</p>
+          ) : sortedEvents.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="py-10 text-center">
+                <Calendar className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground mb-4">
+                  No ceremonies yet
+                </p>
+                <Button size="sm" onClick={() => navigate('/events/new')}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Plan a ceremony
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {sortedEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Quick Start */}
+        <section>
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Quick start
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {quickStartOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <Card 
+                  key={option.type}
+                  className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 tap-highlight-none group"
+                  onClick={() => navigate(`/events/new?type=${option.type}`)}
+                >
+                  <CardContent className="p-4">
+                    <Icon className="h-5 w-5 text-accent mb-2 group-hover:scale-110 transition-transform" />
+                    <h4 className="font-medium text-foreground text-sm">
+                      {option.label}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {option.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        )}
+        </section>
       </div>
     </div>
   );
