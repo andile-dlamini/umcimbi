@@ -211,9 +211,9 @@ export default function BookingDetail() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {offerNumber && (
+            {(booking as any).order_number && (
               <p className="text-xs text-muted-foreground font-mono">
-                Ref: {offerNumber}
+                Order: {(booking as any).order_number}
               </p>
             )}
             <div className="space-y-2">
@@ -235,19 +235,31 @@ export default function BookingDetail() {
               )}
             </div>
 
-            {/* View PDF button */}
+            {/* View Order PDF */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={handleViewOrderPdf}
+              disabled={isLoadingPdf}
+            >
+              {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+              View Order PDF
+            </Button>
+
+            {/* View original Quotation PDF */}
             {booking.quote_id && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="w-full"
-                onClick={handleViewPdf}
-                disabled={isLoadingPdf}
+                className="w-full text-muted-foreground"
+                onClick={handleViewQuotePdf}
+                disabled={isLoadingQuotePdf}
               >
-                {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
-                View Order PDF
+                {isLoadingQuotePdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
+                View Original Quotation
               </Button>
-            )}
+            )
           </CardContent>
         </Card>
 
