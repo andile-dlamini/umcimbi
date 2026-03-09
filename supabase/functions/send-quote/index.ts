@@ -302,11 +302,14 @@ serve(async (req) => {
     let quoteId: string;
     let offerNumber: string;
 
+    let isAdjustment = false;
+    let currentAdjustmentCount = 0;
+
     if (quote_id) {
       // ADJUSTMENT: Update existing quote in-place
       const { data: existingQuote, error: fetchErr } = await supabase
         .from("quotes")
-        .select("id, offer_number, vendor_id")
+        .select("id, offer_number, vendor_id, adjustment_count")
         .eq("id", quote_id)
         .single();
 
@@ -316,6 +319,8 @@ serve(async (req) => {
 
       quoteId = existingQuote.id;
       offerNumber = existingQuote.offer_number || `UMC-Q-${Date.now()}`;
+      isAdjustment = true;
+      currentAdjustmentCount = existingQuote.adjustment_count || 0;
 
       // Update quote record
       const { error: updateErr } = await supabase
@@ -448,17 +453,18 @@ serve(async (req) => {
     await supabase.from("quotes").update({
       final_offer_pdf_key: pdfKey,
       final_offer_pdf_generated_at: new Date().toISOString(),
-    }).eq("id", quote.I);
+    }).eq("id", quoteId);
 
     // 9) Insert quote_card message into chat
     const depositAmountChat = total * 1.08 * (deposit_percentage / 100);
     const platformFeeChat = total * 0.08;
+    const cardLabel = isAdjustment ? `📋 Revised Quotation ${offerNumber} — ${formatCurrency(total)}` : `📋 Quotation ${offerNumber} — ${formatCurrency(total)}`;
     await supabase.from("messages").insert({
       conversation_id: conversation_id,
       sender_type: "vendor",
       sender_user_id: user.id,
       message_type: "quote_card",
-      content: `📋 Quotation ${offerNumber} — ${formatCurrency(total)}`,
+      content: cardLabel,
       metadata: {
         quote_id: quoteId,
         offer_number: offerNumber,
@@ -470,6 +476,7 @@ serve(async (req) => {
         pdf_key: pdfKey,
         status: "pending_client",
         booking_id: null,
+        adjustment_count: isAdjustment ? currentAdjustmentCount : 0,
       },
       attachments: [],
     });
