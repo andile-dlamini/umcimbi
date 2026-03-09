@@ -127,7 +127,7 @@ export function AppSidebar() {
         <button
           onClick={() => goTo('/settings')}
           className={cn(
-            'flex items-center gap-3 tap-highlight-none transition-colors hover:bg-muted/50',
+            'flex items-center gap-3 tap-highlight-none transition-colors hover:bg-sidebar-accent/50',
             collapsed ? 'justify-center p-3' : 'px-4 py-3'
           )}
         >
