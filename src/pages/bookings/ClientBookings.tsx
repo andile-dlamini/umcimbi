@@ -1,32 +1,73 @@
 import { PageHeader } from '@/components/layout/PageHeader';
-
 import { useClientBookings } from '@/hooks/useBookings';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Banknote, Clock } from 'lucide-react';
+import { Calendar, MapPin, Banknote, Clock, Star, FileText, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { BookingWithDetails, BookingStatus } from '@/types/booking';
+import { BookingWithDetails } from '@/types/booking';
 import { bookingStatusConfig } from '@/lib/statusConfig';
+import { viewQuotePdfAction } from '@/lib/quoteActions';
+import { useStartConversation } from '@/hooks/useChat';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 const statusConfig = bookingStatusConfig;
 
 function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClick: () => void }) {
+  const navigate = useNavigate();
+  const { startConversation } = useStartConversation();
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const status = statusConfig[booking.booking_status];
-  
+
+  const handleOpenChat = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!booking.vendor?.id) return;
+    const convId = await startConversation(booking.vendor.id);
+    if (convId) {
+      navigate(`/chat/${convId}`);
+    } else {
+      toast.error('Could not open chat');
+    }
+  };
+
+  const handleViewPdf = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!booking.quote_id) {
+      toast.error('No linked quotation found');
+      return;
+    }
+    setIsLoadingPdf(true);
+    await viewQuotePdfAction(booking.quote_id);
+    setIsLoadingPdf(false);
+  };
+
   return (
-    <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
-      <CardContent className="p-4">
+    <Card>
+      <CardContent className="p-4 cursor-pointer" onClick={onClick}>
         <div className="flex justify-between items-start mb-3">
-          <div>
-            <h3 className="font-semibold text-foreground">{booking.vendor?.name}</h3>
-            <p className="text-sm text-muted-foreground">{booking.service_category}</p>
+          <div className="flex items-center gap-3">
+            {booking.vendor?.image_urls?.[0] && (
+              <img
+                src={booking.vendor.image_urls[0]}
+                alt={booking.vendor.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            )}
+            <div>
+              <h3 className="font-semibold text-foreground">{booking.vendor?.name}</h3>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <span>{booking.vendor?.rating ? Number(booking.vendor.rating).toFixed(1) : 'New'}</span>
+              </div>
+            </div>
           </div>
           <Badge className={status.className}>{status.label}</Badge>
         </div>
-        
+
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -44,8 +85,8 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
               <span>{booking.event.location}</span>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <Banknote className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-lg font-bold text-foreground">
+            <Banknote className="h-5 w-5" />
             <span>R{booking.agreed_price.toLocaleString()}</span>
           </div>
         </div>
@@ -58,6 +99,25 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
           </div>
         )}
       </CardContent>
+
+      <CardFooter className="p-4 pt-0 gap-2">
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenChat}>
+          <MessageCircle className="h-4 w-4 mr-2" />
+          Open Chat
+        </Button>
+        {booking.quote_id && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            disabled={isLoadingPdf}
+            onClick={handleViewPdf}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            {isLoadingPdf ? 'Loading...' : 'View PDF'}
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 }
@@ -66,11 +126,11 @@ export default function ClientBookings() {
   const { bookings, isLoading } = useClientBookings();
   const navigate = useNavigate();
 
-  const activeOrders = bookings.filter(b => 
+  const activeOrders = bookings.filter(b =>
     b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed'
   );
   const completedOrders = bookings.filter(b => b.booking_status === 'completed');
-  const otherOrders = bookings.filter(b => 
+  const otherOrders = bookings.filter(b =>
     b.booking_status === 'cancelled' || b.booking_status === 'disputed'
   );
 
@@ -90,7 +150,7 @@ export default function ClientBookings() {
   return (
     <div className="min-h-screen bg-background">
       <PageHeader title="Orders" showBack />
-      
+
       <div className="px-4 py-4 max-w-lg mx-auto">
         {bookings.length === 0 ? (
           <Card>
@@ -114,7 +174,7 @@ export default function ClientBookings() {
                 Other ({otherOrders.length})
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="active" className="mt-4 space-y-3">
               {activeOrders.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No active orders</p>
@@ -128,7 +188,7 @@ export default function ClientBookings() {
                 ))
               )}
             </TabsContent>
-            
+
             <TabsContent value="completed" className="mt-4 space-y-3">
               {completedOrders.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No completed orders</p>
@@ -142,7 +202,7 @@ export default function ClientBookings() {
                 ))
               )}
             </TabsContent>
-            
+
             <TabsContent value="other" className="mt-4 space-y-3">
               {otherOrders.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No cancelled or disputed orders</p>

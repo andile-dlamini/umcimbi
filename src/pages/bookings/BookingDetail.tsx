@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
 import { useState, useEffect } from 'react';
@@ -15,6 +15,7 @@ import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { viewQuotePdfAction } from '@/lib/quoteActions';
 
 const statusConfig = bookingStatusConfig;
 
@@ -38,6 +39,8 @@ export default function BookingDetail() {
   const [isReporting, setIsReporting] = useState(false);
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const [offerNumber, setOfferNumber] = useState<string | null>(null);
 
   // Handle Yoco redirect back
   useEffect(() => {
@@ -45,15 +48,26 @@ export default function BookingDetail() {
     const kind = searchParams.get('kind');
     if (paymentStatus === 'success') {
       toast.success(`${kind === 'deposit' ? 'Deposit' : 'Balance'} payment successful! It may take a moment to reflect.`);
-      // Clean URL
       navigate(`/bookings/${bookingId}`, { replace: true });
-      // Refresh after a short delay to allow webhook processing
       setTimeout(() => refreshDetails(), 2000);
     } else if (paymentStatus === 'cancelled') {
       toast.info('Payment was cancelled.');
       navigate(`/bookings/${bookingId}`, { replace: true });
     }
   }, [searchParams, bookingId, navigate, refreshDetails]);
+
+  // Fetch linked quote's offer_number
+  useEffect(() => {
+    if (!booking?.quote_id) return;
+    supabase
+      .from('quotes')
+      .select('offer_number')
+      .eq('id', booking.quote_id)
+      .single()
+      .then(({ data }) => {
+        if (data) setOfferNumber(data.offer_number);
+      });
+  }, [booking?.quote_id]);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -77,6 +91,16 @@ export default function BookingDetail() {
     await reportProblem(bookingId);
     setIsReporting(false);
     refreshDetails();
+  };
+
+  const handleViewPdf = async () => {
+    if (!booking?.quote_id) {
+      toast.error('No linked quotation found');
+      return;
+    }
+    setIsLoadingPdf(true);
+    await viewQuotePdfAction(booking.quote_id);
+    setIsLoadingPdf(false);
   };
 
   const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
@@ -120,7 +144,7 @@ export default function BookingDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Booking Details" showBack />
+        <PageHeader title="Order Details" showBack />
         <div className="p-4 space-y-4">
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-32 w-full" />
@@ -132,11 +156,11 @@ export default function BookingDetail() {
   if (!booking) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Booking Details" showBack />
+        <PageHeader title="Order Details" showBack />
         <div className="p-4">
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">Booking not found</p>
+              <p className="text-muted-foreground">Order not found</p>
             </CardContent>
           </Card>
         </div>
@@ -150,9 +174,9 @@ export default function BookingDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Booking Details" showBack />
+      <PageHeader title="Order Details" showBack />
       
-      <div className="p-4 space-y-4">
+      <div className="p-4 max-w-lg mx-auto space-y-4">
         {/* Review Banner */}
         {canReview && (
           <Card className="bg-primary/10 border-primary/20">
@@ -176,14 +200,31 @@ export default function BookingDetail() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
-              <div>
-                <CardTitle>{booking.vendor?.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{booking.service_category}</p>
+              <div className="flex items-center gap-3">
+                {booking.vendor?.image_urls?.[0] && (
+                  <img
+                    src={booking.vendor.image_urls[0]}
+                    alt={booking.vendor.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                )}
+                <div>
+                  <CardTitle>{booking.vendor?.name}</CardTitle>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span>{booking.vendor?.rating ? Number(booking.vendor.rating).toFixed(1) : 'New'}</span>
+                  </div>
+                </div>
               </div>
               <Badge className={status.className}>{status.label}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {offerNumber && (
+              <p className="text-xs text-muted-foreground font-mono">
+                Ref: {offerNumber}
+              </p>
+            )}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -202,6 +243,20 @@ export default function BookingDetail() {
                 </div>
               )}
             </div>
+
+            {/* View PDF button */}
+            {booking.quote_id && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handleViewPdf}
+                disabled={isLoadingPdf}
+              >
+                {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                View Order PDF
+              </Button>
+            )}
           </CardContent>
         </Card>
 
