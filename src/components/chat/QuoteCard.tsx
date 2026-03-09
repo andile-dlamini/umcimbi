@@ -13,6 +13,8 @@ interface QuoteCardMetadata {
   total: number;
   deposit_percentage: number;
   deposit_amount: number;
+  platform_fee: number;
+  vendor_payout: number;
   pdf_key: string;
   status: string;
   booking_id: string | null;
