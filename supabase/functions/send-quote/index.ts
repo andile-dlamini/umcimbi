@@ -199,7 +199,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { conversation_id, event_id, request_id, deposit_percentage = 50, notes, line_items } = await req.json();
+    const { conversation_id, event_id, request_id, deposit_percentage = 50, notes, line_items, quote_id } = await req.json();
 
     if (!conversation_id || !line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return new Response(JSON.stringify({ error: "conversation_id and line_items are required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
