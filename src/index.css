@@ -2,145 +2,151 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Isiko — Soft Glassmorphism Design System */
+/* Isiko — Shweshwe Glassmorphism Design System */
+/* Rooted in Shweshwe fabric: Indigo Blue, Terracotta Orange, Burgundy Red */
 
 @layer base {
   :root {
-    /* Soft gradient base */
-    --background: 225 25% 96%;
-    --foreground: 222 20% 14%;
+    /* Warm cream base with personality */
+    --background: 38 30% 96%;
+    --foreground: 220 25% 12%;
 
     /* Frosted card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222 20% 14%;
+    --card-foreground: 220 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 20% 14%;
+    --popover-foreground: 220 25% 12%;
 
-    /* Primary: Shweshwe Indigo */
-    --primary: 224 60% 38%;
+    /* Primary: Deep Shweshwe Indigo Blue — punchy */
+    --primary: 220 70% 32%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Warm Sand */
-    --secondary: 32 20% 93%;
-    --secondary-foreground: 222 20% 22%;
+    /* Secondary: Warm Terracotta tint */
+    --secondary: 24 40% 92%;
+    --secondary-foreground: 20 50% 25%;
 
     /* Muted */
-    --muted: 225 15% 93%;
-    --muted-foreground: 222 8% 52%;
+    --muted: 38 18% 92%;
+    --muted-foreground: 220 12% 48%;
 
-    /* Accent: Terracotta Gold */
-    --accent: 22 82% 52%;
+    /* Accent: Terracotta Orange — bold */
+    --accent: 18 78% 48%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success */
-    --success: 155 50% 42%;
+    /* Success green */
+    --success: 150 58% 38%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
-    --warning: 42 92% 52%;
-    --warning-foreground: 222 20% 14%;
+    --warning: 42 92% 50%;
+    --warning-foreground: 220 25% 12%;
 
-    --destructive: 0 62% 52%;
+    /* Burgundy destructive */
+    --destructive: 348 65% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 225 15% 90%;
-    --input: 225 15% 90%;
-    --ring: 224 60% 38%;
+    --border: 220 18% 88%;
+    --input: 220 18% 88%;
+    --ring: 220 70% 32%;
 
     --radius: 1rem;
 
-    /* Ceremony colors */
-    --umembeso: 22 82% 52%;
-    --umabo: 348 52% 50%;
+    /* Ceremony type colors */
+    --umembeso: 18 78% 48%;
+    --umabo: 348 65% 45%;
 
-    /* Card border — translucent for glass effect */
-    --card-border: 225 15% 88%;
+    /* Card border */
+    --card-border: 220 15% 85%;
 
-    /* Glass-specific tokens */
-    --glass-bg: 0 0% 100% / 0.65;
-    --glass-border: 0 0% 100% / 0.25;
-    --glass-shadow: 224 60% 38% / 0.06;
+    /* Glass tokens — warm tint */
+    --glass-bg: 38 20% 99% / 0.7;
+    --glass-border: 220 20% 80% / 0.3;
+    --glass-shadow: 220 70% 32% / 0.08;
 
-    /* Sidebar / Drawer */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 20% 14%;
-    --sidebar-primary: 224 60% 38%;
+    /* Sidebar — deeper indigo tint */
+    --sidebar-background: 220 35% 18%;
+    --sidebar-foreground: 220 15% 92%;
+    --sidebar-primary: 18 78% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 15% 96%;
-    --sidebar-accent-foreground: 222 20% 14%;
-    --sidebar-border: 225 15% 92%;
-    --sidebar-ring: 224 60% 38%;
+    --sidebar-accent: 220 30% 24%;
+    --sidebar-accent-foreground: 220 15% 92%;
+    --sidebar-border: 220 30% 25%;
+    --sidebar-ring: 18 78% 52%;
   }
 
   .dark {
-    --background: 222 22% 8%;
-    --foreground: 225 12% 92%;
+    --background: 220 25% 7%;
+    --foreground: 38 15% 92%;
 
-    --card: 222 20% 12%;
-    --card-foreground: 225 12% 92%;
+    --card: 220 22% 12%;
+    --card-foreground: 38 15% 92%;
 
-    --popover: 222 20% 12%;
-    --popover-foreground: 225 12% 92%;
+    --popover: 220 22% 12%;
+    --popover-foreground: 38 15% 92%;
 
-    --primary: 224 52% 58%;
+    --primary: 220 60% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 14% 18%;
-    --secondary-foreground: 225 12% 85%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 38 15% 85%;
 
-    --muted: 222 14% 16%;
-    --muted-foreground: 222 10% 55%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 22 75% 52%;
+    --accent: 18 72% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 155 48% 46%;
+    --success: 150 52% 44%;
     --success-foreground: 0 0% 100%;
 
     --warning: 42 86% 55%;
-    --warning-foreground: 222 22% 8%;
+    --warning-foreground: 220 25% 7%;
 
-    --destructive: 0 58% 46%;
+    --destructive: 348 58% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 14% 20%;
-    --input: 222 14% 20%;
-    --ring: 224 52% 58%;
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 220 60% 58%;
 
-    --umembeso: 22 75% 52%;
-    --umabo: 348 48% 52%;
+    --umembeso: 18 72% 52%;
+    --umabo: 348 55% 52%;
 
-    --card-border: 222 14% 22%;
+    --card-border: 220 15% 22%;
 
-    --glass-bg: 222 20% 12% / 0.7;
-    --glass-border: 222 14% 28% / 0.4;
-    --glass-shadow: 0 0% 0% / 0.2;
+    --glass-bg: 220 22% 12% / 0.75;
+    --glass-border: 220 15% 28% / 0.4;
+    --glass-shadow: 0 0% 0% / 0.25;
 
-    --sidebar-background: 222 20% 10%;
-    --sidebar-foreground: 225 12% 92%;
-    --sidebar-primary: 224 52% 58%;
+    --sidebar-background: 220 28% 10%;
+    --sidebar-foreground: 38 15% 90%;
+    --sidebar-primary: 18 72% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 14% 15%;
-    --sidebar-accent-foreground: 225 12% 92%;
-    --sidebar-border: 222 14% 20%;
-    --sidebar-ring: 224 52% 58%;
+    --sidebar-accent: 220 22% 16%;
+    --sidebar-accent-foreground: 38 15% 90%;
+    --sidebar-border: 220 22% 18%;
+    --sidebar-ring: 18 72% 52%;
   }
 
-  /* Vendor mode */
+  /* Vendor mode — warm terracotta primary */
   .vendor-mode {
-    --primary: 22 75% 42%;
+    --primary: 18 75% 42%;
     --primary-foreground: 0 0% 100%;
-    --ring: 22 75% 42%;
-    --accent: 22 65% 52%;
+    --ring: 18 75% 42%;
+    --accent: 18 65% 52%;
     --accent-foreground: 0 0% 100%;
+    --sidebar-background: 18 30% 16%;
+    --sidebar-primary: 220 60% 55%;
+    --sidebar-accent: 18 25% 22%;
+    --sidebar-border: 18 25% 22%;
   }
 
   .dark.vendor-mode {
-    --primary: 22 70% 52%;
+    --primary: 18 70% 52%;
     --primary-foreground: 0 0% 100%;
-    --ring: 22 70% 52%;
-    --accent: 22 60% 55%;
+    --ring: 18 70% 52%;
+    --accent: 18 60% 55%;
     --accent-foreground: 0 0% 100%;
   }
 }
@@ -155,18 +161,20 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Soft gradient background */
+    /* Richer gradient background with Shweshwe colors */
     background:
-      radial-gradient(ellipse at 20% 0%, hsl(224 60% 38% / 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, hsl(22 82% 52% / 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 15% 0%, hsl(220 70% 32% / 0.08) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 20%, hsl(18 78% 48% / 0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 100%, hsl(348 65% 45% / 0.04) 0%, transparent 50%),
       hsl(var(--background));
     min-height: 100vh;
   }
 
   .dark body {
     background:
-      radial-gradient(ellipse at 20% 0%, hsl(224 52% 58% / 0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, hsl(22 75% 52% / 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 15% 0%, hsl(220 60% 58% / 0.1) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 20%, hsl(18 72% 52% / 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 100%, hsl(348 58% 48% / 0.05) 0%, transparent 50%),
       hsl(var(--background));
   }
 
@@ -179,19 +187,20 @@
   /* Glass card utility */
   .glass {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(16px) saturate(1.5);
-    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
     border: 1px solid hsl(var(--glass-border));
     box-shadow: 0 4px 24px -4px hsl(var(--glass-shadow));
   }
 
   /* Ceremony type badges */
   .badge-umembeso {
-    @apply bg-secondary text-secondary-foreground;
+    @apply bg-accent text-accent-foreground;
   }
 
   .badge-umabo {
-    @apply bg-accent text-accent-foreground;
+    background-color: hsl(var(--umabo));
+    @apply text-white;
   }
 
   .pb-safe {

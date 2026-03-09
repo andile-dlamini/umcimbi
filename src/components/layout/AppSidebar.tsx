@@ -113,13 +113,13 @@ export function AppSidebar() {
   // Shared nav content
   function NavContent({ collapsed = false }: { collapsed?: boolean }) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
         {/* Logo / Brand */}
-        <div className={cn('flex items-center h-14 shrink-0 border-b border-border/50', collapsed ? 'justify-center px-2' : 'px-4')}>
+        <div className={cn('flex items-center h-14 shrink-0 border-b border-sidebar-border/50', collapsed ? 'justify-center px-2' : 'px-4')}>
           {collapsed ? (
-            <span className="text-lg font-bold text-primary">I</span>
+            <span className="text-lg font-bold text-sidebar-primary">I</span>
           ) : (
-            <span className="text-base font-semibold tracking-tight text-foreground">Isiko</span>
+            <span className="text-base font-semibold tracking-tight text-sidebar-foreground">Isiko</span>
           )}
         </div>
 
@@ -127,22 +127,22 @@ export function AppSidebar() {
         <button
           onClick={() => goTo('/settings')}
           className={cn(
-            'flex items-center gap-3 tap-highlight-none transition-colors hover:bg-muted/50',
+            'flex items-center gap-3 tap-highlight-none transition-colors hover:bg-sidebar-accent/50',
             collapsed ? 'justify-center p-3' : 'px-4 py-3'
           )}
         >
           <Avatar className={cn('border border-border shrink-0', collapsed ? 'h-8 w-8' : 'h-9 w-9')}>
             <AvatarImage src={(profile as any)?.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+            <AvatarFallback className="bg-sidebar-primary/20 text-sidebar-primary text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-foreground truncate">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">
                 {profile?.full_name || 'User'}
               </p>
-              <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+              <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
           )}
         </button>
@@ -161,12 +161,12 @@ export function AppSidebar() {
                   'flex items-center gap-3 w-full text-sm font-medium transition-all tap-highlight-none relative',
                   collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
                   active
-                    ? 'text-primary bg-primary/8'
-                    : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'
+                    ? 'text-sidebar-primary bg-sidebar-primary/15'
+                    : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                 )}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-primary" />
                 )}
                 <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]')} />
                 {!collapsed && <span className="flex-1 text-left">{label}</span>}
@@ -208,7 +208,7 @@ export function AppSidebar() {
                 className={cn(
                   'flex items-center gap-3 w-full text-sm font-medium transition-colors tap-highlight-none',
                   collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
-                  active ? 'text-primary bg-primary/8' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'
+                  active ? 'text-sidebar-primary bg-sidebar-primary/15' : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                 )}
               >
                 <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]')} />
@@ -232,8 +232,9 @@ export function AppSidebar() {
               <button
                 onClick={handleLogout}
                 className={cn(
-                  'flex items-center gap-3 w-full text-sm font-medium text-destructive hover:bg-destructive/5 transition-colors tap-highlight-none',
-                  collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5'
+                  'flex items-center gap-3 w-full text-sm font-medium hover:bg-sidebar-accent/50 transition-colors tap-highlight-none',
+                  collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
+                  'text-red-400'
                 )}
               >
                 <LogOut className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]')} />
@@ -260,13 +261,13 @@ export function AppSidebar() {
     return (
       <>
         {/* Narrow icon rail */}
-        <aside className="fixed left-0 top-0 bottom-0 z-40 w-14 glass border-r border-border/30 flex flex-col">
+        <aside className="fixed left-0 top-0 bottom-0 z-40 w-14 bg-sidebar border-r border-sidebar-border flex flex-col">
           <NavContent collapsed />
         </aside>
 
         {/* Full overlay when tapped */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
             <NavContent />
           </SheetContent>
         </Sheet>
@@ -276,7 +277,7 @@ export function AppSidebar() {
 
   // ─── Desktop/Tablet: persistent expanded sidebar ───
   return (
-    <aside className="sticky top-0 h-screen w-56 shrink-0 glass border-r border-border/30 overflow-hidden">
+    <aside className="sticky top-0 h-screen w-56 shrink-0 bg-sidebar border-r border-sidebar-border overflow-hidden">
       <NavContent />
     </aside>
   );
