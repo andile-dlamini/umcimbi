@@ -206,6 +206,7 @@ export default function VendorOnboarding() {
     const vendorBusinessType = formData.is_registered_business ? 'registered_business' as const : 'independent' as const;
     const verificationStatus = formData.is_registered_business ? 'pending' as const : 'not_applicable' as const;
 
+    setJustCreated(true);
     const result = await createVendorProfile({
       name: formData.name.trim(),
       category: formData.category as VendorCategory,
