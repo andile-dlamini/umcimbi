@@ -25,6 +25,7 @@ import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
 import VendorBookings from "@/pages/vendor-dashboard/VendorBookings";
 import MyRequests from "@/pages/profile/MyRequests";
 import MyQuotes from "@/pages/quotes/MyQuotes";
+import CompareQuotes from "@/pages/quotes/CompareQuotes";
 import ClientBookings from "@/pages/bookings/ClientBookings";
 import BookingDetail from "@/pages/bookings/BookingDetail";
 import Learn from "@/pages/Learn";
