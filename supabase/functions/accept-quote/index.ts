@@ -98,6 +98,10 @@ serve(async (req) => {
       }
     }
 
+    // Generate order number
+    const { data: orderNumResult } = await supabase.rpc("generate_order_number" as any);
+    const orderNumber = (orderNumResult as unknown as string) || `UMC-O-${Date.now()}`;
+
     const { data: booking, error: bookingErr } = await supabase
       .from("bookings")
       .insert({
@@ -113,6 +117,7 @@ serve(async (req) => {
         deposit_status: "due",
         balance_status: "not_due",
         event_date_time: eventDateTime,
+        order_number: orderNumber,
       })
       .select("id")
       .single();
