@@ -277,7 +277,7 @@ export function AppSidebar() {
 
   // ─── Desktop/Tablet: persistent expanded sidebar ───
   return (
-    <aside className="sticky top-0 h-screen w-56 shrink-0 glass border-r border-border/30 overflow-hidden">
+    <aside className="sticky top-0 h-screen w-56 shrink-0 bg-sidebar border-r border-sidebar-border overflow-hidden">
       <NavContent />
     </aside>
   );
