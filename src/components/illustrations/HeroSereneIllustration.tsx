@@ -89,7 +89,7 @@ export default function HeroSereneIllustration() {
 
         {/* Vendor cards */}
         <div className="px-3.5 space-y-1.5 bg-white">
-          <div className="text-[6px] text-gray-400 mb-1">Booked Vendors</div>
+          <div className="text-[6px] text-gray-400 mb-1">Vendors</div>
 
           <div className="rounded-lg border border-primary/15 p-2 bg-primary/[0.03] flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
