@@ -66,6 +66,10 @@ export const quoteStatusConfig: Record<string, { label: string; className: strin
     label: 'Awaiting Response',
     className: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
   },
+  adjustment_requested: {
+    label: 'Adjustment Requested',
+    className: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+  },
   client_accepted: {
     label: 'Accepted',
     className: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
