@@ -486,7 +486,7 @@ serve(async (req) => {
     }).eq("id", serviceRequestId);
 
     return new Response(
-      JSON.stringify({ quote_id: quote.id, offer_number: offerNumber, conversation_id }),
+      JSON.stringify({ quote_id: quoteId, offer_number: offerNumber, conversation_id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
