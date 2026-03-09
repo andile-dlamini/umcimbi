@@ -232,8 +232,9 @@ export function AppSidebar() {
               <button
                 onClick={handleLogout}
                 className={cn(
-                  'flex items-center gap-3 w-full text-sm font-medium text-destructive hover:bg-destructive/5 transition-colors tap-highlight-none',
-                  collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5'
+                  'flex items-center gap-3 w-full text-sm font-medium hover:bg-sidebar-accent/50 transition-colors tap-highlight-none',
+                  collapsed ? 'justify-center px-2 py-3' : 'px-4 py-2.5',
+                  'text-red-400'
                 )}
               >
                 <LogOut className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]')} />
