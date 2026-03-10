@@ -266,9 +266,11 @@ const ChatThread = () => {
     );
   }
 
-  const headerTitle = isVendorView
-    ? conversation.user_profile?.full_name || conversation.user_profile?.phone_number || 'User'
-    : conversation.vendor?.name || 'Vendor';
+  const userDisplayName = conversation.user_profile?.full_name
+    || [conversation.user_profile?.first_name, conversation.user_profile?.surname].filter(Boolean).join(' ')
+    || conversation.user_profile?.phone_number
+    || 'User';
+  const headerTitle = isVendorView ? userDisplayName : conversation.vendor?.name || 'Vendor';
   const headerSubtitle = isVendorView
     ? conversation.user_profile?.email
     : conversation.vendor?.category;
