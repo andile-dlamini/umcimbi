@@ -620,7 +620,7 @@ export default function OnboardingLanguage() {
 
           {/* Additional ceremony types */}
           <div className="mt-8 text-center">
-            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Also supporting</p>
+            <p className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Also supporting</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
               { icon: '🤝', name: 'Lobola' },
