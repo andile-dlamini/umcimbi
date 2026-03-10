@@ -5,14 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
 import { useAuth } from '@/context/AuthContext';
 import { EventCard } from '@/components/shared/EventCard';
-import { EventType } from '@/types/database';
-
-const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift },
-  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles },
-];
 
 export default function EventsList() {
   const navigate = useNavigate();
