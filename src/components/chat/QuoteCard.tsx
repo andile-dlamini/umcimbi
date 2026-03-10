@@ -75,27 +75,15 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
         setDepositPaid(booking.deposit_status === 'paid');
       }
 
-      // Check if this card is superseded (there's a newer quote_card message for the same quote)
-      const { data: newerCards } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('conversation_id', (await supabase.from('messages').select('conversation_id').eq('id', messageId).single()).data?.conversation_id || '')
-        .eq('message_type', 'quote_card')
-        .gt('created_at', (await supabase.from('messages').select('created_at').eq('id', messageId).single()).data?.created_at || '')
-        .limit(1);
-
-      // A simpler approach: if the metadata status is adjustment_requested and there's an adjustment_note, this is an adjustment card
-      // If the current quote status is different from 'adjustment_requested', the vendor has already responded
+      // Determine if this card is superseded
+      // An adjustment_requested card is superseded once vendor responds (status changes)
       if (metadata.status === 'adjustment_requested' && quote && quote.status !== 'adjustment_requested') {
         setIsSuperseded(true);
       }
       
-      // If this card's status is pending_client but the current quote status has moved on, supersede it
-      if (metadata.status === 'pending_client' && quote && quote.status !== 'pending_client') {
-        // Only supersede if there's a newer revision (higher adjustment count)
-        if ((quote.adjustment_count || 0) > (metadata.adjustment_count || 0)) {
-          setIsSuperseded(true);
-        }
+      // A pending_client card is superseded if the quote now has a higher adjustment count
+      if (metadata.status === 'pending_client' && quote && (quote.adjustment_count || 0) > (metadata.adjustment_count || 0)) {
+        setIsSuperseded(true);
       }
     };
     refreshStatus();
