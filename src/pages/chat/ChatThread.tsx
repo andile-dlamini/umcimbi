@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { format, isToday, isYesterday } from 'date-fns';
 import { QuoteCard } from '@/components/chat/QuoteCard';
 import { MakeQuotationSheet, QuotePrefillData } from '@/components/chat/MakeQuotationSheet';
+import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ChatDetailsDrawer } from '@/components/chat/ChatDetailsDrawer';
