@@ -73,6 +73,9 @@ export default function AuthPage() {
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
+  // Forgot password state
+  const [forgotPhone, setForgotPhone] = useState('');
+
   // Registration form state
   const [form, setForm] = useState({
     first_name: '',
