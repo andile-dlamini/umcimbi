@@ -166,12 +166,10 @@ export default function VendorDetail() {
                   <span className="font-medium">{vendor.rating}</span>
                   <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
                 </div>
-                {(vendor as any).jobs_completed > 0 && (
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Briefcase className="h-4 w-4" />
-                    <span>{(vendor as any).jobs_completed} jobs done</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                  <span>{vendor.added_to_events_count ?? 0} events</span>
+                </div>
                 {vendor.location && (
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
