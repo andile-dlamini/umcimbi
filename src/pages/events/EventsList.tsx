@@ -39,7 +39,7 @@ export default function EventsList() {
 
       <div className="px-4 py-4 space-y-8 max-w-lg mx-auto">
         {/* New Ceremony Button */}
-        <Button className="w-full" size="lg" onClick={() => navigate('/events/new')}>
+        <Button className="w-full bg-sidebar text-sidebar-foreground hover:bg-sidebar/90" size="lg" onClick={() => navigate('/events/new')}>
           <Plus className="h-4 w-4 mr-2" />
           New Ceremony
         </Button>
