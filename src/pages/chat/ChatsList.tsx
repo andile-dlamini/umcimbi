@@ -137,7 +137,7 @@ const ChatsList = () => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <h3 className={`truncate ${hasUnread ? 'font-bold text-primary' : 'font-medium text-foreground'}`}>
-              {conv.event?.name || 'General'}
+              {conv.event?.name || (isVendor ? (conv.user_profile?.full_name || 'Chat') : (conv.vendor?.name || 'Chat'))}
             </h3>
             <span className={`text-xs shrink-0 ${hasUnread ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
               {getTimeAgo(conv.last_message_at)}
