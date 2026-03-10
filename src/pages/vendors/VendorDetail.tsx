@@ -207,7 +207,7 @@ export default function VendorDetail() {
           {events.length > 0 && (
             <Select value={selectedEventId} onValueChange={setSelectedEventId}>
               <SelectTrigger>
-                <SelectValue placeholder="Link to an event (optional)" />
+                <SelectValue placeholder="Link to an event" />
               </SelectTrigger>
               <SelectContent>
                 {events.map((evt) => (
