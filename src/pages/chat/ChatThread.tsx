@@ -349,7 +349,7 @@ const ChatThread = () => {
             if (messageType === 'quote_card' && metadata) {
               return (
               <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} w-full`}>
-                  <div className={`max-w-xs ${isOwn ? 'ml-auto' : ''}`}>
+                  <div className={`max-w-sm ${isOwn ? 'ml-auto' : ''}`}>
                   <QuoteCard
                     metadata={metadata}
                     isVendorView={isVendorView}
