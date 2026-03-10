@@ -101,10 +101,17 @@ export const useConversations = () => {
           // Fetch latest quote status if no booking
           let quoteStatus: string | null = null;
           if (!bookingStatus) {
-            const { data: latestQuote } = await supabase
+            // Only fetch quotes linked to service requests for this conversation's event
+            let quoteQuery = supabase
               .from('quotes')
-              .select('status')
-              .eq('vendor_id', conv.vendor_id)
+              .select('status, request_id, service_requests!inner(event_id, vendor_id)')
+              .eq('vendor_id', conv.vendor_id);
+
+            if (conv.event_id) {
+              quoteQuery = quoteQuery.eq('service_requests.event_id', conv.event_id);
+            }
+
+            const { data: latestQuote } = await quoteQuery
               .order('created_at', { ascending: false })
               .limit(1)
               .maybeSingle();
