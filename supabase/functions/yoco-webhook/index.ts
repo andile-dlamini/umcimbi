@@ -43,16 +43,23 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update booking payment status
+    const now = new Date().toISOString();
     const updates: Record<string, unknown> = {};
     if (kind === "deposit") {
       updates.deposit_status = "paid";
-      updates.deposit_paid_at = new Date().toISOString();
+      updates.deposit_paid_at = now;
       updates.booking_status = "confirmed";
       updates.balance_status = "due";
-      updates.balance_due_at = new Date().toISOString();
+      updates.balance_due_at = now;
     } else if (kind === "balance") {
       updates.balance_status = "paid";
-      updates.balance_paid_at = new Date().toISOString();
+      updates.balance_paid_at = now;
+      updates.booking_status = "completed";
+    } else if (kind === "full") {
+      updates.deposit_status = "paid";
+      updates.deposit_paid_at = now;
+      updates.balance_status = "paid";
+      updates.balance_paid_at = now;
       updates.booking_status = "completed";
     }
 
