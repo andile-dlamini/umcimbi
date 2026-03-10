@@ -629,7 +629,7 @@ export default function OnboardingLanguage() {
               { icon: '🕯️', name: 'Funeral' },
               { icon: '🙏', name: 'Ancestral Ritual' }].
               map((c) =>
-              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground shadow-sm">
+              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-sm font-medium text-white shadow-sm">
                   <span>{c.icon}</span> {c.name}
                 </span>
               )}
