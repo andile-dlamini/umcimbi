@@ -209,7 +209,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
         )}
       </div>
 
-      <div className="px-4 py-3 border-t border-border space-y-2">
+      <div className="px-3 py-2 border-t border-border space-y-1.5">
         {/* PDF always available */}
         <Button
           type="button"
