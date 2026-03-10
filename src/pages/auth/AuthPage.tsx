@@ -296,6 +296,129 @@ export default function AuthPage() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  // ─── FORGOT PASSWORD HANDLERS ───
+
+  const handleForgotSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    if (!forgotPhone.trim()) { setErrors({ forgotPhone: 'Phone number is required' }); return; }
+    if (!validateSAPhone(forgotPhone)) { setErrors({ forgotPhone: 'Please enter a valid SA phone number' }); return; }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ phone_number: toE164(forgotPhone) }),
+      });
+      const data = await res.json();
+
+      if (res.status === 429) {
+        toast.error('Please wait before requesting a new code');
+        setCooldown(30);
+      } else if (!res.ok) {
+        toast.error(data.error || 'Failed to send verification code');
+      } else {
+        toast.success('Verification code sent!');
+        setStep('forgot_otp');
+        setCooldown(30);
+        setOtpExpiry(300);
+        setOtpValue('');
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotResend = async () => {
+    if (cooldown > 0) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ phone_number: toE164(forgotPhone) }),
+      });
+      const data = await res.json();
+      if (res.status === 429) {
+        toast.error(data.error || 'Too many requests');
+      } else {
+        toast.success('New code sent!');
+        setCooldown(30);
+        setOtpExpiry(300);
+        setOtpValue('');
+      }
+    } catch {
+      toast.error('Network error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotVerifyOtp = () => {
+    if (otpValue.length !== 6) {
+      toast.error('Please enter the full 6-digit code');
+      return;
+    }
+    setPasswordForm({ password: '', confirm_password: '' });
+    setStep('forgot_password');
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const result = passwordSchema.safeParse(passwordForm);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0]?.toString();
+        if (field) fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({
+          phone_number: toE164(forgotPhone),
+          otp: otpValue,
+          new_password: passwordForm.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.expired) {
+          toast.error('Code expired. Please start over.');
+          setStep('forgot_phone');
+        } else if (data.locked) {
+          toast.error('Too many attempts. Please start over.');
+          setStep('forgot_phone');
+        } else {
+          toast.error(data.error || 'Password reset failed');
+        }
+        return;
+      }
+
+      toast.success('Password reset successfully! Please sign in.');
+      setStep('login');
+      setLoginPhone(forgotPhone);
+      setLoginPassword('');
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // ─── LOGIN ───
   if (step === 'login') {
     return (
