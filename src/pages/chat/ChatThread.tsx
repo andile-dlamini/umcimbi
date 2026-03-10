@@ -25,6 +25,7 @@ const ChatThread = () => {
   const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [quotePrefill, setQuotePrefill] = useState<QuotePrefillData | null>(null);
+  const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
