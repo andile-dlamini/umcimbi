@@ -117,19 +117,17 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (conv) {
-        let label: string;
-        let amount: number;
         let content: string;
 
         if (kind === "full") {
           const totalAmount = (booking.deposit_amount || 0) + (booking.balance_amount || 0);
-          content = `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`;
+          content = `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed. Booking is now completed!`;
         } else {
-          label = kind === "deposit" ? "Deposit" : "Balance";
-          amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
+          const label = kind === "deposit" ? "Deposit" : "Balance";
+          const amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
           content = kind === "balance"
-            ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`
-            : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now active!`;
+            ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed. Booking is now completed!`
+            : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed. Booking is now active!`;
         }
 
         await supabase.from("messages").insert({
@@ -139,6 +137,21 @@ Deno.serve(async (req) => {
           message_type: "system",
           content,
         });
+
+        // If booking is now completed, send review prompt
+        const isCompleted = kind === "balance" || kind === "full";
+        if (isCompleted) {
+          // Find the booking ID for linking
+          await supabase.from("messages").insert({
+            conversation_id: conv.id,
+            sender_type: "system",
+            sender_user_id: null,
+            message_type: "review_prompt",
+            content: "⭐ How was the experience? Tap below to leave a review.",
+            metadata: { booking_id: bookingId },
+          });
+        }
+
         await supabase
           .from("conversations")
           .update({ last_message_at: new Date().toISOString() })

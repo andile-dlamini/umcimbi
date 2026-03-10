@@ -1310,6 +1310,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_vendor_view_count: {
+        Args: { vendor_id_input: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "user" | "vendor" | "admin"

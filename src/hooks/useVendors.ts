@@ -78,9 +78,9 @@ export function useVendor(vendorId: string | undefined) {
       } else {
         setVendor(data as Vendor | null);
         
-        // Increment view count (fire and forget)
+        // Increment view count via RPC to avoid race conditions (fire and forget)
         if (data) {
-          supabase.from('vendors').update({ view_count: (data.view_count || 0) + 1 }).eq('id', vendorId);
+          supabase.rpc('increment_vendor_view_count' as any, { vendor_id_input: vendorId });
         }
       }
       setIsLoading(false);

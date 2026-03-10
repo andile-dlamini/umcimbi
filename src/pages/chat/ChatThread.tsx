@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { format, isToday, isYesterday } from 'date-fns';
 import { QuoteCard } from '@/components/chat/QuoteCard';
 import { MakeQuotationSheet, QuotePrefillData } from '@/components/chat/MakeQuotationSheet';
+import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ChatDetailsDrawer } from '@/components/chat/ChatDetailsDrawer';
@@ -24,6 +25,7 @@ const ChatThread = () => {
   const [showDetailsDrawer, setShowDetailsDrawer] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [quotePrefill, setQuotePrefill] = useState<QuotePrefillData | null>(null);
+  const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,14 +44,19 @@ const ChatThread = () => {
   const handleSendAdjustment = async () => {
     if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
 
-    // Fetch current adjustment_count first
+    // Fetch current quote details for the adjustment card
     const { data: quoteData } = await supabase
       .from('quotes')
-      .select('adjustment_count')
+      .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
       .eq('id', adjustmentQuoteId)
       .single();
 
-    const newCount = (quoteData?.adjustment_count || 0) + 1;
+    if (!quoteData) return;
+
+    const newCount = (quoteData.adjustment_count || 0) + 1;
+    const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
+    const totalWithFee = quoteData.price + platformFee;
+    const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
 
     // Update quote status to adjustment_requested
     await supabase
@@ -61,10 +68,37 @@ const ChatThread = () => {
       })
       .eq('id', adjustmentQuoteId);
 
-    // Send chat message
-    const msg = `📝 Adjustment requested: ${adjustmentNote.trim()}`;
-    const success = await sendMessage(conversationId, msg);
-    if (success) {
+    // Send adjustment requested card as a quote_card message
+    const adjustmentMetadata = {
+      quote_id: adjustmentQuoteId,
+      offer_number: quoteData.offer_number,
+      total: quoteData.price,
+      deposit_percentage: quoteData.deposit_percentage,
+      deposit_amount: depositAmount,
+      platform_fee: platformFee,
+      vendor_payout: quoteData.price,
+      pdf_key: quoteData.final_offer_pdf_key || '',
+      status: 'adjustment_requested',
+      booking_id: null,
+      adjustment_count: newCount,
+      adjustment_note: adjustmentNote.trim(),
+    };
+
+    const { error: msgError } = await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_type: 'user' as const,
+      sender_user_id: user?.id,
+      message_type: 'quote_card',
+      content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
+      metadata: adjustmentMetadata,
+    });
+
+    if (!msgError) {
+      // Update conversation timestamp
+      await supabase.from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
       setAdjustmentNote('');
       setShowAdjustmentInput(false);
       setAdjustmentQuoteId(null);
@@ -270,6 +304,28 @@ const ChatThread = () => {
               if (vis === 'vendor' && !isVendorView) return null;
             }
 
+            // Review Prompt
+            if (messageType === 'review_prompt' && metadata?.booking_id) {
+              return (
+                <div key={message.id} className="flex justify-center">
+                  <div className="max-w-[85%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
+                    <p className="text-sm text-foreground">{message.content}</p>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => setReviewBookingId(metadata.booking_id)}
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Leave a Review
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground/70">
+                      {formatMessageTime(message.created_at)}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
             // Quote Card
             if (messageType === 'quote_card' && metadata) {
               return (
@@ -421,6 +477,20 @@ const ChatThread = () => {
         conversationId={conversationId || ''}
         isVendorView={isVendorView}
       />
+
+      {/* Inline Review Dialog */}
+      {reviewBookingId && (
+        <ReviewDialog
+          open={!!reviewBookingId}
+          onOpenChange={(open) => { if (!open) setReviewBookingId(null); }}
+          bookingId={reviewBookingId}
+          isVendorView={isVendorView}
+          onSuccess={() => {
+            setReviewBookingId(null);
+            refreshMessages();
+          }}
+        />
+      )}
     </div>
   );
 };
