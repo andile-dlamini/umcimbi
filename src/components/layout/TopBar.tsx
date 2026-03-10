@@ -88,7 +88,7 @@ export function TopBar() {
           </Button>
 
           {/* Center: app name */}
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" />
+          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-16 dark:brightness-0 dark:invert" />
 
           {/* Right: role switcher or messages shortcut */}
           <div className="flex items-center gap-1">
