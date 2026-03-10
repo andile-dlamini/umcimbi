@@ -83,7 +83,15 @@ export function AppSidebar() {
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    // Exact match first
+    if (location.pathname === path) return true;
+    // For sub-paths, check that no other nav item is a better (longer) match
+    if (location.pathname.startsWith(path + '/')) {
+      const allPaths = [...navItems.map(i => i.to), ...bottomItems.map(i => i.to)];
+      const longerMatch = allPaths.find(p => p !== path && p.length > path.length && location.pathname.startsWith(p));
+      return !longerMatch;
+    }
+    return false;
   };
 
   const initials = (profile?.first_name?.[0] || profile?.full_name?.[0] || 'U').toUpperCase();
@@ -115,12 +123,8 @@ export function AppSidebar() {
     return (
       <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
         {/* Logo / Brand */}
-        <div className={cn("h-14 shrink-0 border-b border-sidebar-border/50 gap-0 flex-row flex items-start justify-end", collapsed ? 'justify-center px-2' : 'px-4')}>
-          {collapsed ?
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" /> :
-
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" />
-          }
+        <div className={cn("h-14 shrink-0 border-b border-sidebar-border/50 flex items-center", collapsed ? 'justify-center px-2' : 'px-4')}>
+          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className={cn("dark:brightness-0 dark:invert", collapsed ? 'h-10' : 'h-16')} />
         </div>
 
         {/* User card */}
