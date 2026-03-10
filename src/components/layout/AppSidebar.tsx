@@ -83,7 +83,15 @@ export function AppSidebar() {
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    // Exact match first
+    if (location.pathname === path) return true;
+    // For sub-paths, check that no other nav item is a better (longer) match
+    if (location.pathname.startsWith(path + '/')) {
+      const allPaths = [...navItems.map(i => i.to), ...bottomItems.map(i => i.to)];
+      const longerMatch = allPaths.find(p => p !== path && p.length > path.length && location.pathname.startsWith(p));
+      return !longerMatch;
+    }
+    return false;
   };
 
   const initials = (profile?.first_name?.[0] || profile?.full_name?.[0] || 'U').toUpperCase();
