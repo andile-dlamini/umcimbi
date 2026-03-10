@@ -391,23 +391,23 @@ export default function OnboardingLanguage() {
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
-              <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better. Work with less back-and-forth.</h2>
-              <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
+              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">Win better. Work with less back-and-forth.</h2>
+              <p className="text-lg text-muted-foreground mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {[
                 { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
                 { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
                 { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' }].
                 map(({ icon: Icon, title, body }) =>
-                <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+                <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
                     <div className="flex gap-5 items-start">
-                      <div className="w-11 h-11 rounded-xl bg-primary/25 flex items-center justify-center shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[15px] text-white">{title}</h3>
-                        <p className="text-sm text-white/55 mt-1 leading-relaxed">{body}</p>
+                        <h3 className="font-semibold text-[15px] text-foreground">{title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
                       </div>
                     </div>
                   </div>
