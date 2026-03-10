@@ -199,18 +199,6 @@ export default function VendorDetail() {
           </div>
         )}
 
-        {/* Languages */}
-        {vendor.languages && vendor.languages.length > 0 && (
-          <div>
-            <h2 className="font-semibold text-foreground mb-2">Languages</h2>
-            <div className="flex flex-wrap gap-2">
-              {vendor.languages.map((lang) => (
-                <Badge key={lang} variant="outline">{lang}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Reviews Section */}
         <VendorRating vendorId={id!} />
 
