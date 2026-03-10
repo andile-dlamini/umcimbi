@@ -379,41 +379,35 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FOR VENDORS — Warm override band with background image ═══ */}
+      {/* ═══ FOR VENDORS — Clean light section ═══ */}
       <section
         id="vendors"
-        className="relative py-28 scroll-mt-20 overflow-hidden"
+        className="relative py-28 scroll-mt-20 overflow-hidden bg-background"
         style={{
           '--primary': '20 75% 40%',
           '--accent': '20 65% 50%'
         } as React.CSSProperties}>
 
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }} />
-
-        <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.64)]" />
-
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
-              <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg">Win better. Work with less back-and-forth.</h2>
-              <p className="text-lg text-white/55 mb-10">Grow your ceremony business with qualified leads.</p>
+              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">Win better. Work with less back-and-forth.</h2>
+              <p className="text-lg text-muted-foreground mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {[
                 { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
                 { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
                 { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' }].
                 map(({ icon: Icon, title, body }) =>
-                <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-6 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
+                <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
                     <div className="flex gap-5 items-start">
-                      <div className="w-11 h-11 rounded-xl bg-primary/25 flex items-center justify-center shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[15px] text-white">{title}</h3>
-                        <p className="text-sm text-white/55 mt-1 leading-relaxed">{body}</p>
+                        <h3 className="font-semibold text-[15px] text-foreground">{title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
                       </div>
                     </div>
                   </div>
@@ -432,7 +426,7 @@ export default function OnboardingLanguage() {
             <div className="hidden md:flex flex-col justify-center items-center gap-5">
               {/* Vendor Dashboard mockup — matches actual VendorDashboard layout */}
               <div className="relative w-80 h-80">
-                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
+                <div className="absolute inset-0 rounded-[2rem] bg-muted/50 border border-border" />
                 <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Page header */}
                   <div className="h-8 bg-primary flex items-center justify-between px-3">
