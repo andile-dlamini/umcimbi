@@ -76,14 +76,20 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
       }
 
       // Determine if this card is superseded
-      // An adjustment_requested card is superseded once vendor responds (status changes)
-      if (metadata.status === 'adjustment_requested' && quote && quote.status !== 'adjustment_requested') {
-        setIsSuperseded(true);
-      }
-      
-      // A pending_client card is superseded if the quote now has a higher adjustment count
-      if (metadata.status === 'pending_client' && quote && (quote.adjustment_count || 0) > (metadata.adjustment_count || 0)) {
-        setIsSuperseded(true);
+      if (quote) {
+        const currentCount = quote.adjustment_count || 0;
+        const cardCount = metadata.adjustment_count || 0;
+        
+        // A pending_client card is superseded if a newer revision exists
+        if (metadata.status === 'pending_client' && currentCount > cardCount) {
+          setIsSuperseded(true);
+        }
+        
+        // An adjustment_requested card is superseded once the vendor has sent a revised quote
+        // (adjustment_count increments and status returns to pending_client)
+        if (metadata.status === 'adjustment_requested' && quote.status === 'pending_client' && currentCount > cardCount) {
+          setIsSuperseded(true);
+        }
       }
     };
     refreshStatus();
