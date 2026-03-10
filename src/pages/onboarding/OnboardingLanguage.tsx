@@ -426,7 +426,7 @@ export default function OnboardingLanguage() {
             <div className="hidden md:flex flex-col justify-center items-center gap-5">
               {/* Vendor Dashboard mockup — matches actual VendorDashboard layout */}
               <div className="relative w-80 h-80">
-                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
+                <div className="absolute inset-0 rounded-[2rem] bg-muted/50 border border-border" />
                 <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
                   {/* Page header */}
                   <div className="h-8 bg-primary flex items-center justify-between px-3">
