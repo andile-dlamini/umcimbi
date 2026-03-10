@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     const { bookingId, kind, successUrl, cancelUrl } = await req.json();
 
-    if (!bookingId || !kind || !["deposit", "balance"].includes(kind)) {
+    if (!bookingId || !kind || !["deposit", "balance", "full"].includes(kind)) {
       return new Response(JSON.stringify({ error: "Invalid parameters" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -90,8 +90,22 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (kind === "full" && (booking.deposit_status === "paid" && booking.balance_status === "paid")) {
+      return new Response(JSON.stringify({ error: "Already fully paid" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
+    // Calculate amount: for "full", charge the total remaining (deposit + balance if both unpaid, or just balance if deposit already paid)
+    let amount: number;
+    if (kind === "full") {
+      const depositRemaining = booking.deposit_status !== "paid" ? (booking.deposit_amount || 0) : 0;
+      const balanceRemaining = booking.balance_status !== "paid" ? (booking.balance_amount || 0) : 0;
+      amount = depositRemaining + balanceRemaining;
+    } else {
+      amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
+    }
     const amountInCents = Math.round((amount || 0) * 100);
 
     if (amountInCents <= 0) {

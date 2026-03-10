@@ -39,6 +39,7 @@ export default function BookingDetail() {
   const [isReporting, setIsReporting] = useState(false);
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
+  const [isPayingFull, setIsPayingFull] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
 
@@ -47,7 +48,7 @@ export default function BookingDetail() {
     const paymentStatus = searchParams.get('payment');
     const kind = searchParams.get('kind');
     if (paymentStatus === 'success') {
-      toast.success(`${kind === 'deposit' ? 'Deposit' : 'Balance'} payment successful! It may take a moment to reflect.`);
+      toast.success(`${kind === 'deposit' ? 'Deposit' : kind === 'balance' ? 'Balance' : 'Full'} payment successful! It may take a moment to reflect.`);
       navigate(`/bookings/${bookingId}`, { replace: true });
       setTimeout(() => refreshDetails(), 2000);
     } else if (paymentStatus === 'cancelled') {
@@ -94,10 +95,10 @@ export default function BookingDetail() {
     setIsLoadingQuotePdf(false);
   };
 
-  const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
+  const handleYocoPayment = async (kind: 'deposit' | 'balance' | 'full') => {
     if (!bookingId || !user) return;
 
-    const setLoading = kind === 'deposit' ? setIsPayingDeposit : setIsPayingBalance;
+    const setLoading = kind === 'deposit' ? setIsPayingDeposit : kind === 'balance' ? setIsPayingBalance : setIsPayingFull;
     setLoading(true);
 
     try {
@@ -295,19 +296,35 @@ export default function BookingDetail() {
                 </div>
               </div>
               {isClient && depositDue && booking.deposit_status !== 'paid' && (
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => handleYocoPayment('deposit')}
-                  disabled={isPayingDeposit}
-                >
-                  {isPayingDeposit ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CreditCard className="h-4 w-4 mr-2" />
-                  )}
-                  {isPayingDeposit ? 'Redirecting to Yoco...' : 'Pay Deposit'}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleYocoPayment('deposit')}
+                    disabled={isPayingDeposit || isPayingFull}
+                  >
+                    {isPayingDeposit ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-4 w-4 mr-2" />
+                    )}
+                    {isPayingDeposit ? 'Redirecting to Yoco...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleYocoPayment('full')}
+                    disabled={isPayingFull || isPayingDeposit}
+                  >
+                    {isPayingFull ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-4 w-4 mr-2" />
+                    )}
+                    {isPayingFull ? 'Redirecting to Yoco...' : `Pay in Full (R${booking.agreed_price?.toLocaleString()})`}
+                  </Button>
+                </div>
               )}
 
               {/* Balance */}

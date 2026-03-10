@@ -43,16 +43,23 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update booking payment status
+    const now = new Date().toISOString();
     const updates: Record<string, unknown> = {};
     if (kind === "deposit") {
       updates.deposit_status = "paid";
-      updates.deposit_paid_at = new Date().toISOString();
+      updates.deposit_paid_at = now;
       updates.booking_status = "confirmed";
       updates.balance_status = "due";
-      updates.balance_due_at = new Date().toISOString();
+      updates.balance_due_at = now;
     } else if (kind === "balance") {
       updates.balance_status = "paid";
-      updates.balance_paid_at = new Date().toISOString();
+      updates.balance_paid_at = now;
+      updates.booking_status = "completed";
+    } else if (kind === "full") {
+      updates.deposit_status = "paid";
+      updates.deposit_paid_at = now;
+      updates.balance_status = "paid";
+      updates.balance_paid_at = now;
       updates.booking_status = "completed";
     }
 
@@ -110,11 +117,20 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (conv) {
-        const label = kind === "deposit" ? "Deposit" : "Balance";
-        const amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
-        const content = kind === "balance"
-          ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`
-          : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now active!`;
+        let label: string;
+        let amount: number;
+        let content: string;
+
+        if (kind === "full") {
+          const totalAmount = (booking.deposit_amount || 0) + (booking.balance_amount || 0);
+          content = `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`;
+        } else {
+          label = kind === "deposit" ? "Deposit" : "Balance";
+          amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
+          content = kind === "balance"
+            ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`
+            : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now active!`;
+        }
 
         await supabase.from("messages").insert({
           conversation_id: conv.id,
