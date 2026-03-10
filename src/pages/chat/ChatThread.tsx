@@ -356,6 +356,7 @@ const ChatThread = () => {
                     onRequestAdjustment={!isVendorView ? handleRequestAdjustment : undefined}
                     onAdjustQuote={isVendorView ? handleAdjustQuote : undefined}
                   />
+                  </div>
                 </div>
               );
             }
