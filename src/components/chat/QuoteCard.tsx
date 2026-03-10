@@ -145,22 +145,35 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
   const isAccepted = currentStatus === 'client_accepted';
   const canRequestAdjustment = adjustmentCount < MAX_ADJUSTMENTS;
 
+  const isAdjustmentCard = metadata.status === 'adjustment_requested' && !!metadata.adjustment_note;
+
   return (
-    <div className="w-full max-w-[85%] rounded-xl border-2 border-primary/30 bg-card overflow-hidden">
-      <div className="bg-primary/10 px-4 py-2 flex items-center justify-between">
+    <div className={`w-full max-w-[85%] rounded-xl border-2 overflow-hidden ${
+      isSuperseded ? 'border-border opacity-70' : isAdjustmentCard ? 'border-amber-400/50 bg-card' : 'border-primary/30 bg-card'
+    }`}>
+      <div className={`px-4 py-2 flex items-center justify-between ${
+        isAdjustmentCard ? 'bg-amber-500/10' : 'bg-primary/10'
+      }`}>
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-primary">
-            {depositPaid
-              ? 'Order'
-              : (metadata.adjustment_count || 0) > 0
-                ? 'Revised Quotation'
-                : 'Quotation'}
+          <FileText className={`h-4 w-4 ${isAdjustmentCard ? 'text-amber-600' : 'text-primary'}`} />
+          <span className={`text-sm font-semibold ${isAdjustmentCard ? 'text-amber-700 dark:text-amber-400' : 'text-primary'}`}>
+            {isAdjustmentCard
+              ? 'Adjustment Requested'
+              : depositPaid
+                ? 'Order'
+                : (metadata.adjustment_count || 0) > 0
+                  ? 'Revised Quotation'
+                  : 'Quotation'}
           </span>
         </div>
-        <Badge variant={statusInfo.variant} className="text-xs">
-          {statusInfo.label}
-        </Badge>
+        <div className="flex items-center gap-1.5">
+          {isSuperseded && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">Superseded</Badge>
+          )}
+          <Badge variant={statusInfo.variant} className="text-xs">
+            {statusInfo.label}
+          </Badge>
+        </div>
       </div>
 
       <div className="px-4 py-3 space-y-2">
