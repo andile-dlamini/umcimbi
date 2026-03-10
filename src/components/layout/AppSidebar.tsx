@@ -117,7 +117,7 @@ export function AppSidebar() {
         {/* Logo / Brand */}
         <div className={cn('flex items-center h-14 shrink-0 border-b border-sidebar-border/50', collapsed ? 'justify-center px-2' : 'px-4')}>
           {collapsed ? (
-            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-16 dark:brightness-0 dark:invert" />
+            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-10 dark:brightness-0 dark:invert" />
           ) : (
             <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-16 dark:brightness-0 dark:invert" />
           )}
