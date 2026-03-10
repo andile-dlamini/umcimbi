@@ -469,7 +469,11 @@ export default function AuthPage() {
                     autoComplete="current-password"
                   />
                   {errors.loginPassword && <p className="text-sm text-destructive">{errors.loginPassword}</p>}
-                </div>
+                  <div className="text-right">
+                    <Button variant="link" className="px-0 h-auto text-xs" onClick={() => { setForgotPhone(loginPhone); setStep('forgot_phone'); }}>
+                      Forgot password?
+                    </Button>
+                  </div>
                 <Button type="submit" className="w-full h-12" disabled={isLoading}>
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   {isLoading ? 'Signing in...' : 'Sign in'}
