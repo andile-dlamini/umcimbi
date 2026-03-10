@@ -95,10 +95,10 @@ export default function BookingDetail() {
     setIsLoadingQuotePdf(false);
   };
 
-  const handleYocoPayment = async (kind: 'deposit' | 'balance') => {
+  const handleYocoPayment = async (kind: 'deposit' | 'balance' | 'full') => {
     if (!bookingId || !user) return;
 
-    const setLoading = kind === 'deposit' ? setIsPayingDeposit : setIsPayingBalance;
+    const setLoading = kind === 'deposit' ? setIsPayingDeposit : kind === 'balance' ? setIsPayingBalance : setIsPayingFull;
     setLoading(true);
 
     try {
