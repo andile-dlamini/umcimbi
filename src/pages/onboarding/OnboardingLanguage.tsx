@@ -379,20 +379,14 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FOR VENDORS — Warm override band with background image ═══ */}
+      {/* ═══ FOR VENDORS — Clean light section ═══ */}
       <section
         id="vendors"
-        className="relative py-28 scroll-mt-20 overflow-hidden"
+        className="relative py-28 scroll-mt-20 overflow-hidden bg-background"
         style={{
           '--primary': '20 75% 40%',
           '--accent': '20 65% 50%'
         } as React.CSSProperties}>
-
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/vendors-bg.jpg)' }} />
-
-        <div className="absolute inset-0 bg-[hsl(20_30%_6%/0.64)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-start">
