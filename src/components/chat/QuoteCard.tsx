@@ -136,10 +136,10 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
   const isAdjustmentCard = metadata.status === 'adjustment_requested' && !!metadata.adjustment_note;
 
   return (
-    <div className={`w-full max-w-[85%] rounded-xl border-2 overflow-hidden ${
+    <div className={`w-full rounded-xl border-2 overflow-hidden ${
       isSuperseded ? 'border-border opacity-70' : isAdjustmentCard ? 'border-amber-400/50 bg-card' : 'border-primary/30 bg-card'
     }`}>
-      <div className={`px-4 py-2 flex items-center justify-between ${
+      <div className={`px-3 py-1.5 flex items-center justify-between ${
         isAdjustmentCard ? 'bg-amber-500/10' : 'bg-primary/10'
       }`}>
         <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
         </div>
       </div>
 
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-3 py-2 space-y-1.5">
         <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">Ref</span>
           <span className="text-sm font-mono font-medium">{metadata.offer_number}</span>
@@ -209,7 +209,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
         )}
       </div>
 
-      <div className="px-4 py-3 border-t border-border space-y-2">
+      <div className="px-3 py-2 border-t border-border space-y-1.5">
         {/* PDF always available */}
         <Button
           type="button"

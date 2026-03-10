@@ -44,56 +44,70 @@ const ChatThread = () => {
   const handleSendAdjustment = async () => {
     if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
 
-    // Fetch current quote details for the adjustment card
-    const { data: quoteData } = await supabase
-      .from('quotes')
-      .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
-      .eq('id', adjustmentQuoteId)
-      .single();
+    try {
+      // Fetch current quote details for the adjustment card
+      const { data: quoteData, error: fetchErr } = await supabase
+        .from('quotes')
+        .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
+        .eq('id', adjustmentQuoteId)
+        .single();
 
-    if (!quoteData) return;
+      if (fetchErr || !quoteData) {
+        toast.error('Failed to load quote details');
+        return;
+      }
 
-    const newCount = (quoteData.adjustment_count || 0) + 1;
-    const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
-    const totalWithFee = quoteData.price + platformFee;
-    const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
+      const newCount = (quoteData.adjustment_count || 0) + 1;
+      const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
+      const totalWithFee = quoteData.price + platformFee;
+      const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
 
-    // Update quote status to adjustment_requested
-    await supabase
-      .from('quotes')
-      .update({
-        status: 'adjustment_requested' as any,
-        adjustment_reason: adjustmentNote.trim(),
+      // Send adjustment requested card as a quote_card message FIRST (before updating quote)
+      const adjustmentMetadata = {
+        quote_id: adjustmentQuoteId,
+        offer_number: quoteData.offer_number,
+        total: quoteData.price,
+        deposit_percentage: quoteData.deposit_percentage,
+        deposit_amount: depositAmount,
+        platform_fee: platformFee,
+        vendor_payout: quoteData.price,
+        pdf_key: quoteData.final_offer_pdf_key || '',
+        status: 'adjustment_requested',
+        booking_id: null,
         adjustment_count: newCount,
-      })
-      .eq('id', adjustmentQuoteId);
+        adjustment_note: adjustmentNote.trim(),
+      };
 
-    // Send adjustment requested card as a quote_card message
-    const adjustmentMetadata = {
-      quote_id: adjustmentQuoteId,
-      offer_number: quoteData.offer_number,
-      total: quoteData.price,
-      deposit_percentage: quoteData.deposit_percentage,
-      deposit_amount: depositAmount,
-      platform_fee: platformFee,
-      vendor_payout: quoteData.price,
-      pdf_key: quoteData.final_offer_pdf_key || '',
-      status: 'adjustment_requested',
-      booking_id: null,
-      adjustment_count: newCount,
-      adjustment_note: adjustmentNote.trim(),
-    };
+      const { error: msgError } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_type: 'user' as const,
+        sender_user_id: user?.id,
+        message_type: 'quote_card',
+        content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
+        metadata: adjustmentMetadata,
+      });
 
-    const { error: msgError } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_type: 'user' as const,
-      sender_user_id: user?.id,
-      message_type: 'quote_card',
-      content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
-      metadata: adjustmentMetadata,
-    });
+      if (msgError) {
+        console.error('Error inserting adjustment message:', msgError);
+        toast.error('Failed to send adjustment request');
+        return;
+      }
 
-    if (!msgError) {
+      // Now update quote status to adjustment_requested
+      const { error: updateErr } = await supabase
+        .from('quotes')
+        .update({
+          status: 'adjustment_requested' as any,
+          adjustment_reason: adjustmentNote.trim(),
+          adjustment_count: newCount,
+        })
+        .eq('id', adjustmentQuoteId);
+
+      if (updateErr) {
+        console.error('Error updating quote status:', updateErr);
+        toast.error('Adjustment message sent but status update failed');
+      }
+
       // Update conversation timestamp
       await supabase.from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -103,6 +117,9 @@ const ChatThread = () => {
       setShowAdjustmentInput(false);
       setAdjustmentQuoteId(null);
       refreshMessages();
+    } catch (err) {
+      console.error('Error in handleSendAdjustment:', err);
+      toast.error('Failed to send adjustment request');
     }
   };
 
@@ -308,7 +325,7 @@ const ChatThread = () => {
             if (messageType === 'review_prompt' && metadata?.booking_id) {
               return (
                 <div key={message.id} className="flex justify-center">
-                  <div className="max-w-[85%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
+                  <div className="max-w-[70%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
                     <p className="text-sm text-foreground">{message.content}</p>
                     <Button
                       size="sm"
@@ -329,7 +346,7 @@ const ChatThread = () => {
             // Quote Card
             if (messageType === 'quote_card' && metadata) {
               return (
-                <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`} style={{ maxWidth: '75%', marginLeft: isOwn ? 'auto' : undefined }}>
                   <QuoteCard
                     metadata={metadata}
                     isVendorView={isVendorView}
@@ -346,7 +363,7 @@ const ChatThread = () => {
             if (isSystem) {
               return (
                 <div key={message.id} className="flex justify-center">
-                  <div className="max-w-[85%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
+                  <div className="max-w-[70%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
                     <p className="text-sm text-center whitespace-pre-wrap text-muted-foreground">
                       {message.content}
                     </p>
