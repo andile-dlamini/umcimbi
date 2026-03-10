@@ -304,6 +304,28 @@ const ChatThread = () => {
               if (vis === 'vendor' && !isVendorView) return null;
             }
 
+            // Review Prompt
+            if (messageType === 'review_prompt' && metadata?.booking_id) {
+              return (
+                <div key={message.id} className="flex justify-center">
+                  <div className="max-w-[85%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
+                    <p className="text-sm text-foreground">{message.content}</p>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => setReviewBookingId(metadata.booking_id)}
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Leave a Review
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground/70">
+                      {formatMessageTime(message.created_at)}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
             // Quote Card
             if (messageType === 'quote_card' && metadata) {
               return (
