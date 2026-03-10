@@ -19,6 +19,8 @@ interface QuoteCardMetadata {
   status: string;
   booking_id: string | null;
   adjustment_count?: number;
+  adjustment_note?: string;
+  is_superseded?: boolean;
 }
 
 interface QuoteCardProps {
