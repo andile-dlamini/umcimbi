@@ -76,7 +76,7 @@ export function createBookingFromQuote(
     vendor_id: quote.vendor_id,
     quote_id: quote.id,
     service_category: null,
-    agreed_price: quote.price,
+    agreed_price: totalWithFee,
     event_date_time: event.date,
     deposit_amount: depositAmount,
     balance_amount: balanceAmount,
