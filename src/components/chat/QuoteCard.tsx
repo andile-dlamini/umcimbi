@@ -139,14 +139,14 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
     <div className={`w-full rounded-xl border-2 overflow-hidden ${
       isSuperseded ? 'border-border opacity-70' : isAdjustmentCard ? 'border-amber-400/50 bg-card' : 'border-primary/30 bg-card'
     }`}>
-      <div className={`px-3 py-1.5 flex items-center justify-between ${
+      <div className={`px-2 py-1 flex items-center justify-between ${
         isAdjustmentCard ? 'bg-amber-500/10' : 'bg-primary/10'
       }`}>
-        <div className="flex items-center gap-2">
-          <FileText className={`h-4 w-4 ${isAdjustmentCard ? 'text-amber-600' : 'text-primary'}`} />
-          <span className={`text-sm font-semibold ${isAdjustmentCard ? 'text-amber-700 dark:text-amber-400' : 'text-primary'}`}>
+        <div className="flex items-center gap-1">
+          <FileText className={`h-3 w-3 ${isAdjustmentCard ? 'text-amber-600' : 'text-primary'}`} />
+          <span className={`text-xs font-semibold ${isAdjustmentCard ? 'text-amber-700 dark:text-amber-400' : 'text-primary'}`}>
             {isAdjustmentCard
-              ? 'Adjustment Requested'
+              ? 'Adjust Requested'
               : depositPaid
                 ? 'Order'
                 : (metadata.adjustment_count || 0) > 0
@@ -154,57 +154,56 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
                   : 'Quotation'}
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {isSuperseded && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0">Superseded</Badge>
+            <Badge variant="outline" className="text-[9px] px-1 py-0 leading-tight">Superseded</Badge>
           )}
-          <Badge variant={statusInfo.variant} className="text-xs">
+          <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0 leading-tight">
             {statusInfo.label}
           </Badge>
         </div>
       </div>
 
-      <div className="px-3 py-2 space-y-1.5">
+      <div className="px-2 py-1.5 space-y-0.5">
         <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Ref</span>
-          <span className="text-sm font-mono font-medium">{metadata.offer_number}</span>
+          <span className="text-[10px] text-muted-foreground">Ref</span>
+          <span className="text-[10px] font-mono font-medium truncate ml-1">{metadata.offer_number}</span>
         </div>
         {isVendorView ? (
           <>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Your quote</span>
-              <span className="text-lg font-bold">{formatCurrency(metadata.total)}</span>
+              <span className="text-[10px] text-muted-foreground">Your quote</span>
+              <span className="text-sm font-bold">{formatCurrency(metadata.total)}</span>
             </div>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
-              <span>Client pays (incl. 8% fee)</span>
+            <div className="flex justify-between items-center text-[10px] text-muted-foreground">
+              <span>Client pays (8%)</span>
               <span>{formatCurrency(metadata.total * 1.08)}</span>
             </div>
           </>
         ) : (
           <>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <div className="flex justify-between items-center text-[10px] text-muted-foreground">
               <span>Subtotal</span>
               <span>{formatCurrency(metadata.total)}</span>
             </div>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <div className="flex justify-between items-center text-[10px] text-muted-foreground">
               <span>Service fee (8%)</span>
               <span>{formatCurrency(metadata.platform_fee || metadata.total * 0.08)}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-medium">Total</span>
-              <span className="text-lg font-bold">{formatCurrency(metadata.total + (metadata.platform_fee || metadata.total * 0.08))}</span>
+              <span className="text-[10px] font-medium">Total</span>
+              <span className="text-sm font-bold">{formatCurrency(metadata.total + (metadata.platform_fee || metadata.total * 0.08))}</span>
             </div>
           </>
         )}
         <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Deposit ({metadata.deposit_percentage}%)</span>
-          <span className="text-sm font-medium">{formatCurrency((metadata.total + (metadata.platform_fee || metadata.total * 0.08)) * (metadata.deposit_percentage / 100))}</span>
+          <span className="text-[10px] text-muted-foreground">Deposit ({metadata.deposit_percentage}%)</span>
+          <span className="text-xs font-medium">{formatCurrency((metadata.total + (metadata.platform_fee || metadata.total * 0.08)) * (metadata.deposit_percentage / 100))}</span>
         </div>
-        {/* Adjustment note */}
         {metadata.adjustment_note && (
-          <div className="rounded-lg bg-amber-500/10 border border-amber-400/30 px-3 py-2">
-            <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-0.5">Adjustment Note:</p>
-            <p className="text-sm text-foreground">{metadata.adjustment_note}</p>
+          <div className="rounded bg-amber-500/10 border border-amber-400/30 px-2 py-1">
+            <p className="text-[10px] font-medium text-amber-700 dark:text-amber-400">Adjustment Note:</p>
+            <p className="text-xs text-foreground">{metadata.adjustment_note}</p>
           </div>
         )}
       </div>
