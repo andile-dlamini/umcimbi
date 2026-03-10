@@ -474,6 +474,7 @@ export default function AuthPage() {
                       Forgot password?
                     </Button>
                   </div>
+                </div>
                 <Button type="submit" className="w-full h-12" disabled={isLoading}>
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   {isLoading ? 'Signing in...' : 'Sign in'}
