@@ -454,7 +454,7 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-5 w-5" />
-              About Isiko Planner
+              About UMCIMBI
             </CardTitle>
           </CardHeader>
           <CardContent>
