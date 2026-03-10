@@ -308,7 +308,7 @@ export default function BookingDetail() {
                     ) : (
                       <CreditCard className="h-4 w-4 mr-2" />
                     )}
-                    {isPayingDeposit ? 'Redirecting to Yoco...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
+                    {isPayingDeposit ? 'Redirecting to UMCIMBI payment...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
                   </Button>
                   <Button
                     size="sm"
