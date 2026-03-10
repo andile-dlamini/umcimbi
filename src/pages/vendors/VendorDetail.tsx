@@ -166,12 +166,10 @@ export default function VendorDetail() {
                   <span className="font-medium">{vendor.rating}</span>
                   <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
                 </div>
-                {(vendor as any).jobs_completed > 0 && (
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Briefcase className="h-4 w-4" />
-                    <span>{(vendor as any).jobs_completed} jobs done</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                  <span>{vendor.added_to_events_count ?? 0} events</span>
+                </div>
                 {vendor.location && (
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
@@ -198,18 +196,6 @@ export default function VendorDetail() {
           <div>
             <h2 className="font-semibold text-foreground mb-2">About</h2>
             <p className="text-muted-foreground leading-relaxed">{vendor.about}</p>
-          </div>
-        )}
-
-        {/* Languages */}
-        {vendor.languages && vendor.languages.length > 0 && (
-          <div>
-            <h2 className="font-semibold text-foreground mb-2">Languages</h2>
-            <div className="flex flex-wrap gap-2">
-              {vendor.languages.map((lang) => (
-                <Badge key={lang} variant="outline">{lang}</Badge>
-              ))}
-            </div>
           </div>
         )}
 
