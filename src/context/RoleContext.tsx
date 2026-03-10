@@ -17,7 +17,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   // Load saved role preference
   useEffect(() => {
-    const savedRole = localStorage.getItem('isiko-active-role') as ActiveRole | null;
+    const savedRole = localStorage.getItem('umcimbi-active-role') as ActiveRole | null;
     if (savedRole && (savedRole === 'organiser' || savedRole === 'vendor')) {
       // Only set vendor role if user is actually a vendor
       if (savedRole === 'vendor' && isVendor) {
