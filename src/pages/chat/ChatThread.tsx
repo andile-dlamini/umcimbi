@@ -346,7 +346,8 @@ const ChatThread = () => {
             // Quote Card
             if (messageType === 'quote_card' && metadata) {
               return (
-                <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`} style={{ maxWidth: '75%', marginLeft: isOwn ? 'auto' : undefined }}>
+                <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} w-full`}>
+                  <div className={`max-w-xs ${isOwn ? 'ml-auto' : ''}`}>
                   <QuoteCard
                     metadata={metadata}
                     isVendorView={isVendorView}
@@ -355,6 +356,7 @@ const ChatThread = () => {
                     onRequestAdjustment={!isVendorView ? handleRequestAdjustment : undefined}
                     onAdjustQuote={isVendorView ? handleAdjustQuote : undefined}
                   />
+                  </div>
                 </div>
               );
             }
