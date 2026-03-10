@@ -607,9 +607,9 @@ export default function OnboardingLanguage() {
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Ceremonies</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Built for the moments that matter most</h2>
-            <p className="text-lg text-muted-foreground mt-3">Supporting the ceremonies your family treasures.</p>
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Ceremonies</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Built for the moments that matter most</h2>
+            <p className="text-lg text-white/60 mt-3">Supporting the ceremonies your family treasures.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-secondary" icon="🎁" />
