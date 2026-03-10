@@ -11,7 +11,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
   const navigate = useNavigate();
 
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(
-    `Learn about ${article.title}! Check out this guide on Isiko Planner.`
+    `Learn about ${article.title}! Check out this guide on UMCIMBI.`
   )}`;
 
   return (
