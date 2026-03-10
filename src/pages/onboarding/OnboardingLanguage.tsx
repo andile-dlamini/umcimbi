@@ -603,7 +603,7 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }} />
 
-        <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.82)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.55)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
