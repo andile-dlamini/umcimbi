@@ -34,7 +34,10 @@ const ChatsList = () => {
 
   const getDisplayName = (conv: ConversationType) => {
     if (isVendor && vendorProfile?.id === conv.vendor_id) {
-      return conv.user_profile?.full_name || conv.user_profile?.phone_number || 'User';
+      return conv.user_profile?.full_name
+        || [conv.user_profile?.first_name, conv.user_profile?.surname].filter(Boolean).join(' ')
+        || conv.user_profile?.phone_number
+        || 'User';
     }
     return conv.vendor?.name || 'Vendor';
   };
