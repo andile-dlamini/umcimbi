@@ -57,7 +57,7 @@ const passwordSchema = z.object({
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-type Step = 'details' | 'otp' | 'password' | 'success' | 'login';
+type Step = 'details' | 'otp' | 'password' | 'success' | 'login' | 'forgot_phone' | 'forgot_otp' | 'forgot_password';
 
 export default function AuthPage() {
   const navigate = useNavigate();
