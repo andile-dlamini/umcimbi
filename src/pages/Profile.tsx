@@ -459,7 +459,7 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Isiko Planner helps South African families plan traditional Zulu ceremonies 
+              UMCIMBI helps South African families plan traditional Zulu ceremonies 
               with respect and care. We provide checklists, budget tools, and connect you 
               with trusted vendors to make your special day memorable.
             </p>

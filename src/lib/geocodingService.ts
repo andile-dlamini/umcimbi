@@ -26,7 +26,7 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
       {
         headers: {
-          'User-Agent': 'IsikoPlannerApp/1.0',
+          'User-Agent': 'UmcimbiApp/1.0',
         },
       }
     );

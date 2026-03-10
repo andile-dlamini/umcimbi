@@ -31,7 +31,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const handleSetActiveRole = (role: ActiveRole) => {
     if (role === 'vendor' && !isVendor) return;
     setActiveRole(role);
-    localStorage.setItem('isiko-active-role', role);
+    localStorage.setItem('umcimbi-active-role', role);
   };
 
   const canSwitchRole = isVendor;

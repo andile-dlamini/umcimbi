@@ -80,10 +80,7 @@ export default function OnboardingLanguage() {
 
         <div className="mx-auto max-w-6xl flex items-center justify-between px-5 sm:px-8 h-16">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-              <span className="text-sm font-bold text-primary-foreground">U</span>
-            </div>
-            <span className="font-bold text-lg tracking-tight text-white">UMCIMBI</span>
+            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-8 brightness-0 invert" />
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
