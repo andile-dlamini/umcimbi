@@ -79,13 +79,29 @@ export function AddressFields({ data, onChange, errors }: AddressFieldsProps) {
 
         <div className="space-y-2">
           <Label htmlFor="state_province">State / Province</Label>
-          <Input
-            id="state_province"
-            placeholder="e.g., KwaZulu-Natal"
-            value={data.state_province}
-            onChange={(e) => update('state_province', e.target.value)}
-            className="h-12"
-          />
+          {data.country === 'ZA' ? (
+            <Select
+              value={data.state_province}
+              onValueChange={(v) => update('state_province', v)}
+            >
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Select province" />
+              </SelectTrigger>
+              <SelectContent>
+                {SA_PROVINCES.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              id="state_province"
+              placeholder="e.g., KwaZulu-Natal"
+              value={data.state_province}
+              onChange={(e) => update('state_province', e.target.value)}
+              className="h-12"
+            />
+          )}
         </div>
       </div>
 
