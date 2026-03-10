@@ -1,18 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Calendar, Gift, Heart, Handshake, Sparkles, ArrowRight } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
 import { useAuth } from '@/context/AuthContext';
 import { EventCard } from '@/components/shared/EventCard';
-import { EventType } from '@/types/database';
-
-const quickStartOptions: { type: EventType; label: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { type: 'umembeso', label: 'Umembeso', description: 'Gift-giving ceremony', icon: Gift },
-  { type: 'umabo', label: 'Umabo', description: 'Traditional wedding', icon: Heart },
-  { type: 'lobola', label: 'Lobola', description: 'Bridewealth negotiation', icon: Handshake },
-  { type: 'umemulo', label: 'Umemulo', description: 'Coming-of-age', icon: Sparkles },
-];
 
 export default function EventsList() {
   const navigate = useNavigate();
@@ -38,6 +30,12 @@ export default function EventsList() {
       </div>
 
       <div className="px-4 py-4 space-y-8 max-w-lg mx-auto">
+        {/* New Ceremony Button */}
+        <Button className="w-full" size="lg" onClick={() => navigate('/events/new')}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Ceremony
+        </Button>
+
         {/* Upcoming Ceremonies */}
         <section>
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
@@ -50,13 +48,9 @@ export default function EventsList() {
             <Card className="border-dashed">
               <CardContent className="py-10 text-center">
                 <Calendar className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  No ceremonies yet
+                <p className="text-sm text-muted-foreground">
+                  No ceremonies yet — tap above to get started
                 </p>
-                <Button size="sm" onClick={() => navigate('/events/new')}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Plan a ceremony
-                </Button>
               </CardContent>
             </Card>
           ) : (
@@ -66,36 +60,6 @@ export default function EventsList() {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Quick Start */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-            Quick start
-          </h3>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {quickStartOptions.map((option) => {
-              const Icon = option.icon;
-              return (
-                <Card 
-                  key={option.type}
-                  className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 tap-highlight-none group"
-                  onClick={() => navigate(`/events/new?type=${option.type}`)}
-                >
-                  <CardContent className="p-4">
-                    <Icon className="h-5 w-5 text-accent mb-2 group-hover:scale-110 transition-transform" />
-                    <h4 className="font-medium text-foreground text-sm">
-                      {option.label}
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {option.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </section>
       </div>
     </div>
