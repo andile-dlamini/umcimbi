@@ -84,10 +84,12 @@ serve(async (req) => {
     // Decline other quotes for same request
     await supabase.from("quotes").update({ status: "client_declined" }).eq("request_id", quote.request_id).neq("id", quote_id).eq("status", "pending_client");
 
-    // Create booking
+    // Create booking — amounts include the 8% platform service fee
     const depositPercentage = quote.deposit_percentage || 50;
-    const depositAmount = quote.price * (depositPercentage / 100);
-    const balanceAmount = quote.price - depositAmount;
+    const platformFee = Math.round(quote.price * 0.08 * 100) / 100;
+    const totalWithFee = quote.price + platformFee;
+    const depositAmount = Math.round(totalWithFee * (depositPercentage / 100) * 100) / 100;
+    const balanceAmount = Math.round((totalWithFee - depositAmount) * 100) / 100;
 
     // Get event date for booking
     let eventDateTime = null;
