@@ -95,8 +95,22 @@ export default function EventsList() {
                 </Card>
               );
             })}
+            {/* Create Custom Ceremony */}
+            <Card 
+              className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 tap-highlight-none group border-dashed border-2"
+              onClick={() => navigate('/events/new')}
+            >
+              <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                <Plus className="h-5 w-5 text-muted-foreground mb-2 group-hover:scale-110 transition-transform" />
+                <h4 className="font-medium text-foreground text-sm">
+                  Other Ceremony
+                </h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Create your own
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </section>
       </div>
     </div>
   );
