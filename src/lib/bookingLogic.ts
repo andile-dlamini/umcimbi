@@ -64,8 +64,10 @@ export function createBookingFromQuote(
     throw new Error('Can only create booking from an accepted quote');
   }
 
-  const depositAmount = Math.round(quote.price * 0.3); // 30% deposit
-  const balanceAmount = quote.price - depositAmount;
+  const platformFee = Math.round(quote.price * 0.08 * 100) / 100;
+  const totalWithFee = quote.price + platformFee;
+  const depositAmount = Math.round(totalWithFee * 0.3 * 100) / 100; // 30% deposit
+  const balanceAmount = Math.round((totalWithFee - depositAmount) * 100) / 100;
 
   return {
     id: crypto.randomUUID(),
@@ -74,7 +76,7 @@ export function createBookingFromQuote(
     vendor_id: quote.vendor_id,
     quote_id: quote.id,
     service_category: null,
-    agreed_price: quote.price,
+    agreed_price: totalWithFee,
     event_date_time: event.date,
     deposit_amount: depositAmount,
     balance_amount: balanceAmount,
