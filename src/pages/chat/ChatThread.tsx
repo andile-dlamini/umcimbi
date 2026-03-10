@@ -325,7 +325,7 @@ const ChatThread = () => {
             if (messageType === 'review_prompt' && metadata?.booking_id) {
               return (
                 <div key={message.id} className="flex justify-center">
-                  <div className="max-w-[85%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
+                  <div className="max-w-[70%] rounded-xl px-4 py-3 bg-primary/5 border-2 border-primary/20 text-center space-y-2">
                     <p className="text-sm text-foreground">{message.content}</p>
                     <Button
                       size="sm"
