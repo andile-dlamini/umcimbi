@@ -57,7 +57,7 @@ const passwordSchema = z.object({
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-type Step = 'details' | 'otp' | 'password' | 'success' | 'login';
+type Step = 'details' | 'otp' | 'password' | 'success' | 'login' | 'forgot_phone' | 'forgot_otp' | 'forgot_password';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -72,6 +72,9 @@ export default function AuthPage() {
   // Login state
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // Forgot password state
+  const [forgotPhone, setForgotPhone] = useState('');
 
   // Registration form state
   const [form, setForm] = useState({
@@ -293,6 +296,129 @@ export default function AuthPage() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  // ─── FORGOT PASSWORD HANDLERS ───
+
+  const handleForgotSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    if (!forgotPhone.trim()) { setErrors({ forgotPhone: 'Phone number is required' }); return; }
+    if (!validateSAPhone(forgotPhone)) { setErrors({ forgotPhone: 'Please enter a valid SA phone number' }); return; }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ phone_number: toE164(forgotPhone) }),
+      });
+      const data = await res.json();
+
+      if (res.status === 429) {
+        toast.error('Please wait before requesting a new code');
+        setCooldown(30);
+      } else if (!res.ok) {
+        toast.error(data.error || 'Failed to send verification code');
+      } else {
+        toast.success('Verification code sent!');
+        setStep('forgot_otp');
+        setCooldown(30);
+        setOtpExpiry(300);
+        setOtpValue('');
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotResend = async () => {
+    if (cooldown > 0) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ phone_number: toE164(forgotPhone) }),
+      });
+      const data = await res.json();
+      if (res.status === 429) {
+        toast.error(data.error || 'Too many requests');
+      } else {
+        toast.success('New code sent!');
+        setCooldown(30);
+        setOtpExpiry(300);
+        setOtpValue('');
+      }
+    } catch {
+      toast.error('Network error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotVerifyOtp = () => {
+    if (otpValue.length !== 6) {
+      toast.error('Please enter the full 6-digit code');
+      return;
+    }
+    setPasswordForm({ password: '', confirm_password: '' });
+    setStep('forgot_password');
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const result = passwordSchema.safeParse(passwordForm);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        const field = err.path[0]?.toString();
+        if (field) fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({
+          phone_number: toE164(forgotPhone),
+          otp: otpValue,
+          new_password: passwordForm.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.expired) {
+          toast.error('Code expired. Please start over.');
+          setStep('forgot_phone');
+        } else if (data.locked) {
+          toast.error('Too many attempts. Please start over.');
+          setStep('forgot_phone');
+        } else {
+          toast.error(data.error || 'Password reset failed');
+        }
+        return;
+      }
+
+      toast.success('Password reset successfully! Please sign in.');
+      setStep('login');
+      setLoginPhone(forgotPhone);
+      setLoginPassword('');
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // ─── LOGIN ───
   if (step === 'login') {
     return (
@@ -343,6 +469,11 @@ export default function AuthPage() {
                     autoComplete="current-password"
                   />
                   {errors.loginPassword && <p className="text-sm text-destructive">{errors.loginPassword}</p>}
+                  <div className="text-right">
+                    <Button variant="link" className="px-0 h-auto text-xs" onClick={() => { setForgotPhone(loginPhone); setStep('forgot_phone'); }}>
+                      Forgot password?
+                    </Button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full h-12" disabled={isLoading}>
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -357,6 +488,194 @@ export default function AuthPage() {
                   </Button>
                 </p>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── FORGOT: ENTER PHONE ───
+  if (step === 'forgot_phone') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+        <div className="px-4 py-4">
+          <Button variant="ghost" size="icon" onClick={() => setStep('login')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-4 pb-8">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Reset your password</CardTitle>
+              <CardDescription>Enter your phone number and we'll send a verification code</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleForgotSendOtp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="forgotPhone">Phone Number</Label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center justify-center h-12 px-3 rounded-md border border-input bg-muted text-sm font-medium text-muted-foreground shrink-0">
+                      🇿🇦 +27
+                    </div>
+                    <Input
+                      id="forgotPhone"
+                      type="tel"
+                      placeholder="0821234567"
+                      value={forgotPhone}
+                      onChange={e => { setForgotPhone(e.target.value); setErrors(prev => { const n = {...prev}; delete n.forgotPhone; return n; }); }}
+                      className={`h-12 ${errors.forgotPhone ? 'border-destructive' : ''}`}
+                      autoComplete="tel"
+                      autoFocus
+                    />
+                  </div>
+                  {errors.forgotPhone && <p className="text-sm text-destructive">{errors.forgotPhone}</p>}
+                </div>
+                <Button type="submit" className="w-full h-12" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
+                  {isLoading ? 'Sending code...' : 'Send Verification Code'}
+                </Button>
+              </form>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Remember your password?
+                  <Button variant="link" className="px-1" onClick={() => setStep('login')}>
+                    Sign in
+                  </Button>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── FORGOT: VERIFY OTP ───
+  if (step === 'forgot_otp') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+        <div className="px-4 py-4">
+          <Button variant="ghost" size="icon" onClick={() => setStep('forgot_phone')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-4 pb-8">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Verify your phone</CardTitle>
+              <CardDescription>
+                Enter the 6-digit code sent to <span className="font-semibold text-foreground">+27 {forgotPhone}</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+
+              {otpExpiry > 0 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Code expires in <span className="font-mono font-semibold text-foreground">{formatExpiryTime(otpExpiry)}</span>
+                </p>
+              )}
+              {otpExpiry === 0 && (
+                <p className="text-center text-sm text-destructive">Code expired. Please request a new one.</p>
+              )}
+
+              <Button
+                className="w-full h-12"
+                onClick={handleForgotVerifyOtp}
+                disabled={otpValue.length !== 6}
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Continue
+              </Button>
+
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleForgotResend}
+                  disabled={cooldown > 0 || isLoading}
+                >
+                  {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── FORGOT: NEW PASSWORD ───
+  if (step === 'forgot_password') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+        <div className="px-4 py-4">
+          <Button variant="ghost" size="icon" onClick={() => setStep('forgot_otp')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-4 pb-8">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Set new password</CardTitle>
+              <CardDescription>
+                Choose a new password for your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password *</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="Min 6 characters"
+                    value={passwordForm.password}
+                    onChange={e => { setPasswordForm(prev => ({ ...prev, password: e.target.value })); setErrors(prev => { const n = {...prev}; delete n.password; return n; }); }}
+                    className={`h-12 ${errors.password ? 'border-destructive' : ''}`}
+                    autoComplete="new-password"
+                  />
+                  {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewPassword">Confirm New Password *</Label>
+                  <Input
+                    id="confirmNewPassword"
+                    type="password"
+                    placeholder="Re-enter password"
+                    value={passwordForm.confirm_password}
+                    onChange={e => { setPasswordForm(prev => ({ ...prev, confirm_password: e.target.value })); setErrors(prev => { const n = {...prev}; delete n.confirm_password; return n; }); }}
+                    className={`h-12 ${errors.confirm_password ? 'border-destructive' : ''}`}
+                    autoComplete="new-password"
+                  />
+                  {errors.confirm_password && <p className="text-xs text-destructive">{errors.confirm_password}</p>}
+                </div>
+                <Button type="submit" className="w-full h-12 mt-2" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                  {isLoading ? 'Resetting password...' : 'Reset Password'}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
