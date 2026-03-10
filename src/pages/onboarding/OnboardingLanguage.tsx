@@ -80,7 +80,7 @@ export default function OnboardingLanguage() {
 
         <div className="mx-auto max-w-6xl flex items-center justify-between px-5 sm:px-8 h-16">
           <div className="flex items-center gap-2.5">
-            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-8 brightness-0 invert" />
+            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-12 brightness-0 invert" />
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
