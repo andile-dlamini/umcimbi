@@ -123,12 +123,8 @@ export function AppSidebar() {
     return (
       <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
         {/* Logo / Brand */}
-        <div className={cn("h-14 shrink-0 border-b border-sidebar-border/50 gap-0 flex-row flex items-start justify-end", collapsed ? 'justify-center px-2' : 'px-4')}>
-          {collapsed ?
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" /> :
-
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" />
-          }
+        <div className={cn("h-14 shrink-0 border-b border-sidebar-border/50 flex items-center", collapsed ? 'justify-center px-2' : 'px-4')}>
+          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className={cn("dark:brightness-0 dark:invert", collapsed ? 'h-10' : 'h-16')} />
         </div>
 
         {/* User card */}
