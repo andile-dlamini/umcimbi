@@ -351,7 +351,7 @@ export default function BookingDetail() {
                   ) : (
                     <CreditCard className="h-4 w-4 mr-2" />
                   )}
-                  {isPayingBalance ? 'Redirecting to Yoco...' : 'Pay Balance'}
+                  {isPayingBalance ? 'Redirecting to UMCIMBI payment...' : 'Pay Balance'}
                 </Button>
               )}
             </div>

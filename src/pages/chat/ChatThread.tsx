@@ -42,14 +42,19 @@ const ChatThread = () => {
   const handleSendAdjustment = async () => {
     if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
 
-    // Fetch current adjustment_count first
+    // Fetch current quote details for the adjustment card
     const { data: quoteData } = await supabase
       .from('quotes')
-      .select('adjustment_count')
+      .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
       .eq('id', adjustmentQuoteId)
       .single();
 
-    const newCount = (quoteData?.adjustment_count || 0) + 1;
+    if (!quoteData) return;
+
+    const newCount = (quoteData.adjustment_count || 0) + 1;
+    const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
+    const totalWithFee = quoteData.price + platformFee;
+    const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
 
     // Update quote status to adjustment_requested
     await supabase
@@ -61,10 +66,37 @@ const ChatThread = () => {
       })
       .eq('id', adjustmentQuoteId);
 
-    // Send chat message
-    const msg = `📝 Adjustment requested: ${adjustmentNote.trim()}`;
-    const success = await sendMessage(conversationId, msg);
-    if (success) {
+    // Send adjustment requested card as a quote_card message
+    const adjustmentMetadata = {
+      quote_id: adjustmentQuoteId,
+      offer_number: quoteData.offer_number,
+      total: quoteData.price,
+      deposit_percentage: quoteData.deposit_percentage,
+      deposit_amount: depositAmount,
+      platform_fee: platformFee,
+      vendor_payout: quoteData.price,
+      pdf_key: quoteData.final_offer_pdf_key || '',
+      status: 'adjustment_requested',
+      booking_id: null,
+      adjustment_count: newCount,
+      adjustment_note: adjustmentNote.trim(),
+    };
+
+    const { error: msgError } = await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_type: 'user' as const,
+      sender_user_id: user?.id,
+      message_type: 'quote_card',
+      content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
+      metadata: adjustmentMetadata,
+    });
+
+    if (!msgError) {
+      // Update conversation timestamp
+      await supabase.from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
       setAdjustmentNote('');
       setShowAdjustmentInput(false);
       setAdjustmentQuoteId(null);
