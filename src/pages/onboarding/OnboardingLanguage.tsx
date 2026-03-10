@@ -603,13 +603,13 @@ export default function OnboardingLanguage() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }} />
 
-        <div className="absolute inset-0 bg-[hsl(40_33%_96%/0.82)]" />
+        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.55)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Ceremonies</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Built for the moments that matter most</h2>
-            <p className="text-lg text-muted-foreground mt-3">Supporting the ceremonies your family treasures.</p>
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Ceremonies</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Built for the moments that matter most</h2>
+            <p className="text-lg text-white/60 mt-3">Supporting the ceremonies your family treasures.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-secondary" icon="🎁" />
@@ -620,7 +620,7 @@ export default function OnboardingLanguage() {
 
           {/* Additional ceremony types */}
           <div className="mt-8 text-center">
-            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Also supporting</p>
+            <p className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Also supporting</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
               { icon: '🤝', name: 'Lobola' },
@@ -629,7 +629,7 @@ export default function OnboardingLanguage() {
               { icon: '🕯️', name: 'Funeral' },
               { icon: '🙏', name: 'Ancestral Ritual' }].
               map((c) =>
-              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground shadow-sm">
+              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-sm font-medium text-white shadow-sm">
                   <span>{c.icon}</span> {c.name}
                 </span>
               )}
