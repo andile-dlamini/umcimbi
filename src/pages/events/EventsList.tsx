@@ -111,6 +111,7 @@ export default function EventsList() {
               </CardContent>
             </Card>
           </div>
+        </section>
       </div>
     </div>
   );
