@@ -212,9 +212,17 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
           <span className="text-xs text-muted-foreground">Deposit ({metadata.deposit_percentage}%)</span>
           <span className="text-sm font-medium">{formatCurrency((metadata.total + (metadata.platform_fee || metadata.total * 0.08)) * (metadata.deposit_percentage / 100))}</span>
         </div>
+        {/* Adjustment note */}
+        {metadata.adjustment_note && (
+          <div className="rounded-lg bg-amber-500/10 border border-amber-400/30 px-3 py-2">
+            <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-0.5">Adjustment Note:</p>
+            <p className="text-sm text-foreground">{metadata.adjustment_note}</p>
+          </div>
+        )}
       </div>
 
       <div className="px-4 py-3 border-t border-border space-y-2">
+        {/* PDF always available */}
         <Button
           type="button"
           variant="outline"
@@ -227,89 +235,94 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
           View PDF
         </Button>
 
-        {/* Vendor: Adjust Quote button when adjustment is requested */}
-        {isVendorView && isAdjustmentRequested && onAdjustQuote && (
-          <Button
-            type="button"
-            size="sm"
-            className="w-full"
-            onClick={() => onAdjustQuote(metadata.quote_id)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Adjust Quote
-          </Button>
-        )}
+        {/* Only show action buttons if NOT superseded */}
+        {!isSuperseded && (
+          <>
+            {/* Vendor: Adjust Quote button when adjustment is requested */}
+            {isVendorView && isAdjustmentRequested && onAdjustQuote && (
+              <Button
+                type="button"
+                size="sm"
+                className="w-full"
+                onClick={() => onAdjustQuote(metadata.quote_id)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Adjust Quote
+              </Button>
+            )}
 
-        {/* Client: Accept / Decline / Request Adjustment */}
-        {!isVendorView && isPending && (
-          <div className="space-y-2">
-            <div className="flex gap-2">
+            {/* Client: Accept / Decline / Request Adjustment */}
+            {!isVendorView && isPending && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleAccept}
+                    disabled={isAccepting}
+                  >
+                    {isAccepting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                    Accept
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleDecline}
+                    disabled={isDeclining}
+                  >
+                    {isDeclining ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <X className="h-4 w-4 mr-2" />}
+                    Decline
+                  </Button>
+                </div>
+                {onRequestAdjustment && canRequestAdjustment && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => onRequestAdjustment(metadata.quote_id)}
+                  >
+                    Request Adjustment ({MAX_ADJUSTMENTS - adjustmentCount} left)
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {!isVendorView && isAccepted && !depositPaid && (
               <Button
                 type="button"
                 size="sm"
-                className="flex-1"
-                onClick={handleAccept}
-                disabled={isAccepting}
+                className="w-full"
+                variant="default"
+                onClick={handlePayDeposit}
               >
-                {isAccepting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
-                Accept
+                <CreditCard className="h-4 w-4 mr-2" />
+                Pay Deposit
               </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                className="flex-1"
-                onClick={handleDecline}
-                disabled={isDeclining}
-              >
-                {isDeclining ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <X className="h-4 w-4 mr-2" />}
-                Decline
-              </Button>
-            </div>
-            {onRequestAdjustment && canRequestAdjustment && (
+            )}
+
+            {depositPaid && (
+              <div className="text-center text-sm text-muted-foreground py-1">
+                ✅ Deposit paid
+              </div>
+            )}
+
+            {isAccepted && bookingId && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() => onRequestAdjustment(metadata.quote_id)}
+                onClick={() => navigate(`/bookings/${bookingId}`)}
               >
-                Request Adjustment ({MAX_ADJUSTMENTS - adjustmentCount} left)
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Order
               </Button>
             )}
-          </div>
-        )}
-
-        {!isVendorView && isAccepted && !depositPaid && (
-          <Button
-            type="button"
-            size="sm"
-            className="w-full"
-            variant="default"
-            onClick={handlePayDeposit}
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Pay Deposit
-          </Button>
-        )}
-
-        {depositPaid && (
-          <div className="text-center text-sm text-muted-foreground py-1">
-            ✅ Deposit paid
-          </div>
-        )}
-
-        {isAccepted && bookingId && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => navigate(`/bookings/${bookingId}`)}
-          >
-            <ExternalLink className="h-4 w-4 mr-2" />
-            View Order
-          </Button>
+          </>
         )}
       </div>
     </div>
