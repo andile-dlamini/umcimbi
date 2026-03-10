@@ -454,12 +454,12 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-5 w-5" />
-              About Isiko Planner
+              About UMCIMBI
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Isiko Planner helps South African families plan traditional Zulu ceremonies 
+              UMCIMBI helps South African families plan traditional Zulu ceremonies 
               with respect and care. We provide checklists, budget tools, and connect you 
               with trusted vendors to make your special day memorable.
             </p>

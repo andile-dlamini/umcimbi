@@ -11,7 +11,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
   const navigate = useNavigate();
 
   const shareUrl = `https://wa.me/?text=${encodeURIComponent(
-    `Learn about ${article.title}! Check out this guide on Isiko Planner.`
+    `Learn about ${article.title}! Check out this guide on UMCIMBI.`
   )}`;
 
   return (
@@ -72,7 +72,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
         <div className="bg-accent/10 rounded-2xl p-6 mt-8">
           <h3 className="text-lg font-semibold text-foreground mt-0 mb-2">Ready to plan?</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            Use Isiko Planner to organize your {article.title.toLowerCase()} with ease.
+            Use UMCIMBI to organize your {article.title.toLowerCase()} with ease.
           </p>
           <Button onClick={() => navigate('/events/new')} className="w-full">
             Start Planning

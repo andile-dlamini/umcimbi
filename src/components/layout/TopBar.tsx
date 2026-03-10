@@ -88,9 +88,7 @@ export function TopBar() {
           </Button>
 
           {/* Center: app name */}
-          <h1 className="text-base font-semibold tracking-tight text-sidebar-foreground">
-            Isiko
-          </h1>
+          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-6 dark:brightness-0 dark:invert" />
 
           {/* Right: role switcher or messages shortcut */}
           <div className="flex items-center gap-1">
