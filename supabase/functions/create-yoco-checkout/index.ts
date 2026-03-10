@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     const { bookingId, kind, successUrl, cancelUrl } = await req.json();
 
-    if (!bookingId || !kind || !["deposit", "balance"].includes(kind)) {
+    if (!bookingId || !kind || !["deposit", "balance", "full"].includes(kind)) {
       return new Response(JSON.stringify({ error: "Invalid parameters" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
