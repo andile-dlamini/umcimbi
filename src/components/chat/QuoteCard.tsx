@@ -136,7 +136,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
   const isAdjustmentCard = metadata.status === 'adjustment_requested' && !!metadata.adjustment_note;
 
   return (
-    <div className={`w-full max-w-[85%] rounded-xl border-2 overflow-hidden ${
+    <div className={`w-full rounded-xl border-2 overflow-hidden ${
       isSuperseded ? 'border-border opacity-70' : isAdjustmentCard ? 'border-amber-400/50 bg-card' : 'border-primary/30 bg-card'
     }`}>
       <div className={`px-4 py-2 flex items-center justify-between ${

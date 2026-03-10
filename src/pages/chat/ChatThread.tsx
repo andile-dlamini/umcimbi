@@ -44,56 +44,70 @@ const ChatThread = () => {
   const handleSendAdjustment = async () => {
     if (!adjustmentNote.trim() || !conversationId || !adjustmentQuoteId) return;
 
-    // Fetch current quote details for the adjustment card
-    const { data: quoteData } = await supabase
-      .from('quotes')
-      .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
-      .eq('id', adjustmentQuoteId)
-      .single();
+    try {
+      // Fetch current quote details for the adjustment card
+      const { data: quoteData, error: fetchErr } = await supabase
+        .from('quotes')
+        .select('adjustment_count, price, deposit_percentage, offer_number, final_offer_pdf_key')
+        .eq('id', adjustmentQuoteId)
+        .single();
 
-    if (!quoteData) return;
+      if (fetchErr || !quoteData) {
+        toast.error('Failed to load quote details');
+        return;
+      }
 
-    const newCount = (quoteData.adjustment_count || 0) + 1;
-    const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
-    const totalWithFee = quoteData.price + platformFee;
-    const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
+      const newCount = (quoteData.adjustment_count || 0) + 1;
+      const platformFee = Math.round(quoteData.price * 0.08 * 100) / 100;
+      const totalWithFee = quoteData.price + platformFee;
+      const depositAmount = Math.round(totalWithFee * (quoteData.deposit_percentage / 100) * 100) / 100;
 
-    // Update quote status to adjustment_requested
-    await supabase
-      .from('quotes')
-      .update({
-        status: 'adjustment_requested' as any,
-        adjustment_reason: adjustmentNote.trim(),
+      // Send adjustment requested card as a quote_card message FIRST (before updating quote)
+      const adjustmentMetadata = {
+        quote_id: adjustmentQuoteId,
+        offer_number: quoteData.offer_number,
+        total: quoteData.price,
+        deposit_percentage: quoteData.deposit_percentage,
+        deposit_amount: depositAmount,
+        platform_fee: platformFee,
+        vendor_payout: quoteData.price,
+        pdf_key: quoteData.final_offer_pdf_key || '',
+        status: 'adjustment_requested',
+        booking_id: null,
         adjustment_count: newCount,
-      })
-      .eq('id', adjustmentQuoteId);
+        adjustment_note: adjustmentNote.trim(),
+      };
 
-    // Send adjustment requested card as a quote_card message
-    const adjustmentMetadata = {
-      quote_id: adjustmentQuoteId,
-      offer_number: quoteData.offer_number,
-      total: quoteData.price,
-      deposit_percentage: quoteData.deposit_percentage,
-      deposit_amount: depositAmount,
-      platform_fee: platformFee,
-      vendor_payout: quoteData.price,
-      pdf_key: quoteData.final_offer_pdf_key || '',
-      status: 'adjustment_requested',
-      booking_id: null,
-      adjustment_count: newCount,
-      adjustment_note: adjustmentNote.trim(),
-    };
+      const { error: msgError } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_type: 'user' as const,
+        sender_user_id: user?.id,
+        message_type: 'quote_card',
+        content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
+        metadata: adjustmentMetadata,
+      });
 
-    const { error: msgError } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_type: 'user' as const,
-      sender_user_id: user?.id,
-      message_type: 'quote_card',
-      content: `📝 Adjustment requested: ${adjustmentNote.trim()}`,
-      metadata: adjustmentMetadata,
-    });
+      if (msgError) {
+        console.error('Error inserting adjustment message:', msgError);
+        toast.error('Failed to send adjustment request');
+        return;
+      }
 
-    if (!msgError) {
+      // Now update quote status to adjustment_requested
+      const { error: updateErr } = await supabase
+        .from('quotes')
+        .update({
+          status: 'adjustment_requested' as any,
+          adjustment_reason: adjustmentNote.trim(),
+          adjustment_count: newCount,
+        })
+        .eq('id', adjustmentQuoteId);
+
+      if (updateErr) {
+        console.error('Error updating quote status:', updateErr);
+        toast.error('Adjustment message sent but status update failed');
+      }
+
       // Update conversation timestamp
       await supabase.from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -103,6 +117,9 @@ const ChatThread = () => {
       setShowAdjustmentInput(false);
       setAdjustmentQuoteId(null);
       refreshMessages();
+    } catch (err) {
+      console.error('Error in handleSendAdjustment:', err);
+      toast.error('Failed to send adjustment request');
     }
   };
 
