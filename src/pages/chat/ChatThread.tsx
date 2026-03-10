@@ -477,6 +477,20 @@ const ChatThread = () => {
         conversationId={conversationId || ''}
         isVendorView={isVendorView}
       />
+
+      {/* Inline Review Dialog */}
+      {reviewBookingId && (
+        <ReviewDialog
+          open={!!reviewBookingId}
+          onOpenChange={(open) => { if (!open) setReviewBookingId(null); }}
+          bookingId={reviewBookingId}
+          isVendorView={isVendorView}
+          onSuccess={() => {
+            setReviewBookingId(null);
+            refreshMessages();
+          }}
+        />
+      )}
     </div>
   );
 };
