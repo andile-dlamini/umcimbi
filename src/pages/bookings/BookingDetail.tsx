@@ -296,19 +296,35 @@ export default function BookingDetail() {
                 </div>
               </div>
               {isClient && depositDue && booking.deposit_status !== 'paid' && (
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => handleYocoPayment('deposit')}
-                  disabled={isPayingDeposit}
-                >
-                  {isPayingDeposit ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CreditCard className="h-4 w-4 mr-2" />
-                  )}
-                  {isPayingDeposit ? 'Redirecting to Yoco...' : 'Pay Deposit'}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleYocoPayment('deposit')}
+                    disabled={isPayingDeposit || isPayingFull}
+                  >
+                    {isPayingDeposit ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-4 w-4 mr-2" />
+                    )}
+                    {isPayingDeposit ? 'Redirecting to Yoco...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleYocoPayment('full')}
+                    disabled={isPayingFull || isPayingDeposit}
+                  >
+                    {isPayingFull ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-4 w-4 mr-2" />
+                    )}
+                    {isPayingFull ? 'Redirecting to Yoco...' : `Pay in Full (R${booking.agreed_price?.toLocaleString()})`}
+                  </Button>
+                </div>
               )}
 
               {/* Balance */}

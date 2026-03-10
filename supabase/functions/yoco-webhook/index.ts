@@ -117,11 +117,20 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (conv) {
-        const label = kind === "deposit" ? "Deposit" : "Balance";
-        const amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
-        const content = kind === "balance"
-          ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`
-          : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now active!`;
+        let label: string;
+        let amount: number;
+        let content: string;
+
+        if (kind === "full") {
+          const totalAmount = (booking.deposit_amount || 0) + (booking.balance_amount || 0);
+          content = `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`;
+        } else {
+          label = kind === "deposit" ? "Deposit" : "Balance";
+          amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
+          content = kind === "balance"
+            ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now completed!`
+            : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed via Yoco. Booking is now active!`;
+        }
 
         await supabase.from("messages").insert({
           conversation_id: conv.id,
