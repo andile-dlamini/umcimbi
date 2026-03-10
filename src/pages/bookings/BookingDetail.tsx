@@ -39,6 +39,7 @@ export default function BookingDetail() {
   const [isReporting, setIsReporting] = useState(false);
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
+  const [isPayingFull, setIsPayingFull] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
 
