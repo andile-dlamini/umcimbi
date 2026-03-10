@@ -48,7 +48,7 @@ export default function BookingDetail() {
     const paymentStatus = searchParams.get('payment');
     const kind = searchParams.get('kind');
     if (paymentStatus === 'success') {
-      toast.success(`${kind === 'deposit' ? 'Deposit' : 'Balance'} payment successful! It may take a moment to reflect.`);
+      toast.success(`${kind === 'deposit' ? 'Deposit' : kind === 'balance' ? 'Balance' : 'Full'} payment successful! It may take a moment to reflect.`);
       navigate(`/bookings/${bookingId}`, { replace: true });
       setTimeout(() => refreshDetails(), 2000);
     } else if (paymentStatus === 'cancelled') {
