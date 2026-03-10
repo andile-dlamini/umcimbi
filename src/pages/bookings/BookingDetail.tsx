@@ -322,7 +322,7 @@ export default function BookingDetail() {
                     ) : (
                       <CreditCard className="h-4 w-4 mr-2" />
                     )}
-                    {isPayingFull ? 'Redirecting to Yoco...' : `Pay in Full (R${booking.agreed_price?.toLocaleString()})`}
+                    {isPayingFull ? 'Redirecting to UMCIMBI payment...' : `Pay in Full (R${booking.agreed_price?.toLocaleString()})`}
                   </Button>
                 </div>
               )}
