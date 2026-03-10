@@ -82,13 +82,13 @@ export function TopBar() {
     <>
       <header className="sticky top-0 z-40 bg-sidebar text-sidebar-foreground border-b border-sidebar-border/50">
         <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
-          {/* Left: hamburger */}
-          <Button variant="ghost" size="icon" className="shrink-0 -ml-2 text-sidebar-foreground hover:bg-sidebar-accent/50" onClick={() => setDrawerOpen(true)}>
-            <Menu className="h-5 w-5" />
-          </Button>
-
-          {/* Center: app name */}
-          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-16 dark:brightness-0 dark:invert" />
+          {/* Left: hamburger + logo */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="shrink-0 -ml-2 text-sidebar-foreground hover:bg-sidebar-accent/50" onClick={() => setDrawerOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-16 dark:brightness-0 dark:invert" />
+          </div>
 
           {/* Right: role switcher or messages shortcut */}
           <div className="flex items-center gap-1">
