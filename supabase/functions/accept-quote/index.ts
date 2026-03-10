@@ -112,7 +112,7 @@ serve(async (req) => {
         vendor_id: quote.vendor_id,
         quote_id: quote_id,
         service_category: null,
-        agreed_price: quote.price,
+        agreed_price: totalWithFee,
         deposit_amount: depositAmount,
         balance_amount: balanceAmount,
         booking_status: "pending_deposit",
