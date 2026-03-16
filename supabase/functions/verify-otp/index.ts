@@ -22,6 +22,7 @@ interface RegisterData {
   address?: string;
   email?: string;
   password: string;
+  role?: string;
 }
 
 Deno.serve(async (req) => {
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
 
   try {
     const body: RegisterData = await req.json();
-    const { phone_number, otp, first_name, surname, address, email, password } = body;
+    const { phone_number, otp, first_name, surname, address, email, password, role } = body;
 
     if (!phone_number || !otp || !first_name || !surname || !password) {
       return new Response(
@@ -168,6 +169,16 @@ Deno.serve(async (req) => {
 
     if (profileError) {
       console.error("Profile update error:", profileError);
+    }
+
+    // If registering as vendor, add vendor role
+    if (role === "vendor") {
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: authData.user.id, role: "vendor" });
+      if (roleError) {
+        console.error("Vendor role insert error:", roleError);
+      }
     }
 
     return new Response(
