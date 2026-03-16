@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
   try {
     const body: RegisterData = await req.json();
-    const { phone_number, otp, first_name, surname, address, email, password } = body;
+    const { phone_number, otp, first_name, surname, address, email, password, role } = body;
 
     if (!phone_number || !otp || !first_name || !surname || !password) {
       return new Response(
