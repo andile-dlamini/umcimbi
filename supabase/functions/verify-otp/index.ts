@@ -22,6 +22,7 @@ interface RegisterData {
   address?: string;
   email?: string;
   password: string;
+  role?: string;
 }
 
 Deno.serve(async (req) => {
