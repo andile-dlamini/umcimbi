@@ -171,6 +171,16 @@ Deno.serve(async (req) => {
       console.error("Profile update error:", profileError);
     }
 
+    // If registering as vendor, add vendor role
+    if (role === "vendor") {
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: authData.user.id, role: "vendor" });
+      if (roleError) {
+        console.error("Vendor role insert error:", roleError);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
