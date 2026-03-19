@@ -27,7 +27,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
-  Play } from
+  Play,
+  Instagram,
+  Facebook,
+  Music2 } from
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import StepIllustration from '@/components/illustrations/StepIllustration';
