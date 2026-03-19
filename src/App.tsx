@@ -66,6 +66,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/onboarding" element={<OnboardingLanguage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
