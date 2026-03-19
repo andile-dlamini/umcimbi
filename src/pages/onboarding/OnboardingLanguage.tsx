@@ -736,15 +736,22 @@ export default function OnboardingLanguage() {
 
       {/* ═══ FOOTER ═══ */}
       <footer className="bg-[hsl(220_25%_8%)] border-t border-white/5">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-[9px] font-bold text-primary-foreground">U</span>
-            </div>
-            <span className="font-semibold text-sm text-white">UMCIMBI</span>
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-7" />
+          <div className="flex items-center gap-4">
+            <a href="https://instagram.com/umcimbi.official" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <Instagram size={18} />
+            </a>
+            <a href="https://facebook.com/umcimbi.official" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <Facebook size={18} />
+            </a>
+            <a href="https://tiktok.com/@umcimbi.official" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+              <Music2 size={18} />
+            </a>
           </div>
-          <p className="text-xs text-white/30">Privacy · Terms · Contact</p>
-          <p className="text-xs text-white/30">© {new Date().getFullYear()} UMCIMBI</p>
+          <p className="text-xs text-white/30">
+            © {new Date().getFullYear()} UMCIMBI · Privacy · Terms · <Link to="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
+          </p>
         </div>
       </footer>
     </div>);
