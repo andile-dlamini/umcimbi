@@ -10,6 +10,7 @@ import { AppShell } from "@/components/layout/AppShell";
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
+import ContactPage from "@/pages/contact/ContactPage";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
@@ -65,6 +66,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/onboarding" element={<OnboardingLanguage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
