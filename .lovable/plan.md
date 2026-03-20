@@ -1,23 +1,28 @@
 
 
-## Fix: Show Vendor Logo on Vendor List Cards
+## Create Demo Test User (Bypass OTP)
 
-### Problem
-`VendorCard` still displays the first showcase image (`image_urls[0]`) as the thumbnail instead of the vendor's logo/avatar.
+Create a demo planner user directly via the Supabase Admin API, bypassing SMS OTP entirely.
 
-### Change
+### User Details
+- **Name**: Demo User
+- **Phone**: +27710000003
+- **Email**: 27710000003@phone.isiko.app
+- **Password**: demo123 (simple for testing)
+- **Role**: Planner (default `user` role)
 
-**`src/components/shared/VendorCard.tsx`** — two edits:
+### Approach
 
-1. **Line 40**: Change `rounded-lg` to `rounded-full` (avatar style for logo)
-2. **Line 42**: Change image source from:
-   ```tsx
-   src={vendor.image_urls?.[0] || '/placeholder.svg'}
-   ```
-   to:
-   ```tsx
-   src={vendor.logo_url || vendor.image_urls?.[0] || '/placeholder.svg'}
-   ```
+Run a one-off script using `psql` + Supabase Admin API (via the existing `verify-otp` edge function pattern) to:
 
-This prioritizes `logo_url`, falls back to the first gallery image, then to placeholder. One file, two lines.
+1. **Call Supabase Auth admin.createUser** — create the auth account with phone `+27710000003`, email auto-generated, password `demo123`, email/phone confirmed
+2. **Profile auto-created** by the existing `handle_new_user` trigger (sets `user_id`, `email`, `phone_number`)
+3. **Update profile** with `first_name: 'Demo'`, `surname: 'User'`, `full_name: 'Demo User'`, `phone_verified: true`
+4. **Default `user` role** is auto-assigned by the same trigger
+
+No code changes needed — this is a one-time data operation via the edge function infrastructure. I will invoke the `verify-otp` function with the demo data (it creates users via admin API), or create a small temporary edge function to seed this user.
+
+### Login Credentials
+- **Phone**: 0710000003
+- **Password**: demo123
 
