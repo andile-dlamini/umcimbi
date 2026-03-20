@@ -1,73 +1,61 @@
 
 
-## Privacy Policy & Terms of Service — Using Your Document
+## Auto Super Vendor: 20+ Jobs & 4.8+ Rating
 
-I've read the full document. It's comprehensive and well-structured. Here's the plan:
+### How It Works
 
-### Approach
+Vendors automatically earn (or lose) Super Vendor status based on lifetime metrics:
+- **20+ completed bookings** (`jobs_completed >= 20`)
+- **4.8+ average rating** (`rating >= 4.8`)
 
-Create two light-themed public pages that render the exact content from your DOCX, properly formatted with headings, bullet lists, and info boxes.
+This runs as a database trigger — no admin action needed. Similar to Airbnb's Superhost model.
 
-### Files
+### Changes
 
-| File | Action |
-|------|--------|
-| `src/pages/legal/PrivacyPolicy.tsx` | New — Part A content (Sections 1–14) |
-| `src/pages/legal/TermsOfService.tsx` | New — Part B content (Sections 1–19) |
-| `src/pages/onboarding/OnboardingLanguage.tsx` | Update footer: "Privacy" → `/privacy`, "Terms" → `/terms` |
-| `src/App.tsx` | Add `/privacy` and `/terms` as public routes |
+| File / Asset | Action |
+|---|---|
+| **DB migration** | Create trigger function `evaluate_super_vendor()` that runs after `jobs_completed` or `rating` changes on the `vendors` table |
+| `src/pages/admin/SuperVendorManagement.tsx` | Refactor: remove manual toggle, show auto-eligibility status and current metrics instead (read-only view) |
+| `src/components/vendors/VendorBadges.tsx` | Add tooltips (from prior approved plan) |
+| `src/lib/umcimbiScore.ts` | Export the threshold constants for reuse |
 
-### Page Design
+### Database Trigger
 
-- Light theme, clean layout with `max-w-3xl` readable width
-- UMCIMBI logo at top + back button
-- "Effective Date: 1 May 2026 · Version 1.0" shown at top
-- Proper heading hierarchy (h1 for title, h2 for sections, h3 for subsections)
-- Styled info boxes for the callout blocks (e.g., Information Officer details, Information Regulator)
-- Bullet lists rendered as proper `<ul>` elements
-- Mini footer with social icons + copyright
-- Fully responsive
+```sql
+CREATE OR REPLACE FUNCTION evaluate_super_vendor()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.jobs_completed >= 20 AND NEW.rating >= 4.8 THEN
+    NEW.is_super_vendor := true;
+    IF OLD.is_super_vendor = false THEN
+      NEW.super_vendor_awarded_at := now();
+      NEW.super_vendor_reason := 'Auto-awarded: 20+ jobs, 4.8+ rating';
+    END IF;
+  ELSE
+    NEW.is_super_vendor := false;
+    NEW.super_vendor_awarded_at := null;
+    NEW.super_vendor_reason := null;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-### Content Mapping
+CREATE TRIGGER trg_evaluate_super_vendor
+  BEFORE UPDATE OF jobs_completed, rating ON vendors
+  FOR EACH ROW
+  EXECUTE FUNCTION evaluate_super_vendor();
+```
 
-**Privacy Policy** — all 14 sections from Part A:
-1. Introduction & Who We Are (with info box)
-2. Definitions
-3. Information We Collect (3.1–3.3)
-4. How We Use Your Information (4.1–4.4)
-5. Legal Bases for Processing
-6. How We Share Your Information (6.1–6.5)
-7. Cross-Border Transfer
-8. How We Protect Your Information
-9. Retention of Personal Information
-10. Cookies & Tracking Technologies
-11. Your Rights as a Data Subject (with info box for Information Regulator)
-12. Children's Privacy
-13. Changes to This Privacy Policy
-14. Contact Us
+### Admin Page Refactor
 
-**Terms of Service** — all 19 sections from Part B:
-1. Introduction & Acceptance
-2. The UMCIMBI Platform
-3. Account Registration (3.1–3.3)
-4. Vendor Terms (4.1–4.4)
-5. Customer Terms (5.1–5.3)
-6. Prohibited Conduct
-7. Intellectual Property (7.1–7.2)
-8. Disclaimer of Warranties
-9. Limitation of Liability
-10. Indemnification
-11. Dispute Resolution (11.1–11.3)
-12. Consumer Protection Act Compliance
-13. Electronic Communications & ECTA
-14. Platform Availability & Modifications
-15. Termination (15.1–15.3)
-16. Changes to These Terms
-17. Severability
-18. Entire Agreement
-19. Contact Us
+Replace the manual toggle with a read-only dashboard showing each vendor's:
+- Current rating and jobs completed
+- Whether they meet both thresholds (✓/✗)
+- Current Super Vendor status and when it was awarded
+- Sorted: Super Vendors first, then by closest to qualifying
 
-### Routing
+### Tooltip Content (VendorBadges)
 
-Both `/privacy` and `/terms` added as unauthenticated public routes alongside `/onboarding`, `/auth`, and `/contact`.
+- **Verified** ✓: "Verified – UMCIMBI has verified this vendor's company registration documents"
+- **Super Vendor** ★: "Super Vendor – Awarded automatically for completing 20+ jobs with a 4.8+ rating"
 
