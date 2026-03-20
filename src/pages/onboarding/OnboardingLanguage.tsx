@@ -753,7 +753,7 @@ export default function OnboardingLanguage() {
             </a>
           </div>
           <p className="text-xs text-white/30">
-            © {new Date().getFullYear()} UMCIMBI · Privacy · Terms · <Link to="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
+            © {new Date().getFullYear()} UMCIMBI · <Link to="/privacy" className="hover:text-white/60 transition-colors">Privacy</Link> · <Link to="/terms" className="hover:text-white/60 transition-colors">Terms</Link> · <Link to="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
           </p>
         </div>
       </footer>
