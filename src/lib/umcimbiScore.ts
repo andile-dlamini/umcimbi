@@ -1,6 +1,10 @@
 // Umcimbi Score: deterministic value score (0–100) for quote comparison
 // ValueScore = 60% TrustScore + 40% PriceScore
 
+// Super Vendor auto-award thresholds (mirrored in DB trigger evaluate_super_vendor)
+export const SUPER_VENDOR_MIN_JOBS = 20;
+export const SUPER_VENDOR_MIN_RATING = 4.8;
+
 export interface VendorScoreInput {
   quoteId: string;
   vendorName: string;
