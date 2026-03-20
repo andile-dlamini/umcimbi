@@ -37,9 +37,9 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false }
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-16 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
+          <div className="w-16 h-16 rounded-full bg-muted flex-shrink-0 overflow-hidden">
             <img 
-              src={vendor.image_urls?.[0] || '/placeholder.svg'} 
+              src={vendor.logo_url || vendor.image_urls?.[0] || '/placeholder.svg'} 
               alt={vendor.name}
               className="w-full h-full object-cover"
             />
