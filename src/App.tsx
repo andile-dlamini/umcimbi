@@ -11,6 +11,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
 import ContactPage from "@/pages/contact/ContactPage";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import TermsOfService from "@/pages/legal/TermsOfService";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
