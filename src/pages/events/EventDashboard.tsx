@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp, Trash2, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
