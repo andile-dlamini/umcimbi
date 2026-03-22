@@ -1,40 +1,72 @@
 
 
-## Three Changes
+## Plan: Rebuild Home Screen + Integrate Learn Content
 
-### 1. Remove WhatsApp Button from VendorDetail
+### Summary
+Three files to modify, no new files needed.
 
-**`src/pages/vendors/VendorDetail.tsx`**
-- Delete `whatsappLink` variable (lines 86-88)
-- Delete WhatsApp button block (lines 246-256)
-- Remove `MessageCircle` from imports (line 5)
-- Keep Call button and wrapping div as-is
+---
 
-### 2. Add Google OAuth to AuthPage
+### 1. Rebuild `src/pages/Home.tsx` — Full Home Screen
 
-**`src/pages/auth/AuthPage.tsx`**
-- Uses Lovable Cloud managed Google OAuth via `lovable.auth.signInWithOAuth("google")`
-- Add a "Continue with Google" button at the top of the login card, before phone input
-- Add an "or" divider between Google button and phone login
-- On success, existing `onAuthStateChange` in AuthContext handles session and routing
-- Add `/~oauth` to service worker denylist (relevant for PWA change below)
+Replace the redirect-only component with a proper home screen.
 
-**Note**: This requires using the Configure Social Login tool to generate the lovable module first.
+**Vendor role**: Keep `<Navigate to="/vendor-dashboard" />` as-is.
 
-### 3. Add PWA Support
+**Organiser role** — three states:
 
-**New files:**
-- `public/manifest.json` — app manifest with name, colors, icons
-- `src/components/shared/InstallPrompt.tsx` — dismissable bottom banner for mobile install prompt
+**STATE 1 — No events** (`events.length === 0`):
+- Greeting: "Sawubona, [first_name]" with subtitle "What are you planning?"
+- 2-column grid of 8 ceremony tiles (excludes funeral). Each tile shows icon + English name + isiZulu name in muted text. Clicking navigates to `/events/new?type=[type]`
+- Tiles: umembeso/Gift, umabo/Heart, umemulo/Sparkles, imbeleko/Baby, lobola/Handshake, family_introduction/Users, umbondo/Package, ancestral_ritual/Flame
+- Secondary link: "Not sure? Browse vendors first" → `/vendors`
 
-**Modified files:**
-- `index.html` — add manifest link, theme-color, apple-mobile-web-app meta tags
-- `vite.config.ts` — add `vite-plugin-pwa` with cache-first for static assets, network-first for API, `navigateFallbackDenylist: [/^\/~oauth/]`
-- `src/components/layout/AppShell.tsx` — render `<InstallPrompt />` for authenticated users
-- `package.json` — add `vite-plugin-pwa` dependency
+**STATE 2 — Has upcoming events**:
+- Greeting header
+- Hero card for next upcoming event (sorted by date, first with date ≥ today, excluding funeral): shows ceremony badge + icon, event name, "X days away" countdown (date-fns `differenceInDays`), task progress bar (`useTasks(eventId).getProgress()`), "View Event" button
+- Quick Actions row: "Find Vendors" → `/vendors`, "My Chats" → `/chats`, "My Events" → `/events`
+- Up to 2 more upcoming events in a compact list (excluding funeral)
 
-**InstallPrompt behavior:**
-- Captures `beforeinstallprompt` event
-- Shows only on mobile, once per session (sessionStorage flag)
-- Dismissable banner at bottom with "Install" button
+**STATE 3 — All events in past**:
+- Same layout as STATE 2 but hero card replaced with "Plan your next ceremony" prompt: "Your ceremonies are complete. Ready to plan the next one?" + "Start Planning" button → `/events/new`
+
+**Hooks**: `useAuth`, `useRole`, `useEvents`, `useTasks`
+
+**Styling**: mobile-first, `max-w-lg mx-auto`, `px-4`, existing Card components, matches EventDashboard styling
+
+---
+
+### 2. Add "What is this ceremony?" card in `src/pages/events/CreateEvent.tsx`
+
+After `handleTypeSelect` is called (step transitions to 2):
+- Import `learnArticles` and `BookOpen`, `ChevronDown`, `ChevronUp` from lucide
+- Add `infoExpanded` state
+- In Step 2, before the form fields, render a collapsible Card if a matching article exists (`article.eventTypeId === eventType`)
+- Header: BookOpen icon + "What is [shortLabel]?" + chevron toggle
+- Collapsed by default; when expanded shows `article.sections[0].body`
+- "Read full guide →" link to `/learn/[article.id]`
+
+---
+
+### 3. Add "Guide" tab to `src/pages/events/EventDashboard.tsx`
+
+- Import `learnArticles` from `@/data/learnArticles` and `BookOpen` from lucide
+- Find matching guide: `learnArticles.find(a => a.eventTypeId === event.type)`
+- If guide exists, add a 4th tab trigger ("Guide" with BookOpen icon) after "Vendors"
+- Tab content: render article title, subtitle, all sections inline (same pattern as ArticleDetail — heading, body, bullet items)
+- Bottom quick links: "Find vendors" → `/vendors`, "View my tasks" → `setActiveTab('tasks')`
+
+**Note**: Learn is not currently in the sidebar nav, so no removal needed there (CHANGE 1 from the request is already satisfied).
+
+---
+
+### Technical Details
+
+| File | Action |
+|------|--------|
+| `src/pages/Home.tsx` | Full rewrite (~200 lines) |
+| `src/pages/events/CreateEvent.tsx` | Add collapsible info card in step 2 (~30 lines) |
+| `src/pages/events/EventDashboard.tsx` | Add Guide tab trigger + content (~50 lines) |
+
+No database changes. No new dependencies (date-fns already imported in EventDashboard).
 
