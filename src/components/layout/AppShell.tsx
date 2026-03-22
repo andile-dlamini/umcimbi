@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { InstallPrompt } from '@/components/shared/InstallPrompt';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AppShellProps {
@@ -26,6 +27,7 @@ export function AppShell({ children }: AppShellProps) {
       <main className={`flex-1 min-w-0 ${isMobile ? 'ml-14' : ''}`}>
         {children}
       </main>
+      <InstallPrompt />
     </div>
   );
 }
