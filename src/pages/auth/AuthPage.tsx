@@ -1121,7 +1121,7 @@ export default function AuthPage() {
 
   // ─── REGISTRATION STEPS (with stepper) ───
   const backMap: Partial<Record<Step, Step>> = {
-    details: 'role',
+    details: 'auth_method',
     otp: 'details',
     password: 'otp',
     business: 'password',
