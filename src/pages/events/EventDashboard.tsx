@@ -46,6 +46,7 @@ export default function EventDashboard() {
   const [editBudget, setEditBudget] = useState('');
   
   const event = events.find(e => e.id === id);
+  const guide = event ? learnArticles.find(a => a.eventTypeId === event.type) : undefined;
   const [activeTab, setActiveTab] = useState('overview');
   const [notes, setNotes] = useState('');
   
