@@ -317,6 +317,15 @@ export default function EventDashboard() {
               >
                 Vendors
               </TabsTrigger>
+              {guide && (
+                <TabsTrigger 
+                  value="guide"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+                >
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Guide
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
