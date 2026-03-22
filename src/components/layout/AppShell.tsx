@@ -27,6 +27,7 @@ export function AppShell({ children }: AppShellProps) {
       <main className={`flex-1 min-w-0 ${isMobile ? 'ml-14' : ''}`}>
         {children}
       </main>
+      <InstallPrompt />
     </div>
   );
 }

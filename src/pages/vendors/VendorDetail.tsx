@@ -225,32 +225,18 @@ export default function VendorDetail() {
 
 
         {/* Contact Actions */}
-        <div className="flex gap-3">
-          {vendor.phone_number && (
-            <Button
-              variant="outline"
-              className="flex-1"
-              asChild
-            >
-              <a href={`tel:${vendor.phone_number}`}>
-                <Phone className="h-4 w-4 mr-2" />
-                Call
-              </a>
-            </Button>
-          )}
-          
-          {whatsappLink && (
-            <Button
-              className="flex-1 bg-success hover:bg-success/90"
-              asChild
-            >
-              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                WhatsApp
-              </a>
-            </Button>
-          )}
-        </div>
+        {vendor.phone_number && (
+          <Button
+            variant="outline"
+            className="w-full"
+            asChild
+          >
+            <a href={`tel:${vendor.phone_number}`}>
+              <Phone className="h-4 w-4 mr-2" />
+              Call
+            </a>
+          </Button>
+        )}
 
         {/* Add to Event */}
         {eventId && (
