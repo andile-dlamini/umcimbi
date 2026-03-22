@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { InstallPrompt } from '@/components/shared/InstallPrompt';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AppShellProps {
