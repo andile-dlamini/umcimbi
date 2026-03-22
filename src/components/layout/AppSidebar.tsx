@@ -97,6 +97,7 @@ export function AppSidebar() {
   const initials = (profile?.first_name?.[0] || profile?.full_name?.[0] || 'U').toUpperCase();
 
   const organiserItems = [
+  { to: '/', icon: Home, label: 'Home' },
   { to: '/events', icon: Calendar, label: 'My Events' },
   { to: '/vendors', icon: Store, label: 'Vendors' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
