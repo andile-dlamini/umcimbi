@@ -34,6 +34,7 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getEventTypeInfo } from '@/types/database';
+import { learnArticles } from '@/data/learnArticles';
 
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
