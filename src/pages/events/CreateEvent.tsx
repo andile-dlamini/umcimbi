@@ -58,6 +58,7 @@ export default function CreateEvent() {
   
   const [step, setStep] = useState(preselectedType ? 2 : 1);
   const [eventType, setEventType] = useState<EventType | null>(preselectedType);
+  const [infoExpanded, setInfoExpanded] = useState(false);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
