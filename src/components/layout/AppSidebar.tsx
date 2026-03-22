@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Calendar, Store, MessageCircle, Receipt, ShoppingBag,
+  Home, Calendar, Store, MessageCircle, Receipt, ShoppingBag,
   Settings, LogOut, Shield, LayoutDashboard, ChevronLeft, ChevronRight } from
 'lucide-react';
 import { cn } from '@/lib/utils';
