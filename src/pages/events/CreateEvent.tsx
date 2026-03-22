@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame, ChevronRight } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame, ChevronRight, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
 import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
+import { getArticleByEventType } from '@/data/learnArticles';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
