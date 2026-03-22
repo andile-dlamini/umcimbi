@@ -1,72 +1,61 @@
 
 
-## Plan: Rebuild Home Screen + Integrate Learn Content
+## Add Google OAuth (Sign-in + Sign-up) with Callback & Profile Completion
 
-### Summary
-Three files to modify, no new files needed.
+### Overview
+Three files: modify AuthPage.tsx (add Google button to registration role screen + profile completion step), create AuthCallback.tsx, update App.tsx routes.
 
----
-
-### 1. Rebuild `src/pages/Home.tsx` — Full Home Screen
-
-Replace the redirect-only component with a proper home screen.
-
-**Vendor role**: Keep `<Navigate to="/vendor-dashboard" />` as-is.
-
-**Organiser role** — three states:
-
-**STATE 1 — No events** (`events.length === 0`):
-- Greeting: "Sawubona, [first_name]" with subtitle "What are you planning?"
-- 2-column grid of 8 ceremony tiles (excludes funeral). Each tile shows icon + English name + isiZulu name in muted text. Clicking navigates to `/events/new?type=[type]`
-- Tiles: umembeso/Gift, umabo/Heart, umemulo/Sparkles, imbeleko/Baby, lobola/Handshake, family_introduction/Users, umbondo/Package, ancestral_ritual/Flame
-- Secondary link: "Not sure? Browse vendors first" → `/vendors`
-
-**STATE 2 — Has upcoming events**:
-- Greeting header
-- Hero card for next upcoming event (sorted by date, first with date ≥ today, excluding funeral): shows ceremony badge + icon, event name, "X days away" countdown (date-fns `differenceInDays`), task progress bar (`useTasks(eventId).getProgress()`), "View Event" button
-- Quick Actions row: "Find Vendors" → `/vendors`, "My Chats" → `/chats`, "My Events" → `/events`
-- Up to 2 more upcoming events in a compact list (excluding funeral)
-
-**STATE 3 — All events in past**:
-- Same layout as STATE 2 but hero card replaced with "Plan your next ceremony" prompt: "Your ceremonies are complete. Ready to plan the next one?" + "Start Planning" button → `/events/new`
-
-**Hooks**: `useAuth`, `useRole`, `useEvents`, `useTasks`
-
-**Styling**: mobile-first, `max-w-lg mx-auto`, `px-4`, existing Card components, matches EventDashboard styling
+**Important**: The login screen already has a Google OAuth button (lines 628-665). The user wants it to also work for sign-up, plus proper post-OAuth handling.
 
 ---
 
-### 2. Add "What is this ceremony?" card in `src/pages/events/CreateEvent.tsx`
+### 1. Create `src/pages/auth/AuthCallback.tsx`
 
-After `handleTypeSelect` is called (step transitions to 2):
-- Import `learnArticles` and `BookOpen`, `ChevronDown`, `ChevronUp` from lucide
-- Add `infoExpanded` state
-- In Step 2, before the form fields, render a collapsible Card if a matching article exists (`article.eventTypeId === eventType`)
-- Header: BookOpen icon + "What is [shortLabel]?" + chevron toggle
-- Collapsed by default; when expanded shows `article.sections[0].body`
-- "Read full guide →" link to `/learn/[article.id]`
+Handles the OAuth redirect at `/auth/callback`:
+- On mount, calls `supabase.auth.getSession()`
+- If no session, redirects to `/auth`
+- If session exists, checks `profiles` table for the user:
+  - Fetches profile by `user_id`
+  - Extracts `full_name` and `avatar_url` from `session.user.user_metadata`
+  - If profile has no `first_name` or no `phone_number` (incomplete): updates profile with Google metadata (full_name, avatar_url), then navigates to `/auth?step=complete-profile`
+  - If profile is complete: navigates to `/`
+
+### 2. Update `src/App.tsx`
+
+Add to the unauthenticated routes block (lines 68-75):
+```
+<Route path="/auth/callback" element={<AuthCallback />} />
+```
+Import AuthCallback at top.
+
+### 3. Update `src/pages/auth/AuthPage.tsx`
+
+**A. Add Google button to the role selection screen** (step === 'role', lines 812-886):
+- Before the role cards, add Google button + "or" divider
+- Same styling as login screen's Google button
+- Uses `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + '/auth/callback' })`
+- Divider text: "or continue with phone"
+
+**B. Update existing login Google button redirect_uri** (line 636):
+- Change `redirect_uri` from `window.location.origin` to `window.location.origin + '/auth/callback'`
+
+**C. Add `complete-profile` step handling**:
+- Read `searchParams.get('step')` — if value is `'complete-profile'`, show profile completion form
+- Add a new early return block (before the login block) that renders:
+  - Full name field (pre-filled from profile via a useEffect that fetches current profile)
+  - Phone number field (required, SA format with +27 prefix)
+  - Note: "We need your number to connect you with vendors"
+  - Submit button that updates profile (`first_name`, `surname`, `phone_number`, `phone_verified: false`, `is_profile_complete: true`) then navigates to `/`
 
 ---
 
-### 3. Add "Guide" tab to `src/pages/events/EventDashboard.tsx`
-
-- Import `learnArticles` from `@/data/learnArticles` and `BookOpen` from lucide
-- Find matching guide: `learnArticles.find(a => a.eventTypeId === event.type)`
-- If guide exists, add a 4th tab trigger ("Guide" with BookOpen icon) after "Vendors"
-- Tab content: render article title, subtitle, all sections inline (same pattern as ArticleDetail — heading, body, bullet items)
-- Bottom quick links: "Find vendors" → `/vendors`, "View my tasks" → `setActiveTab('tasks')`
-
-**Note**: Learn is not currently in the sidebar nav, so no removal needed there (CHANGE 1 from the request is already satisfied).
-
----
-
-### Technical Details
+### Files
 
 | File | Action |
 |------|--------|
-| `src/pages/Home.tsx` | Full rewrite (~200 lines) |
-| `src/pages/events/CreateEvent.tsx` | Add collapsible info card in step 2 (~30 lines) |
-| `src/pages/events/EventDashboard.tsx` | Add Guide tab trigger + content (~50 lines) |
+| `src/pages/auth/AuthCallback.tsx` | Create (~60 lines) |
+| `src/App.tsx` | Add 1 route + 1 import |
+| `src/pages/auth/AuthPage.tsx` | Add Google to role screen, update redirect_uri, add complete-profile step (~80 lines) |
 
-No database changes. No new dependencies (date-fns already imported in EventDashboard).
+No database changes needed.
 
