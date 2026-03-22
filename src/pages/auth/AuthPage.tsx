@@ -115,7 +115,7 @@ function getSteps(role: UserRole | null): Step[] {
 // ─── STEPPER COMPONENT ───
 function OnboardingStepper({ steps, currentStep }: { steps: Step[]; currentStep: Step }) {
   // Only show stepper for registration steps (not role, not forgot/login)
-  const regSteps: Step[] = steps.filter(s => s !== 'role' && s !== 'success');
+  const regSteps: Step[] = steps.filter(s => s !== 'role' && s !== 'auth_method' && s !== 'success');
   const currentIndex = regSteps.indexOf(currentStep);
   if (currentIndex < 0) return null;
 
