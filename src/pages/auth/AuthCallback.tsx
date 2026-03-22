@@ -10,6 +10,8 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        const role = new URLSearchParams(window.location.search).get('role'); // 'user' | 'vendor' | 'planner'
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
@@ -47,7 +49,8 @@ export default function AuthCallback() {
             await supabase.from('profiles').update(updates).eq('user_id', userId);
           }
 
-          navigate('/auth?step=complete-profile', { replace: true });
+          const roleParam = role || 'user';
+          navigate(`/auth?step=complete-profile&role=${roleParam}`, { replace: true });
         } else {
           navigate('/', { replace: true });
         }

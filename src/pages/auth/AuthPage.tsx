@@ -103,19 +103,19 @@ const vendorSchema = z.object({
 
 // ─── TYPES ───
 type UserRole = 'planner' | 'vendor';
-type Step = 'role' | 'details' | 'otp' | 'password' | 'business' | 'showcase' | 'success'
+type Step = 'role' | 'auth_method' | 'details' | 'otp' | 'password' | 'business' | 'showcase' | 'success'
   | 'login' | 'forgot_phone' | 'forgot_otp' | 'forgot_password';
 
 function getSteps(role: UserRole | null): Step[] {
   if (!role) return ['role'];
-  if (role === 'planner') return ['role', 'details', 'otp', 'password', 'success'];
-  return ['role', 'details', 'otp', 'password', 'business', 'showcase', 'success'];
+  if (role === 'planner') return ['role', 'auth_method', 'details', 'otp', 'password', 'success'];
+  return ['role', 'auth_method', 'details', 'otp', 'password', 'business', 'showcase', 'success'];
 }
 
 // ─── STEPPER COMPONENT ───
 function OnboardingStepper({ steps, currentStep }: { steps: Step[]; currentStep: Step }) {
   // Only show stepper for registration steps (not role, not forgot/login)
-  const regSteps: Step[] = steps.filter(s => s !== 'role' && s !== 'success');
+  const regSteps: Step[] = steps.filter(s => s !== 'role' && s !== 'auth_method' && s !== 'success');
   const currentIndex = regSteps.indexOf(currentStep);
   if (currentIndex < 0) return null;
 
@@ -960,7 +960,85 @@ export default function AuthPage() {
               <p className="text-muted-foreground text-sm">Choose your path to get started</p>
             </div>
 
-            {/* Google OAuth - Note: Enable Google provider in Lovable Cloud Auth Settings before deploying */}
+            <div className="grid gap-4">
+              {/* Planner Card */}
+              <button
+                onClick={() => { setSelectedRole('planner'); setStep('auth_method'); }}
+                className={cn(
+                  'relative p-6 rounded-2xl border-2 text-left transition-all group',
+                  'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-accent',
+                  'border-border/50'
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <PartyPopper className="h-7 w-7 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm planning a ceremony</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Organise traditional ceremonies, manage guests, budgets, and find trusted vendors.
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40 group-hover:text-accent transition-colors" />
+              </button>
+
+              {/* Vendor Card */}
+              <button
+                onClick={() => { setSelectedRole('vendor'); setStep('auth_method'); }}
+                className={cn(
+                  'relative p-6 rounded-2xl border-2 text-left transition-all group',
+                  'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-[hsl(174,82%,29%)]',
+                  'border-border/50'
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-[hsl(174,82%,29%)]/10 flex items-center justify-center shrink-0">
+                    <Store className="h-7 w-7 text-[hsl(174,82%,29%)]" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm a service provider</h3>
+                    <p className="text-sm text-muted-foreground">
+                      List your business, receive requests, send quotes, and grow your customer base.
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40 group-hover:text-[hsl(174,82%,29%)] transition-colors" />
+              </button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?
+                <Button variant="link" className="px-1" onClick={() => setStep('login')}>Sign in</Button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Role must always be selected before auth method to ensure correct post-registration routing
+  if (step === 'auth_method') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
+        <div className="px-4 py-4">
+          <Button variant="ghost" size="icon" onClick={() => setStep('role')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-4 pb-8">
+          <div className="w-full max-w-md space-y-6">
+            <div className="text-center space-y-2">
+              <span className="inline-block text-xs font-medium uppercase tracking-wide text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                Registering as: {selectedRole === 'vendor' ? 'Service Provider' : 'Ceremony Planner'}
+              </span>
+              <h1 className="text-2xl font-bold text-foreground">How would you like to sign up?</h1>
+            </div>
+
+            {/* Google OAuth */}
             <Button
               variant="outline"
               className="w-full h-12"
@@ -968,7 +1046,7 @@ export default function AuthPage() {
                 setIsLoading(true);
                 try {
                   const result = await lovable.auth.signInWithOAuth("google", {
-                    redirect_uri: window.location.origin + '/auth/callback',
+                    redirect_uri: window.location.origin + '/auth/callback?role=' + selectedRole,
                   });
                   if (result?.error) {
                     toast.error('Google sign-up failed. Please try again.');
@@ -999,60 +1077,14 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="grid gap-4">
-              {/* Planner Card */}
-              <button
-                onClick={() => { setSelectedRole('planner'); setStep('details'); }}
-                className={cn(
-                  'relative p-6 rounded-2xl border-2 text-left transition-all group',
-                  'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-accent',
-                  'border-border/50'
-                )}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                    <PartyPopper className="h-7 w-7 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm planning a ceremony</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Organise traditional ceremonies, manage guests, budgets, and find trusted vendors.
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40 group-hover:text-accent transition-colors" />
-              </button>
-
-              {/* Vendor Card */}
-              <button
-                onClick={() => { setSelectedRole('vendor'); setStep('details'); }}
-                className={cn(
-                  'relative p-6 rounded-2xl border-2 text-left transition-all group',
-                  'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-[hsl(174,82%,29%)]',
-                  'border-border/50'
-                )}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-[hsl(174,82%,29%)]/10 flex items-center justify-center shrink-0">
-                    <Store className="h-7 w-7 text-[hsl(174,82%,29%)]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm a service provider</h3>
-                    <p className="text-sm text-muted-foreground">
-                      List your business, receive requests, send quotes, and grow your customer base.
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40 group-hover:text-[hsl(174,82%,29%)] transition-colors" />
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?
-                <Button variant="link" className="px-1" onClick={() => setStep('login')}>Sign in</Button>
-              </p>
-            </div>
+            <Button
+              className="w-full h-12"
+              variant="outline"
+              onClick={() => setStep('details')}
+            >
+              <Phone className="h-5 w-5 mr-2" />
+              Continue with Phone
+            </Button>
           </div>
         </div>
       </div>
@@ -1089,7 +1121,7 @@ export default function AuthPage() {
 
   // ─── REGISTRATION STEPS (with stepper) ───
   const backMap: Partial<Record<Step, Step>> = {
-    details: 'role',
+    details: 'auth_method',
     otp: 'details',
     password: 'otp',
     business: 'password',

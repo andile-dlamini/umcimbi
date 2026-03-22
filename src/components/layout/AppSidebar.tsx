@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Calendar, Store, MessageCircle, Receipt, ShoppingBag,
+  Home, Calendar, Store, MessageCircle, Receipt, ShoppingBag,
   Settings, LogOut, Shield, LayoutDashboard, ChevronLeft, ChevronRight } from
 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -97,6 +97,7 @@ export function AppSidebar() {
   const initials = (profile?.first_name?.[0] || profile?.full_name?.[0] || 'U').toUpperCase();
 
   const organiserItems = [
+  { to: '/', icon: Home, label: 'Home' },
   { to: '/events', icon: Calendar, label: 'My Events' },
   { to: '/vendors', icon: Store, label: 'Vendors' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
@@ -105,6 +106,7 @@ export function AppSidebar() {
 
 
   const vendorItems = [
+  { to: '/', icon: Home, label: 'Home' },
   { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
   { to: '/vendor-dashboard/quotations', icon: Receipt, label: 'Quotations' },
