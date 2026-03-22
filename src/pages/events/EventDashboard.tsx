@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Wallet, Pencil, Check, X, TrendingUp, Trash2, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +34,7 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getEventTypeInfo } from '@/types/database';
+import { learnArticles } from '@/data/learnArticles';
 
 export default function EventDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,7 @@ export default function EventDashboard() {
   const [editBudget, setEditBudget] = useState('');
   
   const event = events.find(e => e.id === id);
+  const guide = event ? learnArticles.find(a => a.eventTypeId === event.type) : undefined;
   const [activeTab, setActiveTab] = useState('overview');
   const [notes, setNotes] = useState('');
   
@@ -315,6 +317,15 @@ export default function EventDashboard() {
               >
                 Vendors
               </TabsTrigger>
+              {guide && (
+                <TabsTrigger 
+                  value="guide"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+                >
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Guide
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -448,6 +459,38 @@ export default function EventDashboard() {
           <TabsContent value="vendors" className="px-4 py-6">
             <VendorsTab eventId={event.id} location={event.location || ''} />
           </TabsContent>
+
+          {guide && (
+            <TabsContent value="guide" className="px-4 py-6 space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{guide.title}</h2>
+                {guide.subtitle && (
+                  <p className="text-sm text-muted-foreground mt-1">{guide.subtitle}</p>
+                )}
+              </div>
+              {guide.sections.map((section, idx) => (
+                <div key={idx} className="space-y-2">
+                  <h3 className="text-base font-semibold text-foreground">{section.heading}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{section.body}</p>
+                  {section.items && (
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground pl-2">
+                      {section.items.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button variant="outline" size="sm" onClick={() => navigate('/vendors')}>
+                  Find vendors
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('tasks')}>
+                  View my tasks
+                </Button>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

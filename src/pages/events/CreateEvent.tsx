@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame, ChevronRight } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flower2, Flame, ChevronRight, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
 import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
+import { getArticleByEventType } from '@/data/learnArticles';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
@@ -56,6 +58,7 @@ export default function CreateEvent() {
   
   const [step, setStep] = useState(preselectedType ? 2 : 1);
   const [eventType, setEventType] = useState<EventType | null>(preselectedType);
+  const [infoExpanded, setInfoExpanded] = useState(false);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
@@ -189,6 +192,44 @@ export default function CreateEvent() {
                 Tell us more about your {selectedTypeInfo.shortLabel}
               </p>
             </div>
+
+            {/* Contextual ceremony info card */}
+            {eventType && (() => {
+              const article = getArticleByEventType(eventType);
+              if (!article || !article.sections[0]) return null;
+              return (
+                <Collapsible open={infoExpanded} onOpenChange={setInfoExpanded}>
+                  <Card className="border-border">
+                    <CollapsibleTrigger asChild>
+                      <button className="w-full p-4 flex items-center gap-2 text-left">
+                        <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium text-foreground flex-1">
+                          What is {selectedTypeInfo.shortLabel}?
+                        </span>
+                        {infoExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent className="pt-0 pb-4 px-4 space-y-3">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {article.sections[0].body}
+                        </p>
+                        <Link
+                          to={`/learn/${article.id}`}
+                          className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          Read full guide →
+                        </Link>
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+              );
+            })()}
 
             <div className="space-y-4">
               <div className="space-y-2">
