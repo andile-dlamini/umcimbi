@@ -165,6 +165,136 @@ function OnboardingStepper({ steps, currentStep }: { steps: Step[]; currentStep:
   );
 }
 
+// ─── COMPLETE PROFILE STEP (for Google OAuth new users) ───
+function CompleteProfileStep() {
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // Pre-fill from profile if available
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { navigate('/auth', { replace: true }); return; }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, surname, full_name, phone_number')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (profile) {
+        if (profile.full_name) setFullName(profile.full_name);
+        else if (profile.first_name) setFullName([profile.first_name, profile.surname].filter(Boolean).join(' '));
+        if (profile.phone_number) setPhoneNumber(profile.phone_number);
+      }
+    };
+    loadProfile();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFieldErrors({});
+    const nameParts = fullName.trim().split(/\s+/);
+    if (nameParts.length < 1 || !nameParts[0]) {
+      setFieldErrors({ fullName: 'Please enter your full name' });
+      return;
+    }
+    if (!phoneNumber.trim()) {
+      setFieldErrors({ phoneNumber: 'Phone number is required' });
+      return;
+    }
+    if (!validateSAPhone(phoneNumber)) {
+      setFieldErrors({ phoneNumber: 'Please enter a valid SA phone number' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error('Session expired'); navigate('/auth'); return; }
+
+      const firstName = nameParts[0];
+      const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+      const { error } = await supabase.from('profiles').update({
+        first_name: firstName,
+        surname: surname || null,
+        full_name: fullName.trim(),
+        phone_number: toE164(phoneNumber),
+        phone_verified: false,
+        is_profile_complete: true,
+      }).eq('user_id', user.id);
+
+      if (error) {
+        toast.error('Failed to save profile. Please try again.');
+        console.error('Profile update error:', error);
+      } else {
+        toast.success('Profile complete! Welcome to UMCIMBI.');
+        navigate('/', { replace: true });
+      }
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col items-center justify-center px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <CheckCircle2 className="h-8 w-8 text-primary" />
+          </div>
+          <CardTitle className="text-2xl">Complete your profile</CardTitle>
+          <CardDescription>Just a few more details to get you started</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="cpFullName">Full Name *</Label>
+              <Input
+                id="cpFullName"
+                placeholder="e.g. Thandi Nkosi"
+                value={fullName}
+                onChange={e => { setFullName(e.target.value); setFieldErrors(prev => { const n = { ...prev }; delete n.fullName; return n; }); }}
+                className={`h-12 ${fieldErrors.fullName ? 'border-destructive' : ''}`}
+                autoComplete="name"
+              />
+              {fieldErrors.fullName && <p className="text-sm text-destructive">{fieldErrors.fullName}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cpPhone">Phone Number *</Label>
+              <div className="flex gap-2">
+                <div className="flex items-center justify-center h-12 px-3 rounded-md border border-input bg-muted text-sm font-medium text-muted-foreground shrink-0">🇿🇦 +27</div>
+                <Input
+                  id="cpPhone"
+                  type="tel"
+                  placeholder="0821234567"
+                  value={phoneNumber}
+                  onChange={e => { setPhoneNumber(e.target.value); setFieldErrors(prev => { const n = { ...prev }; delete n.phoneNumber; return n; }); }}
+                  className={`h-12 ${fieldErrors.phoneNumber ? 'border-destructive' : ''}`}
+                  autoComplete="tel"
+                />
+              </div>
+              {fieldErrors.phoneNumber && <p className="text-sm text-destructive">{fieldErrors.phoneNumber}</p>}
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Info className="h-3 w-3" />
+                We need your number to connect you with vendors
+              </p>
+            </div>
+            <Button type="submit" className="w-full h-12" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
+              {isSubmitting ? 'Saving...' : 'Continue'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ───
 export default function AuthPage() {
   const navigate = useNavigate();
