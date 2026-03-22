@@ -83,10 +83,6 @@ export default function VendorDetail() {
     }
   };
 
-  const whatsappLink = vendor.whatsapp_number 
-    ? `https://wa.me/${vendor.whatsapp_number.replace(/\D/g, '')}`
-    : null;
-
   return (
     <div className="min-h-screen pb-safe">
       <PageHeader title={vendor.name} showBack />
