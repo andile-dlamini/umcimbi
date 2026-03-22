@@ -10,6 +10,7 @@ import { AppShell } from "@/components/layout/AppShell";
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
+import AuthCallback from "@/pages/auth/AuthCallback";
 import ContactPage from "@/pages/contact/ContactPage";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
