@@ -103,13 +103,13 @@ const vendorSchema = z.object({
 
 // ─── TYPES ───
 type UserRole = 'planner' | 'vendor';
-type Step = 'role' | 'details' | 'otp' | 'password' | 'business' | 'showcase' | 'success'
+type Step = 'role' | 'auth_method' | 'details' | 'otp' | 'password' | 'business' | 'showcase' | 'success'
   | 'login' | 'forgot_phone' | 'forgot_otp' | 'forgot_password';
 
 function getSteps(role: UserRole | null): Step[] {
   if (!role) return ['role'];
-  if (role === 'planner') return ['role', 'details', 'otp', 'password', 'success'];
-  return ['role', 'details', 'otp', 'password', 'business', 'showcase', 'success'];
+  if (role === 'planner') return ['role', 'auth_method', 'details', 'otp', 'password', 'success'];
+  return ['role', 'auth_method', 'details', 'otp', 'password', 'business', 'showcase', 'success'];
 }
 
 // ─── STEPPER COMPONENT ───
