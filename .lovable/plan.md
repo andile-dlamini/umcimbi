@@ -1,61 +1,46 @@
 
 
-## Add Google OAuth (Sign-in + Sign-up) with Callback & Profile Completion
+## Plan: Add 4 Automated Test Files
 
-### Overview
-Three files: modify AuthPage.tsx (add Google button to registration role screen + profile completion step), create AuthCallback.tsx, update App.tsx routes.
-
-**Important**: The login screen already has a Google OAuth button (lines 628-665). The user wants it to also work for sign-up, plus proper post-OAuth handling.
+Following the existing test pattern (inline test components, no actual component imports, using `renderWithProviders` from `test-utils.tsx`).
 
 ---
 
-### 1. Create `src/pages/auth/AuthCallback.tsx`
+### Test File 1: `tests/Home.test.tsx`
 
-Handles the OAuth redirect at `/auth/callback`:
-- On mount, calls `supabase.auth.getSession()`
-- If no session, redirects to `/auth`
-- If session exists, checks `profiles` table for the user:
-  - Fetches profile by `user_id`
-  - Extracts `full_name` and `avatar_url` from `session.user.user_metadata`
-  - If profile has no `first_name` or no `phone_number` (incomplete): updates profile with Google metadata (full_name, avatar_url), then navigates to `/auth?step=complete-profile`
-  - If profile is complete: navigates to `/`
+Define an inline `Home` component that replicates the core logic of `src/pages/Home.tsx`:
+- Accepts props: `profile`, `activeRole`, `isVendor`, `events`, `isLoading`, `getProgress`
+- Renders the three organiser states + vendor redirect
+- 5 test cases as specified: no events greeting, tile navigation, upcoming event card, vendor redirect, null first_name fallback
 
-### 2. Update `src/App.tsx`
+### Test File 2: `tests/VendorDetail.test.tsx`
 
-Add to the unauthenticated routes block (lines 68-75):
-```
-<Route path="/auth/callback" element={<AuthCallback />} />
-```
-Import AuthCallback at top.
+Define an inline `VendorContactActions` component that mirrors the contact section:
+- Accepts vendor props (name, phone_number, whatsapp_number, etc.)
+- Renders Call button when phone exists, Start Chat button, NO WhatsApp button
+- 3 test cases: no WhatsApp button, Call button present, Start Chat present
 
-### 3. Update `src/pages/auth/AuthPage.tsx`
+### Test File 3: `tests/LearnIntegration.test.tsx`
 
-**A. Add Google button to the role selection screen** (step === 'role', lines 812-886):
-- Before the role cards, add Google button + "or" divider
-- Same styling as login screen's Google button
-- Uses `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + '/auth/callback' })`
-- Divider text: "or continue with phone"
+Define an inline `CeremonyGuideCard` component replicating the collapsible card from CreateEvent step 2:
+- Uses Collapsible, shows "What is X?" header, body text on expand, "Read full guide" link
+- 4 test cases: card appears, collapsed by default, expands on click, no card when no article
 
-**B. Update existing login Google button redirect_uri** (line 636):
-- Change `redirect_uri` from `window.location.origin` to `window.location.origin + '/auth/callback'`
+### Test File 4: `tests/AuthGoogle.test.tsx`
 
-**C. Add `complete-profile` step handling**:
-- Read `searchParams.get('step')` — if value is `'complete-profile'`, show profile completion form
-- Add a new early return block (before the login block) that renders:
-  - Full name field (pre-filled from profile via a useEffect that fetches current profile)
-  - Phone number field (required, SA format with +27 prefix)
-  - Note: "We need your number to connect you with vendors"
-  - Submit button that updates profile (`first_name`, `surname`, `phone_number`, `phone_verified: false`, `is_profile_complete: true`) then navigates to `/`
+Define an inline `AuthLoginScreen` component replicating the login screen's Google button + divider + phone input:
+- 3 test cases: Google button rendered, signInWithOAuth called on click, phone input + divider present
 
 ---
 
-### Files
+### Technical Details
 
-| File | Action |
-|------|--------|
-| `src/pages/auth/AuthCallback.tsx` | Create (~60 lines) |
-| `src/App.tsx` | Add 1 route + 1 import |
-| `src/pages/auth/AuthPage.tsx` | Add Google to role screen, update redirect_uri, add complete-profile step (~80 lines) |
+| File | Approach |
+|------|----------|
+| `tests/Home.test.tsx` | Inline component with props for role/events/profile |
+| `tests/VendorDetail.test.tsx` | Inline component with vendor contact props |
+| `tests/LearnIntegration.test.tsx` | Inline component using actual Collapsible from ui |
+| `tests/AuthGoogle.test.tsx` | Inline component with mock signInWithOAuth callback |
 
-No database changes needed.
+All files use `describe/it/expect/vi` from vitest, `renderWithProviders` from `./test-utils`, `screen/fireEvent` from testing library. No existing test files modified.
 
