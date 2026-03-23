@@ -1061,6 +1061,7 @@ export type Database = {
           review_count: number | null
           show_registration_on_pdf: boolean
           show_vat_on_pdf: boolean
+          signup_source: string | null
           state_province: string | null
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
@@ -1106,6 +1107,7 @@ export type Database = {
           review_count?: number | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
+          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
@@ -1151,6 +1153,7 @@ export type Database = {
           review_count?: number | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
+          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
