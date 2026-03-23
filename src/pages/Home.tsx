@@ -87,6 +87,16 @@ export default function Home() {
   const hasEvents = events.length > 0;
   const hasUpcoming = upcomingEvents.length > 0;
 
+  // CeremonyJourney data
+  const userEventTypes = events.map(e => e.type);
+  const articleIdMap = Object.fromEntries(
+    learnArticles.filter(a => a.eventTypeId).map(a => [a.eventTypeId, a.id])
+  );
+  const handleCeremonyPress = (eventTypeId: string) => {
+    const articleId = articleIdMap[eventTypeId];
+    if (articleId) navigate('/learn/' + articleId);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen pb-safe bg-background">
