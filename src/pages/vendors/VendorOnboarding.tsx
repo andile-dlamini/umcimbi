@@ -58,6 +58,8 @@ const vendorSchema = z.object({
 
 export default function VendorOnboarding() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isQuickMode = searchParams.get('quick') === 'true';
   const { createVendorProfile, vendor: existingVendor, isLoading: isLoadingVendor } = useMyVendorProfile();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [justCreated, setJustCreated] = useState(false);
