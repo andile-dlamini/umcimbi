@@ -44,7 +44,7 @@ describe('Status config canonical coverage', () => {
 
 describe('No stale/orphan status values in configs', () => {
   it('quoteStatusConfig has no extra keys beyond canonical', () => {
-    const canonical = new Set(['pending_client', 'client_accepted', 'client_declined', 'expired']);
+    const canonical = new Set(['pending_client', 'client_accepted', 'client_declined', 'expired', 'adjustment_requested']);
     const actual = new Set(Object.keys(quoteStatusConfig));
     for (const key of actual) {
       expect(canonical.has(key)).toBe(true);
