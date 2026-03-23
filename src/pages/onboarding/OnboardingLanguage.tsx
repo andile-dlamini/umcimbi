@@ -723,7 +723,7 @@ export default function OnboardingLanguage() {
             Join families and vendors already using UMCIMBI to bring their ceremonies together.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/auth?mode=signup">
+            <Link to="/waitlist">
               <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30">
                 Get started — it's free
               </Button>
