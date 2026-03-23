@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
     } else if (kind === "balance") {
       updates.balance_status = "paid";
       updates.balance_paid_at = now;
-      updates.booking_status = "completed";
+      updates.booking_status = "confirmed";
+      updates.funds_held_since = now;
     } else if (kind === "full") {
       updates.deposit_status = "paid";
       updates.deposit_paid_at = now;
