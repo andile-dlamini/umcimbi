@@ -118,6 +118,9 @@ export default function AdminDashboard() {
         totalBookings: bookingsCount || 0,
         totalRequests: requestsCount || 0,
         pendingRequests: pendingCount || 0,
+        waitlistTotal: waitlistCount || 0,
+        waitlistOrganisers,
+        waitlistVendors,
         eventsByType,
         vendorsByCategory,
       });
