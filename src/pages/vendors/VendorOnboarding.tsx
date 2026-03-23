@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check, Upload, Info } from 'lucide-react';
+import { PricingInput } from '@/components/vendors/PricingInput';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
