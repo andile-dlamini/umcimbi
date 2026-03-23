@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
 import { useState, useEffect } from 'react';
