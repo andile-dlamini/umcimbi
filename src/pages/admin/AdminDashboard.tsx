@@ -172,6 +172,33 @@ export default function AdminDashboard() {
         </div>
       </TooltipProvider>
 
+      {/* Waitlist Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Waitlist Signups
+          </CardTitle>
+          <CardDescription>Pre-launch interest</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-7 w-10 rounded bg-muted" />
+              <div className="h-4 w-20 rounded bg-muted" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-3xl font-bold">{stats.waitlistTotal}</p>
+              <div className="flex gap-4 text-sm text-muted-foreground">
+                <span>Organisers: {stats.waitlistOrganisers}</span>
+                <span>Vendors: {stats.waitlistVendors}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Events by Type */}
         <Card>
