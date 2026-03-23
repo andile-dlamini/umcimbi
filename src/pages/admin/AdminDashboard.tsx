@@ -95,6 +95,12 @@ export default function AdminDashboard() {
         supabase.from('vendors').select('category').eq('is_active', true),
       ]);
 
+      // Waitlist stats
+      const { count: waitlistCount } = await supabase.from('waitlist_signups' as any).select('*', { count: 'exact', head: true });
+      const { data: waitlistData } = await supabase.from('waitlist_signups' as any).select('role');
+      const waitlistOrganisers = waitlistData?.filter((w: any) => w.role === 'organiser').length || 0;
+      const waitlistVendors = waitlistData?.filter((w: any) => w.role === 'vendor').length || 0;
+
       const eventsByType: Record<string, number> = {};
       events?.forEach(e => {
         eventsByType[e.type] = (eventsByType[e.type] || 0) + 1;
