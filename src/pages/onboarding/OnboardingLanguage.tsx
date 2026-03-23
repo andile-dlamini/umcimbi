@@ -113,7 +113,7 @@ export default function OnboardingLanguage() {
             {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
           <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
           )}
-            <Link to="/auth?mode=signup" className="block pt-1">
+            <Link to="/waitlist" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
           </div>
