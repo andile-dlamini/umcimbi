@@ -359,6 +359,23 @@ export default function BookingDetail() {
           </CardContent>
         </Card>
 
+        {/* Escrow Info Card */}
+        {booking.balance_status === 'paid' && booking.booking_status === 'confirmed' && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="h-5 w-5 text-blue-600" />
+                <span className="font-medium">Funds secured</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isClient
+                  ? "Your balance payment is held securely by Umcimbi and will be released to your vendor after your ceremony. This protects both parties."
+                  : "Your client's balance payment is held securely by Umcimbi and will be released to you after the ceremony date. No action needed from you."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Delivery Proofs */}
         {deliveryProofs.length > 0 && (
           <Card>
