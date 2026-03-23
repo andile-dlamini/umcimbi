@@ -99,7 +99,7 @@ export default function OnboardingLanguage() {
             <Link to="/auth?mode=login">
               <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
-            <Link to="/auth?mode=signup" className="hidden sm:inline-flex">
+            <Link to="/waitlist" className="hidden sm:inline-flex">
               <Button size="sm" className="text-[13px] font-semibold rounded-full px-5 shadow-md shadow-primary/15">Register</Button>
             </Link>
             <button className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
