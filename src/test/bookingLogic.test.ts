@@ -71,8 +71,8 @@ describe('Booking Logic', () => {
     it('calculates deposit as 30% and balance as 70%', () => {
       const booking = createBookingFromQuote(mockAcceptedQuote, mockEvent, 'client-1');
 
-      expect(booking.deposit_amount).toBe(3000); // 30% of 10000
-      expect(booking.balance_amount).toBe(7000); // 70% of 10000
+      expect(booking.deposit_amount).toBe(3240); // 30% of 10800 (with 8% platform fee)
+      expect(booking.balance_amount).toBe(7560); // 70% of 10800
     });
 
     it('throws error if quote is not accepted', () => {
