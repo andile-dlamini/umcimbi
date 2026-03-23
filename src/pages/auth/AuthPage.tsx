@@ -657,6 +657,11 @@ export default function AuthPage() {
       toast.error('Profile created but some images failed to upload.');
     }
 
+    // Save signup_source if ref param present
+    if (refSource) {
+      await supabase.from('vendors').update({ signup_source: refSource } as any).eq('id', vendorData.id);
+    }
+
     setIsLoading(false);
     setStep('success');
     toast.success('Your business profile is live!');

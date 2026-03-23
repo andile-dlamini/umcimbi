@@ -162,6 +162,11 @@ export default function Home() {
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6 animate-fade-in">
         <h1 className="text-2xl font-bold text-foreground">Sawubona, {firstName} 👋</h1>
 
+        <CeremonyJourney
+          userEventTypes={userEventTypes}
+          onCeremonyPress={handleCeremonyPress}
+        />
+
         {/* Hero card: next event or plan-next prompt */}
         {nextEvent ? (
           <NextEventHeroCard eventId={nextEvent.id} event={nextEvent} />
