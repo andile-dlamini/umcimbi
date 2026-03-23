@@ -534,7 +534,8 @@ export default function VendorOnboarding() {
               </div>
               )}
 
-              {/* About */}
+              {/* About — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="about">About your business</Label>
                 <Textarea
@@ -547,8 +548,10 @@ export default function VendorOnboarding() {
                 />
                 {errors.about && <p className="text-sm text-destructive">{errors.about}</p>}
               </div>
+              )}
 
-              {/* Showcase Images */}
+              {/* Showcase Images — show single optional photo in quick mode, full in standard */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label>Showcase your work (up to 5 images)</Label>
                 <div className="grid grid-cols-5 gap-2">
@@ -586,13 +589,16 @@ export default function VendorOnboarding() {
                   Add photos of your work to attract clients. You can also add these later.
                 </p>
               </div>
+              )}
 
-              {/* Price Range */}
+              {/* Price Range — hidden in quick mode */}
+              {!isQuickMode && (
               <PricingInput
                 category={formData.category}
                 value={formData.price_range_text}
                 onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
               />
+              )}
 
               {/* Phone with Country Code */}
               <div className="space-y-2">
