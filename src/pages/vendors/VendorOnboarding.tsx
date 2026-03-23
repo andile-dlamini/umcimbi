@@ -56,6 +56,14 @@ const vendorSchema = z.object({
   website_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
 
+const quickVendorSchema = z.object({
+  name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
+  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  city: z.string().trim().min(1, 'City / Suburb is required').max(100),
+  phone_country: z.string().min(1, 'Please select a country code'),
+  phone_number: z.string().trim().min(1, 'Phone number is required'),
+});
+
 export default function VendorOnboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
