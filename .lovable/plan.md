@@ -1,48 +1,59 @@
 
 
-## Implementation Plan — 5 Features in Risk-Ordered Sequence
+## Plan: Balance Payment Escrow Changes
 
-The approved plan will be implemented in this exact order:
+5 targeted changes across 3 files + 1 migration.
 
-### Phase 1: Structured Pricing Input (Feature 2)
-- Create `src/lib/pricingModels.ts` — types, configs for 14 categories, serialiser, parser
-- Create `src/components/vendors/PricingInput.tsx` — category-aware form with live preview
-- Update `VendorOnboarding.tsx`, `VendorProfile.tsx`, `AuthPage.tsx` — swap price Input for PricingInput
+---
 
-### Phase 2: Quick Vendor Registration (Feature 5)
-- Update `VendorOnboarding.tsx` — read `?quick=true`, show simplified 4-field form
-- Update `VendorDashboard.tsx` — incomplete profile banner
+### 1. `supabase/functions/yoco-webhook/index.ts`
 
-### Phase 3: Ceremony Journey Timeline (Feature 1)
-- Create `src/components/shared/CeremonyJourney.tsx` — horizontal scrollable timeline with 3 journey paths
-- Update `Home.tsx` — integrate CeremonyJourney using `events.map(e => e.event_type)`, add learnArticles lookup
+**Change 1 — Hold balance in escrow** (lines 54-57):
+Change `kind === "balance"` block from setting `booking_status = "completed"` to `booking_status = "confirmed"` and add `funds_held_since = now`.
 
-### Phase 4: Vendor Referral Links (Feature 4)
-- Update `AuthPage.tsx` — read `ref` param, pre-select vendor role, show Ndabe co-branded banner
-- Update `App.tsx` — add `/join/vendor` → `/auth?mode=register&role=vendor&ref=ndabe` redirect
-- DB migration: add `signup_source` text column to vendors table
+**Change 2 — Replace balance chat message with two escrow messages** (lines 119-139):
+- Query vendor name: `supabase.from('vendors').select('name').eq('id', booking.vendor_id).single()`
+- When `kind === "balance"`, instead of the single "completed" message, insert two system messages:
+  - Client message: "✅ Your balance payment of R[amount] has been received and is securely held by Umcimbi. Funds will be released to [vendor name] after your ceremony. You're all set! 🎉"
+  - Vendor message: "💰 Great news! The balance payment of R[amount]..."
+- Both with `sender_type: "system"`, `message_type: "system"`, `sender_user_id: null`
+- Keep deposit and full payment messages unchanged
 
-### Phase 5: Waitlist Gate (Feature 3)
-- DB migration: create `waitlist_signups` table with RLS
-- Create `src/pages/WaitlistPage.tsx` — countdown to `2026-05-25`, signup form, success state
-- Update `App.tsx` — add `/waitlist` route
-- Update `OnboardingLanguage.tsx` — registration CTAs → `/waitlist`
-- Update `AdminDashboard.tsx` — waitlist stat card
+**Change 3 — Remove review prompt** (lines 141-153):
+Delete the entire `isCompleted` block that sends the review_prompt message.
 
-### Files Summary
+---
 
-| Phase | Files | Action |
-|-------|-------|--------|
-| 1 | `src/lib/pricingModels.ts` | Create |
-| 1 | `src/components/vendors/PricingInput.tsx` | Create |
-| 1 | `VendorOnboarding.tsx`, `VendorProfile.tsx`, `AuthPage.tsx` | Edit (swap Input) |
-| 2 | `VendorOnboarding.tsx` | Edit (quick mode) |
-| 2 | `VendorDashboard.tsx` | Edit (banner) |
-| 3 | `src/components/shared/CeremonyJourney.tsx` | Create |
-| 3 | `Home.tsx` | Edit |
-| 4 | `AuthPage.tsx`, `App.tsx` | Edit |
-| 4 | Migration: `vendors.signup_source` | Create |
-| 5 | `src/pages/WaitlistPage.tsx` | Create |
-| 5 | `App.tsx`, `OnboardingLanguage.tsx`, `AdminDashboard.tsx` | Edit |
-| 5 | Migration: `waitlist_signups` | Create |
+### 2. `src/pages/bookings/BookingDetail.tsx`
+
+**4a** — Add `funds_held` to `paymentStatusCfg` (line 26):
+```
+funds_held: { label: 'Held by Umcimbi', color: 'text-blue-600 dark:text-blue-400' },
+```
+
+**4b** — Add escrow info card after the balance payment section (after line 356), shown when `booking.balance_status === 'paid' && booking.booking_status === 'confirmed'`:
+- Blue-themed card with Lock icon and "Funds secured" heading
+- Conditional text for client vs vendor
+
+**4c** — `canReview` already includes `booking_status === 'completed'` (line 63) — no change needed, it's already correct.
+
+**Import** — Add `Lock` to the lucide-react import (line 10).
+
+---
+
+### 3. Migration: `add_funds_held_since`
+
+```sql
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS funds_held_since timestamptz;
+```
+
+---
+
+### Files
+
+| File | Changes |
+|------|---------|
+| `supabase/functions/yoco-webhook/index.ts` | Escrow status, two messages, remove review prompt |
+| `src/pages/bookings/BookingDetail.tsx` | funds_held status, escrow card, Lock import |
+| Migration | Add `funds_held_since` column |
 
