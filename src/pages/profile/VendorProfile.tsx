@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle, Briefcase } from 'lucide-react';
+import { PricingInput } from '@/components/vendors/PricingInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -232,14 +233,11 @@ export default function VendorProfile() {
                     rows={4}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Price range</Label>
-                  <Input
-                    value={editData.price_range_text}
-                    onChange={(e) => setEditData({ ...editData, price_range_text: e.target.value })}
-                    placeholder="From R5,000"
-                  />
-                </div>
+                <PricingInput
+                  category={vendor.category}
+                  value={editData.price_range_text}
+                  onChange={(formatted) => setEditData({ ...editData, price_range_text: formatted })}
+                />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Phone</Label>

@@ -8,7 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/shared/ProgressBar';
+import { CeremonyJourney } from '@/components/shared/CeremonyJourney';
 import { getEventTypeInfo, EventType } from '@/types/database';
+import { learnArticles } from '@/data/learnArticles';
 import { differenceInDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -84,6 +86,16 @@ export default function Home() {
 
   const hasEvents = events.length > 0;
   const hasUpcoming = upcomingEvents.length > 0;
+
+  // CeremonyJourney data
+  const userEventTypes = events.map(e => e.type);
+  const articleIdMap = Object.fromEntries(
+    learnArticles.filter(a => a.eventTypeId).map(a => [a.eventTypeId, a.id])
+  );
+  const handleCeremonyPress = (eventTypeId: string) => {
+    const articleId = articleIdMap[eventTypeId];
+    if (articleId) navigate('/learn/' + articleId);
+  };
 
   if (isLoading) {
     return (

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check, Upload, Info } from 'lucide-react';
+import { PricingInput } from '@/components/vendors/PricingInput';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -55,8 +56,18 @@ const vendorSchema = z.object({
   website_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
 
+const quickVendorSchema = z.object({
+  name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
+  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  city: z.string().trim().min(1, 'City / Suburb is required').max(100),
+  phone_country: z.string().min(1, 'Please select a country code'),
+  phone_number: z.string().trim().min(1, 'Phone number is required'),
+});
+
 export default function VendorOnboarding() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isQuickMode = searchParams.get('quick') === 'true';
   const { createVendorProfile, vendor: existingVendor, isLoading: isLoadingVendor } = useMyVendorProfile();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [justCreated, setJustCreated] = useState(false);
@@ -162,11 +173,11 @@ export default function VendorOnboarding() {
     e.preventDefault();
     setErrors({});
 
-    const dataToValidate = {
-      ...formData,
-      ...address,
-    };
-    const validation = vendorSchema.safeParse(dataToValidate);
+    const dataToValidate = isQuickMode
+      ? { name: formData.name, category: formData.category, city: address.city, phone_country: formData.phone_country, phone_number: formData.phone_number }
+      : { ...formData, ...address };
+    const schema = isQuickMode ? quickVendorSchema : vendorSchema;
+    const validation = schema.safeParse(dataToValidate);
 
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
@@ -308,7 +319,7 @@ export default function VendorOnboarding() {
     }
 
     setIsLoading(false);
-    navigate('/profile/vendor');
+    navigate(isQuickMode ? '/vendor-dashboard' : '/profile/vendor');
   };
 
   return (
@@ -390,7 +401,8 @@ export default function VendorOnboarding() {
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
               </div>
 
-              {/* Business Type */}
+              {/* Business Type — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-4 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div>
@@ -501,14 +513,29 @@ export default function VendorOnboarding() {
                   </div>
                 )}
               </div>
+              )}
 
-              {/* Address Section */}
+              {/* Address Section — full in standard mode, city-only in quick mode */}
+              {isQuickMode ? (
+                <div className="space-y-2">
+                  <Label>City / Suburb *</Label>
+                  <Input
+                    placeholder="e.g., Durban, Umlazi"
+                    value={address.city}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    className={`h-12 ${errors.city ? 'border-destructive' : ''}`}
+                  />
+                  {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+                </div>
+              ) : (
               <div className="pt-2">
                 <h3 className="text-sm font-medium mb-3">Business Address *</h3>
                 <AddressFields data={address} onChange={setAddress} errors={errors} />
               </div>
+              )}
 
-              {/* About */}
+              {/* About — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="about">About your business</Label>
                 <Textarea
@@ -521,8 +548,10 @@ export default function VendorOnboarding() {
                 />
                 {errors.about && <p className="text-sm text-destructive">{errors.about}</p>}
               </div>
+              )}
 
-              {/* Showcase Images */}
+              {/* Showcase Images — show single optional photo in quick mode, full in standard */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label>Showcase your work (up to 5 images)</Label>
                 <div className="grid grid-cols-5 gap-2">
@@ -560,18 +589,16 @@ export default function VendorOnboarding() {
                   Add photos of your work to attract clients. You can also add these later.
                 </p>
               </div>
+              )}
 
-              {/* Price Range */}
-              <div className="space-y-2">
-                <Label htmlFor="price">Price range</Label>
-                <Input
-                  id="price"
-                  placeholder="e.g., From R5,000 or R150/head"
-                  value={formData.price_range_text}
-                  onChange={(e) => setFormData({ ...formData, price_range_text: e.target.value })}
-                  className="h-12"
-                />
-              </div>
+              {/* Price Range — hidden in quick mode */}
+              {!isQuickMode && (
+              <PricingInput
+                category={formData.category}
+                value={formData.price_range_text}
+                onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
+              />
+              )}
 
               {/* Phone with Country Code */}
               <div className="space-y-2">
@@ -637,7 +664,8 @@ export default function VendorOnboarding() {
                 {errors.phone_country && <p className="text-sm text-destructive">{errors.phone_country}</p>}
               </div>
 
-              {/* Email */}
+              {/* Email — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="email">Business email</Label>
                 <div className="relative">
@@ -653,8 +681,10 @@ export default function VendorOnboarding() {
                 </div>
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
+              )}
 
-              {/* Website */}
+              {/* Website — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
                 <div className="relative">
@@ -670,6 +700,7 @@ export default function VendorOnboarding() {
                 </div>
                 {errors.website_url && <p className="text-sm text-destructive">{errors.website_url}</p>}
               </div>
+              )}
 
               <Button type="submit" className="w-full h-12 mt-6" disabled={isLoading}>
                 {isLoading ? 'Creating profile...' : 'Create vendor profile'}
