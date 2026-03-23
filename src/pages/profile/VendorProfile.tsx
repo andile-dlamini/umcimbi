@@ -233,14 +233,11 @@ export default function VendorProfile() {
                     rows={4}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Price range</Label>
-                  <Input
-                    value={editData.price_range_text}
-                    onChange={(e) => setEditData({ ...editData, price_range_text: e.target.value })}
-                    placeholder="From R5,000"
-                  />
-                </div>
+                <PricingInput
+                  category={vendor.category}
+                  value={editData.price_range_text}
+                  onChange={(formatted) => setEditData({ ...editData, price_range_text: formatted })}
+                />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Phone</Label>

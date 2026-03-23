@@ -563,16 +563,11 @@ export default function VendorOnboarding() {
               </div>
 
               {/* Price Range */}
-              <div className="space-y-2">
-                <Label htmlFor="price">Price range</Label>
-                <Input
-                  id="price"
-                  placeholder="e.g., From R5,000 or R150/head"
-                  value={formData.price_range_text}
-                  onChange={(e) => setFormData({ ...formData, price_range_text: e.target.value })}
-                  className="h-12"
-                />
-              </div>
+              <PricingInput
+                category={formData.category}
+                value={formData.price_range_text}
+                onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
+              />
 
               {/* Phone with Country Code */}
               <div className="space-y-2">

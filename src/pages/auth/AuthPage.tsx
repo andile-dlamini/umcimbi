@@ -1329,10 +1329,11 @@ export default function AuthPage() {
                   </div>
 
                   {/* Price Range */}
-                  <div className="space-y-2">
-                    <Label>Price range</Label>
-                    <Input placeholder="e.g., From R5,000 or R150/head" value={vendorForm.price_range_text} onChange={e => setVendorForm({ ...vendorForm, price_range_text: e.target.value })} className="h-12" />
-                  </div>
+                  <PricingInput
+                    category={vendorForm.category}
+                    value={vendorForm.price_range_text}
+                    onChange={(formatted) => setVendorForm({ ...vendorForm, price_range_text: formatted })}
+                  />
 
                   {/* Phone */}
                   <div className="space-y-2">
