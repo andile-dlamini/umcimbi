@@ -401,7 +401,8 @@ export default function VendorOnboarding() {
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
               </div>
 
-              {/* Business Type */}
+              {/* Business Type — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-4 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div>
@@ -512,12 +513,26 @@ export default function VendorOnboarding() {
                   </div>
                 )}
               </div>
+              )}
 
-              {/* Address Section */}
+              {/* Address Section — full in standard mode, city-only in quick mode */}
+              {isQuickMode ? (
+                <div className="space-y-2">
+                  <Label>City / Suburb *</Label>
+                  <Input
+                    placeholder="e.g., Durban, Umlazi"
+                    value={address.city}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    className={`h-12 ${errors.city ? 'border-destructive' : ''}`}
+                  />
+                  {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+                </div>
+              ) : (
               <div className="pt-2">
                 <h3 className="text-sm font-medium mb-3">Business Address *</h3>
                 <AddressFields data={address} onChange={setAddress} errors={errors} />
               </div>
+              )}
 
               {/* About */}
               <div className="space-y-2">
