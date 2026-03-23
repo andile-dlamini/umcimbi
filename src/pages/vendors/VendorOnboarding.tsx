@@ -319,7 +319,7 @@ export default function VendorOnboarding() {
     }
 
     setIsLoading(false);
-    navigate('/profile/vendor');
+    navigate(isQuickMode ? '/vendor-dashboard' : '/profile/vendor');
   };
 
   return (
