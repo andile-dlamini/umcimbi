@@ -173,11 +173,11 @@ export default function VendorOnboarding() {
     e.preventDefault();
     setErrors({});
 
-    const dataToValidate = {
-      ...formData,
-      ...address,
-    };
-    const validation = vendorSchema.safeParse(dataToValidate);
+    const dataToValidate = isQuickMode
+      ? { name: formData.name, category: formData.category, city: address.city, phone_country: formData.phone_country, phone_number: formData.phone_number }
+      : { ...formData, ...address };
+    const schema = isQuickMode ? quickVendorSchema : vendorSchema;
+    const validation = schema.safeParse(dataToValidate);
 
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
