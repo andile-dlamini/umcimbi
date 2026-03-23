@@ -24,6 +24,7 @@ const paymentStatusCfg: Record<string, { label: string; color: string }> = {
   due: { label: 'Due', color: 'text-amber-600 dark:text-amber-400' },
   paid: { label: 'Paid', color: 'text-emerald-600 dark:text-emerald-400' },
   pending_verification: { label: 'Pending Verification', color: 'text-blue-600 dark:text-blue-400' },
+  funds_held: { label: 'Held by Umcimbi', color: 'text-blue-600 dark:text-blue-400' },
 };
 
 export default function BookingDetail() {
