@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
 import { useState, useEffect } from 'react';
@@ -24,6 +24,7 @@ const paymentStatusCfg: Record<string, { label: string; color: string }> = {
   due: { label: 'Due', color: 'text-amber-600 dark:text-amber-400' },
   paid: { label: 'Paid', color: 'text-emerald-600 dark:text-emerald-400' },
   pending_verification: { label: 'Pending Verification', color: 'text-blue-600 dark:text-blue-400' },
+  funds_held: { label: 'Held by Umcimbi', color: 'text-blue-600 dark:text-blue-400' },
 };
 
 export default function BookingDetail() {
@@ -357,6 +358,23 @@ export default function BookingDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Escrow Info Card */}
+        {booking.balance_status === 'paid' && booking.booking_status === 'confirmed' && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="h-5 w-5 text-blue-600" />
+                <span className="font-medium">Funds secured</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isClient
+                  ? "Your balance payment is held securely by Umcimbi and will be released to your vendor after your ceremony. This protects both parties."
+                  : "Your client's balance payment is held securely by Umcimbi and will be released to you after the ceremony date. No action needed from you."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Delivery Proofs */}
         {deliveryProofs.length > 0 && (

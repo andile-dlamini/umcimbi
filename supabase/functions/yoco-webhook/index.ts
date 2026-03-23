@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
     } else if (kind === "balance") {
       updates.balance_status = "paid";
       updates.balance_paid_at = now;
-      updates.booking_status = "completed";
+      updates.booking_status = "confirmed";
+      updates.funds_held_since = now;
     } else if (kind === "full") {
       updates.deposit_status = "paid";
       updates.deposit_paid_at = now;
@@ -107,6 +108,14 @@ Deno.serve(async (req) => {
       .single();
 
     if (booking) {
+      // Get vendor name for escrow messages
+      const { data: vendorData } = await supabase
+        .from("vendors")
+        .select("name")
+        .eq("id", booking.vendor_id)
+        .single();
+      const vendorName = vendorData?.name || "your vendor";
+
       const { data: conv } = await supabase
         .from("conversations")
         .select("id")
@@ -117,38 +126,41 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (conv) {
-        let content: string;
-
-        if (kind === "full") {
-          const totalAmount = (booking.deposit_amount || 0) + (booking.balance_amount || 0);
-          content = `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed. Booking is now completed!`;
-        } else {
-          const label = kind === "deposit" ? "Deposit" : "Balance";
-          const amount = kind === "deposit" ? booking.deposit_amount : booking.balance_amount;
-          content = kind === "balance"
-            ? `✅ ${label} payment of R${amount?.toLocaleString()} confirmed. Booking is now completed!`
-            : `✅ ${label} payment of R${amount?.toLocaleString()} confirmed. Booking is now active!`;
-        }
-
-        await supabase.from("messages").insert({
-          conversation_id: conv.id,
-          sender_type: "system",
-          sender_user_id: metadata.userId,
-          message_type: "system",
-          content,
-        });
-
-        // If booking is now completed, send review prompt
-        const isCompleted = kind === "balance" || kind === "full";
-        if (isCompleted) {
-          // Find the booking ID for linking
+        if (kind === "balance") {
+          const amount = booking.balance_amount;
+          // Message for the client
           await supabase.from("messages").insert({
             conversation_id: conv.id,
             sender_type: "system",
             sender_user_id: null,
-            message_type: "review_prompt",
-            content: "⭐ How was the experience? Tap below to leave a review.",
-            metadata: { booking_id: bookingId },
+            message_type: "system",
+            content: `✅ Your balance payment of R${amount?.toLocaleString()} has been received and is securely held by Umcimbi. Funds will be released to ${vendorName} after your ceremony. You're all set! 🎉`,
+          });
+          // Message for the vendor
+          await supabase.from("messages").insert({
+            conversation_id: conv.id,
+            sender_type: "system",
+            sender_user_id: null,
+            message_type: "system",
+            content: `💰 Great news! The balance payment of R${amount?.toLocaleString()} for this booking has been received and is being held securely by Umcimbi pending your ceremony date. Funds will be released to you automatically after the service is delivered. No action needed from you.`,
+          });
+        } else if (kind === "full") {
+          const totalAmount = (booking.deposit_amount || 0) + (booking.balance_amount || 0);
+          await supabase.from("messages").insert({
+            conversation_id: conv.id,
+            sender_type: "system",
+            sender_user_id: metadata.userId,
+            message_type: "system",
+            content: `✅ Full payment of R${totalAmount?.toLocaleString()} confirmed. Booking is now completed!`,
+          });
+        } else {
+          const amount = booking.deposit_amount;
+          await supabase.from("messages").insert({
+            conversation_id: conv.id,
+            sender_type: "system",
+            sender_user_id: metadata.userId,
+            message_type: "system",
+            content: `✅ Deposit payment of R${amount?.toLocaleString()} confirmed. Booking is now active!`,
           });
         }
 

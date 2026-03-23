@@ -80,6 +80,7 @@ export type Database = {
           deposit_status: Database["public"]["Enums"]["payment_status"]
           event_date_time: string | null
           event_id: string
+          funds_held_since: string | null
           id: string
           order_number: string | null
           order_pdf_generated_at: string | null
@@ -104,6 +105,7 @@ export type Database = {
           deposit_status?: Database["public"]["Enums"]["payment_status"]
           event_date_time?: string | null
           event_id: string
+          funds_held_since?: string | null
           id?: string
           order_number?: string | null
           order_pdf_generated_at?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           deposit_status?: Database["public"]["Enums"]["payment_status"]
           event_date_time?: string | null
           event_id?: string
+          funds_held_since?: string | null
           id?: string
           order_number?: string | null
           order_pdf_generated_at?: string | null
