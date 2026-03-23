@@ -14,6 +14,7 @@ import AuthCallback from "@/pages/auth/AuthCallback";
 import ContactPage from "@/pages/contact/ContactPage";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
+import WaitlistPage from "@/pages/WaitlistPage";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
