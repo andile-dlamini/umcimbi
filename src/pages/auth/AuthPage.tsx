@@ -5,6 +5,7 @@ import {
   PartyPopper, Store, Phone, Mail, Globe, ImagePlus, Camera,
   ChevronsUpDown, Check, Upload, Info
 } from 'lucide-react';
+import { PricingInput } from '@/components/vendors/PricingInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
