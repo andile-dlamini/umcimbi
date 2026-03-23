@@ -117,6 +117,11 @@ export default function Home() {
             <p className="text-muted-foreground mt-1">What are you planning?</p>
           </div>
 
+          <CeremonyJourney
+            userEventTypes={userEventTypes}
+            onCeremonyPress={handleCeremonyPress}
+          />
+
           <div className="grid grid-cols-2 gap-3">
             {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel }) => (
               <Card
