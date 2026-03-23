@@ -1043,6 +1043,13 @@ export default function AuthPage() {
               <h1 className="text-2xl font-bold text-foreground">How would you like to sign up?</h1>
             </div>
 
+            {/* Referral welcome banner */}
+            {refSource === 'ndabe' && selectedRole === 'vendor' && (
+              <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 text-center space-y-1">
+                <p className="text-sm font-semibold text-foreground">Welcome — Ndabe has partnered with Umcimbi to help your business grow</p>
+              </div>
+            )}
+
             {/* Google OAuth */}
             <Button
               variant="outline"
