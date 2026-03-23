@@ -302,9 +302,13 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams();
   const { signIn } = useAuth();
 
-  const initialStep: Step = searchParams.get('mode') === 'signup' ? 'role' : 'login';
+  const refSource = searchParams.get('ref');
+  const initialRole: UserRole | null = searchParams.get('role') === 'vendor' ? 'vendor' : null;
+  const initialStep: Step = searchParams.get('mode') === 'signup'
+    ? (initialRole ? 'auth_method' : 'role')
+    : 'login';
   const [step, setStep] = useState<Step>(initialStep);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(initialRole);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
@@ -651,6 +655,11 @@ export default function AuthPage() {
     } catch (err) {
       console.error('Image upload error:', err);
       toast.error('Profile created but some images failed to upload.');
+    }
+
+    // Save signup_source if ref param present
+    if (refSource) {
+      await supabase.from('vendors').update({ signup_source: refSource } as any).eq('id', vendorData.id);
     }
 
     setIsLoading(false);
@@ -1038,6 +1047,13 @@ export default function AuthPage() {
               </span>
               <h1 className="text-2xl font-bold text-foreground">How would you like to sign up?</h1>
             </div>
+
+            {/* Referral welcome banner */}
+            {refSource === 'ndabe' && selectedRole === 'vendor' && (
+              <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 text-center space-y-1">
+                <p className="text-sm font-semibold text-foreground">Welcome — Ndabe has partnered with Umcimbi to help your business grow</p>
+              </div>
+            )}
 
             {/* Google OAuth */}
             <Button

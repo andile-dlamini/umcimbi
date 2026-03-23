@@ -14,6 +14,7 @@ import AuthCallback from "@/pages/auth/AuthCallback";
 import ContactPage from "@/pages/contact/ContactPage";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
+import WaitlistPage from "@/pages/WaitlistPage";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
@@ -70,6 +71,8 @@ function AppRoutes() {
         <Route path="/onboarding" element={<OnboardingLanguage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/waitlist" element={<WaitlistPage />} />
+        <Route path="/join/vendor" element={<Navigate to="/auth?mode=signup&role=vendor&ref=ndabe" replace />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />

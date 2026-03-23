@@ -1061,6 +1061,7 @@ export type Database = {
           review_count: number | null
           show_registration_on_pdf: boolean
           show_vat_on_pdf: boolean
+          signup_source: string | null
           state_province: string | null
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
@@ -1106,6 +1107,7 @@ export type Database = {
           review_count?: number | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
+          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
@@ -1151,6 +1153,7 @@ export type Database = {
           review_count?: number | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
+          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
@@ -1162,6 +1165,36 @@ export type Database = {
           view_count?: number | null
           website_url?: string | null
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      waitlist_signups: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          phone_number: string | null
+          role: string | null
+          source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          role?: string | null
+          source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          role?: string | null
+          source?: string | null
         }
         Relationships: []
       }

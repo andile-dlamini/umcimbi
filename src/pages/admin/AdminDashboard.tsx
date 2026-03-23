@@ -11,6 +11,9 @@ interface Stats {
   totalBookings: number;
   totalRequests: number;
   pendingRequests: number;
+  waitlistTotal: number;
+  waitlistOrganisers: number;
+  waitlistVendors: number;
   eventsByType: Record<string, number>;
   vendorsByCategory: Record<string, number>;
 }
@@ -62,6 +65,9 @@ export default function AdminDashboard() {
     totalBookings: 0,
     totalRequests: 0,
     pendingRequests: 0,
+    waitlistTotal: 0,
+    waitlistOrganisers: 0,
+    waitlistVendors: 0,
     eventsByType: {},
     vendorsByCategory: {},
   });
@@ -89,6 +95,12 @@ export default function AdminDashboard() {
         supabase.from('vendors').select('category').eq('is_active', true),
       ]);
 
+      // Waitlist stats
+      const { count: waitlistCount } = await supabase.from('waitlist_signups' as any).select('*', { count: 'exact', head: true });
+      const { data: waitlistData } = await supabase.from('waitlist_signups' as any).select('role');
+      const waitlistOrganisers = waitlistData?.filter((w: any) => w.role === 'organiser').length || 0;
+      const waitlistVendors = waitlistData?.filter((w: any) => w.role === 'vendor').length || 0;
+
       const eventsByType: Record<string, number> = {};
       events?.forEach(e => {
         eventsByType[e.type] = (eventsByType[e.type] || 0) + 1;
@@ -106,6 +118,9 @@ export default function AdminDashboard() {
         totalBookings: bookingsCount || 0,
         totalRequests: requestsCount || 0,
         pendingRequests: pendingCount || 0,
+        waitlistTotal: waitlistCount || 0,
+        waitlistOrganisers,
+        waitlistVendors,
         eventsByType,
         vendorsByCategory,
       });
@@ -156,6 +171,33 @@ export default function AdminDashboard() {
           ))}
         </div>
       </TooltipProvider>
+
+      {/* Waitlist Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Waitlist Signups
+          </CardTitle>
+          <CardDescription>Pre-launch interest</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-7 w-10 rounded bg-muted" />
+              <div className="h-4 w-20 rounded bg-muted" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-3xl font-bold">{stats.waitlistTotal}</p>
+              <div className="flex gap-4 text-sm text-muted-foreground">
+                <span>Organisers: {stats.waitlistOrganisers}</span>
+                <span>Vendors: {stats.waitlistVendors}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Events by Type */}

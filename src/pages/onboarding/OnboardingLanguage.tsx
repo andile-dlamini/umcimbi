@@ -99,7 +99,7 @@ export default function OnboardingLanguage() {
             <Link to="/auth?mode=login">
               <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
-            <Link to="/auth?mode=signup" className="hidden sm:inline-flex">
+            <Link to="/waitlist" className="hidden sm:inline-flex">
               <Button size="sm" className="text-[13px] font-semibold rounded-full px-5 shadow-md shadow-primary/15">Register</Button>
             </Link>
             <button className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -113,7 +113,7 @@ export default function OnboardingLanguage() {
             {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
           <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
           )}
-            <Link to="/auth?mode=signup" className="block pt-1">
+            <Link to="/waitlist" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
           </div>
@@ -145,7 +145,7 @@ export default function OnboardingLanguage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
-              <Link to="/auth?mode=signup">
+              <Link to="/waitlist">
                 <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all">
                   Get started — it's free
                 </Button>
@@ -334,7 +334,7 @@ export default function OnboardingLanguage() {
             )}
           </div>
           <div className="text-center mt-12">
-            <Link to="/auth?mode=signup">
+            <Link to="/waitlist">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
                 Get started free
               </Button>
@@ -373,7 +373,7 @@ export default function OnboardingLanguage() {
             )}
           </div>
           <div className="text-center mt-10">
-            <Link to="/auth?mode=signup">
+            <Link to="/waitlist">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                 Register to start planning
               </Button>
@@ -417,7 +417,7 @@ export default function OnboardingLanguage() {
                 )}
               </div>
               <div className="mt-10">
-                <Link to="/auth?mode=signup">
+                <Link to="/waitlist">
                   <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                     I'm a vendor — Register
                   </Button>
@@ -723,7 +723,7 @@ export default function OnboardingLanguage() {
             Join families and vendors already using UMCIMBI to bring their ceremonies together.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/auth?mode=signup">
+            <Link to="/waitlist">
               <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30">
                 Get started — it's free
               </Button>
