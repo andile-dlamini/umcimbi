@@ -664,7 +664,8 @@ export default function VendorOnboarding() {
                 {errors.phone_country && <p className="text-sm text-destructive">{errors.phone_country}</p>}
               </div>
 
-              {/* Email */}
+              {/* Email — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="email">Business email</Label>
                 <div className="relative">
@@ -680,8 +681,10 @@ export default function VendorOnboarding() {
                 </div>
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
+              )}
 
-              {/* Website */}
+              {/* Website — hidden in quick mode */}
+              {!isQuickMode && (
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
                 <div className="relative">
@@ -697,6 +700,7 @@ export default function VendorOnboarding() {
                 </div>
                 {errors.website_url && <p className="text-sm text-destructive">{errors.website_url}</p>}
               </div>
+              )}
 
               <Button type="submit" className="w-full h-12 mt-6" disabled={isLoading}>
                 {isLoading ? 'Creating profile...' : 'Create vendor profile'}

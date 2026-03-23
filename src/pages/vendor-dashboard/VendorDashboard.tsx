@@ -60,12 +60,29 @@ export default function VendorDashboard() {
     return { profileViews, quotesSent, ordersCompleted, totalPayout };
   }, [vendorProfile, quotes, bookings, thirtyDaysAgo]);
 
+  // Profile completeness check for quick registration
+  const isProfileIncomplete = !vendorProfile.about && !vendorProfile.price_range_text;
+
   return (
     <div className="min-h-screen bg-background">
       <PageHeader title="Dashboard" />
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
-        {/* 30-Day KPI Grid */}
+        {/* Incomplete profile banner */}
+        {isProfileIncomplete && (
+          <div
+            className="rounded-lg border border-accent/30 bg-accent/5 p-4 flex items-center gap-3 cursor-pointer hover:bg-accent/10 transition-colors"
+            onClick={() => navigate('/profile/vendor')}
+          >
+            <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
+              <Store className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Your profile is 40% complete</p>
+              <p className="text-xs text-muted-foreground">Add more details to appear higher in search results →</p>
+            </div>
+          </div>
+        )}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
