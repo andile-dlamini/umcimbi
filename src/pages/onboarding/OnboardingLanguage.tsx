@@ -334,7 +334,7 @@ export default function OnboardingLanguage() {
             )}
           </div>
           <div className="text-center mt-12">
-            <Link to="/auth?mode=signup">
+            <Link to="/waitlist">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
                 Get started free
               </Button>
