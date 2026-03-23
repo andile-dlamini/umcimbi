@@ -65,6 +65,9 @@ export default function AdminDashboard() {
     totalBookings: 0,
     totalRequests: 0,
     pendingRequests: 0,
+    waitlistTotal: 0,
+    waitlistOrganisers: 0,
+    waitlistVendors: 0,
     eventsByType: {},
     vendorsByCategory: {},
   });
