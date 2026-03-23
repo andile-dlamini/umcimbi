@@ -145,7 +145,7 @@ export default function OnboardingLanguage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
-              <Link to="/auth?mode=signup">
+              <Link to="/waitlist">
                 <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all">
                   Get started — it's free
                 </Button>
