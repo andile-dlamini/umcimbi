@@ -11,6 +11,9 @@ interface Stats {
   totalBookings: number;
   totalRequests: number;
   pendingRequests: number;
+  waitlistTotal: number;
+  waitlistOrganisers: number;
+  waitlistVendors: number;
   eventsByType: Record<string, number>;
   vendorsByCategory: Record<string, number>;
 }
