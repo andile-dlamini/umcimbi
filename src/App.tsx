@@ -71,6 +71,8 @@ function AppRoutes() {
         <Route path="/onboarding" element={<OnboardingLanguage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/waitlist" element={<WaitlistPage />} />
+        <Route path="/join/vendor" element={<Navigate to="/auth?mode=signup&role=vendor&ref=ndabe" replace />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
