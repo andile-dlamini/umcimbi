@@ -58,7 +58,7 @@ describe('Booking Logic', () => {
       expect(booking.booking_status).toBe('pending_deposit');
       expect(booking.vendor_id).toBe(mockAcceptedQuote.vendor_id);
       expect(booking.event_id).toBe(mockEvent.id);
-      expect(booking.agreed_price).toBe(mockAcceptedQuote.price);
+      expect(booking.agreed_price).toBe(10800); // 10000 + 8% platform fee
     });
 
     it('sets deposit as due and balance as not_due', () => {
