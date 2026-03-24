@@ -1,23 +1,27 @@
 
 
-## Plan: Fix Back Button Navigation
+## Plan: Update Terms of Service and Registration Checkbox
 
-4 changes across 6 files.
+### Summary
+Four additions: new section 4.5 (vendor disclaimer), new paragraph in section 9, new section 20 (force majeure), and updated T&C checkbox with actual links.
 
-### Fix 1: ArticleDetail — use history back
-`src/components/learn/ArticleDetail.tsx` line 22: change `navigate('/learn')` → `navigate(-1)`
+### Changes
 
-### Fix 2: PageHeader — add `backTo` prop
-`src/components/layout/PageHeader.tsx`:
-- Add `backTo?: string` to props interface
-- Update onClick: `onClick={() => backTo ? navigate(backTo) : navigate(-1)}`
+**File 1: `src/pages/legal/TermsOfService.tsx`**
 
-### Fix 3: Remove `showBack` from top-level nav pages
-- `src/pages/vendor-dashboard/VendorDashboard.tsx` — already has no `showBack` ✓
-- `src/pages/bookings/ClientBookings.tsx` lines 134, 146 — remove `showBack`
-- `src/pages/vendor-dashboard/VendorBookings.tsx` lines 94, 106 — remove `showBack`
-- `src/pages/quotes/MyQuotes.tsx` lines 120, 132 — remove `showBack`
+1. After section 4.4 (line 96), insert new subsection **4.5 Independent Vendor Status & Platform Disclaimer** with the full disclaimer text, bullet list, and closing paragraph as specified.
 
-### Fix 4: EventDashboard Guide tab
-No change needed — article links already use standard `navigate()` which correctly records history for `navigate(-1)`.
+2. After the existing section 9 closing paragraph (line 159), insert the explicit liability exclusion paragraph for personal injury, illness, food poisoning, etc.
+
+3. After section 19 (line 244, before `</main>`), insert new **Section 20. Force Majeure** with both paragraphs as specified.
+
+**File 2: `src/pages/auth/AuthPage.tsx`**
+
+4. Update the checkbox label (around line 1205-1207) to replace the current plain text with actual `<Link>` elements:
+   - "Terms of Service" links to `/terms`
+   - "Privacy Policy" links to `/privacy` (replacing the POPIA reference)
+   - Import `Link` from `react-router-dom` (likely already imported)
+   - The label becomes: *"I have read and agree to the [Terms of Service](/terms) and [Privacy Policy](/privacy)"*
+
+No existing sections are removed or modified. The submit button is already disabled when `terms_accepted` is false, so no additional gating is needed.
 
