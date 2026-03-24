@@ -14,15 +14,15 @@ import { learnArticles } from '@/data/learnArticles';
 import { differenceInDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const CEREMONY_TILES: { type: EventType; icon: React.ComponentType<{ className?: string }>; label: string; zuluLabel: string }[] = [
-  { type: 'umembeso', icon: Gift, label: 'Umembeso', zuluLabel: 'Ukupha izipho' },
-  { type: 'umabo', icon: Heart, label: 'Umabo', zuluLabel: 'Umshado wesintu' },
-  { type: 'umemulo', icon: Sparkles, label: 'Umemulo', zuluLabel: 'Ukuqomisa' },
-  { type: 'imbeleko', icon: Baby, label: 'Imbeleko', zuluLabel: 'Ukwethula ingane' },
-  { type: 'lobola', icon: Handshake, label: 'Lobola', zuluLabel: 'Ilobola' },
-  { type: 'family_introduction', icon: Users, label: 'Family Intro', zuluLabel: 'Ukucela' },
-  { type: 'umbondo', icon: Package, label: 'Umbondo', zuluLabel: 'Ukuletha izipho' },
-  { type: 'ancestral_ritual', icon: Flame, label: 'Ancestral Ritual', zuluLabel: 'Idlozi' },
+const CEREMONY_TILES: { type: EventType; icon: React.ComponentType<{ className?: string }>; label: string; zuluLabel: string; colorClass: string }[] = [
+  { type: 'umembeso', icon: Gift, label: 'Umembeso', zuluLabel: 'Ukupha izipho', colorClass: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+  { type: 'umabo', icon: Heart, label: 'Umabo', zuluLabel: 'Umshado wesintu', colorClass: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+  { type: 'umemulo', icon: Sparkles, label: 'Umemulo', zuluLabel: 'Ukuqomisa', colorClass: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+  { type: 'imbeleko', icon: Baby, label: 'Imbeleko', zuluLabel: 'Ukwethula ingane', colorClass: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+  { type: 'lobola', icon: Handshake, label: 'Lobola', zuluLabel: 'Ilobola', colorClass: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+  { type: 'family_introduction', icon: Users, label: 'Family Intro', zuluLabel: 'Ukucela', colorClass: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+  { type: 'umbondo', icon: Package, label: 'Umbondo', zuluLabel: 'Ukuletha izipho', colorClass: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+  { type: 'ancestral_ritual', icon: Flame, label: 'Ancestral Ritual', zuluLabel: 'Idlozi', colorClass: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
 ];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -111,43 +111,51 @@ export default function Home() {
   if (!hasEvents) {
     return (
       <div className="min-h-screen pb-safe bg-background">
-        <div className="px-4 py-6 max-w-lg mx-auto space-y-6 animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Sawubona, {firstName} 👋</h1>
-            <p className="text-muted-foreground mt-1">What are you planning?</p>
-          </div>
+        <div className="px-4 lg:px-12 py-6 max-w-lg lg:max-w-5xl mx-auto animate-fade-in">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-12 space-y-6 lg:space-y-0">
+            {/* Left: greeting + journey + browse link */}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl lg:text-4xl font-bold text-foreground font-display">Sawubona, {firstName} 👋</h1>
+                <p className="text-muted-foreground mt-1 lg:text-lg">What are you planning?</p>
+              </div>
 
-          <CeremonyJourney
-            userEventTypes={userEventTypes}
-            onCeremonyPress={handleCeremonyPress}
-          />
+              <CeremonyJourney
+                userEventTypes={userEventTypes}
+                onCeremonyPress={handleCeremonyPress}
+              />
 
-          <div className="grid grid-cols-2 gap-3">
-            {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel }) => (
-              <Card
-                key={type}
-                className="cursor-pointer transition-all hover:shadow-md hover:border-primary/50 tap-highlight-none"
-                onClick={() => navigate(`/events/new?type=${type}`)}
+              <button
+                className="w-full text-center text-sm text-primary hover:underline py-2"
+                onClick={() => navigate('/vendors')}
               >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-foreground">{label}</p>
-                    <p className="text-xs text-muted-foreground">{zuluLabel}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                Not sure? Browse vendors first
+              </button>
+            </div>
 
-          <button
-            className="w-full text-center text-sm text-primary hover:underline py-2"
-            onClick={() => navigate('/vendors')}
-          >
-            Not sure? Browse vendors first
-          </button>
+            {/* Right: ceremony tiles grid */}
+            <div>
+              <div className="grid grid-cols-2 gap-3">
+                {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel, colorClass }) => (
+                  <Card
+                    key={type}
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 tap-highlight-none"
+                    onClick={() => navigate(`/events/new?type=${type}`)}
+                  >
+                    <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${colorClass}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-foreground">{label}</p>
+                        <p className="text-xs text-muted-foreground">{zuluLabel}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -159,82 +167,114 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-safe bg-background">
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-6 animate-fade-in">
-        <h1 className="text-2xl font-bold text-foreground">Sawubona, {firstName} 👋</h1>
+      <div className="px-4 lg:px-12 py-6 max-w-lg lg:max-w-5xl mx-auto animate-fade-in">
+        <div className="lg:grid lg:grid-cols-5 lg:gap-10 space-y-6 lg:space-y-0">
+          {/* Left 3/5: greeting, journey, hero card, upcoming */}
+          <div className="lg:col-span-3 space-y-6">
+            <h1 className="text-2xl lg:text-4xl font-bold text-foreground font-display">Sawubona, {firstName} 👋</h1>
 
-        <CeremonyJourney
-          userEventTypes={userEventTypes}
-          onCeremonyPress={handleCeremonyPress}
-        />
+            <CeremonyJourney
+              userEventTypes={userEventTypes}
+              onCeremonyPress={handleCeremonyPress}
+            />
 
-        {/* Hero card: next event or plan-next prompt */}
-        {nextEvent ? (
-          <NextEventHeroCard eventId={nextEvent.id} event={nextEvent} />
-        ) : (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-5 space-y-3 text-center">
-              <Plus className="h-10 w-10 mx-auto text-primary/60" />
-              <h3 className="text-lg font-semibold text-foreground">Plan your next ceremony</h3>
-              <p className="text-sm text-muted-foreground">
-                Your ceremonies are complete. Ready to plan the next one?
-              </p>
-              <Button className="w-full" onClick={() => navigate('/events/new')}>
-                Start Planning
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+            {/* Hero card: next event or plan-next prompt */}
+            {nextEvent ? (
+              <NextEventHeroCard eventId={nextEvent.id} event={nextEvent} />
+            ) : (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-5 space-y-3 text-center">
+                  <Plus className="h-10 w-10 mx-auto text-primary/60" />
+                  <h3 className="text-lg font-semibold text-foreground">Plan your next ceremony</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Your ceremonies are complete. Ready to plan the next one?
+                  </p>
+                  <Button className="w-full" onClick={() => navigate('/events/new')}>
+                    Start Planning
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Find Vendors', icon: Search, to: '/vendors' },
-            { label: 'My Chats', icon: MessageSquare, to: '/chats' },
-            { label: 'My Events', icon: CalendarDays, to: '/events' },
-          ].map(({ label, icon: Icon, to }) => (
-            <Card
-              key={to}
-              className="cursor-pointer hover:shadow-sm tap-highlight-none"
-              onClick={() => navigate(to)}
-            >
-              <CardContent className="p-3 flex flex-col items-center gap-1.5">
-                <Icon className="h-5 w-5 text-primary" />
-                <span className="text-xs font-medium text-foreground">{label}</span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+            {/* More upcoming events */}
+            {moreUpcoming.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
+                {moreUpcoming.map(event => {
+                  const typeInfo = getEventTypeInfo(event.type);
+                  const Icon = iconMap[typeInfo.icon] || Gift;
+                  return (
+                    <Card
+                      key={event.id}
+                      className="cursor-pointer hover:shadow-sm tap-highlight-none"
+                      onClick={() => navigate(`/events/${event.id}`)}
+                    >
+                      <CardContent className="p-3 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                          <Icon className="h-4 w-4 text-accent" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{event.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {event.date ? format(new Date(event.date), 'dd MMM yyyy') : 'Date not set'}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-        {/* More upcoming events */}
-        {moreUpcoming.length > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
-            {moreUpcoming.map(event => {
-              const typeInfo = getEventTypeInfo(event.type);
-              const Icon = iconMap[typeInfo.icon] || Gift;
-              return (
+          {/* Right 2/5: quick actions + compact ceremony tiles */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Quick Actions */}
+            <div className="grid grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-2">
+              {[
+                { label: 'Find Vendors', icon: Search, to: '/vendors' },
+                { label: 'My Chats', icon: MessageSquare, to: '/chats' },
+                { label: 'My Events', icon: CalendarDays, to: '/events' },
+              ].map(({ label, icon: Icon, to }) => (
                 <Card
-                  key={event.id}
-                  className="cursor-pointer hover:shadow-sm tap-highlight-none"
-                  onClick={() => navigate(`/events/${event.id}`)}
+                  key={to}
+                  className="cursor-pointer hover:shadow-sm tap-highlight-none lg:hover:bg-muted/60 transition-all duration-200"
+                  onClick={() => navigate(to)}
                 >
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-4 w-4 text-accent" />
+                  <CardContent className="p-3 flex flex-col items-center gap-1.5 lg:flex-row lg:justify-between lg:p-4">
+                    <div className="flex flex-col items-center gap-1.5 lg:flex-row lg:gap-3">
+                      <Icon className="h-5 w-5 text-primary" />
+                      <span className="text-xs lg:text-sm font-medium text-foreground">{label}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{event.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {event.date ? format(new Date(event.date), 'dd MMM yyyy') : 'Date not set'}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <ChevronRight className="hidden lg:block h-4 w-4 text-muted-foreground" />
                   </CardContent>
                 </Card>
-              );
-            })}
+              ))}
+            </div>
+
+            {/* Compact ceremony tiles */}
+            <div className="grid grid-cols-2 gap-3">
+              {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel, colorClass }) => (
+                <Card
+                  key={type}
+                  className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30 tap-highlight-none"
+                  onClick={() => navigate(`/events/new?type=${type}`)}
+                >
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${colorClass}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">{label}</p>
+                      <p className="text-xs text-muted-foreground">{zuluLabel}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
