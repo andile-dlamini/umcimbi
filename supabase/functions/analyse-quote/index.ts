@@ -51,7 +51,10 @@ serve(async (req) => {
     );
 
     const anthropicData = await anthropicResponse.json();
-    console.log('Status:', anthropicResponse.status, 'Body:', JSON.stringify(anthropicData).slice(0, 500));
+    if (!anthropicResponse.ok) {
+      console.error('Anthropic API error:', anthropicResponse.status, anthropicData?.error?.message);
+      return new Response(JSON.stringify(fallback), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     const rawText = anthropicData?.content?.[0]?.text || '';
 
     let insight = fallback.insight;
