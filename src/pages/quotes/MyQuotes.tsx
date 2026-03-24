@@ -129,7 +129,7 @@ export default function MyQuotes() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Quotations" showBack />
+      <PageHeader title="Quotations" />
       
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <div className="flex items-center justify-between">
