@@ -117,7 +117,7 @@ export default function MyQuotes() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <PageHeader title="Quotations" showBack />
+        <PageHeader title="Quotations" />
         <div className="p-4 space-y-4">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-48 w-full" />
