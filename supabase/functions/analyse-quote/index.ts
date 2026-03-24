@@ -18,6 +18,15 @@ serve(async (req) => {
   try {
     const { price, category, ceremonyType, vendorRating, reviewCount, isVerified, jobsCompleted, notes } = await req.json();
 
+    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!apiKey) {
+      console.error('ANTHROPIC_API_KEY not set');
+      return new Response(
+        JSON.stringify(fallback),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const anthropicResponse = await fetch(
       "https://api.anthropic.com/v1/messages",
       {
