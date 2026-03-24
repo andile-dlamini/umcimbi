@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, CheckCircle2, Loader2, Shield, Lock,
   PartyPopper, Store, Phone, Mail, Globe, ImagePlus, Camera,
