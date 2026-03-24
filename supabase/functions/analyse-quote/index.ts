@@ -51,6 +51,7 @@ serve(async (req) => {
     );
 
     const anthropicData = await anthropicResponse.json();
+    console.log('Status:', anthropicResponse.status, 'Body:', JSON.stringify(anthropicData).slice(0, 500));
     const rawText = anthropicData?.content?.[0]?.text || '';
 
     let insight = fallback.insight;
