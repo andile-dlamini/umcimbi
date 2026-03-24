@@ -89,6 +89,20 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
               Ref: {quote.offer_number}
             </p>
           )}
+
+          {quote.status === 'pending_client' && !isExpired && ceremonyType && (
+            <QuoteInsight
+              quoteId={quote.id}
+              price={quote.price}
+              category={(quote.vendor as any)?.category || ''}
+              ceremonyType={ceremonyType}
+              vendorRating={(quote.vendor as any)?.rating ?? null}
+              reviewCount={(quote.vendor as any)?.review_count ?? 0}
+              isVerified={(quote.vendor as any)?.business_verification_status === 'verified'}
+              jobsCompleted={(quote.vendor as any)?.jobs_completed ?? 0}
+              notes={quote.notes}
+            />
+          )}
         </div>
       </CardContent>
       
