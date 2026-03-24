@@ -158,7 +158,7 @@
 
   body {
     @apply text-foreground antialiased;
-    font-family: 'Nunito', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Richer gradient background with Shweshwe colors */
@@ -176,11 +176,6 @@
       radial-gradient(ellipse at 85% 20%, hsl(18 72% 52% / 0.08) 0%, transparent 40%),
       radial-gradient(ellipse at 50% 100%, hsl(348 58% 48% / 0.05) 0%, transparent 50%),
       hsl(var(--background));
-  }
-
-  h1, h2 {
-    font-family: 'Fraunces', Georgia, serif;
-    font-optical-sizing: auto;
   }
 
   html, body, #root {
