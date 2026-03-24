@@ -120,7 +120,7 @@ export default function WaitlistPage() {
       <div className="flex-1 flex flex-col items-center px-6 pb-12 max-w-md mx-auto w-full space-y-8">
         {/* Context */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">You're early — and that's a good thing</h1>
+          <h1 className="text-2xl font-bold text-foreground"><h1 className="text-2xl font-bold text-foreground">You're early and that's a good thing</h1></h1>
           <p className="text-muted-foreground text-sm">
             Umcimbi is launching soon. Be among the first families and vendors on the platform.
           </p>
