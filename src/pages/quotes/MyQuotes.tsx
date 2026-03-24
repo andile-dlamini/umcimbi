@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Banknote, Clock, Star, FileText, MessageCircle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuoteWithDetails } from '@/types/booking';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { quoteStatusConfig } from '@/lib/statusConfig';
 import { viewQuotePdfAction } from '@/lib/quoteActions';
 import { useStartConversation } from '@/hooks/useChat';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { QuoteInsight } from '@/components/quotes/QuoteInsight';
 
 const statusConfig = quoteStatusConfig;
 
@@ -24,7 +26,19 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
   const { startConversation } = useStartConversation();
   const status = statusConfig[quote.status];
   const isExpired = new Date(quote.expires_at) < new Date();
+  const [ceremonyType, setCeremonyType] = useState('');
 
+  useEffect(() => {
+    if (!quote.request?.event_id) return;
+    supabase
+      .from('events')
+      .select('type')
+      .eq('id', quote.request.event_id)
+      .single()
+      .then(({ data }) => {
+        if (data?.type) setCeremonyType(data.type);
+      });
+  }, [quote.request?.event_id]);
   const handleOpenChat = async () => {
     if (!quote.vendor?.id) return;
     const convId = await startConversation(quote.vendor.id);
