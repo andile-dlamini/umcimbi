@@ -106,8 +106,7 @@ export function AppSidebar() {
 
 
   const vendorItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/vendor-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/vendor-dashboard', icon: Home, label: 'Home' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
   { to: '/vendor-dashboard/quotations', icon: Receipt, label: 'Quotations' },
   { to: '/vendor-dashboard/orders', icon: ShoppingBag, label: 'Orders' }];
