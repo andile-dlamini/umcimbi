@@ -42,19 +42,23 @@ serve(async (req) => {
     );
 
     const anthropicData = await anthropicResponse.json();
+    console.log('Anthropic response status:', anthropicResponse.status);
     const rawText = anthropicData?.content?.[0]?.text || '';
+    console.log('Raw text:', rawText);
 
     let insight = fallback.insight;
     let sentiment = fallback.sentiment;
 
     try {
-      const parsed = JSON.parse(rawText);
+      // Handle potential markdown code blocks wrapping the JSON
+      const cleaned = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      const parsed = JSON.parse(cleaned);
       insight = parsed.insight?.slice(0, 200) || insight;
       sentiment = ['good', 'neutral', 'caution'].includes(parsed.sentiment)
         ? parsed.sentiment
         : 'neutral';
-    } catch {
-      // fallback values already set above
+    } catch (e) {
+      console.error('JSON parse error:', e, 'rawText:', rawText);
     }
 
     return new Response(
