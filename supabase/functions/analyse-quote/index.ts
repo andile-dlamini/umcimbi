@@ -52,6 +52,7 @@ serve(async (req) => {
 
     const anthropicData = await anthropicResponse.json();
     console.log('Anthropic response status:', anthropicResponse.status);
+    console.log('Anthropic full response:', JSON.stringify(anthropicData));
     const rawText = anthropicData?.content?.[0]?.text || '';
     console.log('Raw text:', rawText);
 
