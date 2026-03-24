@@ -232,6 +232,19 @@ export default function CompareQuotes() {
     })();
   }, [user, eventId]);
 
+  // Fetch ceremony type for selected event
+  useEffect(() => {
+    if (!selectedEventId) { setCeremonyType(''); return; }
+    supabase
+      .from('events')
+      .select('type')
+      .eq('id', selectedEventId)
+      .single()
+      .then(({ data }) => {
+        if (data?.type) setCeremonyType(data.type);
+      });
+  }, [selectedEventId]);
+
   // Fetch quotes for selected event
   useEffect(() => {
     if (!selectedEventId) { setQuotes([]); return; }
