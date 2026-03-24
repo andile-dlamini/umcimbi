@@ -19,7 +19,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/learn')}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="font-semibold text-sm truncate max-w-[200px]">{article.title}</h1>

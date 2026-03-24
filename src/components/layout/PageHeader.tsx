@@ -8,18 +8,16 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   showBack?: boolean;
+  backTo?: string;
   rightAction?: ReactNode;
   className?: string;
 }
 
-/**
- * Inline page title bar — no sticky chrome, just a flex row
- * with optional back button and right-side actions.
- */
 export function PageHeader({ 
   title, 
   subtitle, 
   showBack = false, 
+  backTo,
   rightAction,
   className 
 }: PageHeaderProps) {
@@ -33,7 +31,7 @@ export function PageHeader({
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0 -ml-2"
-            onClick={() => navigate(-1)}
+            onClick={() => backTo ? navigate(backTo) : navigate(-1)}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
