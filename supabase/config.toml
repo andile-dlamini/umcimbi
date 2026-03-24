@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.get-order-pdf-url]
 verify_jwt = false
+
+[functions.analyse-quote]
+verify_jwt = false
