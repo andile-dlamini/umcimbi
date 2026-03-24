@@ -354,7 +354,7 @@ export default function OnboardingLanguage() {
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Use you time to plan UMCIMBI. Lose the stress.</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Use your time to plan UMCIMBI. Lose the stress.</h2>
             <p className="text-lg text-white/60 mt-3">Plan your UMCIMBI with tools that actually help.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
