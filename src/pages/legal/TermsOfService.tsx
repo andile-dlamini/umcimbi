@@ -95,6 +95,16 @@ export default function TermsOfService() {
         <h3 className="text-lg font-medium mt-6 text-foreground">4.4 Platform Fees</h3>
         <p className="text-muted-foreground">UMCIMBI may charge Vendors a platform fee or commission for transactions facilitated through the Platform. Fee structures will be clearly communicated to Vendors upon onboarding and updated in advance of any changes. By using the Platform, you agree to the applicable fee structure.</p>
 
+        <h3 className="text-lg font-medium mt-6 text-foreground">4.5 Independent Vendor Status & Platform Disclaimer</h3>
+        <p className="text-muted-foreground">All Vendors on the UMCIMBI Platform are independent businesses or individuals. They are not employees, agents, partners, or representatives of ISINTU DIGITAL (Pty) Ltd in any capacity whatsoever.</p>
+        <p className="text-muted-foreground">UMCIMBI does not:</p>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>Inspect, certify, or verify the safety, quality, or fitness for purpose of any vendor's goods, services, premises, food, equipment, or structures;</li>
+          <li>Verify whether vendors hold the licences, permits, certifications, or insurance required for their specific category of service under South African law;</li>
+          <li>Guarantee that any vendor's food, beverages, temporary structures, transportation, or any other physical service meets any applicable safety or regulatory standard.</li>
+        </ul>
+        <p className="text-muted-foreground">Customers engage vendors entirely at their own risk. Any personal injury, illness, food poisoning, death, property damage, or loss arising from a vendor's goods or services is a matter strictly between the Customer and the Vendor. UMCIMBI has no liability whatsoever in such circumstances.</p>
+
         {/* 5 */}
         <h2 className="text-xl font-semibold mt-10 text-foreground">5. Customer Terms & Obligations</h2>
         <p className="text-muted-foreground">If you register as a Customer / Planner on the Platform, the following additional terms apply:</p>
@@ -157,6 +167,7 @@ export default function TermsOfService() {
           <li>Any technical failures, interruptions, or downtime affecting Platform availability.</li>
         </ul>
         <p className="text-muted-foreground">UMCIMBI's total aggregate liability to you for any claim arising under these Terms shall not exceed the amount you paid to UMCIMBI (if any) in the 12 months preceding the event giving rise to the claim. Nothing in these Terms limits liability for fraud, gross negligence, or any other liability that cannot be excluded by law under the Consumer Protection Act 68 of 2008.</p>
+        <p className="text-muted-foreground">For the avoidance of doubt, UMCIMBI expressly excludes all liability for any personal injury, illness, food poisoning, bodily harm, death, or property damage arising from goods or services supplied by any Vendor through the Platform — including but not limited to food and beverages, temporary structures such as tents, transportation, or any other physical service. In any such event, the Customer's recourse lies exclusively against the Vendor as an independent operator.</p>
 
         {/* 10 */}
         <h2 className="text-xl font-semibold mt-10 text-foreground">10. Indemnification</h2>
@@ -242,6 +253,11 @@ export default function TermsOfService() {
           <p className="text-muted-foreground">Website: www.umcimbi.co.za</p>
           <p className="text-muted-foreground mt-2">For legal notices and formal correspondence, please use email and mark your subject line: LEGAL NOTICE — UMCIMBI</p>
         </div>
+
+        {/* 20 */}
+        <h2 className="text-xl font-semibold mt-10 text-foreground">20. Force Majeure</h2>
+        <p className="text-muted-foreground">UMCIMBI shall not be liable for any failure or delay in the operation of the Platform resulting from circumstances beyond its reasonable control, including acts of God, natural disasters, floods, severe weather, fire, epidemic or pandemic, load shedding, civil unrest, or government action.</p>
+        <p className="text-muted-foreground">Where a booking between a Customer and Vendor cannot proceed due to such circumstances, any resolution — including rescheduling or refunds — is a matter to be agreed directly between those parties. UMCIMBI is not a party to that agreement and bears no liability for any resulting loss.</p>
       </main>
 
       {/* Footer */}

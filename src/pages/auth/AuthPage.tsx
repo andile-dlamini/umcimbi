@@ -1203,7 +1203,7 @@ export default function AuthPage() {
                       onCheckedChange={checked => updateForm('terms_accepted', !!checked)}
                       className={errors.terms_accepted ? 'border-destructive' : ''} />
                     <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
-                      I accept the <span className="text-primary font-medium underline">Terms of Service</span> and consent to the processing of my personal information as per <span className="text-primary font-medium underline">POPIA</span>.
+                      I have read and agree to the <Link to="/terms" className="text-primary font-medium underline" target="_blank" rel="noopener noreferrer">Terms of Service</Link> and <Link to="/privacy" className="text-primary font-medium underline" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>.
                     </Label>
                   </div>
                   {errors.terms_accepted && <p className="text-xs text-destructive">{errors.terms_accepted}</p>}
