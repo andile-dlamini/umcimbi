@@ -161,6 +161,20 @@ function CompareCard({ vendor, onOpenChat, ceremonyType }: { vendor: ScoredVendo
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{vendor.notes}</p>
         )}
 
+        {ceremonyType && !isExpired && (
+          <QuoteInsight
+            quoteId={vendor.quoteId}
+            price={vendor.price}
+            category={vendor.vendorCategory || ''}
+            ceremonyType={ceremonyType}
+            vendorRating={vendor.rating}
+            reviewCount={vendor.reviewCount}
+            isVerified={vendor.isVerified}
+            jobsCompleted={vendor.jobsCompleted}
+            notes={vendor.notes}
+          />
+        )}
+
         {/* Umcimbi breakdown */}
         <div className="rounded-lg bg-muted/50 p-3 mb-3">
           <p className="text-xs font-medium text-muted-foreground mb-2">Umcimbi Score Breakdown</p>
@@ -201,6 +215,7 @@ export default function CompareQuotes() {
   const [selectedQuoteIds, setSelectedQuoteIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState<'select' | 'compare'>(eventId ? 'select' : 'select');
+  const [ceremonyType, setCeremonyType] = useState('');
 
   // Fetch user's events that have quotes
   useEffect(() => {
@@ -403,7 +418,7 @@ export default function CompareQuotes() {
         </div>
 
         {scoredVendors.map(v => (
-          <CompareCard key={v.quoteId} vendor={v} onOpenChat={handleOpenChat} />
+          <CompareCard key={v.quoteId} vendor={v} onOpenChat={handleOpenChat} ceremonyType={ceremonyType} />
         ))}
       </div>
     </div>
