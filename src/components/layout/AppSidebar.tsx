@@ -145,9 +145,8 @@ export function AppSidebar() {
           {!collapsed &&
           <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {profile?.full_name || 'User'}
+                {profile?.full_name || profile?.first_name || 'User'}
               </p>
-              <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
           }
         </button>
