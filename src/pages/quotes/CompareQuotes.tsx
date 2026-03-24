@@ -16,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { calculateUmcimbiScores, VendorScoreInput, ScoredVendor } from '@/lib/umcimbiScore';
 import { useStartConversation } from '@/hooks/useChat';
 import { toast } from 'sonner';
+import { QuoteInsight } from '@/components/quotes/QuoteInsight';
 
 interface QuoteRow {
   id: string;
@@ -94,7 +95,7 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-function CompareCard({ vendor, onOpenChat }: { vendor: ScoredVendor; onOpenChat: (vendorId: string) => void }) {
+function CompareCard({ vendor, onOpenChat, ceremonyType }: { vendor: ScoredVendor; onOpenChat: (vendorId: string) => void; ceremonyType: string }) {
   const isExpired = vendor.expiresAt && new Date(vendor.expiresAt) < new Date();
 
   return (
