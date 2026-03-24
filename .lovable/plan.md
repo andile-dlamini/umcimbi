@@ -1,27 +1,43 @@
 
 
-## Plan: Update Terms of Service and Registration Checkbox
+## Revised Plan: Quote Insight Feature with Direct Anthropic API
 
-### Summary
-Four additions: new section 4.5 (vendor disclaimer), new paragraph in section 9, new section 20 (force majeure), and updated T&C checkbox with actual links.
+### What Changed from Previous Plan
+- Edge function now calls Anthropic API directly (`https://api.anthropic.com/v1/messages`) instead of Lovable AI gateway
+- Uses `claude-sonnet-4-20250514` model
+- Requires new `ANTHROPIC_API_KEY` secret
+
+### Secret Required
+**ANTHROPIC_API_KEY** must be added before the edge function will work. You can get this from [console.anthropic.com](https://console.anthropic.com/) under API Keys.
 
 ### Changes
 
-**File 1: `src/pages/legal/TermsOfService.tsx`**
+**File 1: `supabase/functions/analyse-quote/index.ts`** (new)
+- Standard CORS headers + OPTIONS handler
+- Parse POST body for `{ price, category, ceremonyType, vendorRating, reviewCount, isVerified, jobsCompleted, notes }`
+- Call Anthropic API directly using `Deno.env.get("ANTHROPIC_API_KEY")` with the exact prompt and model specified by the user
+- Parse response: extract `content[0].text`, JSON.parse it, validate sentiment enum, truncate insight to 200 chars
+- On any failure: return `{ insight: "We don't have enough data...", sentiment: "neutral" }`
 
-1. After section 4.4 (line 96), insert new subsection **4.5 Independent Vendor Status & Platform Disclaimer** with the full disclaimer text, bullet list, and closing paragraph as specified.
+**File 2: `supabase/config.toml`**
+- Add `[functions.analyse-quote]` with `verify_jwt = false`
 
-2. After the existing section 9 closing paragraph (line 159), insert the explicit liability exclusion paragraph for personal injury, illness, food poisoning, etc.
+**File 3: `src/components/quotes/QuoteInsight.tsx`** (new — unchanged from previous plan)
+- Calls `supabase.functions.invoke('analyse-quote', { body })` on mount
+- Loading: skeleton bar; Loaded: sentiment-colored card with Sparkles icon + insight text
+- Error: returns null silently
 
-3. After section 19 (line 244, before `</main>`), insert new **Section 20. Force Majeure** with both paragraphs as specified.
+**File 4: `src/pages/quotes/MyQuotes.tsx`**
+- Add ceremonyType fetch via `quote.request?.event_id` → events table
+- Render `<QuoteInsight>` for pending, non-expired quotes
 
-**File 2: `src/pages/auth/AuthPage.tsx`**
+**File 5: `src/pages/quotes/CompareQuotes.tsx`**
+- Add `<QuoteInsight>` to CompareCard between price and score sections
 
-4. Update the checkbox label (around line 1205-1207) to replace the current plain text with actual `<Link>` elements:
-   - "Terms of Service" links to `/terms`
-   - "Privacy Policy" links to `/privacy` (replacing the POPIA reference)
-   - Import `Link` from `react-router-dom` (likely already imported)
-   - The label becomes: *"I have read and agree to the [Terms of Service](/terms) and [Privacy Policy](/privacy)"*
-
-No existing sections are removed or modified. The submit button is already disabled when `terms_accepted` is false, so no additional gating is needed.
+### Implementation Order
+1. Add `ANTHROPIC_API_KEY` secret (will prompt you)
+2. Create edge function + update config.toml
+3. Deploy and test edge function
+4. Create QuoteInsight component
+5. Integrate into MyQuotes and CompareQuotes
 
