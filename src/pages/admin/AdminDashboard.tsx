@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Store, Calendar, BarChart3, TrendingUp, Clock, FileText, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +59,7 @@ const eventTypeLabels: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalVendors: 0,
@@ -173,7 +175,7 @@ export default function AdminDashboard() {
       </TooltipProvider>
 
       {/* Waitlist Card */}
-      <Card>
+      <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/waitlist')}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Clock className="h-5 w-5" />
