@@ -109,7 +109,7 @@ export default function Home() {
   return (
     <div className="min-h-screen pb-safe bg-background">
       {/* Topbar */}
-      <div className="h-[108px] border-b border-border bg-background/80 backdrop-blur-sm flex items-center px-6">
+      <div className="min-h-[109px] border-b border-border bg-background/80 backdrop-blur-sm flex items-center px-6">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold font-display text-foreground">
             Sawubona,{' '}{firstName} 👋
@@ -120,7 +120,7 @@ export default function Home() {
         </div>
         <Button
           onClick={() => navigate('/events/new')}
-          className="hidden sm:flex items-center gap-2 shrink-0"
+          className="hidden sm:flex items-center gap-2 bg-accent hover:bg-accent/90 text-white border-0 shrink-0"
         >
           <Plus className="h-4 w-4" />
           New Ceremony
@@ -157,8 +157,8 @@ export default function Home() {
                   onClick={() => navigate(`/events/${event.id}`)}
                 >
                   <CardContent className="p-3 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-4 w-4 text-accent" />
+                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                      <Icon className="h-4 w-4 text-foreground/60" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{event.name}</p>
@@ -196,8 +196,8 @@ export default function Home() {
                 onClick={() => navigate('/events/new?type=' + type)}
               >
                 <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-accent" />
+                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-foreground/60" />
                   </div>
                   <div>
                     <p className="font-semibold text-sm text-foreground">{label}</p>

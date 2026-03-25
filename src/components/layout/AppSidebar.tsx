@@ -125,16 +125,18 @@ export function AppSidebar() {
       )}>
         {/* Logo / Brand */}
         <div className={cn(
-          "h-14 shrink-0 border-b flex items-center",
+          "shrink-0 border-b flex items-center min-h-[56px]",
           isPlanner ? "border-border" : "border-sidebar-border/50",
-          collapsed ? 'justify-center px-2' : 'px-4'
+          collapsed ? 'justify-center px-2' : 'px-5'
         )}>
           <img
             src="/images/umcimbi-logo.png"
             alt="UMCIMBI"
             className={cn(
-              collapsed ? 'h-10' : 'h-16',
-              !isPlanner && 'dark:brightness-0 dark:invert'
+              collapsed ? 'h-8' : 'h-7 w-auto',
+              isPlanner
+                ? 'brightness-0'
+                : 'brightness-0 invert'
             )}
           />
         </div>
@@ -143,9 +145,9 @@ export function AppSidebar() {
         <button
           onClick={() => goTo('/settings')}
           className={cn(
-            'flex items-center gap-3 tap-highlight-none transition-colors',
+            'flex items-center gap-3 tap-highlight-none transition-colors min-h-[52px]',
             isPlanner ? 'hover:bg-muted/50' : 'hover:bg-sidebar-accent/50',
-            collapsed ? 'justify-center p-3' : 'px-4 py-3'
+            collapsed ? 'justify-center p-3' : 'px-5 py-3'
           )}>
           <Avatar className={cn('shrink-0', collapsed ? 'h-8 w-8' : 'h-9 w-9')}>
             <AvatarImage src={(profile as any)?.avatar_url || undefined} />
@@ -159,14 +161,14 @@ export function AppSidebar() {
           {!collapsed &&
           <div className="flex-1 min-w-0 text-left">
               <p className={cn(
-                "text-sm font-medium truncate",
+                "text-sm font-semibold truncate",
                 isPlanner ? "text-foreground" : "text-sidebar-foreground"
               )}>
                 {profile?.full_name || profile?.first_name || 'User'}
               </p>
               <p className={cn(
-                "text-xs",
-                isPlanner ? "text-muted-foreground" : "text-sidebar-foreground/60"
+                "text-[11px] truncate",
+                isPlanner ? "text-muted-foreground" : "text-sidebar-foreground/50"
               )}>
                 {isPlanner ? 'Planner' : 'Vendor'}
               </p>

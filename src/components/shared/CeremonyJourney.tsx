@@ -87,17 +87,17 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
       </div>
 
       {/* Timeline strip */}
-      <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
-        <div className="flex items-start gap-0 py-2" style={{ minWidth: 'max-content' }}>
+      <div className="w-full">
+        <div className="flex items-start w-full py-2">
           {journey.map((ceremony, i) => {
             const status = statuses[i];
             const Icon = iconMap[ceremony.id] || Gift;
             const isLast = i === journey.length - 1;
 
             return (
-              <div key={ceremony.id} className="flex items-start">
+              <div key={ceremony.id} className="flex items-start flex-1">
                 <button
-                  className="flex flex-col items-center min-w-[72px] gap-1.5"
+                  className="flex flex-col items-center flex-1 gap-1.5"
                   onClick={() => onCeremonyPress(ceremony.id)}
                 >
                   {/* Circle */}
@@ -137,9 +137,9 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
 
                 {/* Connecting line */}
                 {!isLast && (
-                  <div className="flex items-center pt-5">
+                  <div className="flex items-center pt-5 flex-1">
                     <div
-                      className={`w-6 h-0.5 ${
+                      className={`w-full h-0.5 ${
                         status === 'completed' && statuses[i + 1] === 'completed'
                           ? 'bg-accent/50'
                           : 'bg-border'
