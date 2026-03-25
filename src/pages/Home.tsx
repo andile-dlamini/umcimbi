@@ -109,7 +109,7 @@ export default function Home() {
   return (
     <div className="min-h-screen pb-safe bg-background">
       {/* Topbar */}
-      <div className="min-h-[109px] border-b border-border bg-background/80 backdrop-blur-sm flex items-center px-6">
+      <div className="min-h-[117px] border-b border-border bg-white flex items-center px-6">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold font-display text-foreground">
             Sawubona,{' '}{firstName} 👋
@@ -130,14 +130,31 @@ export default function Home() {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         {/* CeremonyJourney — always shown */}
-        <Card>
-          <CardContent className="p-5">
-            <CeremonyJourney
-              userEventTypes={userEventTypes}
-              onCeremonyPress={handleCeremonyPress}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold font-display text-foreground">
+              Your Journey
+            </h2>
+            <button
+              className="text-sm text-accent hover:underline font-medium"
+              onClick={() => {
+                import('sonner').then(({ toast }) =>
+                  toast('This shows the traditional sequence of Zulu ceremonies. Tap any ceremony to learn more.')
+                );
+              }}
+            >
+              What's this? →
+            </button>
+          </div>
+          <Card className="shadow-none">
+            <CardContent className="p-5">
+              <CeremonyJourney
+                userEventTypes={userEventTypes}
+                onCeremonyPress={handleCeremonyPress}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Event content — shown when has events */}
         {hasEvents && nextEvent && (
