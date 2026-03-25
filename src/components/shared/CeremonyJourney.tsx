@@ -1,6 +1,13 @@
 import { Check } from 'lucide-react';
 import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flame } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+// TODO: Journey paths are currently Zulu-specific.
+// When multi-culture support is added, accept a
+// 'culture' prop ('zulu' | 'xhosa' | 'sotho' etc)
+// and select the appropriate journey array.
+// Xhosa journey will differ — e.g. includes
+// imvulamlomo, ikhazi stages within lobola process.
 
 interface CeremonyStep {
   id: string;
@@ -44,9 +51,8 @@ interface CeremonyJourneyProps {
 }
 
 export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJourneyProps) {
-  const hasChild = userEventTypes.some(t =>
-    ['imbeleko', 'ancestral_ritual'].includes(t)
-  );
+  // Determine which journey to display
+  const hasChild = userEventTypes.some(t => ['imbeleko', 'ancestral_ritual'].includes(t));
   const hasComingOfAge = userEventTypes.includes('umemulo');
 
   let journey: CeremonyStep[];
@@ -58,9 +64,8 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
     journey = MARRIAGE_JOURNEY;
   }
 
-  const allCompleted = journey.every(c =>
-    userEventTypes.includes(c.id)
-  );
+  // Determine status for each ceremony
+  const allCompleted = journey.every(c => userEventTypes.includes(c.id));
   let foundCurrent = false;
 
   const statuses: Status[] = journey.map(c => {
@@ -74,72 +79,89 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
   });
 
   return (
-    <div className="w-full">
-      <div className="relative flex items-start w-full">
-        {journey.map((ceremony, i) => {
-          const status = statuses[i];
-          const Icon = iconMap[ceremony.id] || Gift;
-          const isFirst = i === 0;
-          const isLast = i === journey.length - 1;
+    <div className="space-y-2">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Your Journey
+        </h2>
+        <button
+          className="text-xs text-primary hover:underline"
+          onClick={() =>
+            toast('This shows the traditional sequence of Zulu ceremonies. Tap any ceremony to learn more.')
+          }
+        >
+          What's this?
+        </button>
+      </div>
+      <p className="text-xs text-muted-foreground">Tap a ceremony to learn about it</p>
 
-          return (
-            <div key={ceremony.id} className="relative flex-1 flex flex-col items-center">
-              {/* Left half-line */}
-              {!isFirst && (
-                <div className={cn(
-                  'absolute top-6 right-1/2 w-1/2 h-0.5',
-                  statuses[i - 1] === 'completed' && status === 'completed'
-                    ? 'bg-accent/50'
-                    : 'bg-border'
-                )} />
-              )}
+      {/* Timeline strip */}
+      <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+        <div className="flex items-start gap-0 py-2" style={{ minWidth: 'max-content' }}>
+          {journey.map((ceremony, i) => {
+            const status = statuses[i];
+            const Icon = iconMap[ceremony.id] || Gift;
+            const isLast = i === journey.length - 1;
 
-              {/* Right half-line */}
-              {!isLast && (
-                <div className={cn(
-                  'absolute top-6 left-1/2 w-1/2 h-0.5',
-                  status === 'completed' && statuses[i + 1] === 'completed'
-                    ? 'bg-accent/50'
-                    : 'bg-border'
-                )} />
-              )}
+            return (
+              <div key={ceremony.id} className="flex items-start">
+                {/* Ceremony bubble + label */}
+                <button
+                  className="flex flex-col items-center min-w-[72px] gap-1.5"
+                  onClick={() => onCeremonyPress(ceremony.id)}
+                >
+                  {/* Circle */}
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                      status === 'completed'
+                        ? 'bg-primary text-primary-foreground'
+                        : status === 'current'
+                        ? 'bg-accent text-accent-foreground ring-2 ring-accent ring-offset-2 ring-offset-background'
+                        : 'bg-muted text-muted-foreground opacity-50'
+                    }`}
+                  >
+                    {status === 'completed' ? (
+                      <Check className="h-5 w-5" />
+                    ) : (
+                      <Icon className="h-5 w-5" />
+                    )}
+                  </div>
 
-              <button
-                className="relative z-10 flex flex-col items-center gap-1.5"
-                onClick={() => onCeremonyPress(ceremony.id)}
-              >
-                <div className={cn(
-                  'w-12 h-12 rounded-full flex items-center justify-center transition-all',
-                  status === 'completed'
-                    ? 'bg-accent text-accent-foreground'
-                    : status === 'current'
-                    ? 'bg-muted text-foreground/65 ring-2 ring-accent ring-offset-2 ring-offset-background'
-                    : 'bg-muted text-foreground/50 opacity-50'
-                )}>
-                  {status === 'completed'
-                    ? <Check className="h-5 w-5" />
-                    : <Icon className="h-5 w-5" />
-                  }
-                </div>
+                  {/* "Next →" badge for current */}
+                  {status === 'current' && (
+                    <span className="text-[10px] font-semibold text-accent">
+                      Next →
+                    </span>
+                  )}
 
-                {status === 'current' && (
-                  <span className="text-[10px] font-bold text-accent">
-                    Next →
-                  </span>
+                  {/* Labels */}
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-foreground leading-tight">
+                      {ceremony.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-tight">
+                      {ceremony.english}
+                    </p>
+                  </div>
+                </button>
+
+                {/* Connecting line */}
+                {!isLast && (
+                  <div className="flex items-center pt-5">
+                    <div
+                      className={`w-6 h-0.5 ${
+                        status === 'completed' && statuses[i + 1] === 'completed'
+                          ? 'bg-primary'
+                          : 'bg-muted'
+                      }`}
+                    />
+                  </div>
                 )}
-
-                <div className="text-center">
-                  <p className="text-xs font-medium text-foreground leading-tight">
-                    {ceremony.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-tight">
-                    {ceremony.english}
-                  </p>
-                </div>
-              </button>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

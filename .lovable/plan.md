@@ -1,50 +1,43 @@
 
 
-## Plan: Redesign Planner Home Screen
+## Revised Plan: Quote Insight Feature with Direct Anthropic API
 
-Six files changed. No hooks, types, or data files modified. Vendor sidebar/dashboard untouched.
+### What Changed from Previous Plan
+- Edge function now calls Anthropic API directly (`https://api.anthropic.com/v1/messages`) instead of Lovable AI gateway
+- Uses `claude-sonnet-4-20250514` model
+- Requires new `ANTHROPIC_API_KEY` secret
 
-### File 1: `index.html`
-Add Google Fonts preconnect and stylesheet links for Fraunces + Nunito inside `<head>`, before existing content.
+### Secret Required
+**ANTHROPIC_API_KEY** must be added before the edge function will work. You can get this from [console.anthropic.com](https://console.anthropic.com/) under API Keys.
 
-### File 2: `tailwind.config.ts`
-Replace `fontFamily` section (line 81-83) with Nunito as sans, Fraunces as display.
+### Changes
 
-### File 3: `src/index.css`
-- Add `h1, h2 { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }` inside `@layer base` block
-- Update body font-family from Inter to Nunito (line 161)
+**File 1: `supabase/functions/analyse-quote/index.ts`** (new)
+- Standard CORS headers + OPTIONS handler
+- Parse POST body for `{ price, category, ceremonyType, vendorRating, reviewCount, isVerified, jobsCompleted, notes }`
+- Call Anthropic API directly using `Deno.env.get("ANTHROPIC_API_KEY")` with the exact prompt and model specified by the user
+- Parse response: extract `content[0].text`, JSON.parse it, validate sentiment enum, truncate insight to 200 chars
+- On any failure: return `{ insight: "We don't have enough data...", sentiment: "neutral" }`
 
-### File 4: `src/components/layout/AppSidebar.tsx`
-Conditionally style sidebar for planner role (when `activeRole !== 'vendor'`):
-- Desktop wrapper: `bg-white border-r border-border` instead of dark sidebar colors
-- Logo block: no invert/filter for planner
-- User card: light colors, avatar with muted background, "Planner" sub-label
-- Nav items: light color scheme — inactive: `text-foreground/55`, active: `text-accent bg-accent/8 border-l-2 border-accent`
-- Bottom items: light destructive for logout
-- Vendor sidebar remains completely unchanged (dark indigo)
+**File 2: `supabase/config.toml`**
+- Add `[functions.analyse-quote]` with `verify_jwt = false`
 
-### File 5: `src/pages/Home.tsx`
-Full JSX redesign keeping all hooks, logic, imports, and NextEventHeroCard:
-- **Topbar**: `h-[108px]` with greeting heading (font-display), subtitle, and "New Ceremony" button (hidden on mobile)
-- **Content wrapper**: `max-w-5xl mx-auto px-6 py-8 space-y-8`
-- **CeremonyJourney**: always shown, wrapped in a Card
-- **Ceremony tiles**: always shown as 2x4 grid (lg:grid-cols-4), with sand-colored icon circles, "Browse vendors →" link
-- **Has events**: NextEventHeroCard + moreUpcoming list rendered ABOVE ceremony tiles; tiles heading changes to "Plan another ceremony"
-- **No events**: journey card + ceremony tiles only, heading "Choose a ceremony to plan"
-- **Loading state**: centered Loader2 spinner
-- **Removed**: stat pills block entirely
+**File 3: `src/components/quotes/QuoteInsight.tsx`** (new — unchanged from previous plan)
+- Calls `supabase.functions.invoke('analyse-quote', { body })` on mount
+- Loading: skeleton bar; Loaded: sentiment-colored card with Sparkles icon + insight text
+- Error: returns null silently
 
-### File 6: `src/components/shared/CeremonyJourney.tsx`
-Visual-only changes, all logic preserved:
-- Header: simplified with "Your Journey" heading and "What's this? →" link
-- Remove subtitle paragraph
-- Circles: all use `bg-secondary` (sand) base; completed gets `bg-accent text-white` with Check icon; current gets `ring-2 ring-accent`; upcoming stays `bg-secondary opacity-50`
-- "Next →" badge: `text-accent font-semibold`
-- Connecting lines: completed-to-completed `bg-accent/50`, otherwise `bg-border`
+**File 4: `src/pages/quotes/MyQuotes.tsx`**
+- Add ceremonyType fetch via `quote.request?.event_id` → events table
+- Render `<QuoteInsight>` for pending, non-expired quotes
 
-### Technical Details
-- Planner vs vendor distinction uses existing `activeRole` from `useRole()` context
-- All sidebar conditional styling uses ternary on `isPlanner = activeRole !== 'vendor'` boolean
-- No color tokens changed in index.css
-- Mobile sidebar layout unchanged (icon rail stays as-is, conditionally styled)
+**File 5: `src/pages/quotes/CompareQuotes.tsx`**
+- Add `<QuoteInsight>` to CompareCard between price and score sections
+
+### Implementation Order
+1. Add `ANTHROPIC_API_KEY` secret (will prompt you)
+2. Create edge function + update config.toml
+3. Deploy and test edge function
+4. Create QuoteInsight component
+5. Integrate into MyQuotes and CompareQuotes
 
