@@ -125,7 +125,7 @@ export function AppSidebar() {
       )}>
         {/* Logo / Brand */}
         <div className={cn(
-          "shrink-0 border-b flex items-center min-h-[56px]",
+          "shrink-0 border-b flex items-center min-h-[64px]",
           isPlanner ? "border-border" : "border-sidebar-border/50",
           collapsed ? 'justify-center px-2' : 'px-5'
         )}>
@@ -133,7 +133,7 @@ export function AppSidebar() {
             src="/images/umcimbi-logo.png"
             alt="UMCIMBI"
             className={cn(
-              collapsed ? 'h-8' : 'h-7 w-auto',
+              collapsed ? 'h-8' : 'h-10 w-auto',
               isPlanner
                 ? 'brightness-0'
                 : 'brightness-0 invert'
