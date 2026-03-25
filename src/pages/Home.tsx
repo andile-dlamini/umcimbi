@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRole } from '@/context/RoleContext';
 import { useEvents } from '@/hooks/useEvents';
 import { useTasks } from '@/hooks/useTasks';
-import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flame, Search, MessageSquare, CalendarDays, Plus, ChevronRight } from 'lucide-react';
+import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flame, Search, MessageSquare, CalendarDays, Plus, ChevronRight, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -75,7 +75,6 @@ export default function Home() {
 
   const firstName = profile?.first_name || 'there';
 
-  // Filter out funeral events
   const nonFuneralEvents = events.filter(e => e.type !== 'funeral');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -87,7 +86,6 @@ export default function Home() {
   const hasEvents = events.length > 0;
   const hasUpcoming = upcomingEvents.length > 0;
 
-  // CeremonyJourney data
   const userEventTypes = events.map(e => e.type);
   const articleIdMap = Object.fromEntries(
     learnArticles.filter(a => a.eventTypeId).map(a => [a.eventTypeId, a.id])
@@ -97,116 +95,56 @@ export default function Home() {
     if (articleId) navigate('/learn/' + articleId);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen pb-safe bg-background">
-        <div className="px-4 py-12 max-w-lg mx-auto text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // STATE 1: No events
-  if (!hasEvents) {
-    return (
-      <div className="min-h-screen pb-safe bg-background">
-        <div className="px-4 py-6 max-w-lg mx-auto space-y-6 animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Sawubona, {firstName} 👋</h1>
-            <p className="text-muted-foreground mt-1">What are you planning?</p>
-          </div>
-
-          <CeremonyJourney
-            userEventTypes={userEventTypes}
-            onCeremonyPress={handleCeremonyPress}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel }) => (
-              <Card
-                key={type}
-                className="cursor-pointer transition-all hover:shadow-md hover:border-primary/50 tap-highlight-none"
-                onClick={() => navigate(`/events/new?type=${type}`)}
-              >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-foreground">{label}</p>
-                    <p className="text-xs text-muted-foreground">{zuluLabel}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <button
-            className="w-full text-center text-sm text-primary hover:underline py-2"
-            onClick={() => navigate('/vendors')}
-          >
-            Not sure? Browse vendors first
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // STATE 2 & 3: Has events
   const nextEvent = hasUpcoming ? upcomingEvents[0] : null;
   const moreUpcoming = hasUpcoming ? upcomingEvents.slice(1, 3) : [];
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-safe bg-background">
-      <div className="px-4 py-6 max-w-lg mx-auto space-y-6 animate-fade-in">
-        <h1 className="text-2xl font-bold text-foreground">Sawubona, {firstName} 👋</h1>
+      {/* Topbar */}
+      <div className="h-[108px] border-b border-border bg-background/80 backdrop-blur-sm flex items-center px-6">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold font-display text-foreground">
+            Sawubona,{' '}{firstName} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            What are you planning today?
+          </p>
+        </div>
+        <Button
+          onClick={() => navigate('/events/new')}
+          className="hidden sm:flex items-center gap-2 shrink-0"
+        >
+          <Plus className="h-4 w-4" />
+          New Ceremony
+        </Button>
+      </div>
 
-        <CeremonyJourney
-          userEventTypes={userEventTypes}
-          onCeremonyPress={handleCeremonyPress}
-        />
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        {/* CeremonyJourney — always shown */}
+        <Card>
+          <CardContent className="p-5">
+            <CeremonyJourney
+              userEventTypes={userEventTypes}
+              onCeremonyPress={handleCeremonyPress}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Hero card: next event or plan-next prompt */}
-        {nextEvent ? (
+        {/* Event content — shown when has events */}
+        {hasEvents && nextEvent && (
           <NextEventHeroCard eventId={nextEvent.id} event={nextEvent} />
-        ) : (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-5 space-y-3 text-center">
-              <Plus className="h-10 w-10 mx-auto text-primary/60" />
-              <h3 className="text-lg font-semibold text-foreground">Plan your next ceremony</h3>
-              <p className="text-sm text-muted-foreground">
-                Your ceremonies are complete. Ready to plan the next one?
-              </p>
-              <Button className="w-full" onClick={() => navigate('/events/new')}>
-                Start Planning
-              </Button>
-            </CardContent>
-          </Card>
         )}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Find Vendors', icon: Search, to: '/vendors' },
-            { label: 'My Chats', icon: MessageSquare, to: '/chats' },
-            { label: 'My Events', icon: CalendarDays, to: '/events' },
-          ].map(({ label, icon: Icon, to }) => (
-            <Card
-              key={to}
-              className="cursor-pointer hover:shadow-sm tap-highlight-none"
-              onClick={() => navigate(to)}
-            >
-              <CardContent className="p-3 flex flex-col items-center gap-1.5">
-                <Icon className="h-5 w-5 text-primary" />
-                <span className="text-xs font-medium text-foreground">{label}</span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* More upcoming events */}
-        {moreUpcoming.length > 0 && (
+        {hasEvents && moreUpcoming.length > 0 && (
           <div className="space-y-2">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Upcoming</h2>
             {moreUpcoming.map(event => {
@@ -235,6 +173,41 @@ export default function Home() {
             })}
           </div>
         )}
+
+        {/* Ceremony tiles — always shown */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold font-display text-foreground">
+              {hasEvents ? 'Plan another ceremony' : 'Choose a ceremony to plan'}
+            </h2>
+            <button
+              className="text-sm text-accent hover:underline font-medium"
+              onClick={() => navigate('/vendors')}
+            >
+              Browse vendors →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {CEREMONY_TILES.map(({ type, icon: Icon, label, zuluLabel }) => (
+              <Card
+                key={type}
+                className="cursor-pointer transition-all hover:shadow-md hover:border-accent/30 tap-highlight-none"
+                onClick={() => navigate('/events/new?type=' + type)}
+              >
+                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                  <div className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground">{zuluLabel}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

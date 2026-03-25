@@ -2,13 +2,6 @@ import { Check } from 'lucide-react';
 import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 
-// TODO: Journey paths are currently Zulu-specific.
-// When multi-culture support is added, accept a
-// 'culture' prop ('zulu' | 'xhosa' | 'sotho' etc)
-// and select the appropriate journey array.
-// Xhosa journey will differ — e.g. includes
-// imvulamlomo, ikhazi stages within lobola process.
-
 interface CeremonyStep {
   id: string;
   label: string;
@@ -51,7 +44,6 @@ interface CeremonyJourneyProps {
 }
 
 export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJourneyProps) {
-  // Determine which journey to display
   const hasChild = userEventTypes.some(t => ['imbeleko', 'ancestral_ritual'].includes(t));
   const hasComingOfAge = userEventTypes.includes('umemulo');
 
@@ -64,7 +56,6 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
     journey = MARRIAGE_JOURNEY;
   }
 
-  // Determine status for each ceremony
   const allCompleted = journey.every(c => userEventTypes.includes(c.id));
   let foundCurrent = false;
 
@@ -79,22 +70,21 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
   });
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-base font-semibold text-foreground">
           Your Journey
         </h2>
         <button
-          className="text-xs text-primary hover:underline"
+          className="text-xs text-accent hover:underline font-medium"
           onClick={() =>
             toast('This shows the traditional sequence of Zulu ceremonies. Tap any ceremony to learn more.')
           }
         >
-          What's this?
+          What's this? →
         </button>
       </div>
-      <p className="text-xs text-muted-foreground">Tap a ceremony to learn about it</p>
 
       {/* Timeline strip */}
       <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
@@ -106,7 +96,6 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
 
             return (
               <div key={ceremony.id} className="flex items-start">
-                {/* Ceremony bubble + label */}
                 <button
                   className="flex flex-col items-center min-w-[72px] gap-1.5"
                   onClick={() => onCeremonyPress(ceremony.id)}
@@ -115,10 +104,10 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
                       status === 'completed'
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-accent text-white'
                         : status === 'current'
-                        ? 'bg-accent text-accent-foreground ring-2 ring-accent ring-offset-2 ring-offset-background'
-                        : 'bg-muted text-muted-foreground opacity-50'
+                        ? 'bg-secondary text-accent ring-2 ring-accent ring-offset-2 ring-offset-background'
+                        : 'bg-secondary text-muted-foreground opacity-50'
                     }`}
                   >
                     {status === 'completed' ? (
@@ -152,8 +141,8 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
                     <div
                       className={`w-6 h-0.5 ${
                         status === 'completed' && statuses[i + 1] === 'completed'
-                          ? 'bg-primary'
-                          : 'bg-muted'
+                          ? 'bg-accent/50'
+                          : 'bg-border'
                       }`}
                     />
                   </div>
