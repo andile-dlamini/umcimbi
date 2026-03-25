@@ -45,6 +45,7 @@ import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import AdminInsights from "@/pages/admin/AdminInsights";
 import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminWaitlist from "@/pages/admin/AdminWaitlist";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
@@ -120,6 +121,7 @@ function AppRoutes() {
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="waitlist" element={<AdminWaitlist />} />
         </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />

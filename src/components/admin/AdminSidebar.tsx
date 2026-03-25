@@ -8,6 +8,8 @@ import {
   Upload,
   Star,
   ShieldCheck,
+  ClipboardList as ClipboardIcon,
+  Clock,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -29,6 +31,7 @@ const navItems = [
   { label: 'Verification Queue', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Super Vendors', to: '/admin/super-vendors', icon: Star },
   { label: 'Bulk Upload', to: '/admin/bulk-vendors', icon: Upload },
+  { label: 'Waitlist', to: '/admin/waitlist', icon: Clock },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];
 
