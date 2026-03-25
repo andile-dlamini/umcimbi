@@ -44,7 +44,9 @@ interface CeremonyJourneyProps {
 }
 
 export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJourneyProps) {
-  const hasChild = userEventTypes.some(t => ['imbeleko', 'ancestral_ritual'].includes(t));
+  const hasChild = userEventTypes.some(t =>
+    ['imbeleko', 'ancestral_ritual'].includes(t)
+  );
   const hasComingOfAge = userEventTypes.includes('umemulo');
 
   let journey: CeremonyStep[];
@@ -56,7 +58,9 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
     journey = MARRIAGE_JOURNEY;
   }
 
-  const allCompleted = journey.every(c => userEventTypes.includes(c.id));
+  const allCompleted = journey.every(c =>
+    userEventTypes.includes(c.id)
+  );
   let foundCurrent = false;
 
   const statuses: Status[] = journey.map(c => {
@@ -70,54 +74,70 @@ export function CeremonyJourney({ userEventTypes, onCeremonyPress }: CeremonyJou
   });
 
   return (
-    <div className="relative w-full py-2">
-      {/* Background line — sits behind all circles */}
-      <div className="absolute top-[24px] left-[24px] right-[24px] h-0.5 bg-border z-0" />
-
-      {/* Steps — equally distributed */}
-      <div className="relative flex items-start justify-between w-full z-10">
+    <div className="w-full">
+      <div className="relative flex items-start w-full">
         {journey.map((ceremony, i) => {
           const status = statuses[i];
           const Icon = iconMap[ceremony.id] || Gift;
+          const isFirst = i === 0;
+          const isLast = i === journey.length - 1;
 
           return (
-            <button
-              key={ceremony.id}
-              className="flex flex-col items-center gap-1.5 flex-1"
-              onClick={() => onCeremonyPress(ceremony.id)}
-            >
-              {/* Circle */}
-              <div className={cn(
-                'w-12 h-12 rounded-full flex items-center justify-center transition-all',
-                status === 'completed'
-                  ? 'bg-accent text-white'
-                  : status === 'current'
-                  ? 'bg-muted text-foreground/65 ring-2 ring-accent ring-offset-2 ring-offset-background'
-                  : 'bg-muted text-foreground/50 opacity-50'
-              )}>
-                {status === 'completed'
-                  ? <Check className="h-5 w-5" />
-                  : <Icon className="h-5 w-5" />
-                }
-              </div>
-
-              {/* Next badge */}
-              {status === 'current' && (
-                <span className="text-[10px] font-bold text-accent">
-                  Next →
-                </span>
+            <div key={ceremony.id} className="relative flex-1 flex flex-col items-center">
+              {/* Left half-line */}
+              {!isFirst && (
+                <div className={cn(
+                  'absolute top-6 right-1/2 w-1/2 h-0.5',
+                  statuses[i - 1] === 'completed' && status === 'completed'
+                    ? 'bg-accent/50'
+                    : 'bg-border'
+                )} />
               )}
 
-              {/* Labels */}
-              <div className="text-center">
-                <p className="text-xs font-medium text-foreground leading-tight">
-                  {ceremony.label}
-                </p>
-                <p className="text-xs text-muted-foreground leading-tight">
-                  {ceremony.english}
-                </p>
-              </div>
-            </button>
+              {/* Right half-line */}
+              {!isLast && (
+                <div className={cn(
+                  'absolute top-6 left-1/2 w-1/2 h-0.5',
+                  status === 'completed' && statuses[i + 1] === 'completed'
+                    ? 'bg-accent/50'
+                    : 'bg-border'
+                )} />
+              )}
+
+              <button
+                className="relative z-10 flex flex-col items-center gap-1.5"
+                onClick={() => onCeremonyPress(ceremony.id)}
+              >
+                <div className={cn(
+                  'w-12 h-12 rounded-full flex items-center justify-center transition-all',
+                  status === 'completed'
+                    ? 'bg-accent text-accent-foreground'
+                    : status === 'current'
+                    ? 'bg-muted text-foreground/65 ring-2 ring-accent ring-offset-2 ring-offset-background'
+                    : 'bg-muted text-foreground/50 opacity-50'
+                )}>
+                  {status === 'completed'
+                    ? <Check className="h-5 w-5" />
+                    : <Icon className="h-5 w-5" />
+                  }
+                </div>
+
+                {status === 'current' && (
+                  <span className="text-[10px] font-bold text-accent">
+                    Next →
+                  </span>
+                )}
+
+                <div className="text-center">
+                  <p className="text-xs font-medium text-foreground leading-tight">
+                    {ceremony.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-tight">
+                    {ceremony.english}
+                  </p>
+                </div>
+              </button>
+            </div>
           );
         })}
       </div>

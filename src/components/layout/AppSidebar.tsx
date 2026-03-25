@@ -129,16 +129,13 @@ export function AppSidebar() {
           isPlanner ? "border-border" : "border-sidebar-border/50",
           collapsed ? 'justify-center px-2' : 'px-5'
         )}>
-          <img
-            src="/images/umcimbi-logo.png"
-            alt="UMCIMBI"
-            className={cn(
-              collapsed ? 'h-8' : 'h-10 w-auto',
-              isPlanner
-                ? 'brightness-0'
-                : 'brightness-0 invert'
-            )}
-          />
+          <span className={cn(
+            "font-display font-bold tracking-tight lowercase",
+            collapsed ? 'text-lg' : 'text-2xl',
+            isPlanner ? 'text-foreground' : 'text-sidebar-foreground'
+          )}>
+            umcimbi
+          </span>
         </div>
 
         {/* User card */}

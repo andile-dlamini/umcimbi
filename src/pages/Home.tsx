@@ -212,13 +212,17 @@ export default function Home() {
                 className="cursor-pointer transition-all hover:shadow-md hover:border-accent/30 tap-highlight-none"
                 onClick={() => navigate('/events/new?type=' + type)}
               >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center shrink-0">
                     <Icon className="h-5 w-5 text-foreground/60" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm text-foreground">{label}</p>
-                    <p className="text-xs text-muted-foreground">{zuluLabel}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-foreground leading-tight">
+                      {label}
+                    </p>
+                    <p className="text-xs text-muted-foreground leading-tight">
+                      {zuluLabel}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
