@@ -270,7 +270,10 @@ export default function TermsOfService() {
         <h2 className="text-xl font-semibold mt-10 text-foreground">19. Contact Us — Legal & General Enquiries</h2>
         <div className="rounded-lg border border-border bg-muted/50 p-4 my-4 text-sm">
           <p className="font-semibold text-foreground">ISINTU DIGITAL (Pty) Ltd</p>
-          <p className="text-muted-foreground">Email: hello@umcimbi.co.za</p>
+          <p className="text-muted-foreground">37 Villa Toulouse, Eagle Trace Estate</p>
+          <p className="text-muted-foreground">Fourways, Gauteng, 2055</p>
+          <p className="text-muted-foreground">South Africa</p>
+          <p className="text-muted-foreground">Email: andile@umcimbi.co.za</p>
           <p className="text-muted-foreground">Website: www.umcimbi.co.za</p>
           <p className="text-muted-foreground mt-2">For legal notices and formal correspondence, please use email and mark your subject line: LEGAL NOTICE — UMCIMBI</p>
         </div>
