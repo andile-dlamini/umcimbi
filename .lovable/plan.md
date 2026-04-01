@@ -1,43 +1,34 @@
 
 
-## Revised Plan: Quote Insight Feature with Direct Anthropic API
+## Plan: Add Two Vendor Categories and Rename One
 
-### What Changed from Previous Plan
-- Edge function now calls Anthropic API directly (`https://api.anthropic.com/v1/messages`) instead of Lovable AI gateway
-- Uses `claude-sonnet-4-20250514` model
-- Requires new `ANTHROPIC_API_KEY` secret
-
-### Secret Required
-**ANTHROPIC_API_KEY** must be added before the edge function will work. You can get this from [console.anthropic.com](https://console.anthropic.com/) under API Keys.
+### Summary
+Add `dj_sound_audio` and `florist` to the vendor category enum and code definitions, and rename the label for `invitations_stationery`.
 
 ### Changes
 
-**File 1: `supabase/functions/analyse-quote/index.ts`** (new)
-- Standard CORS headers + OPTIONS handler
-- Parse POST body for `{ price, category, ceremonyType, vendorRating, reviewCount, isVerified, jobsCompleted, notes }`
-- Call Anthropic API directly using `Deno.env.get("ANTHROPIC_API_KEY")` with the exact prompt and model specified by the user
-- Parse response: extract `content[0].text`, JSON.parse it, validate sentiment enum, truncate insight to 200 chars
-- On any failure: return `{ insight: "We don't have enough data...", sentiment: "neutral" }`
+**1. Database migration** — Add two new enum values to `vendor_category`:
+```sql
+ALTER TYPE vendor_category ADD VALUE IF NOT EXISTS 'dj_sound_audio';
+ALTER TYPE vendor_category ADD VALUE IF NOT EXISTS 'florist';
+```
 
-**File 2: `supabase/config.toml`**
-- Add `[functions.analyse-quote]` with `verify_jwt = false`
+**2. `src/lib/vendorCategories.ts`** — Three changes:
+- Add `'dj_sound_audio'` and `'florist'` to the `VendorCategory` type union
+- Add entries to `VENDOR_CATEGORIES` array after `decor`: `{ value: 'dj_sound_audio', label: 'DJ / Sound & Audio' }` then `{ value: 'florist', label: 'Florist' }`
+- Rename `invitations_stationery` label to `'Invitations, Stationery & Printing'`
 
-**File 3: `src/components/quotes/QuoteInsight.tsx`** (new — unchanged from previous plan)
-- Calls `supabase.functions.invoke('analyse-quote', { body })` on mount
-- Loading: skeleton bar; Loaded: sentiment-colored card with Sparkles icon + insight text
-- Error: returns null silently
+**3. `src/types/database.ts`** — Add `'dj_sound_audio' | 'florist'` to the `VendorCategory` type union (line 5)
 
-**File 4: `src/pages/quotes/MyQuotes.tsx`**
-- Add ceremonyType fetch via `quote.request?.event_id` → events table
-- Render `<QuoteInsight>` for pending, non-expired quotes
+**4. `src/data/vendors.ts`** — The legacy `vendorCategories` array: no structural change needed (it's a subset used for sample data filtering)
 
-**File 5: `src/pages/quotes/CompareQuotes.tsx`**
-- Add `<QuoteInsight>` to CompareCard between price and score sections
+### Files touched
+- New migration SQL file
+- `src/lib/vendorCategories.ts`
+- `src/types/database.ts`
 
-### Implementation Order
-1. Add `ANTHROPIC_API_KEY` secret (will prompt you)
-2. Create edge function + update config.toml
-3. Deploy and test edge function
-4. Create QuoteInsight component
-5. Integrate into MyQuotes and CompareQuotes
+### Not changed
+- No existing category IDs modified
+- No vendor data or bookings affected
+- No pages changed
 
