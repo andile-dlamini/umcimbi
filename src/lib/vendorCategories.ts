@@ -6,8 +6,10 @@ export type VendorCategory =
   | 'cakes_baking'
   | 'catering' 
   | 'cold_room_hire'
-  | 'decor' 
+  | 'decor'
+  | 'dj_sound_audio'
   | 'drinks_ice_delivery'
+  | 'florist'
   | 'invitations_stationery'
   | 'livestock' 
   | 'makeup_beauty'
@@ -29,8 +31,10 @@ export const VENDOR_CATEGORIES: VendorCategoryInfo[] = [
   { value: 'catering', label: 'Catering' },
   { value: 'cold_room_hire', label: 'Cold Room Hire' },
   { value: 'decor', label: 'Decor & Styling' },
+  { value: 'dj_sound_audio', label: 'DJ / Sound & Audio' },
   { value: 'drinks_ice_delivery', label: 'Drinks & Ice Delivery' },
-  { value: 'invitations_stationery', label: 'Invitations & Stationery' },
+  { value: 'florist', label: 'Florist' },
+  { value: 'invitations_stationery', label: 'Invitations, Stationery & Printing' },
   { value: 'livestock', label: 'Livestock / Abattoir' },
   { value: 'makeup_beauty', label: 'Makeup & Beauty' },
   { value: 'mobile_toilets', label: 'Mobile Toilets & Sanitation' },
