@@ -120,7 +120,28 @@ export default function TermsOfService() {
         </ul>
 
         <h3 className="text-lg font-medium mt-6 text-foreground">5.3 Payments</h3>
-        <p className="text-muted-foreground">Payments for vendor services made through the Platform are processed by our third-party payment partners. You agree to pay the full amount of any accepted quotation in accordance with the agreed payment terms. UMCIMBI does not guarantee refunds from Vendors — any refund disputes are between you and the Vendor, subject to the Consumer Protection Act 68 of 2008.</p>
+        <p className="text-muted-foreground">Payments for vendor services made through the Platform are processed by Ozow (Pty) Ltd, our third-party payment provider. By making a payment through the Platform, you acknowledge that UMCIMBI is the merchant of record responsible for your transaction and that payment processing is subject to Ozow's terms and conditions available at www.ozow.com. You agree to pay the full amount of any accepted quotation in accordance with the agreed payment terms.</p>
+
+        <h3 className="text-lg font-medium mt-6 text-foreground">5.4 Cancellation & Refund Policy</h3>
+        <p className="text-muted-foreground">The following cancellation and refund terms apply to all bookings made through the UMCIMBI Platform:</p>
+        <p className="text-muted-foreground"><strong className="text-foreground">Deposit (30% of agreed booking value):</strong> The deposit is non-refundable once a booking has been confirmed. By confirming a booking, the Vendor commits their time, resources, and capacity to your ceremony date. The deposit compensates the Vendor for this commitment.</p>
+        <p className="text-muted-foreground"><strong className="text-foreground">Balance payment (remaining 70%):</strong> The balance payment is due 5 (five) days before your ceremony date. This allows Vendors adequate time to finalise preparations, procure materials, and arrange staffing.</p>
+        <p className="text-muted-foreground">If a Customer cancels a booking more than 5 days before the ceremony date AND has already paid the balance into the Umcimbi escrow account, the balance will be refunded in full within 5 to 7 business days. If the balance has not yet been paid at the time of cancellation, no balance refund is applicable.</p>
+        <p className="text-muted-foreground">If a Customer cancels a booking within 5 days of the ceremony date, the balance is non-refundable. This is because Vendors will have already committed to expenditure and preparation based on the confirmed booking.</p>
+        <p className="text-muted-foreground"><strong className="text-foreground">Force Majeure exceptions:</strong> If a ceremony cannot proceed due to circumstances beyond either party's reasonable control — including but not limited to natural disasters, flooding, civil unrest, or a declared national state of emergency — the Customer may apply to UMCIMBI for a balance refund or rescheduling credit. Each such application will be assessed on its merits, and UMCIMBI's decision shall be reasonable but final.</p>
+        <p className="text-muted-foreground"><strong className="text-foreground">Vendor cancellations:</strong> If a confirmed Vendor cancels a booking for any reason other than force majeure, the Customer is entitled to a full refund of both the deposit and any balance already paid. UMCIMBI will process this refund within 5 to 7 business days and may suspend or remove the Vendor from the Platform.</p>
+        <p className="text-muted-foreground">All refund requests must be submitted to andile@umcimbi.co.za with the booking reference number and reason for cancellation.</p>
+
+        <h3 className="text-lg font-medium mt-6 text-foreground">5.5 Service Delivery Policy</h3>
+        <p className="text-muted-foreground">When a booking is confirmed on the UMCIMBI Platform, the following fulfilment process applies:</p>
+        <ol className="list-decimal pl-6 space-y-2 text-muted-foreground">
+          <li><strong className="text-foreground">Booking confirmation:</strong> A booking is confirmed once the Customer has paid the deposit and the Vendor has accepted the quotation. Both parties will receive confirmation via the Platform's messaging system.</li>
+          <li><strong className="text-foreground">Balance collection:</strong> The balance payment is collected through the Platform 5 days before the ceremony date. Customers will receive a reminder notification and a payment link in advance of this date.</li>
+          <li><strong className="text-foreground">Fund holding:</strong> Once the balance is received, funds are held securely by Ozow on behalf of UMCIMBI until after the ceremony is delivered. This protects both the Customer and the Vendor.</li>
+          <li><strong className="text-foreground">Service delivery:</strong> The Vendor is responsible for delivering all agreed services on the ceremony date, in accordance with the accepted quotation. Any material changes to the agreed scope must be communicated and agreed in writing through the Platform's messaging system prior to the ceremony.</li>
+          <li><strong className="text-foreground">Fund release:</strong> Funds are released to the Vendor following confirmation that services have been delivered. If no dispute is raised by the Customer within 48 hours of the ceremony date, funds are automatically released to the Vendor.</li>
+          <li><strong className="text-foreground">Disputes:</strong> If a Customer believes that a Vendor has not delivered services as agreed, they must raise a dispute within 48 hours of the ceremony date by contacting andile@umcimbi.co.za with their booking reference and details of the issue. UMCIMBI will review the dispute and make a reasonable determination, which shall be final.</li>
+        </ol>
 
         {/* 6 */}
         <h2 className="text-xl font-semibold mt-10 text-foreground">6. Prohibited Conduct</h2>
