@@ -241,7 +241,7 @@ export default function TermsOfService() {
         <h2 className="text-xl font-semibold mt-10 text-foreground">15. Termination</h2>
 
         <h3 className="text-lg font-medium mt-6 text-foreground">15.1 Termination by You</h3>
-        <p className="text-muted-foreground">You may deactivate or delete your account at any time by following the instructions within the Platform or by contacting hello@umcimbi.co.za. Deletion of your account will result in the loss of access to your data and history on the Platform.</p>
+        <p className="text-muted-foreground">You may deactivate or delete your account at any time by following the instructions within the Platform or by contacting andile@umcimbi.co.za. Deletion of your account will result in the loss of access to your data and history on the Platform.</p>
 
         <h3 className="text-lg font-medium mt-6 text-foreground">15.2 Termination by UMCIMBI</h3>
         <p className="text-muted-foreground">UMCIMBI reserves the right to suspend or terminate your account at any time if we reasonably believe you have violated these Terms, are engaged in fraudulent activity, or pose a risk to other users. Where termination is not for cause, we will provide reasonable notice.</p>
