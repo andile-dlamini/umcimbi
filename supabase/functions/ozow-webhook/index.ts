@@ -162,14 +162,14 @@ Deno.serve(async (req) => {
               sender_type: "system",
               sender_user_id: null,
               message_type: "system",
-              content: `✅ Your balance payment of R${amount?.toLocaleString()} has been received and is securely held by Umcimbi. Funds will be released to ${vendorName} after your ceremony. You're all set! 🎉`,
+              content: `✅ Your balance payment of R${amount?.toLocaleString()} is secured and held by Umcimbi. Your vendor has been notified and is ready to deliver. After the service, you will be asked to confirm delivery to release funds. You're all set! 🎉`,
             });
             await supabase.from("messages").insert({
               conversation_id: conv.id,
               sender_type: "system",
               sender_user_id: null,
               message_type: "system",
-              content: `💰 Great news! The balance payment of R${amount?.toLocaleString()} for this booking has been received and is being held securely by Umcimbi pending your ceremony date. Funds will be released to you automatically after the service is delivered. No action needed from you.`,
+              content: `💰 The balance payment of R${amount?.toLocaleString()} has been received and is held securely by Umcimbi. Once you have delivered your service, upload your proof of delivery from this booking to release your payment. Funds clear within 48 hours of upload.`,
             });
           } else {
             const amount = bookingData.deposit_amount;

@@ -38,3 +38,18 @@ verify_jwt = false
 
 [functions.process-email-queue]
 verify_jwt = true
+
+[functions.upload-delivery-proof]
+verify_jwt = false
+
+[functions.confirm-delivery]
+verify_jwt = false
+
+[functions.raise-dispute]
+verify_jwt = false
+
+[functions.release-escrow]
+verify_jwt = false
+
+[functions.trigger-vendor-payout]
+verify_jwt = false

@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock } from 'lucide-react';
+import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock, Clock, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +41,8 @@ export default function BookingDetail() {
   const [isPayingBalance, setIsPayingBalance] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -106,6 +108,42 @@ export default function BookingDetail() {
     }
   };
 
+  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !bookingId) return;
+
+    setIsUploading(true);
+    try {
+      const path = `${bookingId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('delivery-proofs')
+        .upload(path, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('delivery-proofs')
+        .getPublicUrl(path);
+
+      const photoUrl = urlData.publicUrl;
+
+      const { data, error } = await supabase.functions.invoke('upload-delivery-proof', {
+        body: { booking_id: bookingId, photo_url: photoUrl },
+      });
+
+      if (error || data?.error) throw error || new Error(data.error);
+
+      toast.success('Proof uploaded! Payment will be released within 48 hours.');
+      refreshDetails();
+    } catch (err: any) {
+      console.error('Proof upload error:', err);
+      toast.error('Upload failed. Please try again.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -136,6 +174,8 @@ export default function BookingDetail() {
   const status = statusConfig[booking.booking_status];
   const depositDue = booking.deposit_status === 'due' || (booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit');
   const balanceDue = booking.balance_status === 'due';
+  const fundsReleased = !!(booking as any).funds_released_at;
+  const eventDatePassed = booking.event_date_time && new Date(booking.event_date_time) < new Date();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -316,7 +356,7 @@ export default function BookingDetail() {
         </Card>
 
         {/* Escrow Info Card */}
-        {booking.balance_status === 'paid' && booking.booking_status === 'confirmed' && (
+        {booking.balance_status === 'paid' && booking.booking_status === 'confirmed' && !fundsReleased && (
           <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
@@ -358,18 +398,124 @@ export default function BookingDetail() {
           </Card>
         )}
 
-        {/* Actions */}
-        {isClient && booking.booking_status === 'confirmed' && (
-          <div className="space-y-2">
-            <Button className="w-full" onClick={handleMarkComplete} disabled={isCompleting || isReporting}>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              {isCompleting ? 'Processing...' : 'Everything Delivered as Agreed'}
-            </Button>
-            <Button variant="destructive" className="w-full" onClick={handleReportProblem} disabled={isReporting || isCompleting}>
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              {isReporting ? 'Reporting...' : 'Report a Problem'}
-            </Button>
-          </div>
+        {/* VENDOR: Proof Upload Section */}
+        {isVendor && booking.booking_status === 'confirmed' && booking.balance_status === 'paid' && !fundsReleased && (
+          <>
+            {eventDatePassed && deliveryProofs.length === 0 && (
+              <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-5 w-5 text-amber-600" />
+                    <span className="font-medium text-amber-800 dark:text-amber-300">Ceremony date has passed</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Upload proof of delivery to release your payment of R{booking.balance_amount?.toLocaleString()}.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {deliveryProofs.length === 0 ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Upload Proof of Delivery</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Upload a photo confirming your service was delivered to release your payment.
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProofUpload}
+                  />
+                  <Button
+                    className="w-full"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    {isUploading ? 'Uploading...' : 'Select Photo & Upload'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                    <span className="font-medium text-emerald-800 dark:text-emerald-300">
+                      Proof submitted — your payment will be released within 48 hours, or sooner if the client confirms.
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+
+        {/* CLIENT: Action Section */}
+        {isClient && booking.booking_status === 'confirmed' && !fundsReleased && (
+          <>
+            {deliveryProofs.length === 0 ? (
+              <Card className="border-muted">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Waiting for your vendor to upload proof of delivery. You will be notified when it is ready to confirm.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                <Button className="w-full" onClick={handleMarkComplete} disabled={isCompleting || isReporting}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {isCompleting ? 'Processing...' : 'Confirm Service Received'}
+                </Button>
+                <Button variant="destructive" className="w-full" onClick={handleReportProblem} disabled={isReporting || isCompleting}>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  {isReporting ? 'Raising dispute...' : 'Raise a Dispute'}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* DISPUTED Status Card */}
+        {booking.booking_status === 'disputed' && (
+          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
+                <span className="font-medium text-amber-800 dark:text-amber-300">Dispute Under Review</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Umcimbi admin has been notified and will contact both parties within 24 hours. Funds are held securely until the dispute is resolved.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* COMPLETED + Funds Released Card */}
+        {booking.booking_status === 'completed' && fundsReleased && (
+          <Card className="border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <span className="font-medium text-emerald-800 dark:text-emerald-300">Payment Released</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isClient
+                  ? "Service confirmed and payment released to your vendor. Thank you for using Umcimbi!"
+                  : `Payment of R${booking.balance_amount?.toLocaleString()} has been released to your account. Thank you for using Umcimbi!`}
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
 
