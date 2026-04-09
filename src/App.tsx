@@ -49,6 +49,9 @@ import AdminWaitlist from "@/pages/admin/AdminWaitlist";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
+import PaymentSuccess from "@/pages/payment/PaymentSuccess";
+import PaymentError from "@/pages/payment/PaymentError";
+import PaymentCancel from "@/pages/payment/PaymentCancel";
 import NotFound from "@/pages/NotFound";
 import { AdminGuard } from "@/components/layout/AdminGuard";
 
@@ -108,6 +111,9 @@ function AppRoutes() {
         <Route path="/quotes/compare" element={<CompareQuotes />} />
         <Route path="/bookings" element={<ClientBookings />} />
         <Route path="/bookings/:bookingId" element={<BookingDetail />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/error" element={<PaymentError />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />

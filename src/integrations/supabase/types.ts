@@ -85,6 +85,7 @@ export type Database = {
           order_number: string | null
           order_pdf_generated_at: string | null
           order_pdf_key: string | null
+          ozow_transaction_id: string | null
           quote_id: string | null
           service_category: string | null
           updated_at: string
@@ -110,6 +111,7 @@ export type Database = {
           order_number?: string | null
           order_pdf_generated_at?: string | null
           order_pdf_key?: string | null
+          ozow_transaction_id?: string | null
           quote_id?: string | null
           service_category?: string | null
           updated_at?: string
@@ -135,6 +137,7 @@ export type Database = {
           order_number?: string | null
           order_pdf_generated_at?: string | null
           order_pdf_key?: string | null
+          ozow_transaction_id?: string | null
           quote_id?: string | null
           service_category?: string | null
           updated_at?: string

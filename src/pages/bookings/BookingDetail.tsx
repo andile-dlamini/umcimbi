@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useBookingDetails } from '@/hooks/useBookings';
 import { useAuth } from '@/context/AuthContext';
@@ -30,7 +30,6 @@ const paymentStatusCfg: Record<string, { label: string; color: string }> = {
 export default function BookingDetail() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, vendorProfile } = useAuth();
   const { booking, deliveryProofs, reviews, isLoading, refreshDetails } = useBookingDetails(bookingId);
   const { reportProblem, markAsCompleted } = useClientBookings();
@@ -40,23 +39,8 @@ export default function BookingDetail() {
   const [isReporting, setIsReporting] = useState(false);
   const [isPayingDeposit, setIsPayingDeposit] = useState(false);
   const [isPayingBalance, setIsPayingBalance] = useState(false);
-  const [isPayingFull, setIsPayingFull] = useState(false);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [isLoadingQuotePdf, setIsLoadingQuotePdf] = useState(false);
-
-  // Handle Yoco redirect back
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment');
-    const kind = searchParams.get('kind');
-    if (paymentStatus === 'success') {
-      toast.success(`${kind === 'deposit' ? 'Deposit' : kind === 'balance' ? 'Balance' : 'Full'} payment successful! It may take a moment to reflect.`);
-      navigate(`/bookings/${bookingId}`, { replace: true });
-      setTimeout(() => refreshDetails(), 2000);
-    } else if (paymentStatus === 'cancelled') {
-      toast.info('Payment was cancelled.');
-      navigate(`/bookings/${bookingId}`, { replace: true });
-    }
-  }, [searchParams, bookingId, navigate, refreshDetails]);
 
   const isClient = booking?.client_id === user?.id;
   const isVendor = vendorProfile?.id === booking?.vendor_id;
@@ -96,39 +80,27 @@ export default function BookingDetail() {
     setIsLoadingQuotePdf(false);
   };
 
-  const handleYocoPayment = async (kind: 'deposit' | 'balance' | 'full') => {
+  const handleOzowPayment = async (payment_type: 'deposit' | 'balance') => {
     if (!bookingId || !user) return;
 
-    const setLoading = kind === 'deposit' ? setIsPayingDeposit : kind === 'balance' ? setIsPayingBalance : setIsPayingFull;
+    const setLoading = payment_type === 'deposit' ? setIsPayingDeposit : setIsPayingBalance;
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('Please log in to make a payment');
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('create-yoco-checkout', {
-        body: {
-          bookingId,
-          kind,
-          successUrl: `${window.location.origin}/bookings/${bookingId}?payment=success&kind=${kind}`,
-          cancelUrl: `${window.location.origin}/bookings/${bookingId}?payment=cancelled`,
-        },
+      const { data, error } = await supabase.functions.invoke('create-ozow-payment', {
+        body: { booking_id: bookingId, payment_type },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      if (data?.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      if (data?.paymentUrl) {
+        window.location.href = data.paymentUrl;
       } else {
-        throw new Error('No redirect URL received');
+        throw new Error('No payment URL received');
       }
     } catch (err: any) {
-      console.error('Yoco payment error:', err);
+      console.error('Ozow payment error:', err);
       toast.error(err.message || 'Failed to start payment');
       setLoading(false);
     }
@@ -297,35 +269,19 @@ export default function BookingDetail() {
                 </div>
               </div>
               {isClient && depositDue && booking.deposit_status !== 'paid' && (
-                <div className="space-y-2">
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleYocoPayment('deposit')}
-                    disabled={isPayingDeposit || isPayingFull}
-                  >
-                    {isPayingDeposit ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <CreditCard className="h-4 w-4 mr-2" />
-                    )}
-                    {isPayingDeposit ? 'Redirecting to UMCIMBI payment...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleYocoPayment('full')}
-                    disabled={isPayingFull || isPayingDeposit}
-                  >
-                    {isPayingFull ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <CreditCard className="h-4 w-4 mr-2" />
-                    )}
-                    {isPayingFull ? 'Redirecting to UMCIMBI payment...' : `Pay in Full (R${booking.agreed_price?.toLocaleString()})`}
-                  </Button>
-                </div>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => handleOzowPayment('deposit')}
+                  disabled={isPayingDeposit}
+                >
+                  {isPayingDeposit ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4 mr-2" />
+                  )}
+                  {isPayingDeposit ? 'Redirecting to payment...' : `Pay Deposit (R${booking.deposit_amount?.toLocaleString()})`}
+                </Button>
               )}
 
               {/* Balance */}
@@ -344,7 +300,7 @@ export default function BookingDetail() {
                 <Button
                   size="sm"
                   className="w-full"
-                  onClick={() => handleYocoPayment('balance')}
+                  onClick={() => handleOzowPayment('balance')}
                   disabled={isPayingBalance}
                 >
                   {isPayingBalance ? (
@@ -352,7 +308,7 @@ export default function BookingDetail() {
                   ) : (
                     <CreditCard className="h-4 w-4 mr-2" />
                   )}
-                  {isPayingBalance ? 'Redirecting to UMCIMBI payment...' : 'Pay Balance'}
+                  {isPayingBalance ? 'Redirecting to payment...' : 'Pay Balance'}
                 </Button>
               )}
             </div>
