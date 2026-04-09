@@ -1162,6 +1162,11 @@ export type Database = {
           added_to_events_count: number | null
           address_line_1: string | null
           address_line_2: string | null
+          bank_account_holder_name: string | null
+          bank_account_number: string | null
+          bank_account_type: string | null
+          bank_branch_code: string | null
+          bank_name: string | null
           business_verification_status: Database["public"]["Enums"]["business_verification_status"]
           category: Database["public"]["Enums"]["vendor_category"]
           city: string | null
@@ -1181,6 +1186,7 @@ export type Database = {
           longitude: number | null
           name: string
           owner_user_id: string | null
+          payout_method: string | null
           phone_number: string | null
           postal_code: string | null
           price_range_text: string | null
@@ -1208,6 +1214,11 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_account_type?: string | null
+          bank_branch_code?: string | null
+          bank_name?: string | null
           business_verification_status?: Database["public"]["Enums"]["business_verification_status"]
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
@@ -1227,6 +1238,7 @@ export type Database = {
           longitude?: number | null
           name: string
           owner_user_id?: string | null
+          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           price_range_text?: string | null
@@ -1254,6 +1266,11 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          bank_account_holder_name?: string | null
+          bank_account_number?: string | null
+          bank_account_type?: string | null
+          bank_branch_code?: string | null
+          bank_name?: string | null
           business_verification_status?: Database["public"]["Enums"]["business_verification_status"]
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
@@ -1273,6 +1290,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           owner_user_id?: string | null
+          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           price_range_text?: string | null

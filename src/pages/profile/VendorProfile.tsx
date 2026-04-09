@@ -15,6 +15,7 @@ import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
+import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
 
 export default function VendorProfile() {
   const navigate = useNavigate();
@@ -328,6 +329,7 @@ export default function VendorProfile() {
         {/* Branding / Letterhead Section */}
         <BrandingSection vendor={vendor} onUpdate={updateVendorProfile} />
 
+        <PayoutDetailsSection vendor={vendor} onUpdate={updateVendorProfile} />
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
