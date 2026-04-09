@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.analyse-quote]
 verify_jwt = false
+
+[functions.create-ozow-payment]
+verify_jwt = false
