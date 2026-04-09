@@ -168,7 +168,12 @@ Deno.serve(async (req) => {
       HashCheck,
     };
 
-    console.log("Sending Ozow payment request:", { TransactionReference, Amount, BankReference });
+    console.log("Ozow payload (no key):", JSON.stringify({
+      ...ozowPayload,
+      HashCheck: ozowPayload.HashCheck.slice(0, 8) + "...",
+    }));
+    console.log("Private key length:", OZOW_PRIVATE_KEY.length);
+    console.log("Site code:", OZOW_SITE_CODE);
 
     const ozowRes = await fetch("https://api.ozow.com/PostPaymentRequest", {
       method: "POST",
@@ -182,8 +187,13 @@ Deno.serve(async (req) => {
     const ozowData = await ozowRes.json();
 
     if (!ozowRes.ok || ozowData.errorMessage) {
-      console.error("Ozow API error:", ozowData);
-      return new Response(JSON.stringify({ error: "Failed to create payment session", details: ozowData.errorMessage || ozowData }), {
+      console.error("Ozow API status:", ozowRes.status);
+      console.error("Ozow API response:", JSON.stringify(ozowData));
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to create payment session", 
+          details: ozowData 
+        }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
