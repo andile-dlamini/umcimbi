@@ -72,15 +72,19 @@ export type Database = {
           balance_paid_at: string | null
           balance_status: Database["public"]["Enums"]["payment_status"]
           booking_status: Database["public"]["Enums"]["booking_status"]
+          client_confirmed_at: string | null
           client_id: string
           created_at: string
           deposit_amount: number | null
           deposit_due_at: string | null
           deposit_paid_at: string | null
           deposit_status: Database["public"]["Enums"]["payment_status"]
+          dispute_raised_at: string | null
+          dispute_raised_by: string | null
           event_date_time: string | null
           event_id: string
           funds_held_since: string | null
+          funds_released_at: string | null
           id: string
           order_number: string | null
           order_pdf_generated_at: string | null
@@ -98,15 +102,19 @@ export type Database = {
           balance_paid_at?: string | null
           balance_status?: Database["public"]["Enums"]["payment_status"]
           booking_status?: Database["public"]["Enums"]["booking_status"]
+          client_confirmed_at?: string | null
           client_id: string
           created_at?: string
           deposit_amount?: number | null
           deposit_due_at?: string | null
           deposit_paid_at?: string | null
           deposit_status?: Database["public"]["Enums"]["payment_status"]
+          dispute_raised_at?: string | null
+          dispute_raised_by?: string | null
           event_date_time?: string | null
           event_id: string
           funds_held_since?: string | null
+          funds_released_at?: string | null
           id?: string
           order_number?: string | null
           order_pdf_generated_at?: string | null
@@ -124,15 +132,19 @@ export type Database = {
           balance_paid_at?: string | null
           balance_status?: Database["public"]["Enums"]["payment_status"]
           booking_status?: Database["public"]["Enums"]["booking_status"]
+          client_confirmed_at?: string | null
           client_id?: string
           created_at?: string
           deposit_amount?: number | null
           deposit_due_at?: string | null
           deposit_paid_at?: string | null
           deposit_status?: Database["public"]["Enums"]["payment_status"]
+          dispute_raised_at?: string | null
+          dispute_raised_by?: string | null
           event_date_time?: string | null
           event_id?: string
           funds_held_since?: string | null
+          funds_released_at?: string | null
           id?: string
           order_number?: string | null
           order_pdf_generated_at?: string | null
