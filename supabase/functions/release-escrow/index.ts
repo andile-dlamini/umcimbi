@@ -112,6 +112,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (mode === "auto") {
       // Query eligible bookings
       const { data: eligibleBookings } = await supabase
         .from("bookings")
@@ -131,7 +132,6 @@ Deno.serve(async (req) => {
       let released = 0;
 
       for (const bk of eligibleBookings) {
-        // Check if delivery proof is > 48 hours old
         const { data: proofs } = await supabase
           .from("delivery_proofs")
           .select("created_at")
