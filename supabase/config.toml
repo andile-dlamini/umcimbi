@@ -21,13 +21,10 @@ verify_jwt = false
 [functions.decline-quote]
 verify_jwt = false
 
-[functions.create-yoco-checkout]
+[functions.create-ozow-payment]
 verify_jwt = false
 
-[functions.yoco-webhook]
-verify_jwt = false
-
-[functions.register-yoco-webhook]
+[functions.ozow-webhook]
 verify_jwt = false
 
 [functions.generate-order-confirmation]
