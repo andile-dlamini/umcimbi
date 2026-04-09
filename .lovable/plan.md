@@ -1,28 +1,26 @@
 
 
-## Plan: Add Payout Details Section to Vendor Profile
+## Plan: Fix Escrow Flow — BookingDetail Wording + Chat Booking Actions
 
-### 1. Database Migration
-Add 6 new columns to `vendors` table: `payout_method`, `bank_name`, `bank_account_holder_name`, `bank_account_number`, `bank_branch_code`, `bank_account_type`.
+### 1. BookingDetail.tsx — Fix vendor escrow text (line 369)
+Replace the vendor-side string from "…will be released to you after the ceremony date. No action needed from you." to "Your client's balance payment is held securely by Umcimbi. Upload your proof of delivery below to release your payment."
 
-### 2. New Component: `src/components/vendors/PayoutDetailsSection.tsx`
-A self-contained Card component following the BrandingSection pattern:
-- Props: `vendor`, `onUpdate` (same signature as BrandingSection)
-- Internal `isEditing`/`isSaving`/`formData` state
-- **View mode**: Shows masked account number (last 4 digits), bank name, account type, branch code, holder name. Green "✓ Payout ready" badge when complete. "Add bank details" prompt when empty.
-- **Edit mode**: Bank dropdown (9 SA banks + "Other"), auto-fills branch code on selection. Account holder input, account number input, account type select (Current/Cheque, Savings, Transmission), editable branch code field. Amber info box about security. Save/Cancel buttons.
-- Uses `Banknote` icon from lucide-react
+### 2. New hook: `src/hooks/useConversationBooking.ts`
+Create the hook as specified — fetches the most recent active booking (confirmed/disputed/completed) by vendor_id + client_id, plus associated delivery_proofs. Returns `booking`, `deliveryProofs`, `isLoading`, `refreshBooking`.
 
-### 3. VendorProfile.tsx
-Add `<PayoutDetailsSection vendor={vendor} onUpdate={updateVendorProfile} />` between `BrandingSection` and the delete `AlertDialog` (line ~250). Import the new component.
+### 3. ChatThread.tsx — Add booking-aware action panel
+- **Imports**: Add `useConversationBooking`, `Upload`, `CheckCircle`, `AlertTriangle`, `Clock` from lucide-react
+- **State/hooks**: Add `activeBooking`/`bookingProofs` via the new hook, plus `isUploadingProof`, `isConfirming`, `isDisputing` state and `proofFileInputRef`
+- **Handlers**: `handleProofUpload` (upload to storage → invoke edge function), `handleConfirmDelivery`, `handleRaiseDispute`
+- **JSX**: Hidden file input for proof uploads before the sticky bottom div. Inside the sticky div, add the 5-state booking action panel (vendor upload, vendor waiting, client confirm/dispute, disputed, completed) as the first child — before the adjustment bar and vendor toolbar.
 
 ### Files Changed
-| File | Action |
+| File | Change |
 |------|--------|
-| Migration | Add 6 columns to vendors |
-| `src/components/vendors/PayoutDetailsSection.tsx` | Create |
-| `src/pages/profile/VendorProfile.tsx` | Add import + component |
+| `src/pages/bookings/BookingDetail.tsx` | Edit 1 string on line 369 |
+| `src/hooks/useConversationBooking.ts` | Create new file |
+| `src/pages/chat/ChatThread.tsx` | Add imports, hook, handlers, JSX panel |
 
 ### What Will NOT Change
-BrandingSection, useVendors, booking/payment/escrow logic, any other pages.
+Existing file upload handler, Make Quotation button, QuoteCard, edge functions, useBookings.ts, BookingDetail upload proof section, any other files.
 
