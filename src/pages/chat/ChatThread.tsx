@@ -250,7 +250,77 @@ const ChatThread = () => {
     }
   };
 
-  const getSignedUrl = useCallback(async (bucket: string, path: string) => {
+  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeBooking) return;
+
+    setIsUploadingProof(true);
+    try {
+      const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('delivery-proofs')
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('delivery-proofs')
+        .getPublicUrl(path);
+
+      const { data, error } = await supabase.functions.invoke(
+        'upload-delivery-proof',
+        { body: { booking_id: activeBooking.id, photo_url: urlData.publicUrl } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+
+      toast.success('Proof uploaded! Payment will be released within 48 hours.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error('Upload failed. Please try again.');
+    } finally {
+      setIsUploadingProof(false);
+      if (proofFileInputRef.current) proofFileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    if (!activeBooking || isConfirming) return;
+    setIsConfirming(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'confirm-delivery',
+        { body: { booking_id: activeBooking.id } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+      toast.success('Service confirmed! Payment will be released.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to confirm delivery');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleRaiseDispute = async () => {
+    if (!activeBooking || isDisputing) return;
+    setIsDisputing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'raise-dispute',
+        { body: { booking_id: activeBooking.id } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+      toast.success('Dispute raised. Admin has been notified.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to raise dispute');
+    } finally {
+      setIsDisputing(false);
+    }
+  };
+
     const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 300);
     return data?.signedUrl || '';
   }, []);
