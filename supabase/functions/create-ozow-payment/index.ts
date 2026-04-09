@@ -97,13 +97,13 @@ Deno.serve(async (req) => {
     }
 
     // Ozow config
-    const OZOW_SITE_CODE = Deno.env.get("OZOW_SITE_CODE")!;
-    const OZOW_PRIVATE_KEY = Deno.env.get("OZOW_PRIVATE_KEY")!;
-    const OZOW_API_KEY = Deno.env.get("OZOW_API_KEY")!;
-    const successUrl = Deno.env.get("OZOW_SUCCESS_URL")!;
-    const errorUrl = Deno.env.get("OZOW_ERROR_URL")!;
-    const cancelUrl = Deno.env.get("OZOW_CANCEL_URL")!;
-    const notifyUrl = Deno.env.get("OZOW_NOTIFY_URL")!;
+    const OZOW_SITE_CODE = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
+    const OZOW_PRIVATE_KEY = (Deno.env.get("OZOW_PRIVATE_KEY") ?? "").trim();
+    const OZOW_API_KEY = (Deno.env.get("OZOW_API_KEY") ?? "").trim();
+    const successUrl = (Deno.env.get("OZOW_SUCCESS_URL") ?? "").trim();
+    const errorUrl = (Deno.env.get("OZOW_ERROR_URL") ?? "").trim();
+    const cancelUrl = (Deno.env.get("OZOW_CANCEL_URL") ?? "").trim();
+    const notifyUrl = (Deno.env.get("OZOW_NOTIFY_URL") ?? "").trim();
 
     if (!OZOW_SITE_CODE || !OZOW_PRIVATE_KEY || !OZOW_API_KEY) {
       return new Response(JSON.stringify({ error: "Payment service not configured" }), {
