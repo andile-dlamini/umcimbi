@@ -112,14 +112,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (mode === "auto") {
-      // Query for bookings with proof > 48hrs old, no client confirmation, no release
-      const { data: bookings, error } = await supabase.rpc("", {}).maybeSingle();
-      
-      // Use raw query via from
+      // Query eligible bookings
       const { data: eligibleBookings } = await supabase
         .from("bookings")
-        .select("id, vendor_id")
+        .select("id")
         .eq("booking_status", "confirmed")
         .not("funds_held_since", "is", null)
         .is("client_confirmed_at", null)
