@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star, Upload, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { useConversationBooking } from '@/hooks/useConversationBooking';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
@@ -28,8 +29,24 @@ const ChatThread = () => {
   const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proofFileInputRef = useRef<HTMLInputElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+
+  const clientUserId = isVendorView
+    ? (conversation as any)?.user_profile?.user_id || conversation?.user_id
+    : user?.id;
+  const vendorId = conversation?.vendor_id;
+
+  const {
+    booking: activeBooking,
+    deliveryProofs: bookingProofs,
+    refreshBooking,
+  } = useConversationBooking(conversationId, vendorId, clientUserId);
+
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isDisputing, setIsDisputing] = useState(false);
 
   // Adjustment request state (client side)
   const [adjustmentQuoteId, setAdjustmentQuoteId] = useState<string | null>(null);
@@ -233,6 +250,77 @@ const ChatThread = () => {
     }
   };
 
+  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeBooking) return;
+
+    setIsUploadingProof(true);
+    try {
+      const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('delivery-proofs')
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('delivery-proofs')
+        .getPublicUrl(path);
+
+      const { data, error } = await supabase.functions.invoke(
+        'upload-delivery-proof',
+        { body: { booking_id: activeBooking.id, photo_url: urlData.publicUrl } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+
+      toast.success('Proof uploaded! Payment will be released within 48 hours.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error('Upload failed. Please try again.');
+    } finally {
+      setIsUploadingProof(false);
+      if (proofFileInputRef.current) proofFileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    if (!activeBooking || isConfirming) return;
+    setIsConfirming(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'confirm-delivery',
+        { body: { booking_id: activeBooking.id } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+      toast.success('Service confirmed! Payment will be released.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to confirm delivery');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleRaiseDispute = async () => {
+    if (!activeBooking || isDisputing) return;
+    setIsDisputing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'raise-dispute',
+        { body: { booking_id: activeBooking.id } }
+      );
+      if (error || data?.error) throw error || new Error(data.error);
+      toast.success('Dispute raised. Admin has been notified.');
+      refreshBooking();
+      refreshMessages();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to raise dispute');
+    } finally {
+      setIsDisputing(false);
+    }
+  };
+
   const getSignedUrl = useCallback(async (bucket: string, path: string) => {
     const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 300);
     return data?.signedUrl || '';
@@ -416,8 +504,105 @@ const ChatThread = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Hidden proof file input */}
+      <input
+        ref={proofFileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleProofUpload}
+      />
+
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        {/* Booking Action Panel */}
+        {activeBooking && (
+          isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && activeBooking.balance_status === 'paid'
+          && bookingProofs.length === 0
+          && !activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                💰 Payment secured — upload proof to release your funds
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => proofFileInputRef.current?.click()}
+                disabled={isUploadingProof}
+              >
+                {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                {isUploadingProof ? 'Uploading...' : 'Upload Proof of Delivery'}
+              </Button>
+            </div>
+          )
+          : isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && bookingProofs.length > 0
+          && !activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                ✅ Proof submitted — payment releases within 48 hours or when client confirms
+              </p>
+            </div>
+          )
+          : !isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && bookingProofs.length > 0
+          && !activeBooking.funds_released_at
+          && !activeBooking.client_confirmed_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                📸 Your vendor has uploaded proof of delivery
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={handleConfirmDelivery}
+                  disabled={isConfirming}
+                >
+                  {isConfirming ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                  {isConfirming ? 'Confirming...' : 'Confirm'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleRaiseDispute}
+                  disabled={isDisputing}
+                >
+                  {isDisputing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-1" />}
+                  {isDisputing ? 'Raising...' : 'Dispute'}
+                </Button>
+              </div>
+            </div>
+          )
+          : activeBooking.booking_status === 'disputed'
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                ⚠️ Dispute under review — admin will contact both parties within 24 hours
+              </p>
+            </div>
+          )
+          : activeBooking.booking_status === 'completed'
+          && activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                🎉 Payment released — booking complete
+              </p>
+            </div>
+          )
+          : null
+        )}
         {/* Adjustment request bar (client) */}
         {showAdjustmentInput && (
           <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
