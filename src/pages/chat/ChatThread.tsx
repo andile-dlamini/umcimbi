@@ -504,8 +504,105 @@ const ChatThread = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Hidden proof file input */}
+      <input
+        ref={proofFileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleProofUpload}
+      />
+
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        {/* Booking Action Panel */}
+        {activeBooking && (
+          isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && activeBooking.balance_status === 'paid'
+          && bookingProofs.length === 0
+          && !activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                💰 Payment secured — upload proof to release your funds
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => proofFileInputRef.current?.click()}
+                disabled={isUploadingProof}
+              >
+                {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                {isUploadingProof ? 'Uploading...' : 'Upload Proof of Delivery'}
+              </Button>
+            </div>
+          )
+          : isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && bookingProofs.length > 0
+          && !activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                ✅ Proof submitted — payment releases within 48 hours or when client confirms
+              </p>
+            </div>
+          )
+          : !isVendorView
+          && activeBooking.booking_status === 'confirmed'
+          && bookingProofs.length > 0
+          && !activeBooking.funds_released_at
+          && !activeBooking.client_confirmed_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                📸 Your vendor has uploaded proof of delivery
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={handleConfirmDelivery}
+                  disabled={isConfirming}
+                >
+                  {isConfirming ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
+                  {isConfirming ? 'Confirming...' : 'Confirm'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleRaiseDispute}
+                  disabled={isDisputing}
+                >
+                  {isDisputing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-1" />}
+                  {isDisputing ? 'Raising...' : 'Dispute'}
+                </Button>
+              </div>
+            </div>
+          )
+          : activeBooking.booking_status === 'disputed'
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                ⚠️ Dispute under review — admin will contact both parties within 24 hours
+              </p>
+            </div>
+          )
+          : activeBooking.booking_status === 'completed'
+          && activeBooking.funds_released_at
+          ? (
+            <div className="mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                🎉 Payment released — booking complete
+              </p>
+            </div>
+          )
+          : null
+        )}
         {/* Adjustment request bar (client) */}
         {showAdjustmentInput && (
           <div className="flex items-center gap-2 mb-2 p-2 bg-muted rounded-lg">
