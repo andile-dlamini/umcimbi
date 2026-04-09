@@ -321,6 +321,7 @@ const ChatThread = () => {
     }
   };
 
+  const getSignedUrl = useCallback(async (bucket: string, path: string) => {
     const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 300);
     return data?.signedUrl || '';
   }, []);
