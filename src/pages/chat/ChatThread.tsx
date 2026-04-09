@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star, Upload, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { useConversationBooking } from '@/hooks/useConversationBooking';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useConversation, useMessages, useSendMessage } from '@/hooks/useChat';
