@@ -112,8 +112,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const TransactionReference = `UMCIMBI-${payment_type.toUpperCase()}-${booking_id}`;
-    const BankReference = `UMCIMBI-${booking_id.slice(0, 8).toUpperCase()}`;
+    // Ozow max 50 chars for TransactionReference. Use short booking_id prefix.
+    const shortId = booking_id.replace(/-/g, '').slice(0, 20);
+    const TransactionReference = `UMC-${payment_type === 'deposit' ? 'D' : 'B'}-${shortId}`;
+    const BankReference = `UMC-${booking_id.slice(0, 8).toUpperCase()}`;
     const Amount = amount.toFixed(2);
     const CountryCode = "ZA";
     const CurrencyCode = "ZAR";
