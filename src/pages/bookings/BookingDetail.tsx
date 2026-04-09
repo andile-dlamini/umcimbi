@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useBookingDetails } from '@/hooks/useBookings';
 import { useAuth } from '@/context/AuthContext';
@@ -30,7 +30,6 @@ const paymentStatusCfg: Record<string, { label: string; color: string }> = {
 export default function BookingDetail() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, vendorProfile } = useAuth();
   const { booking, deliveryProofs, reviews, isLoading, refreshDetails } = useBookingDetails(bookingId);
   const { reportProblem, markAsCompleted } = useClientBookings();
