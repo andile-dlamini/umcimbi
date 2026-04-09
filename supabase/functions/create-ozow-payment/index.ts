@@ -139,10 +139,10 @@ Deno.serve(async (req) => {
       Optional3,
       Optional4,
       Optional5,
-      notifyUrl,
-      successUrl,
-      errorUrl,
       cancelUrl,
+      errorUrl,
+      successUrl,
+      notifyUrl,
       IsTest,
     ].join("") + OZOW_PRIVATE_KEY;
 
