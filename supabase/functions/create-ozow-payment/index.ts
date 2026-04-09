@@ -139,11 +139,11 @@ Deno.serve(async (req) => {
       Optional3,
       Optional4,
       Optional5,
-      IsTest,
       notifyUrl,
       successUrl,
       errorUrl,
       cancelUrl,
+      IsTest,
     ].join("") + OZOW_PRIVATE_KEY;
 
     const HashCheck = await sha512Hex(hashInput.toLowerCase());
