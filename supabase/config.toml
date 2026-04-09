@@ -21,9 +21,6 @@ verify_jwt = false
 [functions.decline-quote]
 verify_jwt = false
 
-[functions.create-ozow-payment]
-verify_jwt = false
-
 [functions.ozow-webhook]
 verify_jwt = false
 
