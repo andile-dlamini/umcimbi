@@ -143,6 +143,17 @@ export default function TermsOfService() {
           <li><strong className="text-foreground">Disputes:</strong> If a Customer believes that a Vendor has not delivered services as agreed, they must raise a dispute within 48 hours of the ceremony date by contacting andile@umcimbi.co.za with their booking reference and details of the issue. UMCIMBI will review the dispute and make a reasonable determination, which shall be final.</li>
         </ol>
 
+        <h3 className="text-lg font-medium mt-6 text-foreground">5.6 Service Delivery & Fund Release</h3>
+        <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+          <li>Once the balance payment is received, funds are held securely by Umcimbi pending service delivery.</li>
+          <li>Vendors must upload photographic proof of service delivery via the booking page once their service has been rendered.</li>
+          <li>Upon proof upload, the client is notified and given the opportunity to confirm receipt.</li>
+          <li>If the client confirms delivery, funds are released immediately to the vendor.</li>
+          <li>If the client takes no action within 48 hours of proof upload, funds are released automatically to the vendor.</li>
+          <li>Either party may raise a dispute before funds are released. Disputes freeze the release and are reviewed by Umcimbi admin within 24 hours.</li>
+          <li>Umcimbi reserves the right to make a final determination on disputed bookings and release funds accordingly.</li>
+        </ul>
+
         {/* 6 */}
         <h2 className="text-xl font-semibold mt-10 text-foreground">6. Prohibited Conduct</h2>
         <p className="text-muted-foreground">You agree not to use the Platform in any way that:</p>

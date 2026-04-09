@@ -130,35 +130,33 @@ export function useClientBookings() {
   };
 
   const markAsCompleted = async (bookingId: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ booking_status: 'completed' as BookingStatus })
-      .eq('id', bookingId);
+    const { data, error } = await supabase.functions.invoke(
+      'confirm-delivery',
+      { body: { booking_id: bookingId } }
+    );
 
-    if (error) {
-      toast.error('Failed to mark as completed');
-      console.error('Error completing booking:', error);
+    if (error || data?.error) {
+      toast.error(data?.error || 'Failed to confirm delivery');
       return false;
     }
 
-    toast.success('Booking marked as completed!');
+    toast.success('Service confirmed! Payment will be released.');
     await fetchBookings();
     return true;
   };
 
   const reportProblem = async (bookingId: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from('bookings')
-      .update({ booking_status: 'disputed' as BookingStatus })
-      .eq('id', bookingId);
+    const { data, error } = await supabase.functions.invoke(
+      'raise-dispute',
+      { body: { booking_id: bookingId } }
+    );
 
-    if (error) {
-      toast.error('Failed to report problem');
-      console.error('Error reporting problem:', error);
+    if (error || data?.error) {
+      toast.error(data?.error || 'Failed to raise dispute');
       return false;
     }
 
-    toast.success('Problem reported');
+    toast.success('Dispute raised. Admin has been notified.');
     await fetchBookings();
     return true;
   };
