@@ -97,13 +97,13 @@ Deno.serve(async (req) => {
     }
 
     // Ozow config
-    const OZOW_SITE_CODE = Deno.env.get("OZOW_SITE_CODE")!;
-    const OZOW_PRIVATE_KEY = Deno.env.get("OZOW_PRIVATE_KEY")!;
-    const OZOW_API_KEY = Deno.env.get("OZOW_API_KEY")!;
-    const successUrl = Deno.env.get("OZOW_SUCCESS_URL")!;
-    const errorUrl = Deno.env.get("OZOW_ERROR_URL")!;
-    const cancelUrl = Deno.env.get("OZOW_CANCEL_URL")!;
-    const notifyUrl = Deno.env.get("OZOW_NOTIFY_URL")!;
+    const OZOW_SITE_CODE = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
+    const OZOW_PRIVATE_KEY = (Deno.env.get("OZOW_PRIVATE_KEY") ?? "").trim();
+    const OZOW_API_KEY = (Deno.env.get("OZOW_API_KEY") ?? "").trim();
+    const successUrl = (Deno.env.get("OZOW_SUCCESS_URL") ?? "").trim();
+    const errorUrl = (Deno.env.get("OZOW_ERROR_URL") ?? "").trim();
+    const cancelUrl = (Deno.env.get("OZOW_CANCEL_URL") ?? "").trim();
+    const notifyUrl = (Deno.env.get("OZOW_NOTIFY_URL") ?? "").trim();
 
     if (!OZOW_SITE_CODE || !OZOW_PRIVATE_KEY || !OZOW_API_KEY) {
       return new Response(JSON.stringify({ error: "Payment service not configured" }), {
@@ -168,7 +168,12 @@ Deno.serve(async (req) => {
       HashCheck,
     };
 
-    console.log("Sending Ozow payment request:", { TransactionReference, Amount, BankReference });
+    console.log("Ozow payload (no key):", JSON.stringify({
+      ...ozowPayload,
+      HashCheck: ozowPayload.HashCheck.slice(0, 8) + "...",
+    }));
+    console.log("Private key length:", OZOW_PRIVATE_KEY.length);
+    console.log("Site code:", OZOW_SITE_CODE);
 
     const ozowRes = await fetch("https://api.ozow.com/PostPaymentRequest", {
       method: "POST",
@@ -182,8 +187,13 @@ Deno.serve(async (req) => {
     const ozowData = await ozowRes.json();
 
     if (!ozowRes.ok || ozowData.errorMessage) {
-      console.error("Ozow API error:", ozowData);
-      return new Response(JSON.stringify({ error: "Failed to create payment session", details: ozowData.errorMessage || ozowData }), {
+      console.error("Ozow API status:", ozowRes.status);
+      console.error("Ozow API response:", JSON.stringify(ozowData));
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to create payment session", 
+          details: ozowData 
+        }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
