@@ -29,8 +29,24 @@ const ChatThread = () => {
   const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proofFileInputRef = useRef<HTMLInputElement>(null);
 
   const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+
+  const clientUserId = isVendorView
+    ? (conversation as any)?.user_profile?.user_id || conversation?.user_id
+    : user?.id;
+  const vendorId = conversation?.vendor_id;
+
+  const {
+    booking: activeBooking,
+    deliveryProofs: bookingProofs,
+    refreshBooking,
+  } = useConversationBooking(conversationId, vendorId, clientUserId);
+
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isDisputing, setIsDisputing] = useState(false);
 
   // Adjustment request state (client side)
   const [adjustmentQuoteId, setAdjustmentQuoteId] = useState<string | null>(null);
