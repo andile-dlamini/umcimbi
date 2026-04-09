@@ -366,7 +366,7 @@ export default function BookingDetail() {
               <p className="text-sm text-muted-foreground">
                 {isClient
                   ? "Your balance payment is held securely by Umcimbi and will be released to your vendor after your ceremony. This protects both parties."
-                  : "Your client's balance payment is held securely by Umcimbi and will be released to you after the ceremony date. No action needed from you."}
+                  : "Your client's balance payment is held securely by Umcimbi. Upload your proof of delivery below to release your payment."}
               </p>
             </CardContent>
           </Card>
