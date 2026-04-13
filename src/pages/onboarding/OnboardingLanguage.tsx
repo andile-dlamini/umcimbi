@@ -10,11 +10,10 @@ import {
   AccordionTrigger } from
 '@/components/ui/accordion';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger } from
-'@/components/ui/tooltip';
+  Popover,
+  PopoverContent,
+  PopoverTrigger } from
+'@/components/ui/popover';
 import {
   ShieldCheck,
   BarChart3,
@@ -28,6 +27,7 @@ import {
   CheckCircle2,
   Sparkles,
   Play,
+  Download,
   Instagram,
   Facebook,
   Music2 } from
