@@ -16,7 +16,6 @@ interface CeremonyStep {
 }
 
 const MARRIAGE_JOURNEY: CeremonyStep[] = [
-  { id: 'family_introduction', label: 'Ukucela', english: 'Family Intro' },
   { id: 'lobola', label: 'Ilobola', english: 'Lobola' },
   { id: 'umembeso', label: 'Umembeso', english: 'Gifts' },
   { id: 'umbondo', label: 'Umbondo', english: 'Groceries' },
@@ -35,7 +34,6 @@ const CHILD_JOURNEY: CeremonyStep[] = [
 type Status = 'completed' | 'current' | 'upcoming';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  family_introduction: Users,
   lobola: Handshake,
   umembeso: Gift,
   umbondo: Package,
