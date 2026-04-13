@@ -36,10 +36,12 @@ import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustr
 import StepIllustration from '@/components/illustrations/StepIllustration';
 import CeremonyTile from '@/components/illustrations/CeremonyTile';
 import FeatureIcon from '@/components/illustrations/FeatureIcon';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 export default function OnboardingLanguage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isInstallable, isIOS, triggerInstall } = usePWAInstall();
 
   useEffect(() => {
     document.title = 'UMCIMBI — Plan your ceremony with confidence';
@@ -155,6 +157,38 @@ export default function OnboardingLanguage() {
                   Login
                 </Button>
               </Link>
+
+              {isInstallable && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={triggerInstall}
+                  className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/30 !text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                >
+                  <Download className="h-5 w-5 mr-2" />
+                  Add to Home Screen
+                </Button>
+              )}
+
+              {!isInstallable && isIOS && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/30 !text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+                    >
+                      <Download className="h-5 w-5 mr-2" />
+                      Add to Home Screen
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="text-sm w-72">
+                    Tap the <strong>Share</strong> button (□↑) in Safari, then select <strong>"Add to Home Screen"</strong>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {/* TODO: QR code placeholder for desktop users */}
             </div>
 
           </div>
