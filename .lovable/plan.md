@@ -1,36 +1,23 @@
 
 
-## Plan: Add "Get the App" Install Button to Landing Page
+## Plan: Fix Low-Contrast Icon in Middle "Why UMCIMBI" Pillar
 
-### 1. Create `src/hooks/usePWAInstall.ts`
-Custom hook that:
-- Listens for `beforeinstallprompt` event, stores in a ref
-- Exposes `isInstallable` boolean (true when event available)
-- Exposes `triggerInstall()` async function that calls `event.prompt()` and awaits `userChoice`
-- Detects iOS via `/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream`, exposes as `isIOS`
-- Cleans up listener on unmount
+### Problem
+The middle pillar card ("Comparable quotes") uses `bg-secondary/15` for the icon background and `text-secondary` for the icon color. The secondary (terracotta) tone at 15% opacity creates very low contrast against the light background, making the BarChart3 icon hard to see.
 
-### 2. Update `src/pages/onboarding/OnboardingLanguage.tsx`
-Import `usePWAInstall` and add an install button in the hero CTA area (lines 147-157), after the existing "Login" button:
-- **Android** (`isInstallable`): "Add to Home Screen" button with Download icon → calls `triggerInstall()`
-- **iOS** (`isIOS`): "Add to Home Screen" button → opens a Popover/Tooltip with Safari share instructions
-- **Neither**: `{/* TODO: QR code placeholder */}` comment, render nothing
-- Style: matches existing CTA buttons — rounded-full, outline variant, white border/text on dark bg
+### Fix
+In `src/pages/onboarding/OnboardingLanguage.tsx`, line 212, increase the icon background opacity and ensure all three pillar cards have equally readable icons:
 
-### 3. Update `src/components/shared/InstallPrompt.tsx`
-Add early return at line 31 (before the existing mobile/prompt/dismissed check):
-```
-if (window.location.pathname === '/') return null;
-```
-This prevents the floating banner from showing on the landing page.
+| Card | Current `iconBg` | New `iconBg` | `iconColor` (unchanged) |
+|------|------------------|--------------|------------------------|
+| Trusted vendors | `bg-primary/15` | `bg-primary/15` | `text-primary` |
+| Comparable quotes | `bg-secondary/15` | `bg-secondary/25` | `text-secondary` |
+| One organised plan | `bg-accent/15` | `bg-accent/25` | `text-accent` |
+
+Bumping the middle and third cards from `/15` to `/25` gives the icon backgrounds enough tint to make the icons clearly visible, while keeping the subtle style consistent across all three.
 
 ### Files Changed
-| File | Action |
+| File | Change |
 |------|--------|
-| `src/hooks/usePWAInstall.ts` | Create |
-| `src/pages/onboarding/OnboardingLanguage.tsx` | Add import + install button in hero |
-| `src/components/shared/InstallPrompt.tsx` | Add pathname check |
-
-### What Will NOT Change
-Any other pages, components, or existing PWA functionality beyond the specified changes.
+| `src/pages/onboarding/OnboardingLanguage.tsx` | Lines 212-213: change `bg-secondary/15` → `bg-secondary/25` and `bg-accent/15` → `bg-accent/25` |
 
