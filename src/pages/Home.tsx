@@ -14,14 +14,15 @@ import { learnArticles } from '@/data/learnArticles';
 import { differenceInDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+const SUPPORTED_TYPES: EventType[] = ['lobola', 'umembeso', 'umbondo', 'umabo', 'umemulo', 'imbeleko', 'ancestral_ritual'];
+
 const CEREMONY_TILES: { type: EventType; icon: React.ComponentType<{ className?: string }>; label: string; zuluLabel: string }[] = [
+  { type: 'lobola', icon: Handshake, label: 'Lobola', zuluLabel: 'Ilobola' },
   { type: 'umembeso', icon: Gift, label: 'Umembeso', zuluLabel: 'Ukupha izipho' },
+  { type: 'umbondo', icon: Package, label: 'Umbondo', zuluLabel: 'Ukuletha izipho' },
   { type: 'umabo', icon: Heart, label: 'Umabo', zuluLabel: 'Umshado wesintu' },
   { type: 'umemulo', icon: Sparkles, label: 'Umemulo', zuluLabel: 'Ukuqomisa' },
   { type: 'imbeleko', icon: Baby, label: 'Imbeleko', zuluLabel: 'Ukwethula ingane' },
-  { type: 'lobola', icon: Handshake, label: 'Lobola', zuluLabel: 'Ilobola' },
-  { type: 'family_introduction', icon: Users, label: 'Family Intro', zuluLabel: 'Ukucela' },
-  { type: 'umbondo', icon: Package, label: 'Umbondo', zuluLabel: 'Ukuletha izipho' },
   { type: 'ancestral_ritual', icon: Flame, label: 'Ancestral Ritual', zuluLabel: 'Idlozi' },
 ];
 
@@ -75,8 +76,8 @@ export default function Home() {
 
   const firstName = profile?.first_name || 'there';
 
-  // Filter out funeral events
-  const nonFuneralEvents = events.filter(e => e.type !== 'funeral');
+  // Only show supported ceremony types
+  const nonFuneralEvents = events.filter(e => SUPPORTED_TYPES.includes(e.type as EventType));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

@@ -29,15 +29,7 @@ export const getDefaultTasks = (eventId: string, eventType: EventType): TaskTemp
         { title: 'Prepare homestead/house for ceremony', description: 'Clean and set up the venue space', category: 'venue', due_date: null, completed: false, assignee_name: null },
       ];
 
-    case 'family_introduction':
-      return [
-        { title: 'Agree on delegation from each family', description: 'Select representatives for the meeting', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Set a date and time for the visit', description: 'Coordinate schedules between both families', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Prepare small gifts or tokens', description: 'Arrange appropriate gifts for the visit', category: 'gifts', due_date: null, completed: false, assignee_name: null },
-        { title: 'Confirm venue (home / neutral place)', description: 'Finalize where the meeting will take place', category: 'venue', due_date: null, completed: false, assignee_name: null },
-        { title: 'Arrange transport for elders', description: 'Organize transportation for elderly family members', category: 'transport', due_date: null, completed: false, assignee_name: null },
-        { title: 'Write down key points to discuss', description: 'Prepare talking points for the meeting', category: 'other', due_date: null, completed: false, assignee_name: null },
-      ];
+    // family_introduction: legacy type, no longer in UI
 
     case 'lobola':
       return [
@@ -101,17 +93,7 @@ export const getDefaultTasks = (eventId: string, eventType: EventType): TaskTemp
         { title: 'Arrange catering', description: 'Plan food and refreshments', category: 'catering', due_date: null, completed: false, assignee_name: null },
       ];
 
-    case 'funeral':
-      return [
-        { title: 'Contact funeral parlour', description: 'Arrange funeral services', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Confirm burial date and time', description: 'Set the date for the funeral', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Coordinate with church/spiritual leader', description: 'Arrange for the service conductor', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Arrange tents and seating', description: 'Hire tents and chairs for attendees', category: 'venue', due_date: null, completed: false, assignee_name: null },
-        { title: 'Arrange catering / refreshments', description: 'Plan food for after the funeral', category: 'catering', due_date: null, completed: false, assignee_name: null },
-        { title: 'Organize transport for family and elders', description: 'Arrange transportation', category: 'transport', due_date: null, completed: false, assignee_name: null },
-        { title: 'Prepare funeral program', description: 'Create the order of service', category: 'other', due_date: null, completed: false, assignee_name: null },
-        { title: 'Plan post-funeral gathering at home', description: 'Organize the after-tears gathering', category: 'other', due_date: null, completed: false, assignee_name: null },
-      ];
+    // funeral: legacy type, no longer in UI
 
     case 'ancestral_ritual':
       return [
@@ -137,12 +119,7 @@ export const getDefaultBudgetItems = (eventId: string, eventType: EventType): Bu
         { category: 'healer_services', description: 'Traditional healer / elder', planned_amount: 0, actual_amount: 0, is_paid: false },
       ];
 
-    case 'family_introduction':
-      return [
-        { category: 'catering', description: 'Snacks / refreshments', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'transport', description: 'Transport for delegation', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'gifts', description: 'Small gifts / tokens', planned_amount: 0, actual_amount: 0, is_paid: false },
-      ];
+    // family_introduction: legacy type, no longer in UI
 
     case 'lobola':
       return [
@@ -192,14 +169,7 @@ export const getDefaultBudgetItems = (eventId: string, eventType: EventType): Bu
         { category: 'attire', description: 'Outfits (celebrant and attendants)', planned_amount: 0, actual_amount: 0, is_paid: false },
       ];
 
-    case 'funeral':
-      return [
-        { category: 'funeral_services', description: 'Funeral parlour services', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'venue', description: 'Tents and chairs', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'catering', description: 'Food after funeral', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'transport', description: 'Hearse and family transport', planned_amount: 0, actual_amount: 0, is_paid: false },
-        { category: 'other', description: 'Funeral programs (printing)', planned_amount: 0, actual_amount: 0, is_paid: false },
-      ];
+    // funeral: legacy type, no longer in UI
 
     case 'ancestral_ritual':
       return [

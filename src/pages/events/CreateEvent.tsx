@@ -38,14 +38,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const colorMap: Record<EventType, string> = {
-  imbeleko: 'bg-accent/20 text-accent',
-  family_introduction: 'bg-accent/20 text-accent',
   lobola: 'bg-accent/20 text-accent',
   umembeso: 'bg-accent/20 text-accent',
   umbondo: 'bg-accent/20 text-accent',
   umabo: 'bg-accent/20 text-accent',
   umemulo: 'bg-accent/20 text-accent',
-  funeral: 'bg-accent/20 text-accent',
+  imbeleko: 'bg-accent/20 text-accent',
   ancestral_ritual: 'bg-accent/20 text-accent',
 };
 
