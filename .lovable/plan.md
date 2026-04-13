@@ -1,21 +1,36 @@
 
-## Plan: Fix the middle “Comparable quotes” icon with a real contrast fix
 
-### What’s actually wrong
-The previous tweak only increased the icon chip background. The real issue is the icon color token:
-- `text-secondary` is using the pale `secondary` color
-- in `src/index.css`, `--secondary` is `24 40% 92%`, which is almost the same brightness as the light section background
-- so the BarChart3 icon still looks washed out even after changing `/15` to `/25`
+## Plan: Standardise ceremony list to 7 supported types across all UI
 
-### What I’ll change
-In `src/pages/onboarding/OnboardingLanguage.tsx` (the 3-pillar config around lines 211–217), I’ll update the middle card to use:
-- `iconColor: 'text-secondary-foreground'`
-- `iconBg: 'bg-secondary border border-secondary-foreground/10 shadow-sm'`
+### Summary
+Remove `funeral` and `family_introduction` from all UI surfaces. Keep them in the database schema (`supabase/types.ts`, enum). Update 5 files.
 
-I’ll also give the other two icon wrappers the same subtle border/shadow treatment so all three pillars stay visually consistent, without changing their brand colors.
+### Changes
 
-### Result
-The middle icon will use the readable foreground token instead of the pale tint token, and the chip will separate clearly from the light card background.
+**1. `src/types/database.ts`**
+- Remove `funeral` and `family_introduction` from `EventType` union (line 4) — keep only the 7 supported types
+- Remove those two entries from `EVENT_TYPES` array (lines 233-234, 240)
+- Update remaining entries with the exact labels/descriptions specified
+- Reorder: lobola, umembeso, umbondo, umabo, umemulo, imbeleko, ancestral_ritual
 
-### File
-- `src/pages/onboarding/OnboardingLanguage.tsx`
+**2. `src/pages/events/CreateEvent.tsx`**
+- Remove `family_introduction` and `funeral` from `colorMap` (lines 42, 48)
+- The ceremony grid (line 150) already iterates `EVENT_TYPES`, so it will automatically show only the 7
+
+**3. `src/components/shared/CeremonyJourney.tsx`**
+- Remove `family_introduction` from `MARRIAGE_JOURNEY` (line 19) — journey becomes: lobola → umembeso → umbondo → umabo
+- Remove `family_introduction` from `iconMap` (line 38)
+
+**4. `src/pages/Home.tsx`**
+- Replace `CEREMONY_TILES` array (lines 17-26) with exactly the 7 supported types in specified order, removing `family_introduction`
+- Change the filter on line 79 from `e.type !== 'funeral'` to a whitelist: only show events whose type is in the 7 supported types
+
+**5. `src/pages/onboarding/OnboardingLanguage.tsx`**
+- In the "Also supporting" pills (lines 662-667): remove "Family Introduction" and "Funeral" entries, keep only Lobola, Imbeleko, Ancestral Ritual
+
+### Files NOT changed
+- `src/integrations/supabase/types.ts` (auto-generated)
+- Database schema/migrations
+- `src/data/learnArticles.ts` (articles can remain for existing records)
+- Test files (will need separate updates)
+
