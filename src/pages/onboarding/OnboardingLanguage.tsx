@@ -41,7 +41,7 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 export default function OnboardingLanguage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { isInstallable, isIOS, triggerInstall } = usePWAInstall();
+  const { isInstallable, isIOS, isStandalone, triggerInstall } = usePWAInstall();
 
   useEffect(() => {
     document.title = 'UMCIMBI — Plan your ceremony with confidence';
@@ -170,7 +170,7 @@ export default function OnboardingLanguage() {
                 </Button>
               )}
 
-              {!isInstallable && isIOS && (
+              {!isInstallable && isIOS && !isStandalone && (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
