@@ -1,23 +1,21 @@
 
+## Plan: Fix the middle “Comparable quotes” icon with a real contrast fix
 
-## Plan: Fix Low-Contrast Icon in Middle "Why UMCIMBI" Pillar
+### What’s actually wrong
+The previous tweak only increased the icon chip background. The real issue is the icon color token:
+- `text-secondary` is using the pale `secondary` color
+- in `src/index.css`, `--secondary` is `24 40% 92%`, which is almost the same brightness as the light section background
+- so the BarChart3 icon still looks washed out even after changing `/15` to `/25`
 
-### Problem
-The middle pillar card ("Comparable quotes") uses `bg-secondary/15` for the icon background and `text-secondary` for the icon color. The secondary (terracotta) tone at 15% opacity creates very low contrast against the light background, making the BarChart3 icon hard to see.
+### What I’ll change
+In `src/pages/onboarding/OnboardingLanguage.tsx` (the 3-pillar config around lines 211–217), I’ll update the middle card to use:
+- `iconColor: 'text-secondary-foreground'`
+- `iconBg: 'bg-secondary border border-secondary-foreground/10 shadow-sm'`
 
-### Fix
-In `src/pages/onboarding/OnboardingLanguage.tsx`, line 212, increase the icon background opacity and ensure all three pillar cards have equally readable icons:
+I’ll also give the other two icon wrappers the same subtle border/shadow treatment so all three pillars stay visually consistent, without changing their brand colors.
 
-| Card | Current `iconBg` | New `iconBg` | `iconColor` (unchanged) |
-|------|------------------|--------------|------------------------|
-| Trusted vendors | `bg-primary/15` | `bg-primary/15` | `text-primary` |
-| Comparable quotes | `bg-secondary/15` | `bg-secondary/25` | `text-secondary` |
-| One organised plan | `bg-accent/15` | `bg-accent/25` | `text-accent` |
+### Result
+The middle icon will use the readable foreground token instead of the pale tint token, and the chip will separate clearly from the light card background.
 
-Bumping the middle and third cards from `/15` to `/25` gives the icon backgrounds enough tint to make the icons clearly visible, while keeping the subtle style consistent across all three.
-
-### Files Changed
-| File | Change |
-|------|--------|
-| `src/pages/onboarding/OnboardingLanguage.tsx` | Lines 212-213: change `bg-secondary/15` → `bg-secondary/25` and `bg-accent/15` → `bg-accent/25` |
-
+### File
+- `src/pages/onboarding/OnboardingLanguage.tsx`
