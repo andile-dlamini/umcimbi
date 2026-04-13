@@ -28,6 +28,7 @@ export function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  if (window.location.pathname === '/') return null;
   if (!isMobile || !deferredPrompt || dismissed) return null;
 
   const handleInstall = async () => {
