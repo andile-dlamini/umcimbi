@@ -5,13 +5,25 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+function detectIOS(): boolean {
+  // Modern iOS Safari may omit "iPhone" from userAgent (request desktop site)
+  // so also check platform and maxTouchPoints
+  const ua = navigator.userAgent;
+  const legacyCheck = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const modernCheck =
+    navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return legacyCheck || modernCheck;
+}
+
 export function usePWAInstall() {
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const [isIOS] = useState(() => detectIOS());
 
-  const isIOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-    !(window as any).MSStream;
+  // Also detect if already installed as standalone
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as any).standalone === true;
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -37,5 +49,5 @@ export function usePWAInstall() {
     }
   }, []);
 
-  return { isInstallable, isIOS, triggerInstall };
+  return { isInstallable, isIOS, isStandalone, triggerInstall };
 }
