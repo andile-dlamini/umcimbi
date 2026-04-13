@@ -649,10 +649,10 @@ export default function OnboardingLanguage() {
             <p className="text-lg text-white/60 mt-3">Supporting the ceremonies your family treasures.</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
-            <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-secondary" icon="🎁" />
-            <CeremonyTile name="Umabo" description="The bride is formally welcomed into the groom's family." categories={['Attire', 'Catering', 'Livestock']} accentClass="bg-accent" icon="👰" />
-            <CeremonyTile name="Umbondo" description="The bride's family delivers groceries and essentials." categories={['Transport', 'Groceries', 'Planning']} accentClass="bg-muted" icon="🧺" />
-            <CeremonyTile name="Umemulo" description="A coming-of-age celebration for a young woman." categories={['Catering', 'Attire', 'Music']} accentClass="bg-muted" icon="🌸" />
+            <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-primary" icon="🎁" />
+            <CeremonyTile name="Umabo" description="The bride is formally welcomed into the groom's family." categories={['Attire', 'Catering', 'Livestock']} accentClass="bg-primary" icon="👰" />
+            <CeremonyTile name="Umbondo" description="The bride's family delivers groceries and essentials." categories={['Transport', 'Groceries', 'Planning']} accentClass="bg-primary" icon="🧺" />
+            <CeremonyTile name="Umemulo" description="A coming-of-age celebration for a young woman." categories={['Catering', 'Attire', 'Music']} accentClass="bg-primary" icon="🌸" />
           </div>
 
           {/* Additional ceremony types */}
