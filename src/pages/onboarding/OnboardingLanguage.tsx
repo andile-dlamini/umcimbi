@@ -398,8 +398,8 @@ export default function OnboardingLanguage() {
             { icon: Inbox, title: 'Everything organised in one place', body: 'Checklist, timelines, and messages — less chaos, more meaning.' }].
             map(({ icon: Icon, title, body }) =>
             <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-xl bg-primary/25 flex items-center justify-center mb-5">
-                  <Icon className="h-6 w-6 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-5">
+                  <Icon className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="font-semibold text-[15px] text-white">{title}</h3>
                 <p className="text-sm text-white/55 leading-relaxed mt-2">{body}</p>
