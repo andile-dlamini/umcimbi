@@ -62,7 +62,7 @@ export default function AdminRevenue() {
       // All bookings for KPIs and charts
       const { data: allBookings } = await supabase
         .from('bookings')
-        .select('agreed_price, booking_status, created_at, event_id, funds_held_since, funds_released_at');
+        .select('id, agreed_price, booking_status, created_at, event_id, funds_held_since, funds_released_at');
 
       const active = (allBookings || []).filter(b =>
         ['confirmed', 'completed', 'disputed'].includes(b.booking_status)
