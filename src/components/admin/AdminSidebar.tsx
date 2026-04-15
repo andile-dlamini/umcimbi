@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  DollarSign,
   Sparkles,
   ClipboardList,
   Settings,
@@ -8,7 +9,6 @@ import {
   Upload,
   Star,
   ShieldCheck,
-  ClipboardList as ClipboardIcon,
   Clock,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
@@ -26,6 +26,7 @@ import {
 
 const navItems = [
   { label: 'Overview', to: '/admin', icon: LayoutDashboard, end: true },
+  { label: 'Revenue', to: '/admin/revenue', icon: DollarSign },
   { label: 'AI Insights', to: '/admin/insights', icon: Sparkles },
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
   { label: 'Verification Queue', to: '/admin/verification-queue', icon: BadgeCheck },
