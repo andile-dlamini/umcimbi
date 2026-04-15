@@ -1,36 +1,52 @@
 
 
-## Plan: Standardise ceremony list to 7 supported types across all UI
+## Plan: Admin Dashboard Overhaul — 5 Targeted Changes
 
 ### Summary
-Remove `funeral` and `family_introduction` from all UI surfaces. Keep them in the database schema (`supabase/types.ts`, enum). Update 5 files.
+Rewrite the admin Overview page with revenue KPIs, growth signals, a conversion funnel, and period filtering. Create a new Revenue page with charts. Enhance Operations with three new queue cards. Add sidebar nav item and route.
 
 ### Changes
 
-**1. `src/types/database.ts`**
-- Remove `funeral` and `family_introduction` from `EventType` union (line 4) — keep only the 7 supported types
-- Remove those two entries from `EVENT_TYPES` array (lines 233-234, 240)
-- Update remaining entries with the exact labels/descriptions specified
-- Reorder: lobola, umembeso, umbondo, umabo, umemulo, imbeleko, ancestral_ritual
+**1. Rewrite `src/pages/admin/AdminDashboard.tsx`**
+- Add period selector (week/month/all, default month) with toggle buttons in page header
+- Tier 1: 4 revenue cards (GMV, platform revenue, escrow, avg booking) with left border accent — query bookings with status filter
+- Tier 2: 4 growth signal cards (new organisers, ceremonies, requests, bookings) with previous-period comparison
+- Tier 3: Full-width conversion funnel card ("Organiser journey") — always all-time, 4 horizontal bars with decreasing opacity
+- Tier 4: Keep existing Ceremonies by Type and Vendors by Category charts as-is
+- Remove Waitlist card
+- Skeleton loading states on all cards
 
-**2. `src/pages/events/CreateEvent.tsx`**
-- Remove `family_introduction` and `funeral` from `colorMap` (lines 42, 48)
-- The ceremony grid (line 150) already iterates `EVENT_TYPES`, so it will automatically show only the 7
+**2. Create `src/pages/admin/AdminRevenue.tsx`**
+- 4 summary KPI cards (all-time: GMV, platform revenue, escrow, avg booking)
+- Revenue over time: BarChart (8 weeks, grouped by ISO week) using ChartContainer — two bars per week (GMV + platform revenue)
+- GMV by ceremony type: horizontal BarChart joining bookings+events
+- Bookings by status: vertical BarChart with all 5 statuses
+- 3 payout summary cards (paid to vendors, in escrow, pending release via delivery_proofs)
+- All skeleton states, R formatting
 
-**3. `src/components/shared/CeremonyJourney.tsx`**
-- Remove `family_introduction` from `MARRIAGE_JOURNEY` (line 19) — journey becomes: lobola → umembeso → umbondo → umabo
-- Remove `family_introduction` from `iconMap` (line 38)
+**3. Rewrite `src/pages/admin/AdminOperations.tsx`**
+- Keep existing Disputed Bookings card unchanged
+- Add "Proof not uploaded" card: bookings confirmed, past event date by 24h, no matching delivery_proof
+- Add "Stuck releases" card: delivery_proofs older than 50h where funds not released
+- Add "Vendor verifications pending" card: count of vendors with pending verification, link to queue
 
-**4. `src/pages/Home.tsx`**
-- Replace `CEREMONY_TILES` array (lines 17-26) with exactly the 7 supported types in specified order, removing `family_introduction`
-- Change the filter on line 79 from `e.type !== 'funeral'` to a whitelist: only show events whose type is in the 7 supported types
+**4. Update `src/components/admin/AdminSidebar.tsx`**
+- Add `{ label: 'Revenue', to: '/admin/revenue', icon: DollarSign }` as second item after Overview
+- Import DollarSign from lucide-react
 
-**5. `src/pages/onboarding/OnboardingLanguage.tsx`**
-- In the "Also supporting" pills (lines 662-667): remove "Family Introduction" and "Funeral" entries, keep only Lobola, Imbeleko, Ancestral Ritual
+**5. Update `src/App.tsx`**
+- Import AdminRevenue
+- Add `<Route path="revenue" element={<AdminRevenue />} />` inside the admin layout route group
 
-### Files NOT changed
-- `src/integrations/supabase/types.ts` (auto-generated)
-- Database schema/migrations
-- `src/data/learnArticles.ts` (articles can remain for existing records)
-- Test files (will need separate updates)
+### Files Changed
+| File | Action |
+|------|--------|
+| `src/pages/admin/AdminDashboard.tsx` | Rewrite |
+| `src/pages/admin/AdminRevenue.tsx` | Create |
+| `src/pages/admin/AdminOperations.tsx` | Rewrite |
+| `src/components/admin/AdminSidebar.tsx` | Edit (add nav item) |
+| `src/App.tsx` | Edit (add route + import) |
+
+### No changes to
+AdminLayout, AdminTopBar, AdminGuard, AdminSettings, AdminWaitlist, VendorVerificationQueue, SuperVendorManagement, BulkVendorUpload, or any non-admin files.
 
