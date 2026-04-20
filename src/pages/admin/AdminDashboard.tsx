@@ -272,6 +272,9 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* SMS balance monitor */}
+      <SmsBalanceCard />
+
       {/* Tier 3 — Conversion funnel */}
       <Card>
         <CardHeader className="pb-3">
