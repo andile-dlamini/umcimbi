@@ -39,7 +39,6 @@ export default function WaitlistPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    businessName: '',
     email: '',
     phone: '',
     role: null as WaitlistRole | null,
