@@ -42,7 +42,37 @@ export default function AdminWaitlist() {
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        setEntries(data as unknown as WaitlistEntry[]);
+        const waitlist = data as unknown as WaitlistEntry[];
+
+        // Match vendor waitlist signups to registered vendor records by email/phone
+        const emails = waitlist.map(e => e.email).filter(Boolean) as string[];
+        const phones = waitlist.map(e => e.phone_number).filter(Boolean) as string[];
+
+        if (emails.length || phones.length) {
+          const filters: string[] = [];
+          if (emails.length) filters.push(`email.in.(${emails.map(e => `"${e}"`).join(',')})`);
+          if (phones.length) filters.push(`phone_number.in.(${phones.map(p => `"${p}"`).join(',')})`);
+
+          const { data: vendors } = await supabase
+            .from('vendors')
+            .select('name, email, phone_number')
+            .or(filters.join(','));
+
+          if (vendors) {
+            const byEmail = new Map(vendors.filter(v => v.email).map(v => [v.email!.toLowerCase(), v.name]));
+            const byPhone = new Map(vendors.filter(v => v.phone_number).map(v => [v.phone_number!, v.name]));
+
+            waitlist.forEach(entry => {
+              if (entry.role !== 'vendor') return;
+              const matched =
+                (entry.email && byEmail.get(entry.email.toLowerCase())) ||
+                (entry.phone_number && byPhone.get(entry.phone_number));
+              if (matched) entry.business_name = matched;
+            });
+          }
+        }
+
+        setEntries(waitlist);
       }
 
       const { count } = await supabase
@@ -184,7 +214,9 @@ export default function AdminWaitlist() {
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.full_name}</TableCell>
                       <TableCell className="text-sm">
-                        {entry.business_name || <span className="text-muted-foreground">—</span>}
+                        {entry.business_name
+                          ? <span>{entry.business_name} <span className="text-[10px] text-muted-foreground">(registered)</span></span>
+                          : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {entry.email || '—'}

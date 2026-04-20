@@ -39,7 +39,6 @@ export default function WaitlistPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    businessName: '',
     email: '',
     phone: '',
     role: null as WaitlistRole | null,
@@ -56,7 +55,6 @@ export default function WaitlistPage() {
     if (!formData.fullName.trim()) e.fullName = 'Name is required';
     if (!formData.email.trim() && !formData.phone.trim()) e.contact = 'Email or phone is required';
     if (!formData.role) e.role = 'Please select a role';
-    if (formData.role === 'vendor' && !formData.businessName.trim()) e.businessName = 'Business or service name is required';
     return e;
   };
 
@@ -66,7 +64,6 @@ export default function WaitlistPage() {
     setIsSubmitting(true);
     const { error } = await supabase.from('waitlist_signups' as any).insert({
       full_name: formData.fullName.trim(),
-      business_name: formData.role === 'vendor' ? formData.businessName.trim() : null,
       email: formData.email.trim() || null,
       phone_number: formData.phone.trim() || null,
       role: formData.role,
@@ -193,15 +190,6 @@ export default function WaitlistPage() {
             {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
           </div>
 
-          {formData.role === 'vendor' && (
-            <div className="space-y-2">
-              <Label>Business or service name *</Label>
-              <Input placeholder="e.g. Sibanda Catering" value={formData.businessName}
-                onChange={e => { setFormData(p => ({ ...p, businessName: e.target.value })); setErrors(p => { const n = { ...p }; delete n.businessName; return n; }); }}
-                className={`h-12 ${errors.businessName ? 'border-destructive' : ''}`} />
-              {errors.businessName && <p className="text-xs text-destructive">{errors.businessName}</p>}
-            </div>
-          )}
 
           <Button className="w-full h-12" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Notify Me When We Launch'}
