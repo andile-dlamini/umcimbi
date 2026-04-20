@@ -190,15 +190,6 @@ export default function WaitlistPage() {
             {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
           </div>
 
-          {formData.role === 'vendor' && (
-            <div className="space-y-2">
-              <Label>Business or service name *</Label>
-              <Input placeholder="e.g. Sibanda Catering" value={formData.businessName}
-                onChange={e => { setFormData(p => ({ ...p, businessName: e.target.value })); setErrors(p => { const n = { ...p }; delete n.businessName; return n; }); }}
-                className={`h-12 ${errors.businessName ? 'border-destructive' : ''}`} />
-              {errors.businessName && <p className="text-xs text-destructive">{errors.businessName}</p>}
-            </div>
-          )}
 
           <Button className="w-full h-12" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Notify Me When We Launch'}
