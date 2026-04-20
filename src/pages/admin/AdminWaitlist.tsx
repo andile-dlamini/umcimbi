@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Users, Store, Calendar } from 'lucide-react';
+import { ArrowLeft, Download, Users, Store, Calendar, Handshake } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ export default function AdminWaitlist() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<string | null>(null);
+  const [ndabeVendors, setNdabeVendors] = useState<number>(0);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -41,6 +43,13 @@ export default function AdminWaitlist() {
       if (!error && data) {
         setEntries(data as unknown as WaitlistEntry[]);
       }
+
+      const { count } = await supabase
+        .from('vendors')
+        .select('*', { count: 'exact', head: true })
+        .eq('signup_source', 'ndabe');
+      if (count !== null) setNdabeVendors(count);
+
       setIsLoading(false);
     };
     fetchEntries();
@@ -53,11 +62,13 @@ export default function AdminWaitlist() {
       e.email?.toLowerCase().includes(search.toLowerCase()) ||
       e.phone_number?.includes(search);
     const matchesRole = !roleFilter || e.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesSource = !sourceFilter || e.source === sourceFilter;
+    return matchesSearch && matchesRole && matchesSource;
   });
 
   const organisersCount = entries.filter(e => e.role === 'organiser').length;
   const vendorsCount = entries.filter(e => e.role === 'vendor').length;
+  const ndabeCount = entries.filter(e => e.source === 'ndabe').length;
 
   const handleExportCsv = () => {
     const headers = ['Name', 'Email', 'Phone', 'Role', 'Source', 'Signed Up'];
