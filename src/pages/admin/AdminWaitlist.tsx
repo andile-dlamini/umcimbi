@@ -220,6 +220,25 @@ export default function AdminWaitlist() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">
+            Vendor Registrations via Ndabe
+          </CardTitle>
+          <CardDescription>
+            Vendors who registered directly via the Ndabe referral link
+            (/join/vendor?ref=ndabe) — these go straight to account creation
+            rather than the waitlist.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-3xl font-bold">{ndabeVendors}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            registered vendors attributed to Ndabe
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
