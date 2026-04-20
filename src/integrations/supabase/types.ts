@@ -961,6 +961,33 @@ export type Database = {
           },
         ]
       }
+      sms_balance_checks: {
+        Row: {
+          alert_sent: boolean
+          balance: number
+          checked_at: string
+          id: string
+          raw_response: Json | null
+          status: string
+        }
+        Insert: {
+          alert_sent?: boolean
+          balance: number
+          checked_at?: string
+          id?: string
+          raw_response?: Json | null
+          status: string
+        }
+        Update: {
+          alert_sent?: boolean
+          balance?: number
+          checked_at?: string
+          id?: string
+          raw_response?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
