@@ -1,50 +1,43 @@
 
-## Plan: Track Ndabe referrals across waitlist & vendor signups
+## Plan: Connect Mobile SMS balance monitor
 
-### 1. `src/pages/WaitlistPage.tsx` — capture `?ref=` param
-- Add `useSearchParams` to the `react-router-dom` import.
-- After existing hooks: `const [searchParams] = useSearchParams();` and `const refSource = searchParams.get('ref');`
-- In `handleSubmit`, change `source: 'waitlist_page'` → `source: refSource || 'waitlist_page'`.
+### 1. Edge function `check-sms-balance`
+- `supabase/functions/check-sms-balance/index.ts`
+- Calls `GET https://api.connect-mobile.co.za/sms/balance/v3/` with `Authorization: Bearer ${CONNECT_MOBILE_API_KEY}`. If 401/403, fall back to `?api_key=` query param. Logs raw response so we can iterate on field shape.
+- Parses balance from common JSON shapes (`balance`, `credits`, `data.balance`).
+- Computes status: Green >200, Yellow 50–200, Red <50.
+- Inserts result into `sms_balance_checks`.
+- If `red` AND no red-status row in last 24h, enqueues low-balance email to `admin@umcimbi.co.za` via `send-transactional-email`.
+- Manual JWT + admin role check for direct (UI refresh) calls; service-role header bypasses for cron. `verify_jwt = false` in config.toml.
 
-### 2. `src/pages/admin/AdminWaitlist.tsx` — surface Ndabe data
+### 2. Database
+- New table `sms_balance_checks` (id, balance int, status text, checked_at timestamptz default now, alert_sent bool default false). RLS: admins SELECT; service role full access.
+- pg_cron daily 08:00 SAST → `net.http_post` to `check-sms-balance` with service-role auth header.
 
-**a. Imports**
-- Add `Handshake` from `lucide-react`.
+### 3. Low-balance email
+- New transactional template `sms-balance-low.tsx` in `_shared/transactional-email-templates/` (balance, threshold, status, recharge link/contact).
+- Register in `registry.ts`.
+- Hardcode recipient `admin@umcimbi.co.za` in the edge function's invoke call.
 
-**b. State**
-- `const [sourceFilter, setSourceFilter] = useState<string | null>(null);`
-- `const [ndabeVendors, setNdabeVendors] = useState<number>(0);`
-- Compute `const ndabeCount = entries.filter(e => e.source === 'ndabe').length;`
+### 4. Admin Overview UI
+- New `src/components/admin/SmsBalanceCard.tsx`: title "SMS Credits (Connect Mobile)", balance number, traffic-light dot (green/yellow/red), last-checked timestamp, Refresh button. Loads latest row from `sms_balance_checks`; Refresh invokes the edge function then refetches.
+- Mount in `src/pages/admin/AdminDashboard.tsx` as a small card above the funnel section (doesn't disturb existing 4-col revenue grid).
 
-**c. Stat cards row**
-- Change grid from `grid-cols-3` → `grid-cols-4`.
-- Add 4th card "Via Ndabe" with `Handshake` icon (text-yellow-600), value `ndabeCount`, clickable to toggle `sourceFilter` between `'ndabe'` and `null`. Apply `ring-2 ring-primary` when active.
-
-**d. Filter logic**
-- Add `const matchesSource = !sourceFilter || e.source === sourceFilter;` and include in the `.filter()` chain.
-
-**e. Table source column**
-- When `entry.source === 'ndabe'`, render outlined Badge "Ndabe" (yellow-600 styling). Otherwise existing muted text.
-
-**f. Vendor Registrations section (below table Card)**
-- Extend the existing `useEffect` to also query:
-  ```ts
-  const { count } = await supabase
-    .from('vendors')
-    .select('*', { count: 'exact', head: true })
-    .eq('signup_source', 'ndabe');
-  if (count !== null) setNdabeVendors(count);
-  ```
-- Render new `<Card>`:
-  - Title: "Vendor Registrations via Ndabe"
-  - Description: explains `/join/vendor?ref=ndabe` direct registration path
-  - Body: large `{ndabeVendors}` with subtitle "registered vendors attributed to Ndabe"
-
-### Files changed
+### 5. Files
 | File | Action |
 |------|--------|
-| `src/pages/WaitlistPage.tsx` | Edit (3 small changes) |
-| `src/pages/admin/AdminWaitlist.tsx` | Edit (add card, filter, badge, section) |
+| `supabase/functions/check-sms-balance/index.ts` | Create |
+| `supabase/functions/_shared/transactional-email-templates/sms-balance-low.tsx` | Create |
+| `supabase/functions/_shared/transactional-email-templates/registry.ts` | Edit |
+| `supabase/config.toml` | Edit (add `[functions.check-sms-balance] verify_jwt = false`) |
+| `src/components/admin/SmsBalanceCard.tsx` | Create |
+| `src/pages/admin/AdminDashboard.tsx` | Edit (mount card) |
+| Migration | Create `sms_balance_checks` + RLS + pg_cron |
 
 ### Not touched
-App.tsx, AuthPage.tsx, AdminDashboard.tsx, AdminSidebar.tsx, AdminLayout.tsx, schema/migrations, any other files. Both `source` and `signup_source` columns already exist.
+AdminLayout, AdminSidebar, AdminTopBar, AdminGuard, AdminWaitlist, send-otp, other admin pages or unrelated code.
+
+### Notes
+- Reuses existing `CONNECT_MOBILE_API_KEY` and email queue infrastructure.
+- Email deduped to once per 24h while status stays Red.
+- First run will log the raw API body so we can confirm field names and auth shape.
