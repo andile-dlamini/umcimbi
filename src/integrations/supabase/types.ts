@@ -1344,6 +1344,7 @@ export type Database = {
       }
       waitlist_signups: {
         Row: {
+          business_name: string | null
           created_at: string | null
           email: string | null
           full_name: string
@@ -1353,6 +1354,7 @@ export type Database = {
           source: string | null
         }
         Insert: {
+          business_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name: string
@@ -1362,6 +1364,7 @@ export type Database = {
           source?: string | null
         }
         Update: {
+          business_name?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string

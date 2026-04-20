@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 interface WaitlistEntry {
   id: string;
   full_name: string;
+  business_name: string | null;
   email: string | null;
   phone_number: string | null;
   role: string | null;
@@ -71,9 +72,10 @@ export default function AdminWaitlist() {
   const ndabeCount = entries.filter(e => e.source === 'ndabe').length;
 
   const handleExportCsv = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Role', 'Source', 'Signed Up'];
+    const headers = ['Name', 'Business / Service', 'Email', 'Phone', 'Role', 'Source', 'Signed Up'];
     const rows = filtered.map(e => [
       e.full_name,
+      e.business_name || '',
       e.email || '',
       e.phone_number || '',
       e.role || '',
@@ -169,6 +171,7 @@ export default function AdminWaitlist() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Business / Service</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Role</TableHead>
@@ -180,6 +183,9 @@ export default function AdminWaitlist() {
                   {filtered.map(entry => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.full_name}</TableCell>
+                      <TableCell className="text-sm">
+                        {entry.business_name || <span className="text-muted-foreground">—</span>}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {entry.email || '—'}
                       </TableCell>
