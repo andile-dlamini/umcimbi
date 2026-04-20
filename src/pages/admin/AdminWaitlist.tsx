@@ -214,7 +214,9 @@ export default function AdminWaitlist() {
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.full_name}</TableCell>
                       <TableCell className="text-sm">
-                        {entry.business_name || <span className="text-muted-foreground">—</span>}
+                        {entry.business_name
+                          ? <span>{entry.business_name} <span className="text-[10px] text-muted-foreground">(registered)</span></span>
+                          : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {entry.email || '—'}
