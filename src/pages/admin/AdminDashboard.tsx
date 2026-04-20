@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { SmsBalanceCard } from '@/components/admin/SmsBalanceCard';
 
 const PLATFORM_FEE_RATE = 0.08;
 
@@ -270,6 +271,9 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* SMS balance monitor */}
+      <SmsBalanceCard />
 
       {/* Tier 3 — Conversion funnel */}
       <Card>
