@@ -33,6 +33,8 @@ type WaitlistRole = 'organiser' | 'vendor';
 export default function WaitlistPage() {
   const navigate = useNavigate();
   const countdown = useCountdown(LAUNCH_DATE);
+  const [searchParams] = useSearchParams();
+  const refSource = searchParams.get('ref');
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -65,7 +67,7 @@ export default function WaitlistPage() {
       email: formData.email.trim() || null,
       phone_number: formData.phone.trim() || null,
       role: formData.role,
-      source: 'waitlist_page',
+      source: refSource || 'waitlist_page',
     } as any);
     setIsSubmitting(false);
     if (error) { toast.error('Something went wrong. Please try again.'); return; }
