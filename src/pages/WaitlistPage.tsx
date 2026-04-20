@@ -55,7 +55,6 @@ export default function WaitlistPage() {
     if (!formData.fullName.trim()) e.fullName = 'Name is required';
     if (!formData.email.trim() && !formData.phone.trim()) e.contact = 'Email or phone is required';
     if (!formData.role) e.role = 'Please select a role';
-    if (formData.role === 'vendor' && !formData.businessName.trim()) e.businessName = 'Business or service name is required';
     return e;
   };
 
@@ -65,7 +64,6 @@ export default function WaitlistPage() {
     setIsSubmitting(true);
     const { error } = await supabase.from('waitlist_signups' as any).insert({
       full_name: formData.fullName.trim(),
-      business_name: formData.role === 'vendor' ? formData.businessName.trim() : null,
       email: formData.email.trim() || null,
       phone_number: formData.phone.trim() || null,
       role: formData.role,
