@@ -79,7 +79,13 @@ export async function acceptQuoteAction(quoteId: string): Promise<{ success: boo
     });
 
     if (error) {
-      const msg = data?.error || error?.message || 'Failed to accept quote';
+      let msg = 'Failed to accept quote';
+      try {
+        const body = await (error as any)?.context?.json?.();
+        msg = body?.error || error?.message || msg;
+      } catch {
+        msg = error?.message || msg;
+      }
       console.error('[ACCEPT] invoke error:', { error, data });
       toast.error(msg);
       return { success: false };
