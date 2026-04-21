@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
     }
 
     if (booking.client_id !== user.id) {
+      console.error("DIAG: client_id mismatch", { booking_client: booking.client_id, user_id: user.id });
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -76,12 +77,14 @@ Deno.serve(async (req) => {
 
     // Validate payment is due
     if (payment_type === "deposit" && booking.deposit_status === "paid") {
+      console.error("DIAG: deposit already paid", { deposit_status: booking.deposit_status });
       return new Response(JSON.stringify({ error: "Deposit already paid" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (payment_type === "balance" && booking.balance_status === "paid") {
+      console.error("DIAG: balance already paid", { balance_status: booking.balance_status });
       return new Response(JSON.stringify({ error: "Balance already paid" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -90,6 +93,7 @@ Deno.serve(async (req) => {
 
     const amount = payment_type === "deposit" ? booking.deposit_amount : booking.balance_amount;
     if (!amount || amount <= 0) {
+      console.error("DIAG: invalid amount", { amount, payment_type, deposit_amount: booking.deposit_amount, balance_amount: booking.balance_amount });
       return new Response(JSON.stringify({ error: "Invalid amount" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -105,7 +109,17 @@ Deno.serve(async (req) => {
     const cancelUrl = (Deno.env.get("OZOW_CANCEL_URL") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_NOTIFY_URL") ?? "").trim();
 
+    console.log("DIAG: secrets check", { 
+      hasSiteCode: !!OZOW_SITE_CODE, 
+      hasPrivateKey: !!OZOW_PRIVATE_KEY, 
+      hasApiKey: !!OZOW_API_KEY,
+      hasSuccessUrl: !!successUrl,
+      hasNotifyUrl: !!notifyUrl,
+      notifyUrl
+    });
+
     if (!OZOW_SITE_CODE || !OZOW_PRIVATE_KEY || !OZOW_API_KEY) {
+      console.error("DIAG: missing Ozow secrets", { hasSiteCode: !!OZOW_SITE_CODE, hasPrivateKey: !!OZOW_PRIVATE_KEY, hasApiKey: !!OZOW_API_KEY });
       return new Response(JSON.stringify({ error: "Payment service not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
