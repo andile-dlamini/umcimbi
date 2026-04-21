@@ -246,7 +246,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
             )}
 
             {/* Client: Accept / Decline / Request Adjustment */}
-            {!isVendorView && isPending && (
+            {!isVendorView && isPending && !isAdjustmentPending && (
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <Button
@@ -283,6 +283,10 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
                   </Button>
                 )}
               </div>
+            )}
+
+            {!isVendorView && isAdjustmentPending && (
+              <p className="text-sm text-muted-foreground text-center py-2">Awaiting vendor revision…</p>
             )}
 
             {!isVendorView && isAccepted && !depositPaid && (
