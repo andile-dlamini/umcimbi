@@ -93,7 +93,17 @@ export default function BookingDetail() {
         body: { booking_id: bookingId, payment_type },
       });
 
-      if (error) throw error;
+      if (error) {
+        let msg = 'Failed to start payment';
+        try {
+          const body = await (error as any)?.context?.json?.();
+          msg = body?.error || error?.message || msg;
+          if (body?.details) console.error('Ozow details:', body.details);
+        } catch {
+          msg = error?.message || msg;
+        }
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
 
       if (data?.paymentUrl) {
