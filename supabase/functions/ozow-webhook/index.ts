@@ -97,7 +97,20 @@ Deno.serve(async (req) => {
         updates.deposit_paid_at = now;
         updates.booking_status = "confirmed";
         updates.balance_status = "due";
-        updates.balance_due_at = now;
+
+        const { data: bookingForDate } = await supabase
+          .from("bookings")
+          .select("event_date_time")
+          .eq("id", booking_id)
+          .single();
+
+        if (bookingForDate?.event_date_time) {
+          const ceremonyDate = new Date(bookingForDate.event_date_time);
+          const balanceDue = new Date(ceremonyDate.getTime() - 5 * 24 * 60 * 60 * 1000);
+          updates.balance_due_at = balanceDue > new Date() ? balanceDue.toISOString() : now;
+        } else {
+          updates.balance_due_at = now;
+        }
       } else if (payment_type === "balance") {
         updates.balance_status = "paid";
         updates.balance_paid_at = now;
