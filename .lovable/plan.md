@@ -1,43 +1,42 @@
 
-## Plan: Connect Mobile SMS balance monitor
 
-### 1. Edge function `check-sms-balance`
-- `supabase/functions/check-sms-balance/index.ts`
-- Calls `GET https://api.connect-mobile.co.za/sms/balance/v3/` with `Authorization: Bearer ${CONNECT_MOBILE_API_KEY}`. If 401/403, fall back to `?api_key=` query param. Logs raw response so we can iterate on field shape.
-- Parses balance from common JSON shapes (`balance`, `credits`, `data.balance`).
-- Computes status: Green >200, Yellow 50–200, Red <50.
-- Inserts result into `sms_balance_checks`.
-- If `red` AND no red-status row in last 24h, enqueues low-balance email to `admin@umcimbi.co.za` via `send-transactional-email`.
-- Manual JWT + admin role check for direct (UI refresh) calls; service-role header bypasses for cron. `verify_jwt = false` in config.toml.
+## Three targeted bug fixes
 
-### 2. Database
-- New table `sms_balance_checks` (id, balance int, status text, checked_at timestamptz default now, alert_sent bool default false). RLS: admins SELECT; service role full access.
-- pg_cron daily 08:00 SAST → `net.http_post` to `check-sms-balance` with service-role auth header.
+Apply three small, isolated fixes. No other files, logic, or styles will be touched.
 
-### 3. Low-balance email
-- New transactional template `sms-balance-low.tsx` in `_shared/transactional-email-templates/` (balance, threshold, status, recharge link/contact).
-- Register in `registry.ts`.
-- Hardcode recipient `admin@umcimbi.co.za` in the edge function's invoke call.
+### Fix 1 — True fire-and-forget Order PDF generation
+**File:** `supabase/functions/accept-quote/index.ts`
 
-### 4. Admin Overview UI
-- New `src/components/admin/SmsBalanceCard.tsx`: title "SMS Credits (Connect Mobile)", balance number, traffic-light dot (green/yellow/red), last-checked timestamp, Refresh button. Loads latest row from `sms_balance_checks`; Refresh invokes the edge function then refetches.
-- Mount in `src/pages/admin/AdminDashboard.tsx` as a small card above the funnel section (doesn't disturb existing 4-col revenue grid).
+Remove the `await` on the order-confirmation PDF call so quote acceptance returns to the user immediately instead of blocking on PDF generation. Replace the `try/await/catch` block with a non-awaited `fetch(...).catch(...)`.
 
-### 5. Files
-| File | Action |
-|------|--------|
-| `supabase/functions/check-sms-balance/index.ts` | Create |
-| `supabase/functions/_shared/transactional-email-templates/sms-balance-low.tsx` | Create |
-| `supabase/functions/_shared/transactional-email-templates/registry.ts` | Edit |
-| `supabase/config.toml` | Edit (add `[functions.check-sms-balance] verify_jwt = false`) |
-| `src/components/admin/SmsBalanceCard.tsx` | Create |
-| `src/pages/admin/AdminDashboard.tsx` | Edit (mount card) |
-| Migration | Create `sms_balance_checks` + RLS + pg_cron |
+### Fix 2 — Hide Accept/Decline while vendor revision is pending
+**File:** `src/components/chat/QuoteCard.tsx`
 
-### Not touched
-AdminLayout, AdminSidebar, AdminTopBar, AdminGuard, AdminWaitlist, send-otp, other admin pages or unrelated code.
+- Add a new derived flag right below `isPending`:
+  ```ts
+  const isAdjustmentPending = currentStatus === 'adjustment_requested';
+  ```
+- Update the Accept/Decline render block so those buttons only show when `isPending && !isAdjustmentPending`.
+- When `isAdjustmentPending` is true, render this in their place:
+  ```tsx
+  <p className="text-sm text-muted-foreground text-center py-2">Awaiting vendor revision…</p>
+  ```
+- The Request Adjustment button logic stays exactly as-is.
 
-### Notes
-- Reuses existing `CONNECT_MOBILE_API_KEY` and email queue infrastructure.
-- Email deduped to once per 24h while status stays Red.
-- First run will log the raw API body so we can confirm field names and auth shape.
+### Fix 3 — Set balance due date to 5 days before ceremony on Ozow deposit
+**File:** `supabase/functions/ozow-webhook/index.ts`
+
+Inside the `Status === "Complete"` branch, when `payment_type === "deposit"`:
+- After setting deposit/booking/balance statuses, fetch the booking's `event_date_time`.
+- Compute `balance_due_at = ceremonyDate − 5 days`.
+- If that date is still in the future, use it; otherwise fall back to `now` (matches existing behaviour for past/imminent ceremonies).
+- The `balance` branch is untouched.
+
+This aligns Ozow deposit handling with the platform's "5-day pre-ceremony balance deadline" rule.
+
+### Scope guarantees
+- No other files modified.
+- No styling, copy, or unrelated logic changes.
+- No DB migrations, no config changes, no new dependencies.
+- Edge functions `accept-quote` and `ozow-webhook` will be redeployed automatically after the edits.
+
