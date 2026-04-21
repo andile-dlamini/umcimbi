@@ -135,6 +135,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
 
   const statusInfo = statusLabels[currentStatus] || statusLabels.pending_client;
   const isPending = currentStatus === 'pending_client';
+  const isAdjustmentPending = currentStatus === 'adjustment_requested';
   const isAdjustmentRequested = currentStatus === 'adjustment_requested';
   const isAccepted = currentStatus === 'client_accepted';
   const canRequestAdjustment = adjustmentCount < MAX_ADJUSTMENTS;
