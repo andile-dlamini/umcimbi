@@ -56,3 +56,9 @@ verify_jwt = false
 
 [functions.check-sms-balance]
 verify_jwt = false
+
+[functions.ozow-payout-verification]
+verify_jwt = false
+
+[functions.ozow-payout-notification]
+verify_jwt = false
