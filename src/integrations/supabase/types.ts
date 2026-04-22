@@ -684,6 +684,47 @@ export type Database = {
           },
         ]
       }
+      payout_webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          headers_redacted: Json | null
+          id: string
+          ozow_status: string | null
+          raw_payload: Json | null
+          redacted_payload: Json | null
+          vendor_payout_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          headers_redacted?: Json | null
+          id?: string
+          ozow_status?: string | null
+          raw_payload?: Json | null
+          redacted_payload?: Json | null
+          vendor_payout_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          headers_redacted?: Json | null
+          id?: string
+          ozow_status?: string | null
+          raw_payload?: Json | null
+          redacted_payload?: Json | null
+          vendor_payout_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_webhook_events_vendor_payout_id_fkey"
+            columns: ["vendor_payout_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -1079,6 +1120,88 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vendor_payouts: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          currency: string
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          internal_reference: string
+          ozow_payout_id: string | null
+          ozow_reference: string | null
+          paid_at: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          currency?: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          internal_reference: string
+          ozow_payout_id?: string | null
+          ozow_reference?: string | null
+          paid_at?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          internal_reference?: string
+          ozow_payout_id?: string | null
+          ozow_reference?: string | null
+          paid_at?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payouts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payouts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payouts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendor_reviews: {
         Row: {
