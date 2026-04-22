@@ -101,6 +101,7 @@ Deno.serve(async (req) => {
     }
 
     // Ozow config
+    const OZOW_API_URL = (Deno.env.get("OZOW_API_URL") ?? "https://api.ozow.com/PostPaymentRequest").trim();
     const OZOW_SITE_CODE = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
     const OZOW_PRIVATE_KEY = (Deno.env.get("OZOW_PRIVATE_KEY") ?? "").trim();
     const OZOW_API_KEY = (Deno.env.get("OZOW_API_KEY") ?? "").trim();
@@ -189,7 +190,7 @@ Deno.serve(async (req) => {
     console.log("Private key length:", OZOW_PRIVATE_KEY.length);
     console.log("Site code:", OZOW_SITE_CODE);
 
-    const ozowRes = await fetch("https://api.ozow.com/PostPaymentRequest", {
+    const ozowRes = await fetch(OZOW_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
