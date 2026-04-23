@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -39,7 +39,7 @@ export function SmsBalanceCard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadLatest = async () => {
+  const loadLatest = useCallback(async () => {
     const { data, error } = await supabase
       .from('sms_balance_checks')
       .select('id, balance, status, checked_at')
@@ -52,11 +52,38 @@ export function SmsBalanceCard() {
       setRow(data as BalanceRow | null);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     loadLatest();
-  }, []);
+  }, [loadLatest]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-sms-balance-checks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sms_balance_checks' },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const next = payload.new as BalanceRow;
+            setRow((current) => {
+              if (!current) return next;
+              return new Date(next.checked_at) >= new Date(current.checked_at) ? next : current;
+            });
+            setLoading(false);
+            return;
+          }
+
+          loadLatest();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadLatest]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
