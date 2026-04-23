@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Store, BarChart3 } from 'lucide-react';
+import { Store, BarChart3, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -67,6 +67,12 @@ export default function AdminDashboard() {
   const [vendorsByCategory, setVendorsByCategory] = useState<Record<string, number>>({});
   const [totalEvents, setTotalEvents] = useState(0);
 
+  // Real account statistics
+  const [totalVendors, setTotalVendors] = useState(0);
+  const [vendorsJoinedThisMonth, setVendorsJoinedThisMonth] = useState(0);
+  const [totalOrganisers, setTotalOrganisers] = useState(0);
+  const [organisersJoinedThisMonth, setOrganisersJoinedThisMonth] = useState(0);
+
   useEffect(() => {
     const fetchAll = async () => {
       setIsLoading(true);
@@ -114,6 +120,13 @@ export default function AdminDashboard() {
         const { count } = await q;
         return count || 0;
       };
+
+      const { data: registrationStats } = await (supabase as any).rpc('get_admin_user_registration_stats');
+      const stats = Array.isArray(registrationStats) ? registrationStats[0] : registrationStats;
+      setTotalVendors(Number(stats?.total_vendors || 0));
+      setVendorsJoinedThisMonth(Number(stats?.vendors_joined_this_month || 0));
+      setTotalOrganisers(Number(stats?.total_organisers || 0));
+      setOrganisersJoinedThisMonth(Number(stats?.organisers_joined_this_month || 0));
 
       setNewOrganisers(await fetchCount('user_roles', '*', start, { role: 'user' }));
       setNewCeremonies(await fetchCount('events', '*', start));
@@ -198,6 +211,11 @@ export default function AdminDashboard() {
     { label: 'Bookings confirmed', current: newBookings, prev: prevBookings },
   ];
 
+  const accountCards = [
+    { label: 'Total real vendors', value: totalVendors, joined: vendorsJoinedThisMonth, icon: Store },
+    { label: 'Total organisers', value: totalOrganisers, joined: organisersJoinedThisMonth, icon: Users },
+  ];
+
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header with period selector */}
@@ -219,6 +237,37 @@ export default function AdminDashboard() {
             </Button>
           ))}
         </div>
+      </div>
+
+      {/* Real account statistics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {accountCards.map(card => {
+          const Icon = card.icon;
+          return (
+            <Card key={card.label} className="border-l-4 border-l-primary">
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">{card.label}</p>
+                      <p className="text-3xl font-bold mt-1">{card.value}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Joined this month: {card.joined}</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Tier 1 — Revenue strip */}
