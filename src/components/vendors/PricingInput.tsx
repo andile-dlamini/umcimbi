@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PRICING_CONFIGS, serialisePricing, parsePriceRangeText } from '@/lib/pricingModels';
@@ -12,19 +12,24 @@ interface PricingInputProps {
 
 export function PricingInput({ category, value, onChange }: PricingInputProps) {
   const config = PRICING_CONFIGS[category as VendorCategory];
+  const lastEmittedValue = useRef(value);
 
   const parsed = parsePriceRangeText(value);
   const [primary, setPrimary] = useState(parsed.primary);
   const [minimum, setMinimum] = useState(parsed.minimum);
   const [maximum, setMaximum] = useState(parsed.maximum);
 
-  // Re-parse when value changes externally (e.g. edit mode load)
+  // Re-parse when value changes externally (e.g. edit mode load), but don't fight active typing.
   useEffect(() => {
+    if (value === lastEmittedValue.current) return;
+
     const p = parsePriceRangeText(value);
     setPrimary(p.primary);
     setMinimum(p.minimum);
     setMaximum(p.maximum);
   }, [value]);
+
+  const digitsOnly = (input: string) => input.replace(/\D/g, '');
 
   // If no config (no category selected), show plain input
   if (!config) {
@@ -47,6 +52,7 @@ export function PricingInput({ category, value, onChange }: PricingInputProps) {
     newMaximum: string
   ) => {
     const serialised = serialisePricing(category, newPrimary, newMinimum, newMaximum);
+    lastEmittedValue.current = serialised;
     onChange(serialised);
   };
 
@@ -62,12 +68,12 @@ export function PricingInput({ category, value, onChange }: PricingInputProps) {
             R
           </span>
           <Input
-            type="number"
-            min="0"
+            type="text"
+            inputMode="numeric"
             placeholder={config.primaryPlaceholder}
             value={primary}
             onChange={(e) => {
-              const v = e.target.value;
+              const v = digitsOnly(e.target.value);
               setPrimary(v);
               handleChange(v, minimum, maximum);
             }}
@@ -81,12 +87,12 @@ export function PricingInput({ category, value, onChange }: PricingInputProps) {
         <div className="space-y-2">
           <Label>{config.minimumLabel}</Label>
           <Input
-            type="number"
-            min="0"
+            type="text"
+            inputMode="numeric"
             placeholder={config.minimumPlaceholder}
             value={minimum}
             onChange={(e) => {
-              const v = e.target.value;
+              const v = digitsOnly(e.target.value);
               setMinimum(v);
               handleChange(primary, v, maximum);
             }}
@@ -104,12 +110,12 @@ export function PricingInput({ category, value, onChange }: PricingInputProps) {
               R
             </span>
             <Input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder={config.maximumPlaceholder}
               value={maximum}
               onChange={(e) => {
-                const v = e.target.value;
+                const v = digitsOnly(e.target.value);
                 setMaximum(v);
                 handleChange(primary, minimum, v);
               }}
