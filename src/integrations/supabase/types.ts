@@ -1644,6 +1644,15 @@ export type Database = {
       }
       generate_offer_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
+      get_admin_user_registration_stats: {
+        Args: never
+        Returns: {
+          organisers_joined_this_month: number
+          total_organisers: number
+          total_vendors: number
+          vendors_joined_this_month: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
