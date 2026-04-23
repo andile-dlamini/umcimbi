@@ -28,7 +28,7 @@ export const RecoveryEmail = ({
     <Preview>Reset your password for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={logoUrl} alt="UMCIMBI" width="132" height="32" style={logo} />
+        <Img src={logoUrl} alt="UMCIMBI" width="264" height="68" style={logo} />
         <Heading style={h1}>Reset your UMCIMBI password</Heading>
         <Text style={text}>
           Choose a new password and keep your ceremony planning account secure.
@@ -47,8 +47,8 @@ export const RecoveryEmail = ({
 
 export default RecoveryEmail
 
-const logoUrl = 'https://pnnckeqrzjglcwkyzzxg.supabase.co/storage/v1/object/public/email-assets/umcimbi-logo.png'
-const logo = { margin: '0 0 28px' }
+const logoUrl = 'https://pnnckeqrzjglcwkyzzxg.supabase.co/storage/v1/object/public/email-assets/umcimbi-logo-email-white.png'
+const logo = { backgroundColor: '#183d8b', borderRadius: '16px', display: 'block', margin: '0 0 28px', objectFit: 'contain' as const, padding: '12px 16px' }
 const main = { backgroundColor: '#ffffff', fontFamily: 'Nunito, Arial, sans-serif' }
 const container = { maxWidth: '560px', margin: '0 auto', padding: '32px 28px', border: '1px solid #e2e4ea', borderRadius: '16px' }
 const h1 = {
