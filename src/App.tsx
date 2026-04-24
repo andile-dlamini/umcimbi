@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { RoleProvider } from "@/context/RoleContext";
 import { AppShell } from "@/components/layout/AppShell";
@@ -58,6 +58,14 @@ import { AdminGuard } from "@/components/layout/AdminGuard";
 
 const queryClient = new QueryClient();
 
+// Redirect component that preserves ref param for vendor join
+const VendorJoinRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const ref = searchParams.get('ref');
+  const to = `/auth?mode=signup&role=vendor${ref ? `&ref=${ref}` : ''}`;
+  return <Navigate to={to} replace />;
+};
+
 function AppRoutes() {
   const { user, isLoading, isProfileComplete } = useAuth();
 
@@ -77,7 +85,7 @@ function AppRoutes() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
-        <Route path="/join/vendor" element={<Navigate to="/auth?mode=signup&role=vendor&ref=ndabe" replace />} />
+        <Route path="/join/vendor" element={<VendorJoinRedirect />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
@@ -133,7 +141,7 @@ function AppRoutes() {
         </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
   );
