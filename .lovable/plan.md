@@ -1,11 +1,11 @@
 # Plan: Replace Vendors Tab with Book Vendors Tab
 
 ## Summary
-Replace the existing "Vendors" tab in the event dashboard with a new "Book Vendors" tab that provides ceremony-specific vendor checklists with booking status tracking.
+Replace the existing "Vendors" tab in the event dashboard with a new "Book Vendors" tab that provides a ceremony-specific vendor checklist with booking-status tracking, plus deep-link support from the checklist into the vendor list filtered by category.
 
 ## Changes
 
-### File 1 — CREATE src/pages/events/tabs/BookVendorsTab.tsx
+### File 1 — CREATE `src/pages/events/tabs/BookVendorsTab.tsx`
 
 Create this file with exactly this content:
 
@@ -38,7 +38,7 @@ interface Props {
 
 export function BookVendorsTab({ eventId, eventType }: Props) {
   const navigate = useNavigate();
-  const [categoryStatus, setCategoryStatus] = useState<Record<VendorCategory, BookingStatus>>({});
+  const [categoryStatus, setCategoryStatus] = useState<Record<string, BookingStatus>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const categories = CEREMONY_VENDOR_MAP[eventType] ?? [];
@@ -56,7 +56,7 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
           .eq('event_id', eventId),
       ]);
 
-      const statusMap: Record<VendorCategory, BookingStatus> = {};
+      const statusMap: Record<string, BookingStatus> = {};
 
       for (const cat of categories) {
         const catBookings = (bookings || []).filter(
@@ -160,7 +160,7 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
 }
 ```
 
-### File 2 — MODIFY src/pages/vendors/VendorsList.tsx
+### File 2 — MODIFY `src/pages/vendors/VendorsList.tsx`
 
 Replace:
 ```typescript
@@ -175,20 +175,20 @@ import { useSearchParams } from 'react-router-dom';
 
 Replace:
 ```typescript
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState<VendorCategory | 'all'>('all');
 ```
 
 With:
 ```typescript
   const [searchParams] = useSearchParams();
-  const [category, setCategory] = useState(
+  const [category, setCategory] = useState<VendorCategory | 'all'>(
     (searchParams.get('category') as VendorCategory) || 'all'
   );
 ```
 
 Do not change anything else in this file.
 
-### File 3 — MODIFY src/pages/events/EventDashboard.tsx
+### File 3 — MODIFY `src/pages/events/EventDashboard.tsx`
 
 Replace:
 ```typescript
@@ -204,31 +204,29 @@ Replace:
 ```tsx
                 Vendors
               </TabsTrigger>
-              <TabsContent value="vendors" className="mt-0">
-                {guide && (
+              {guide && (
 ```
 
 With:
 ```tsx
                 Book Vendors
               </TabsTrigger>
-              <TabsContent value="vendors" className="mt-0">
-                {guide && (
+              {guide && (
 ```
 
 Replace:
 ```tsx
-                <VendorsTab eventId={event.id} eventType={event.type} />
+            <VendorsTab eventId={event.id} location={event.location || ''} />
 ```
 
 With:
 ```tsx
-                <BookVendorsTab eventId={event.id} eventType={event.event_type} />
+            <BookVendorsTab eventId={event.id} eventType={event.event_type} />
 ```
 
 Do not change anything else in this file.
 
 ## Notes
-- The new `BookVendorsTab` component provides a ceremony-specific vendor checklist with status tracking (not_started, in_progress, ordered)
-- Deep linking is supported via URL query params (`/vendors?category=photographer`)
-- The component uses the existing `VENDOR_CATEGORY_LABELS` map for display names
+- `BookVendorsTab` uses `Record<string, BookingStatus>` for both the state and the local `statusMap`, as requested.
+- Deep linking from each row uses `/vendors?category=<cat>`; `VendorsList` initializes its category filter from that query param.
+- The `CEREMONY_VENDOR_MAP` covers all 7 supported ceremonies; any unmapped event type renders the empty-state message.
