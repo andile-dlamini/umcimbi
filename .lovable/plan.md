@@ -1,5 +1,20 @@
 
 
+## Fix BookVendorsTab prop in EventDashboard.tsx
+
+### Changes
+
+1. **Update `src/pages/events/EventDashboard.tsx`**:
+   - Replace `<BookVendorsTab eventId={event.id} eventType={event.type} />` with `<BookVendorsTab eventId={event.id} eventType={event.event_type} />`
+
+### Files to modify
+
+```
+src/pages/events/EventDashboard.tsx
+```
+
+---
+
 ## Update create-ozow-payment to use OZOW_API_URL secret
 
 ### Changes
