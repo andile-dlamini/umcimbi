@@ -29,7 +29,7 @@ import { TasksTab } from './tabs/TasksTab';
 // Note: BudgetTab and GuestsTab are kept but hidden for potential future use
 // import { BudgetTab } from './tabs/BudgetTab';
 // import { GuestsTab } from './tabs/GuestsTab';
-import { VendorsTab } from './tabs/VendorsTab';
+import { BookVendorsTab } from './tabs/BookVendorsTab';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -315,7 +315,7 @@ export default function EventDashboard() {
                 value="vendors"
                 className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
               >
-                Vendors
+                Book Vendors
               </TabsTrigger>
               {guide && (
                 <TabsTrigger 
@@ -457,7 +457,7 @@ export default function EventDashboard() {
           */}
 
           <TabsContent value="vendors" className="px-4 py-6">
-            <VendorsTab eventId={event.id} location={event.location || ''} />
+            <BookVendorsTab eventId={event.id} eventType={event.type} />
           </TabsContent>
 
           {guide && (

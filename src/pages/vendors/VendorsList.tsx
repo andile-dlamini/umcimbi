@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +13,10 @@ import { VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCate
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<VendorCategory | 'all'>('all');
+  const [searchParams] = useSearchParams();
+  const [category, setCategory] = useState<VendorCategory | 'all'>(
+    (searchParams.get('category') as VendorCategory) || 'all'
+  );
   const [locationFilter, setLocationFilter] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
