@@ -136,9 +136,9 @@ export default function MyQuotes() {
   const { quotes, isLoading } = useClientQuotes();
   const navigate = useNavigate();
 
-  const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
+  const decideQuotes = quotes.filter(q => q.status === 'pending_client');
   const acceptedQuotes = quotes.filter(q => q.status === 'client_accepted');
-  const otherQuotes = quotes.filter(q =>
+  const closedQuotes = quotes.filter(q =>
     q.status === 'client_declined' || q.status === 'expired'
   );
 
@@ -179,17 +179,17 @@ export default function MyQuotes() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="pending" className="w-full">
+          <Tabs defaultValue="decide" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="pending">Pending ({pendingQuotes.length})</TabsTrigger>
+              <TabsTrigger value="decide">Decide ({decideQuotes.length})</TabsTrigger>
               <TabsTrigger value="accepted">Accepted ({acceptedQuotes.length})</TabsTrigger>
-              <TabsTrigger value="other">Other ({otherQuotes.length})</TabsTrigger>
+              <TabsTrigger value="closed">Closed ({closedQuotes.length})</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="pending" className="mt-4 space-y-3">
-              {pendingQuotes.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No pending quotations</p>
-              ) : pendingQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
+            <TabsContent value="decide" className="mt-4 space-y-3">
+              {decideQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No quotes awaiting your decision</p>
+              ) : decideQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
             </TabsContent>
 
             <TabsContent value="accepted" className="mt-4 space-y-3">
@@ -198,10 +198,10 @@ export default function MyQuotes() {
               ) : acceptedQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
             </TabsContent>
 
-            <TabsContent value="other" className="mt-4 space-y-3">
-              {otherQuotes.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No declined or expired quotations</p>
-              ) : otherQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
+            <TabsContent value="closed" className="mt-4 space-y-3">
+              {closedQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No closed quotations</p>
+              ) : closedQuotes.map(q => <QuoteCard key={q.id} quote={q} />)}
             </TabsContent>
           </Tabs>
         )}
