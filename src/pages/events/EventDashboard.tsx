@@ -457,7 +457,7 @@ export default function EventDashboard() {
           */}
 
           <TabsContent value="vendors" className="px-4 py-6">
-            <VendorsTab eventId={event.id} location={event.location || ''} />
+            <BookVendorsTab eventId={event.id} eventType={event.type} />
           </TabsContent>
 
           {guide && (
