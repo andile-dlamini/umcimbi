@@ -17,7 +17,7 @@ const CEREMONY_VENDOR_MAP: Partial<Record<EventType, VendorCategory[]>> = {
   ancestral_ritual: ['catering', 'cold_room_hire', 'livestock'],
 };
 
-type BookingStatus = 'not_started' | 'in_progress' | 'ordered';
+type BookingStatus = 'not_started' | 'quote_requested' | 'quote_received' | 'deposit_due' | 'upcoming' | 'balance_due';
 
 interface Props {
   eventId: string;
@@ -48,20 +48,27 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
 
       for (const cat of categories) {
         const catBookings = (bookings || []).filter(
-          (b: any) => b.vendor?.category === cat &&
-            ['confirmed', 'completed'].includes(b.booking_status)
+          (b: any) => b.vendor?.category === cat
         );
         const catRequests = (serviceRequests || []).filter(
           (r: any) => r.vendor?.category === cat
         );
-        const hasOrdered =
-          catBookings.length > 0 ||
-          catRequests.some((r: any) => r.status === 'accepted');
-        const hasInProgress = catRequests.some((r: any) =>
-          ['pending', 'quoted', 'adjustment_requested'].includes(r.status)
+        const depositDue = catBookings.some((b: any) => b.booking_status === 'pending_deposit');
+        const balanceDue = catBookings.some((b: any) =>
+          b.booking_status === 'confirmed' && b.balance_status === 'due'
         );
+        const upcoming = catBookings.some((b: any) =>
+          b.booking_status === 'confirmed' && b.balance_status !== 'due'
+        );
+        const quoteReceived = catRequests.some((r: any) => r.status === 'quoted');
+        const quoteRequested = catRequests.some((r: any) => r.status === 'pending');
 
-        statusMap[cat] = hasOrdered ? 'ordered' : hasInProgress ? 'in_progress' : 'not_started';
+        if (depositDue) statusMap[cat] = 'deposit_due';
+        else if (balanceDue) statusMap[cat] = 'balance_due';
+        else if (upcoming) statusMap[cat] = 'upcoming';
+        else if (quoteReceived) statusMap[cat] = 'quote_received';
+        else if (quoteRequested) statusMap[cat] = 'quote_requested';
+        else statusMap[cat] = 'not_started';
       }
 
       setCategoryStatus(statusMap);
@@ -81,7 +88,7 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
 
   const orderedCount = isLoading
     ? 0
-    : categories.filter(c => categoryStatus[c] === 'ordered').length;
+    : categories.filter(c => categoryStatus[c] === 'upcoming' || categoryStatus[c] === 'balance_due').length;
 
   return (
     <div className="space-y-4">
@@ -101,17 +108,25 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
             : (categoryStatus[cat] ?? 'not_started');
 
           const dotColor =
-            status === 'ordered'     ? 'bg-emerald-500' :
-            status === 'in_progress' ? 'bg-amber-400'   :
-                                       'bg-muted-foreground/30';
+            status === 'deposit_due'    ? 'bg-orange-500' :
+            status === 'balance_due'    ? 'bg-orange-500' :
+            status === 'upcoming'       ? 'bg-blue-500'   :
+            status === 'quote_received' ? 'bg-amber-400'  :
+            status === 'quote_requested'? 'bg-amber-400'  :
+                                          'bg-muted-foreground/30';
           const badgeClass =
-            status === 'ordered'
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              : 'bg-amber-50 text-amber-700 border-amber-200';
+            status === 'deposit_due'    ? 'bg-orange-50 text-orange-700 border-orange-200' :
+            status === 'balance_due'    ? 'bg-orange-50 text-orange-700 border-orange-200' :
+            status === 'upcoming'       ? 'bg-blue-50 text-blue-700 border-blue-200'       :
+            status === 'quote_received' ? 'bg-amber-50 text-amber-700 border-amber-200'    :
+                                          'bg-amber-50 text-amber-700 border-amber-200';
           const badgeLabel =
-            status === 'ordered'     ? 'Ordered'     :
-            status === 'in_progress' ? 'In progress' :
-                                       '';
+            status === 'deposit_due'    ? 'Deposit Due'     :
+            status === 'balance_due'    ? 'Balance Due'     :
+            status === 'upcoming'       ? 'Upcoming'        :
+            status === 'quote_received' ? 'Quote Received'  :
+            status === 'quote_requested'? 'Quote Requested' :
+                                          '';
 
           return (
             <div

@@ -74,7 +74,7 @@ function VendorQuoteCard({ quote }: { quote: QuoteWithDetails }) {
 export default function VendorQuotations() {
   const { quotes, isLoading } = useVendorQuotes();
 
-  const pendingQuotes = quotes.filter(q => q.status === 'pending_client');
+  const awaitingClientQuotes = quotes.filter(q => q.status === 'pending_client');
   const acceptedQuotes = quotes.filter(q => q.status === 'client_accepted');
   const declinedOrExpired = quotes.filter(q =>
     q.status === 'client_declined' || q.status === 'expired'
@@ -96,25 +96,25 @@ export default function VendorQuotations() {
       <PageHeader title="Quotations" showBack />
 
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
-        <Tabs defaultValue="pending" className="w-full">
+        <Tabs defaultValue="awaiting" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pending">
-              Pending ({pendingQuotes.length})
+            <TabsTrigger value="awaiting">
+              Awaiting Client ({awaitingClientQuotes.length})
             </TabsTrigger>
             <TabsTrigger value="accepted">
               Accepted ({acceptedQuotes.length})
             </TabsTrigger>
-            <TabsTrigger value="other">
-              Other ({declinedOrExpired.length})
+            <TabsTrigger value="closed">
+              Closed ({declinedOrExpired.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pending" className="mt-4 space-y-3">
-            {pendingQuotes.length === 0 ? (
+          <TabsContent value="awaiting" className="mt-4 space-y-3">
+            {awaitingClientQuotes.length === 0 ? (
               <Card><CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">No pending quotes</p>
+                <p className="text-muted-foreground">No quotes awaiting client response</p>
               </CardContent></Card>
-            ) : pendingQuotes.map(q => <VendorQuoteCard key={q.id} quote={q} />)}
+            ) : awaitingClientQuotes.map(q => <VendorQuoteCard key={q.id} quote={q} />)}
           </TabsContent>
 
           <TabsContent value="accepted" className="mt-4 space-y-3">
@@ -125,10 +125,10 @@ export default function VendorQuotations() {
             ) : acceptedQuotes.map(q => <VendorQuoteCard key={q.id} quote={q} />)}
           </TabsContent>
 
-          <TabsContent value="other" className="mt-4 space-y-3">
+          <TabsContent value="closed" className="mt-4 space-y-3">
             {declinedOrExpired.length === 0 ? (
               <Card><CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">No declined or expired quotes</p>
+                <p className="text-muted-foreground">No closed quotes</p>
               </CardContent></Card>
             ) : declinedOrExpired.map(q => <VendorQuoteCard key={q.id} quote={q} />)}
           </TabsContent>

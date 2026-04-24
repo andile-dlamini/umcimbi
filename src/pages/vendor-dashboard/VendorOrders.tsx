@@ -69,12 +69,16 @@ function OrderCard({
 export default function VendorOrders() {
   const { bookings, isLoading, markJobCompleted } = useVendorBookings();
 
-  const activeOrders = bookings.filter(
-    b => b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed'
+  const paymentDueOrders = bookings.filter(b =>
+    b.booking_status === 'pending_deposit' ||
+    (b.booking_status === 'confirmed' && b.balance_status === 'due')
+  );
+  const upcomingOrders = bookings.filter(b =>
+    b.booking_status === 'confirmed' && b.balance_status !== 'due'
   );
   const completedOrders = bookings.filter(b => b.booking_status === 'completed');
-  const otherOrders = bookings.filter(
-    b => b.booking_status === 'cancelled' || b.booking_status === 'disputed'
+  const cancelledOrders = bookings.filter(b =>
+    b.booking_status === 'cancelled' || b.booking_status === 'disputed'
   );
 
   if (isLoading) {
@@ -104,18 +108,29 @@ export default function VendorOrders() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="active">Active ({activeOrders.length})</TabsTrigger>
+          <Tabs defaultValue="payment-due" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="payment-due">Payment Due ({paymentDueOrders.length})</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming ({upcomingOrders.length})</TabsTrigger>
               <TabsTrigger value="completed">Completed ({completedOrders.length})</TabsTrigger>
-              <TabsTrigger value="other">Other ({otherOrders.length})</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled ({cancelledOrders.length})</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-4 space-y-3">
-              {activeOrders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No active orders</p>
+            <TabsContent value="payment-due" className="mt-4 space-y-3">
+              {paymentDueOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No payments due</p>
               ) : (
-                activeOrders.map(b => (
+                paymentDueOrders.map(b => (
+                  <OrderCard key={b.id} booking={b} onMarkComplete={() => markJobCompleted(b.id)} />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="upcoming" className="mt-4 space-y-3">
+              {upcomingOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No upcoming orders</p>
+              ) : (
+                upcomingOrders.map(b => (
                   <OrderCard key={b.id} booking={b} onMarkComplete={() => markJobCompleted(b.id)} />
                 ))
               )}
@@ -129,11 +144,11 @@ export default function VendorOrders() {
               )}
             </TabsContent>
 
-            <TabsContent value="other" className="mt-4 space-y-3">
-              {otherOrders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No cancelled or disputed orders</p>
+            <TabsContent value="cancelled" className="mt-4 space-y-3">
+              {cancelledOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No cancelled orders</p>
               ) : (
-                otherOrders.map(b => <OrderCard key={b.id} booking={b} />)
+                cancelledOrders.map(b => <OrderCard key={b.id} booking={b} />)
               )}
             </TabsContent>
           </Tabs>

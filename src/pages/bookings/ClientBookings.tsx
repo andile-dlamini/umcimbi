@@ -120,11 +120,15 @@ export default function ClientBookings() {
   const { bookings, isLoading } = useClientBookings();
   const navigate = useNavigate();
 
-  const activeOrders = bookings.filter(b =>
-    b.booking_status === 'pending_deposit' || b.booking_status === 'confirmed'
+  const paymentDueOrders = bookings.filter(b =>
+    b.booking_status === 'pending_deposit' ||
+    (b.booking_status === 'confirmed' && b.balance_status === 'due')
+  );
+  const upcomingOrders = bookings.filter(b =>
+    b.booking_status === 'confirmed' && b.balance_status !== 'due'
   );
   const completedOrders = bookings.filter(b => b.booking_status === 'completed');
-  const otherOrders = bookings.filter(b =>
+  const cancelledOrders = bookings.filter(b =>
     b.booking_status === 'cancelled' || b.booking_status === 'disputed'
   );
 
@@ -156,24 +160,41 @@ export default function ClientBookings() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="active" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="active">
-                Active ({activeOrders.length})
+          <Tabs defaultValue="payment-due" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="payment-due">
+                Payment Due ({paymentDueOrders.length})
+              </TabsTrigger>
+              <TabsTrigger value="upcoming">
+                Upcoming ({upcomingOrders.length})
               </TabsTrigger>
               <TabsTrigger value="completed">
                 Completed ({completedOrders.length})
               </TabsTrigger>
-              <TabsTrigger value="other">
-                Other ({otherOrders.length})
+              <TabsTrigger value="cancelled">
+                Cancelled ({cancelledOrders.length})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="mt-4 space-y-3">
-              {activeOrders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No active orders</p>
+            <TabsContent value="payment-due" className="mt-4 space-y-3">
+              {paymentDueOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No payments due</p>
               ) : (
-                activeOrders.map((booking) => (
+                paymentDueOrders.map((booking) => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onClick={() => navigate(`/bookings/${booking.id}`)}
+                  />
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="upcoming" className="mt-4 space-y-3">
+              {upcomingOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No upcoming orders</p>
+              ) : (
+                upcomingOrders.map((booking) => (
                   <BookingCard
                     key={booking.id}
                     booking={booking}
@@ -197,11 +218,11 @@ export default function ClientBookings() {
               )}
             </TabsContent>
 
-            <TabsContent value="other" className="mt-4 space-y-3">
-              {otherOrders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No cancelled or disputed orders</p>
+            <TabsContent value="cancelled" className="mt-4 space-y-3">
+              {cancelledOrders.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No cancelled orders</p>
               ) : (
-                otherOrders.map((booking) => (
+                cancelledOrders.map((booking) => (
                   <BookingCard
                     key={booking.id}
                     booking={booking}
