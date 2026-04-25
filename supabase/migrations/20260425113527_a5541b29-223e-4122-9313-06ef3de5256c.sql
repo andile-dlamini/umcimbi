@@ -1,0 +1,1 @@
+ALTER TABLE public.sms_balance_checks ALTER COLUMN balance TYPE numeric;
