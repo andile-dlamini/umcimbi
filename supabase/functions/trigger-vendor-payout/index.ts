@@ -54,10 +54,26 @@ function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function getPayoutStatusObject(response: Record<string, unknown>): Record<string, unknown> | null {
+  const ps = (response.payoutStatus ?? response.PayoutStatus) as unknown;
+  if (ps && typeof ps === "object") return ps as Record<string, unknown>;
+  return null;
+}
+
 function normalizeInitialStatus(response: Record<string, unknown>, ok: boolean) {
-  const status = String(response.status ?? response.Status ?? response.payoutStatus ?? response.PayoutStatus ?? "").toLowerCase();
-  if (!ok) return status.includes("reject") ? "rejected" : "failed";
-  if (["rejected", "declined", "failed", "error"].some((value) => status.includes(value))) return status.includes("reject") || status.includes("declin") ? "rejected" : "failed";
+  if (!ok) return "failed";
+  // Ozow nested payoutStatus.status: 1 = PayoutReceived, 3 = SubmittedForProcessing
+  const ps = getPayoutStatusObject(response);
+  if (ps) {
+    const code = Number(ps.status ?? ps.Status);
+    if (code === 1 || code === 3) return "submitted";
+    return "failed";
+  }
+  // Fallback: legacy string-based status checking
+  const status = String(response.status ?? response.Status ?? "").toLowerCase();
+  if (["rejected", "declined", "failed", "error"].some((value) => status.includes(value))) {
+    return status.includes("reject") || status.includes("declin") ? "rejected" : "failed";
+  }
   return "submitted";
 }
 
@@ -288,15 +304,22 @@ Deno.serve(async (req) => {
     }
 
     const initialStatus = normalizeInitialStatus(responsePayload, responseOk);
+    const payoutStatusObj = getPayoutStatusObject(responsePayload);
     const failureReason = initialStatus === "failed" || initialStatus === "rejected"
-      ? String(responsePayload.errorMessage ?? responsePayload.ErrorMessage ?? responsePayload.message ?? responsePayload.Message ?? `Ozow response status ${responseStatus || "unavailable"}`)
+      ? String(
+          (payoutStatusObj?.errorMessage ?? payoutStatusObj?.ErrorMessage) ??
+          responsePayload.errorMessage ?? responsePayload.ErrorMessage ??
+          responsePayload.message ?? responsePayload.Message ??
+          `Ozow response status ${responseStatus || "unavailable"}`
+        )
       : null;
 
     await supabase
       .from("vendor_payouts")
       .update({
         status: initialStatus,
-        ozow_payout_id: extractResponseRef(responsePayload, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"]),
+        ozow_payout_id: extractResponseRef(responsePayload, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"])
+          ?? (payoutStatusObj ? extractResponseRef(payoutStatusObj, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"]) : null),
         ozow_reference: extractResponseRef(responsePayload, ["reference", "Reference", "ozowReference", "OzowReference"]),
         response_payload: redactValue(responsePayload),
         submitted_at: initialStatus === "submitted" ? new Date().toISOString() : null,
