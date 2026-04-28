@@ -80,13 +80,12 @@ Deno.serve(async (req) => {
 
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
-    const payoutAccessToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim();
     const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
 
-    if (!payoutAccessToken || !payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey || !notifyUrl) {
+    if (!payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey || !notifyUrl) {
       return jsonResponse({ error: "Payout service not configured" }, 500);
     }
 
@@ -135,9 +134,10 @@ Deno.serve(async (req) => {
       const banksRes = await fetch(`${payoutApiUrl}/getavailablebanks`, {
         method: "GET",
         headers: {
-          "SiteCode": ozowSiteCode,
           "ApiKey": ozowPayoutApiKey,
-          "Content-Type": "application/json",
+          "SiteCode": ozowSiteCode,
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
       if (!banksRes.ok) {
@@ -168,41 +168,52 @@ Deno.serve(async (req) => {
     const bankGroupId = matchedBank.bankGroupId;
     const universalBranchCode = matchedBank.universalBranchCode;
 
-    // 2. Encrypt account number with AES-256-CBC (PKCS7 padding via Web Crypto default)
-    const encryptionKeyBytes = crypto.getRandomValues(new Uint8Array(32));
-    const encryptionKeyHex = bytesToHex(encryptionKeyBytes);
-
+    // 2. References (max 20 chars; alphanumeric + dashes)
     const internalReference = `UMC-P-${Date.now()}-${booking.id.replace(/-/g, "").slice(0, 8)}`;
-    const merchantReference = booking.order_number ?? booking.id;
+    const merchantReference = (booking.order_number ?? booking.id).substring(0, 20);
+    const customerBankReference = `UMC-${booking.id.substring(0, 14)}`.substring(0, 20);
     const amountInCents = Math.round(amount * 100);
 
-    const ivInput = `${merchantReference}${amountInCents}${encryptionKeyHex}`;
-    const ivHashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(ivInput));
-    const iv = new Uint8Array(ivHashBuffer).slice(0, 16);
+    // 3. Encrypt account number per Ozow spec (AES-256-CBC, base64 output)
+    const rawKey = crypto.randomUUID().replace(/-/g, "").substring(0, 20);
+    let encryptionKey = rawKey;
+    while (encryptionKey.length < 32) {
+      encryptionKey += rawKey;
+    }
+    encryptionKey = encryptionKey.substring(0, 32);
 
+    const ivInput = `${merchantReference}${amountInCents}${rawKey}`.toLowerCase();
+    const ivHashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(ivInput));
+    const ivHex = Array.from(new Uint8Array(ivHashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const iv = ivHex.substring(0, 16);
+
+    const keyBytes = new TextEncoder().encode(encryptionKey);
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      encryptionKeyBytes,
+      keyBytes,
       { name: "AES-CBC" },
       false,
       ["encrypt"],
     );
 
+    const ivBytes = new TextEncoder().encode(iv);
     const accountNumberBytes = new TextEncoder().encode(vendor.bank_account_number);
     const encryptedBuffer = await crypto.subtle.encrypt(
-      { name: "AES-CBC", iv },
+      { name: "AES-CBC", iv: ivBytes },
       cryptoKey,
       accountNumberBytes,
     );
-    const encryptedAccountNumber = bytesToHex(new Uint8Array(encryptedBuffer));
+    const encryptedAccountNumber = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
 
-    // 3. Build HashCheck (SHA-512 over lowercase concatenation in spec order)
+    // 4. HashCheck (SHA-512 over lowercase concat in spec order — flat field order)
     const isRtc = false;
     const hashInput = [
       ozowSiteCode,
       amountInCents,
       merchantReference,
-      internalReference,
+      customerBankReference,
       isRtc,
       notifyUrl,
       bankGroupId,
@@ -213,17 +224,19 @@ Deno.serve(async (req) => {
     const hashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(hashInput));
     const hashCheck = bytesToHex(new Uint8Array(hashBuffer));
 
-    // 4. Build Ozow-spec payload
+    // 5. Build Ozow-spec payload (nested bankingDetails)
     const payoutPayload = {
       SiteCode: ozowSiteCode,
-      MerchantReference: merchantReference,
-      CustomerBankReference: internalReference,
       Amount: amount,
+      MerchantReference: merchantReference,
+      CustomerBankReference: customerBankReference,
       IsRtc: isRtc,
       NotifyUrl: notifyUrl,
-      BankGroupId: bankGroupId,
-      AccountNumber: encryptedAccountNumber,
-      BranchCode: universalBranchCode,
+      bankingDetails: {
+        bankGroupId: bankGroupId,
+        accountNumber: encryptedAccountNumber,
+        branchCode: universalBranchCode,
+      },
       HashCheck: hashCheck,
     };
 
@@ -237,7 +250,7 @@ Deno.serve(async (req) => {
         internal_reference: internalReference,
         status: "pending",
         request_payload: redactValue(payoutPayload),
-        encryption_key: encryptionKeyHex,
+        encryption_key: rawKey,
         bank_group_id: bankGroupId,
       })
       .select("id")
@@ -259,7 +272,6 @@ Deno.serve(async (req) => {
       console.log("[OZOW DEBUG] header keys:", Object.keys(outboundHeaders));
       console.log("[OZOW DEBUG] SiteCode value:", ozowSiteCode);
       console.log("[OZOW DEBUG] ApiKey length:", ozowPayoutApiKey.length, "preview:", ozowPayoutApiKey.slice(0, 4) + "..." + ozowPayoutApiKey.slice(-4));
-      console.log("[OZOW DEBUG] PayoutAccessToken length:", payoutAccessToken.length, "preview:", payoutAccessToken.slice(0, 4) + "..." + payoutAccessToken.slice(-4));
       console.log("[OZOW DEBUG] body:", JSON.stringify(payoutPayload));
       const ozowRes = await fetch(payoutApiUrl, {
         method: "POST",

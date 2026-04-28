@@ -17,6 +17,9 @@ const SENSITIVE_KEYS = [
   "bankaccountnumber",
   "bankbranchcode",
   "bankdetails",
+  "encryptionkey",
+  "encryption_key",
+  "decryptionkey",
 ];
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
@@ -78,46 +81,86 @@ function getToken(req: Request, payload: Record<string, unknown>) {
   ).trim();
 }
 
-function getReference(payload: Record<string, unknown>) {
-  return String(
-    payload.InternalReference ??
-      payload.internalReference ??
-      payload.internal_reference ??
-      payload.PayoutReference ??
-      payload.payoutReference ??
-      payload.Reference ??
-      payload.reference ??
-      ""
-  ).trim();
+function pick(payload: Record<string, unknown>, keys: string[]): string {
+  for (const k of keys) {
+    const v = payload[k];
+    if (v !== undefined && v !== null && String(v).trim()) return String(v).trim();
+  }
+  return "";
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (!["GET", "POST"].includes(req.method)) return jsonResponse({ allowed: false, error: "Method not allowed" }, 405);
+  if (!["GET", "POST"].includes(req.method)) return jsonResponse({ IsVerified: false, Reason: "Method not allowed" }, 405);
 
   try {
     const configuredToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
-    if (!configuredToken) return jsonResponse({ allowed: false, error: "Verification unavailable" }, 500);
+    const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
+    const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
+
+    if (!configuredToken || !ozowSiteCode || !ozowPayoutApiKey) {
+      return jsonResponse({ IsVerified: false, Reason: "Verification unavailable" }, 500);
+    }
 
     const payload = req.method === "GET" ? Object.fromEntries(new URL(req.url).searchParams) : await parsePayload(req);
     const token = getToken(req, payload);
-    const authorized = token.length > 0 && token === configuredToken;
+    const tokenAuthorized = token.length > 0 && token === configuredToken;
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const reference = getReference(payload);
-    let vendorPayoutId: string | null = null;
 
-    if (reference) {
+    const payoutId = pick(payload, ["PayoutId", "payoutId", "payout_id"]);
+    const merchantReference = pick(payload, ["MerchantReference", "merchantReference", "merchant_reference"]);
+    const customerBankReference = pick(payload, ["CustomerBankReference", "customerBankReference", "customer_bank_reference"]);
+    const amountInCents = pick(payload, ["AmountInCents", "amountInCents", "amount_in_cents", "Amount", "amount"]);
+    const isRtc = pick(payload, ["IsRtc", "isRtc", "is_rtc"]);
+    const notifyUrl = pick(payload, ["NotifyUrl", "notifyUrl", "notify_url"]);
+    const bankGroupId = pick(payload, ["BankGroupId", "bankGroupId", "bank_group_id"]);
+    const accountNumber = pick(payload, ["AccountNumber", "accountNumber", "account_number"]);
+    const branchCode = pick(payload, ["BranchCode", "branchCode", "branch_code"]);
+    const incomingHash = pick(payload, ["HashCheck", "hashCheck", "hash_check"]);
+
+    // Locate the payout by any reference we have
+    let vendorPayout: { id: string; encryption_key: string | null } | null = null;
+    const refCandidates = [payoutId, merchantReference, customerBankReference].filter(Boolean);
+    if (refCandidates.length > 0) {
+      const orClause = refCandidates
+        .flatMap((ref) => [`internal_reference.eq.${ref}`, `ozow_reference.eq.${ref}`, `ozow_payout_id.eq.${ref}`])
+        .join(",");
       const { data } = await supabase
         .from("vendor_payouts")
-        .select("id")
-        .or(`internal_reference.eq.${reference},ozow_reference.eq.${reference},ozow_payout_id.eq.${reference}`)
+        .select("id, encryption_key")
+        .or(orClause)
         .maybeSingle();
-      vendorPayoutId = data?.id ?? null;
+      if (data) vendorPayout = data as { id: string; encryption_key: string | null };
+    }
+
+    // Verify hash (PayoutId first per Ozow verification spec)
+    let hashOk = false;
+    if (incomingHash && payoutId) {
+      const hashInput = [
+        payoutId,
+        ozowSiteCode,
+        amountInCents,
+        merchantReference,
+        customerBankReference,
+        isRtc,
+        notifyUrl,
+        bankGroupId,
+        accountNumber,
+        branchCode,
+        ozowPayoutApiKey,
+      ].join("").toLowerCase();
+      const hashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(hashInput));
+      const computed = bytesToHex(new Uint8Array(hashBuffer));
+      hashOk = computed === incomingHash.toLowerCase();
     }
 
     await supabase.from("payout_webhook_events").insert({
-      vendor_payout_id: vendorPayoutId,
+      vendor_payout_id: vendorPayout?.id ?? null,
       event_type: "verification",
       ozow_status: String(payload.Status ?? payload.status ?? "verification"),
       raw_payload: null,
@@ -125,10 +168,24 @@ Deno.serve(async (req) => {
       headers_redacted: redactHeaders(req.headers),
     });
 
-    if (!authorized) return jsonResponse({ allowed: false, error: "Unauthorized" }, 401);
-    return jsonResponse({ allowed: true, verified: true, vendor_payout_id: vendorPayoutId });
+    if (!tokenAuthorized) {
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Unauthorized" }, 401);
+    }
+    if (!vendorPayout || !vendorPayout.encryption_key) {
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Payout not found" }, 404);
+    }
+    if (!hashOk) {
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Hash mismatch" }, 200);
+    }
+
+    return jsonResponse({
+      PayoutId: payoutId,
+      IsVerified: true,
+      AccountNumberDecryptionKey: vendorPayout.encryption_key,
+      Reason: "",
+    });
   } catch (err) {
     console.error("ozow-payout-verification error:", err);
-    return jsonResponse({ allowed: false, error: "Internal server error" }, 500);
+    return jsonResponse({ IsVerified: false, Reason: "Internal server error" }, 500);
   }
 });
