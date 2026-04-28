@@ -14,7 +14,19 @@ const REQUIRED_BANK_FIELDS = [
   "bank_branch_code",
 ] as const;
 
-const SENSITIVE_KEYS = ["accountnumber", "account_number", "branchcode", "branch_code", "bankaccountnumber", "bankbranchcode", "bankdetails", "authorization", "accesstoken"];
+const SENSITIVE_KEYS = [
+  "accountnumber",
+  "account_number",
+  "branchcode",
+  "branch_code",
+  "bankaccountnumber",
+  "bankbranchcode",
+  "bankdetails",
+  "authorization",
+  "accesstoken",
+  "encryptionkey",
+  "encryption_key",
+];
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -36,6 +48,10 @@ function redactValue(value: unknown): unknown {
     );
   }
   return value;
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function normalizeInitialStatus(response: Record<string, unknown>, ok: boolean) {
@@ -66,7 +82,13 @@ Deno.serve(async (req) => {
 
     const payoutAccessToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim();
-    if (!payoutAccessToken || !payoutApiUrl) return jsonResponse({ error: "Payout service not configured" }, 500);
+    const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
+    const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
+    const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
+
+    if (!payoutAccessToken || !payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey) {
+      return jsonResponse({ error: "Payout service not configured" }, 500);
+    }
 
     const { booking_id } = await req.json();
     if (!booking_id) return jsonResponse({ error: "booking_id is required" }, 400);
@@ -107,18 +129,102 @@ Deno.serve(async (req) => {
     const amount = Number(booking.agreed_price);
     if (!Number.isFinite(amount) || amount <= 0) return jsonResponse({ error: "Invalid payout amount" }, 400);
 
+    // 1. Resolve BankGroupId via Ozow getavailablebanks
+    let banks: Array<{ bankGroupId: string; bankGroupName: string; universalBranchCode: string }> = [];
+    try {
+      const banksRes = await fetch(`${payoutApiUrl}/getavailablebanks`, {
+        method: "GET",
+        headers: {
+          "SiteCode": ozowSiteCode,
+          "ApiKey": ozowPayoutApiKey,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!banksRes.ok) {
+        console.error("getavailablebanks non-OK status:", banksRes.status);
+        return jsonResponse({ error: "Failed to fetch supported banks from Ozow" }, 502);
+      }
+      banks = await banksRes.json();
+    } catch (err) {
+      console.error("getavailablebanks error:", err);
+      return jsonResponse({ error: "Failed to fetch supported banks from Ozow" }, 502);
+    }
+
+    if (!Array.isArray(banks) || banks.length === 0) {
+      return jsonResponse({ error: "Failed to fetch supported banks from Ozow" }, 502);
+    }
+
+    const vendorBankLower = vendor.bank_name.toLowerCase();
+    const matchedBank = banks.find((b) => {
+      const name = (b.bankGroupName ?? "").toLowerCase();
+      if (!name) return false;
+      return name.includes(vendorBankLower) || vendorBankLower.includes(name);
+    });
+
+    if (!matchedBank) {
+      return jsonResponse({ error: `Vendor bank "${vendor.bank_name}" is not supported by Ozow` }, 400);
+    }
+
+    const bankGroupId = matchedBank.bankGroupId;
+    const universalBranchCode = matchedBank.universalBranchCode;
+
+    // 2. Encrypt account number with AES-256-CBC (PKCS7 padding via Web Crypto default)
+    const encryptionKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+    const encryptionKeyHex = bytesToHex(encryptionKeyBytes);
+
     const internalReference = `UMC-P-${Date.now()}-${booking.id.replace(/-/g, "").slice(0, 8)}`;
+    const merchantReference = booking.order_number ?? booking.id;
+    const amountInCents = Math.round(amount * 100);
+
+    const ivInput = `${merchantReference}${amountInCents}${encryptionKeyHex}`;
+    const ivHashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(ivInput));
+    const iv = new Uint8Array(ivHashBuffer).slice(0, 16);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      encryptionKeyBytes,
+      { name: "AES-CBC" },
+      false,
+      ["encrypt"],
+    );
+
+    const accountNumberBytes = new TextEncoder().encode(vendor.bank_account_number);
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: "AES-CBC", iv },
+      cryptoKey,
+      accountNumberBytes,
+    );
+    const encryptedAccountNumber = bytesToHex(new Uint8Array(encryptedBuffer));
+
+    // 3. Build HashCheck (SHA-512 over lowercase concatenation in spec order)
+    const isRtc = false;
+    const hashInput = [
+      ozowSiteCode,
+      amountInCents,
+      merchantReference,
+      internalReference,
+      isRtc,
+      notifyUrl,
+      bankGroupId,
+      encryptedAccountNumber,
+      universalBranchCode,
+      ozowPayoutApiKey,
+    ].join("").toLowerCase();
+    const hashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(hashInput));
+    const hashCheck = bytesToHex(new Uint8Array(hashBuffer));
+
+    // 4. Build Ozow-spec payload
     const payoutPayload = {
-      InternalReference: internalReference,
-      MerchantReference: booking.order_number ?? booking.id,
-      Amount: amount.toFixed(2),
-      CurrencyCode: "ZAR",
-      BankName: vendor.bank_name,
-      AccountHolderName: vendor.bank_account_holder_name,
-      AccountNumber: vendor.bank_account_number,
-      AccountType: vendor.bank_account_type,
-      BranchCode: vendor.bank_branch_code,
-      RecipientName: vendor.name,
+      SiteCode: ozowSiteCode,
+      MerchantReference: merchantReference,
+      CustomerBankReference: internalReference,
+      Amount: amount,
+      IsRtc: isRtc,
+      NotifyUrl: notifyUrl,
+      BankGroupId: bankGroupId,
+      AccountNumber: encryptedAccountNumber,
+      BranchCode: universalBranchCode,
+      HashCheck: hashCheck,
     };
 
     const { data: payout, error: insertError } = await supabase
@@ -131,6 +237,8 @@ Deno.serve(async (req) => {
         internal_reference: internalReference,
         status: "pending",
         request_payload: redactValue(payoutPayload),
+        encryption_key: encryptionKeyHex,
+        bank_group_id: bankGroupId,
       })
       .select("id")
       .single();
@@ -146,8 +254,8 @@ Deno.serve(async (req) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "AccessToken": payoutAccessToken,
-          "x-access-token": payoutAccessToken,
+          "SiteCode": ozowSiteCode,
+          "ApiKey": ozowPayoutApiKey,
         },
         body: JSON.stringify(payoutPayload),
       });
