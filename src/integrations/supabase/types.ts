@@ -1124,9 +1124,11 @@ export type Database = {
       vendor_payouts: {
         Row: {
           amount: number
+          bank_group_id: string | null
           booking_id: string
           created_at: string
           currency: string
+          encryption_key: string | null
           failed_at: string | null
           failure_reason: string | null
           id: string
@@ -1143,9 +1145,11 @@ export type Database = {
         }
         Insert: {
           amount: number
+          bank_group_id?: string | null
           booking_id: string
           created_at?: string
           currency?: string
+          encryption_key?: string | null
           failed_at?: string | null
           failure_reason?: string | null
           id?: string
@@ -1162,9 +1166,11 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bank_group_id?: string | null
           booking_id?: string
           created_at?: string
           currency?: string
+          encryption_key?: string | null
           failed_at?: string | null
           failure_reason?: string | null
           id?: string

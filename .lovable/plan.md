@@ -1,41 +1,31 @@
-# Plan: Rename Tabs & Expand Booking Statuses (5 Files)
+## Fix trigger-vendor-payout for Ozow Payouts API compliance
 
-Apply the exact verbatim replacements provided. No other changes.
+### 1. Migration: `supabase/migrations/<ts>_vendor_payouts_ozow_fields.sql`
+```sql
+ALTER TABLE public.vendor_payouts
+  ADD COLUMN IF NOT EXISTS encryption_key text,
+  ADD COLUMN IF NOT EXISTS bank_group_id text;
+```
 
-## Files & Changes
+### 2. Rewrite `supabase/functions/trigger-vendor-payout/index.ts`
 
-### 1. `src/pages/quotes/MyQuotes.tsx` (Client quotes)
-- Rename filter vars: `pendingQuotes` → `decideQuotes`, `otherQuotes` → `closedQuotes`.
-- Rename tabs: **Pending** → **Decide**, **Other** → **Closed**.
-- Default tab: `decide`.
-- Empty state for Decide: "No quotes awaiting your decision".
+- Add secret reads: `OZOW_SITE_CODE`, `OZOW_PAYOUT_API_KEY`, `OZOW_PAYOUT_NOTIFY_URL`. Extend the "not configured" 500 check to require `ozowSiteCode` and `ozowPayoutApiKey`. Keep `OZOW_PAYOUT_ACCESS_TOKEN` (used by webhook functions).
+- Extend `SENSITIVE_KEYS` with `"encryptionkey"` and `"encryption_key"`.
+- Before insert/payout: GET `${payoutApiUrl}/getavailablebanks` with `SiteCode`/`ApiKey` headers. Match vendor.bank_name to `bankGroupName` (case-insensitive bidirectional substring). On failure → 502; on no match → 400. Capture `bankGroupId`, `universalBranchCode`.
+- AES-256-CBC encryption (Web Crypto, PKCS7 default) of vendor.bank_account_number:
+  - 32 random bytes → `encryptionKeyHex`
+  - IV = first 16 bytes of `SHA-512(merchantReference + amountInCents + encryptionKeyHex)`
+  - merchantReference = booking.order_number ?? booking.id; amountInCents = round(amount*100)
+  - Output as lowercase hex → `encryptedAccountNumber`
+- SHA-512 HashCheck over lowercase concat in this order: `siteCode, amountInCents, merchantReference, internalReference, false, notifyUrl, bankGroupId, encryptedAccountNumber, universalBranchCode, ozowPayoutApiKey`.
+- Replace `payoutPayload` with Ozow-spec shape: `SiteCode, MerchantReference, CustomerBankReference (=internalReference), Amount (rand float), IsRtc=false, NotifyUrl, BankGroupId, AccountNumber (encrypted hex), BranchCode (universalBranchCode), HashCheck`. Drop `BankName`, `AccountHolderName`, `AccountType`, `RecipientName`, `CurrencyCode`, `InternalReference`.
+- Move `vendor_payouts` insert to AFTER bank lookup + encryption succeed (avoids orphan pending rows). Persist `encryption_key: encryptionKeyHex` and `bank_group_id: bankGroupId`.
+- Outbound POST to Ozow: replace `AccessToken`/`x-access-token` headers with `SiteCode` + `ApiKey`.
 
-### 2. `src/pages/vendor-dashboard/VendorQuotations.tsx` (Vendor quotes)
-- Rename filter var: `pendingQuotes` → `awaitingClientQuotes`.
-- Rename tabs: **Pending** → **Awaiting Client**, **Other** → **Closed**.
-- Default tab: `awaiting`.
-- Empty states updated accordingly.
+### 3. New secret to add
+- `OZOW_PAYOUT_NOTIFY_URL` = `https://umcimbi.co.za/functions/v1/ozow-payout-notification`
 
-### 3. `src/pages/bookings/ClientBookings.tsx` (Client bookings)
-- Split `activeOrders` into `paymentDueOrders` (pending_deposit OR confirmed+balance due) and `upcomingOrders` (confirmed + balance not due).
-- Rename `otherOrders` → `cancelledOrders`.
-- Tabs become 4 columns: **Payment Due | Upcoming | Completed | Cancelled**.
-- Default tab: `payment-due`.
+(`OZOW_SITE_CODE`, `OZOW_PAYOUT_API_KEY`, `OZOW_PAYOUT_API_URL`, `OZOW_PAYOUT_ACCESS_TOKEN` already configured.)
 
-### 4. `src/pages/vendor-dashboard/VendorOrders.tsx` (Vendor orders)
-- Same 4-tab split as File 3: **Payment Due | Upcoming | Completed | Cancelled**.
-- `markJobCompleted` action remains on Payment Due and Upcoming cards.
-- Default tab: `payment-due`.
-
-### 5. `src/pages/events/tabs/BookVendorsTab.tsx`
-- Expand `BookingStatus` union from 3 states to 6: `not_started | quote_requested | quote_received | deposit_due | upcoming | balance_due`.
-- Reclassify per-category status using booking_status + balance_status + service_request status, with priority: deposit_due → balance_due → upcoming → quote_received → quote_requested → not_started.
-- Update dot colors, badge classes, and badge labels for each new status.
-- `orderedCount` now counts categories where status is `upcoming` or `balance_due`.
-
-## Notes
-- All replacements are exact text swaps as specified in the user message.
-- No new imports required; `balance_status` already exists on booking objects.
-- No DB or type changes.
-
-Approve to apply.
+### Files NOT touched
+`ozow-payout-verification`, `ozow-payout-notification`, all other files.
