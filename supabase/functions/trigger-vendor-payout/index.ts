@@ -304,15 +304,22 @@ Deno.serve(async (req) => {
     }
 
     const initialStatus = normalizeInitialStatus(responsePayload, responseOk);
+    const payoutStatusObj = getPayoutStatusObject(responsePayload);
     const failureReason = initialStatus === "failed" || initialStatus === "rejected"
-      ? String(responsePayload.errorMessage ?? responsePayload.ErrorMessage ?? responsePayload.message ?? responsePayload.Message ?? `Ozow response status ${responseStatus || "unavailable"}`)
+      ? String(
+          (payoutStatusObj?.errorMessage ?? payoutStatusObj?.ErrorMessage) ??
+          responsePayload.errorMessage ?? responsePayload.ErrorMessage ??
+          responsePayload.message ?? responsePayload.Message ??
+          `Ozow response status ${responseStatus || "unavailable"}`
+        )
       : null;
 
     await supabase
       .from("vendor_payouts")
       .update({
         status: initialStatus,
-        ozow_payout_id: extractResponseRef(responsePayload, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"]),
+        ozow_payout_id: extractResponseRef(responsePayload, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"])
+          ?? (payoutStatusObj ? extractResponseRef(payoutStatusObj, ["payoutId", "PayoutId", "ozowPayoutId", "OzowPayoutId"]) : null),
         ozow_reference: extractResponseRef(responsePayload, ["reference", "Reference", "ozowReference", "OzowReference"]),
         response_payload: redactValue(responsePayload),
         submitted_at: initialStatus === "submitted" ? new Date().toISOString() : null,
