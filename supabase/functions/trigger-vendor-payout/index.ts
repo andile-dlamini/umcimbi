@@ -80,13 +80,12 @@ Deno.serve(async (req) => {
 
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
-    const payoutAccessToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim();
     const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
 
-    if (!payoutAccessToken || !payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey || !notifyUrl) {
+    if (!payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey || !notifyUrl) {
       return jsonResponse({ error: "Payout service not configured" }, 500);
     }
 
