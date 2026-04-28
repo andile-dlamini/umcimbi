@@ -134,9 +134,10 @@ Deno.serve(async (req) => {
       const banksRes = await fetch(`${payoutApiUrl}/getavailablebanks`, {
         method: "GET",
         headers: {
-          "SiteCode": ozowSiteCode,
           "ApiKey": ozowPayoutApiKey,
-          "Content-Type": "application/json",
+          "SiteCode": ozowSiteCode,
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
       if (!banksRes.ok) {
