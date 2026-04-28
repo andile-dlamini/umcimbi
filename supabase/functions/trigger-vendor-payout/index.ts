@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
 
-    if (!payoutAccessToken || !payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey) {
+    if (!payoutAccessToken || !payoutApiUrl || !ozowSiteCode || !ozowPayoutApiKey || !notifyUrl) {
       return jsonResponse({ error: "Payout service not configured" }, 500);
     }
 
