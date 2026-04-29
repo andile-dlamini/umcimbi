@@ -69,7 +69,7 @@ export default function Home() {
   const { activeRole } = useRole();
   const navigate = useNavigate();
   const { events, isLoading } = useEvents();
-  const { tourActive, completeTour } = useOnboardingTour('planner');
+  
 
   if (activeRole === 'vendor' && isVendor) {
     return <Navigate to="/vendor-dashboard" replace />;
@@ -105,9 +105,6 @@ export default function Home() {
         <div className="px-4 py-12 max-w-lg mx-auto text-center">
           <p className="text-muted-foreground">Loading...</p>
         </div>
-        {tourActive && (
-          <OnboardingTour steps={PLANNER_TOUR_STEPS} onComplete={completeTour} />
-        )}
       </div>
     );
   }
@@ -154,9 +151,6 @@ export default function Home() {
             Not sure? Browse vendors first
           </button>
         </div>
-        {tourActive && (
-          <OnboardingTour steps={PLANNER_TOUR_STEPS} onComplete={completeTour} />
-        )}
       </div>
     );
   }
@@ -244,9 +238,6 @@ export default function Home() {
           </div>
         )}
       </div>
-      {tourActive && (
-        <OnboardingTour steps={PLANNER_TOUR_STEPS} onComplete={completeTour} />
-      )}
     </div>
   );
 }
