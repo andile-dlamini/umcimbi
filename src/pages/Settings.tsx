@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight } from 'lucide-react';
+import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle } from 'lucide-react';
+import { clearTour } from '@/hooks/useOnboardingTour';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -34,6 +35,16 @@ export default function SettingsPage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const handleReplayTour = () => {
+    if (activeRole === 'vendor' && canSwitchRole) {
+      clearTour('vendor');
+      navigate('/vendor-dashboard');
+    } else {
+      clearTour('planner');
+      navigate('/');
+    }
+  };
 
   const startEditing = () => {
     setEditData({
@@ -234,6 +245,24 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Help / Replay tour */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <HelpCircle className="h-4 w-4" /> Help
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              New to Umcimbi? Replay the guided platform tour at any time.
+            </p>
+            <Button variant="outline" className="w-full" onClick={handleReplayTour}>
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Replay platform tour
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

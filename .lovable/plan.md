@@ -1,87 +1,52 @@
-## Goal
+# Universal Onboarding Tour
 
-Bring the Ozow Payouts integration into spec compliance by fixing six concrete issues across the trigger and verification edge functions. No other files will be touched.
+Add a one-time, role-specific guided tour for new planners and vendors using pure React + DOM APIs (no new dependencies). Tour state persists in localStorage and is replayable from Settings.
 
-## Files to modify
+## Files to Create
 
-1. `supabase/functions/trigger-vendor-payout/index.ts`
-2. `supabase/functions/ozow-payout-verification/index.ts`
+1. **`src/components/onboarding/OnboardingTour.tsx`** — Portal-based tour overlay with dimmed backdrop, spotlight cut-out around the target element, and a tooltip card supporting `center | right | bottom | top` placements. Handles step navigation (Back/Next/Let's go), close (X), progress dots, and re-measures on resize/scroll.
 
-## Authentication on outbound Ozow calls
+2. **`src/hooks/useOnboardingTour.ts`** — `useOnboardingTour(role)` hook returning `{ tourActive, completeTour }`. Auto-activates after a 900ms delay if the per-role localStorage key is unset. Exports `clearTour(role)` for replay from Settings. Keys: `umcimbi_planner_tour_v1`, `umcimbi_vendor_tour_v1`.
 
-Outbound Ozow requests (both `GET /getavailablebanks` and `POST` payout) authenticate **only** with `SiteCode` and `ApiKey` headers. Do NOT send `Authorization: Bearer` on either call. Remove all references to `payoutAccessToken` from outbound Ozow request headers and debug logs. (`OZOW_PAYOUT_ACCESS_TOKEN` is still used inside `ozow-payout-verification` to verify inbound webhooks from Ozow — that stays.)
+3. **`src/config/plannerTourSteps.ts`** — 8-step planner tour: welcome → ceremonies grid → events → vendors → messages → quotes → orders → outro.
 
-## Changes — `trigger-vendor-payout/index.ts`
+4. **`src/config/vendorTourSteps.ts`** — 9-step vendor tour: welcome → KPIs → quick-links → messages → quotations → orders → escrow explainer → outro.
 
-### Fix 1: `getavailablebanks` request headers
-Send only:
-```ts
-{
-  "ApiKey": ozowPayoutApiKey,
-  "SiteCode": ozowSiteCode,
-  "Accept": "application/json",
-  "Content-Type": "application/x-www-form-urlencoded",
-}
-```
-No `Authorization` header.
+## Files to Modify
 
-### Fix 2: Account number encryption (AES-256-CBC, Ozow spec)
-Replace the current encryption block with:
-- `rawKey`: 20-char alphanumeric from `crypto.randomUUID()` (dashes stripped, sliced to 20).
-- `encryptionKey`: `rawKey` repeated and sliced to exactly 32 chars → UTF-8 encoded as the 32-byte AES key.
-- `iv`: SHA-512 of `${merchantReference}${amountInCents}${rawKey}` lowercased; take the **first 16 characters of the hex string**, then UTF-8 encode those 16 chars to get the 16-byte IV.
-- Encrypt `vendor.bank_account_number` with AES-CBC.
-- Output `encryptedAccountNumber` as **Base64**.
-- Persist `rawKey` (not the padded 32-char key) into `vendor_payouts.encryption_key` — that is what the verification webhook returns to Ozow.
+5. **`src/components/layout/AppSidebar.tsx`** — Add `dataTour` field to `organiserItems` and `vendorItems`. In the `navItems.map()` destructure `dataTour` and apply `data-tour={dataTour}` to the rendered nav button (both expanded and collapsed branches share the same `button` JSX, so a single edit covers both).
 
-### Fix 3: Reference fields (≤20 chars)
-- `customerBankReference = \`UMC-${booking.id.substring(0, 14)}\`.substring(0, 20)`
-- `merchantReference = booking.order_number ?? booking.id.substring(0, 20)` (capped at 20).
-- `internalReference` (DB-only) stays as-is for our tracking.
+6. **`src/pages/Home.tsx`** —
+   - Add imports for `OnboardingTour`, `useOnboardingTour`, `PLANNER_TOUR_STEPS`.
+   - Call `useOnboardingTour('planner')` after existing hooks.
+   - Add `data-tour="planner-ceremonies"` to the `grid grid-cols-2 gap-3` ceremony picker grid.
+   - Add `data-tour="planner-quick-actions"` to the `grid grid-cols-3 gap-3` quick-actions grid.
+   - Render `{tourActive && <OnboardingTour … />}` in all three return branches (loading, empty, populated).
 
-### Fix 4: Nested `bankingDetails` payload + auth headers
-Outbound POST headers: only `Content-Type: application/json`, `SiteCode`, `ApiKey`. No bearer token.
+7. **`src/pages/vendor-dashboard/VendorDashboard.tsx`** —
+   - Add imports for `OnboardingTour`, `useOnboardingTour`, `VENDOR_TOUR_STEPS`, `HelpCircle`.
+   - Call `useOnboardingTour('vendor')`.
+   - Add `data-tour="vendor-kpis"` to the KPI `grid grid-cols-2 gap-3`.
+   - Add `data-tour="vendor-quick-links"` to the quick-links `grid grid-cols-2 gap-3`.
+   - Add a `rightAction` HelpCircle button on `<PageHeader>` that clears the localStorage key and reloads.
+   - Render `{tourActive && <OnboardingTour … />}` at the bottom of the return.
 
-Body:
-```ts
-{
-  SiteCode, Amount, MerchantReference, CustomerBankReference,
-  IsRtc: false, NotifyUrl,
-  bankingDetails: { bankGroupId, accountNumber: encryptedAccountNumber, branchCode: universalBranchCode },
-  HashCheck,
-}
-```
-HashCheck input order stays flat per Ozow spec: `siteCode + amountInCents + merchantReference + customerBankReference + isRtc + notifyUrl + bankGroupId + encryptedAccountNumber + universalBranchCode + apiKey`, lowercased, SHA-512 hex.
+8. **`src/pages/Settings.tsx`** —
+   - Extend imports (add `HelpCircle`, `PlayCircle` from lucide-react; import `clearTour`; `useNavigate` already imported).
+   - Add `handleReplayTour` that clears the role-appropriate key and navigates to `/vendor-dashboard` or `/`.
+   - Append a new "Help" Card after the existing cards with a "Replay platform tour" button.
 
-Also strip the `[OZOW DEBUG] PayoutAccessToken` log line.
+## Technical Notes
 
-## Changes — `ozow-payout-verification/index.ts`
+- **No new dependencies.** Tour uses `createPortal`, `getBoundingClientRect`, and inline styles only.
+- **Targeting**: each step references either `'center'` (modal mode, no spotlight) or a CSS selector like `'[data-tour="nav-events"]'`.
+- **Robustness**: `OnboardingTour` re-measures on `resize`, scrolls the target into view on step change, and falls back to centered placement if the target is missing.
+- **Role gating**: planner tour only fires on `/` for non-vendor users (Home component), vendor tour only fires on `/vendor-dashboard` for vendors. Admins see neither (they don't land on those routes by default after onboarding).
+- **Replay**: clearing the localStorage key + navigating to the home route causes the hook's `useEffect` to re-trigger the 900ms activation timer.
+- **Z-index**: tour overlay uses `z-index: 10001` to sit above sidebar and any sticky headers.
 
-### Fix 5: Return `AccountNumberDecryptionKey`
-After locating the matching `vendor_payouts` row, also select `encryption_key`. On a successful authorized verification, respond with:
-```json
-{
-  "PayoutId": "<payoutId>",
-  "IsVerified": true,
-  "AccountNumberDecryptionKey": "<vendor_payouts.encryption_key>",
-  "Reason": ""
-}
-```
-Unauthorized / not-found cases respond with `IsVerified: false` and a `Reason`.
+## Out of Scope
 
-### Fix 6: Hash verification with `PayoutId` first
-```
-[ payoutId, siteCode, amountInCents, merchantReference, customerBankReference,
-  isRtc, notifyUrl, bankGroupId, accountNumber, branchCode, apiKey ]
-  .join("").toLowerCase() → SHA-512 hex
-```
-Compare to inbound `HashCheck`; only mark `IsVerified: true` when both bearer token AND hash match.
-
-## Files NOT touched
-
-- `supabase/functions/ozow-payout-notification/index.ts`
-- All other project files
-
-## After deploy
-
-Re-run `test-trigger-payout` and inspect `trigger-vendor-payout` logs for the new outbound shape and Ozow's response.
+- No changes to routing, auth, RLS, or backend.
+- No changes to existing classNames, logic, or layout beyond adding `data-tour` attributes and the tour mount points.
+- No admin tour.
