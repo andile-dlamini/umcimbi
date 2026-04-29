@@ -19,8 +19,6 @@ interface OnboardingTourProps {
 }
 
 const PAD = 10;
-const CARD_W = 320;
-const CARD_H_APPROX = 210;
 
 function getSpot(selector: string): DOMRect | null {
   if (selector === 'center') return null;
@@ -65,6 +63,8 @@ export function OnboardingTour({ steps, onComplete }: OnboardingTourProps) {
 
   const vw = window.innerWidth;
   const vh = window.innerHeight;
+  const CARD_W = Math.min(320, vw - 32);
+  const CARD_H_APPROX = 260;
 
   function cardStyle(): React.CSSProperties {
     const base: React.CSSProperties = { position: 'fixed', width: CARD_W, zIndex: 10001 };
@@ -85,12 +85,18 @@ export function OnboardingTour({ steps, onComplete }: OnboardingTourProps) {
         return { ...base, left, top };
       }
       case 'top': {
-        const top = Math.max(highlight.y - CARD_H_APPROX - 16, 16);
+        const idealTop = highlight.y - CARD_H_APPROX - 16;
+        const top = idealTop < 16
+          ? Math.min(highlight.y + highlight.h + 16, vh - CARD_H_APPROX - 16)
+          : idealTop;
         return { ...base, top, left: safeLeft(cx - CARD_W / 2) };
       }
       case 'bottom':
       default: {
-        const top = highlight.y + highlight.h + 16;
+        const idealTop = highlight.y + highlight.h + 16;
+        const top = idealTop + CARD_H_APPROX > vh
+          ? Math.max(highlight.y - CARD_H_APPROX - 16, 16)
+          : idealTop;
         return { ...base, top, left: safeLeft(cx - CARD_W / 2) };
       }
     }

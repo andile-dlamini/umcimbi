@@ -1,35 +1,19 @@
-# Settings.tsx targeted fixes
+## Two targeted fixes
 
-Three scoped changes to `src/pages/Settings.tsx` only. No other files modified.
+### Fix 1 — `src/components/onboarding/OnboardingTour.tsx`
 
-## Fix 1 — Hide internal `@phone.isiko.app` emails
+Make the tooltip card responsive and auto-flip when it would overflow the viewport.
 
-Phone-registered users get a synthetic email like `27821234567@phone.isiko.app`. This is an internal system detail and must not be shown. Real emails stay visible.
+- Remove module-level constants `CARD_W = 320` and `CARD_H_APPROX = 210`.
+- Inside the component, just after `const vw = window.innerWidth; const vh = window.innerHeight;`, declare:
+  - `const CARD_W = Math.min(320, vw - 32);`
+  - `const CARD_H_APPROX = 260;`
+- Update the `'top'` and `'bottom'` cases in `cardStyle()` to flip to the opposite side when there isn't enough room (per the exact code provided in the request).
 
-In the view-mode block of the User Info Card, replace:
-```tsx
-{user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
-```
-with a conditional that also excludes `@phone.isiko.app`.
+### Fix 2 — `src/config/plannerTourSteps.ts`
 
-## Fix 2 — Add address fields to profile editor
+Change the `[data-tour="planner-ceremonies"]` step's `placement` from `'bottom'` to `'top'` so the tooltip doesn't get pushed off-screen by the tall ceremony grid.
 
-The `profiles` table already has `address_line_1`, `address_line_2`, `city`, `postal_code`. Make them editable and viewable for all users (planners + vendors).
+### Note on Settings.tsx
 
-Five sub-edits:
-- **2a** Extend `editData` initial state to include the four address fields.
-- **2b** Populate address fields in `startEditing()` from `profile`.
-- **2c** Include address fields in the Supabase `update()` call in `handleSaveProfile`.
-- **2d** Add address inputs (line 1, line 2, city + postal in a row) to the edit form, and apply the same `@phone.isiko.app` filter to the email shown in edit mode.
-- **2e** In view mode, display a combined address line (`address_line_1, city, postal_code`) below the phone number when `city` is set.
-
-## Fix 3 — Left-align Edit Vendor Profile button
-
-Add `justify-start` to the "Edit Vendor Profile" outline button so its text aligns left, consistent with the role-switch button above it.
-
-## Technical notes
-
-- All address access uses `(profile as any)?.field` to avoid touching `Profile` type imports.
-- No DB schema changes — columns already exist.
-- No changes to AuthContext, AddressFields component, or any other file.
-- Phone-email filter uses `user.email.includes('@phone.isiko.app')` in both view and edit branches for consistency.
+The three Settings.tsx fixes described in the message are already present in the current file (email filter, address fields in edit/view, `justify-start` on the Edit Vendor Profile button). No changes needed there.
