@@ -97,19 +97,19 @@ export function AppSidebar() {
   const initials = (profile?.first_name?.[0] || profile?.full_name?.[0] || 'U').toUpperCase();
 
   const organiserItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/events', icon: Calendar, label: 'My Events' },
-  { to: '/vendors', icon: Store, label: 'Vendors' },
-  { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
-  { to: '/quotes', icon: Receipt, label: 'Quotations' },
-  { to: '/bookings', icon: ShoppingBag, label: 'Orders' }];
+  { to: '/', icon: Home, label: 'Home', dataTour: 'nav-home' },
+  { to: '/events', icon: Calendar, label: 'My Events', dataTour: 'nav-events' },
+  { to: '/vendors', icon: Store, label: 'Vendors', dataTour: 'nav-vendors' },
+  { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount, dataTour: 'nav-messages' },
+  { to: '/quotes', icon: Receipt, label: 'Quotations', dataTour: 'nav-quotes' },
+  { to: '/bookings', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-orders' }];
 
 
   const vendorItems = [
-  { to: '/vendor-dashboard', icon: Home, label: 'Home' },
-  { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount },
-  { to: '/vendor-dashboard/quotations', icon: Receipt, label: 'Quotations' },
-  { to: '/vendor-dashboard/orders', icon: ShoppingBag, label: 'Orders' }];
+  { to: '/vendor-dashboard', icon: Home, label: 'Home', dataTour: 'nav-vendor-home' },
+  { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount, dataTour: 'nav-messages' },
+  { to: '/vendor-dashboard/quotations', icon: Receipt, label: 'Quotations', dataTour: 'nav-vendor-quotations' },
+  { to: '/vendor-dashboard/orders', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-vendor-orders' }];
 
 
   const navItems = activeRole === 'vendor' && canSwitchRole ? vendorItems : organiserItems;
@@ -155,11 +155,12 @@ export function AppSidebar() {
 
         {/* Main nav */}
         <nav className="flex-1 py-2 overflow-y-auto">
-          {navItems.map(({ to, icon: Icon, label, badge }) => {
+          {navItems.map(({ to, icon: Icon, label, badge, dataTour }) => {
             const active = isActive(to);
             const button =
             <button
               key={to}
+              data-tour={dataTour}
               onClick={() => goTo(to)}
               className={cn(
                 'flex items-center gap-3 w-full text-sm font-medium transition-all tap-highlight-none relative',
