@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, FileText, CheckCircle, Store, TrendingUp, Banknote } from 'lucide-react';
+import { Eye, FileText, CheckCircle, Store, TrendingUp, Banknote, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -8,12 +8,16 @@ import { useAuth } from '@/context/AuthContext';
 import { useVendorQuotes } from '@/hooks/useQuotes';
 import { useVendorBookings } from '@/hooks/useBookings';
 import { subDays, isAfter } from 'date-fns';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { useOnboardingTour } from '@/hooks/useOnboardingTour';
+import { VENDOR_TOUR_STEPS } from '@/config/vendorTourSteps';
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
   const { vendorProfile } = useAuth();
   const { quotes, isLoading: quotesLoading } = useVendorQuotes();
   const { bookings, isLoading: bookingsLoading } = useVendorBookings();
+  const { tourActive, completeTour } = useOnboardingTour('vendor');
 
   const isLoading = quotesLoading || bookingsLoading;
   const thirtyDaysAgo = subDays(new Date(), 30);
@@ -65,7 +69,20 @@ export default function VendorDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageHeader title="Dashboard" />
+      <PageHeader
+        title="Dashboard"
+        rightAction={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground"
+            onClick={() => { localStorage.removeItem('umcimbi_vendor_tour_v1'); window.location.reload(); }}
+            title="Replay tour"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        }
+      />
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {/* Incomplete profile banner */}
@@ -89,7 +106,7 @@ export default function VendorDashboard() {
             <h2 className="text-sm font-medium text-muted-foreground">Last 30 days</h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" data-tour="vendor-kpis">
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -149,7 +166,7 @@ export default function VendorDashboard() {
         </div>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3" data-tour="vendor-quick-links">
           <Button variant="outline" className="h-auto py-3" onClick={() => navigate('/profile/vendor')}>
             <Store className="h-4 w-4 mr-2" />
             Edit profile
@@ -160,6 +177,9 @@ export default function VendorDashboard() {
           </Button>
         </div>
       </div>
+      {tourActive && (
+        <OnboardingTour steps={VENDOR_TOUR_STEPS} onComplete={completeTour} />
+      )}
     </div>
   );
 }
