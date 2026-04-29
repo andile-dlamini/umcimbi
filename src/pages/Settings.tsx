@@ -125,13 +125,30 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Input value={editData.full_name} onChange={(e) => setEditData({ ...editData, full_name: e.target.value })} placeholder="Full name" className="h-8" />
                     <Input value={editData.phone_number} onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })} placeholder="Phone number" className="h-8" />
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <Input value={editData.address_line_1} onChange={(e) => setEditData({ ...editData, address_line_1: e.target.value })} placeholder="Address line 1" className="h-8" />
+                    <Input value={editData.address_line_2} onChange={(e) => setEditData({ ...editData, address_line_2: e.target.value })} placeholder="Address line 2 (optional)" className="h-8" />
+                    <div className="flex gap-2">
+                      <Input value={editData.city} onChange={(e) => setEditData({ ...editData, city: e.target.value })} placeholder="City" className="h-8 flex-1" />
+                      <Input value={editData.postal_code} onChange={(e) => setEditData({ ...editData, postal_code: e.target.value })} placeholder="Postal code" className="h-8 w-24" />
+                    </div>
+                    {user?.email && !user.email.includes('@phone.isiko.app') && (
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    )}
                   </div>
                 ) : (
                   <div>
                     <h3 className="text-base font-semibold text-foreground">{profile?.full_name || 'User'}</h3>
-                    {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+                    {user?.email && !user.email.includes('@phone.isiko.app') && (
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    )}
                     {profile?.phone_number && <p className="text-sm text-muted-foreground">{profile.phone_number}</p>}
+                    {(profile as any)?.city && (
+                      <p className="text-sm text-muted-foreground">
+                        {[(profile as any)?.address_line_1, (profile as any)?.city, (profile as any)?.postal_code]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </p>
+                    )}
                     <div className="flex gap-1.5 mt-2">
                       <Badge variant="secondary" className="text-xs">
                         {activeRole === 'vendor' ? 'Vendor' : 'Organiser'}
