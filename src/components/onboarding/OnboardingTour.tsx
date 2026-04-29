@@ -159,7 +159,7 @@ export function OnboardingTour({ steps, onComplete }: OnboardingTourProps) {
           Step {index + 1} of {steps.length}
         </p>
 
-        <h3 className="text-lg font-semibold text-foreground mb-2 font-heading">
+        <h3 className="text-lg font-semibold text-foreground mb-2">
           {step.title}
         </h3>
 
