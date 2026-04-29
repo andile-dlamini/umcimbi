@@ -74,6 +74,8 @@ function getToken(req: Request, payload: Record<string, unknown>) {
   if (auth.toLowerCase().startsWith("bearer ")) return auth.slice(7).trim();
   return String(
     req.headers.get("x-access-token") ??
+      req.headers.get("AccessToken") ??
+      req.headers.get("accesstoken") ??
       payload.AccessToken ??
       payload.accessToken ??
       payload.access_token ??
