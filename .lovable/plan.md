@@ -1,19 +1,33 @@
-## Two targeted fixes
+## Wire page navigation into onboarding tour
 
-### Fix 1 — `src/components/onboarding/OnboardingTour.tsx`
+Three targeted edits to make the tour navigate to the relevant route as the user steps through it.
 
-Make the tooltip card responsive and auto-flip when it would overflow the viewport.
+### 1. `src/components/onboarding/OnboardingTour.tsx`
+- Import `useNavigate` from `react-router-dom`.
+- Add optional `navigateTo?: string` field to the `TourStep` interface.
+- Initialize `const navigate = useNavigate()` inside the component.
+- Update the step-change `useEffect` to:
+  - Call `navigate(step.navigateTo)` first when present.
+  - Defer the `querySelector` + `scrollIntoView` + `measure` inside a `setTimeout(..., 150)` to allow the route to render before measuring, with a cleanup `clearTimeout`.
+  - Fallback to `measure()` if the target isn't found yet.
 
-- Remove module-level constants `CARD_W = 320` and `CARD_H_APPROX = 210`.
-- Inside the component, just after `const vw = window.innerWidth; const vh = window.innerHeight;`, declare:
-  - `const CARD_W = Math.min(320, vw - 32);`
-  - `const CARD_H_APPROX = 260;`
-- Update the `'top'` and `'bottom'` cases in `cardStyle()` to flip to the opposite side when there isn't enough room (per the exact code provided in the request).
+### 2. `src/config/plannerTourSteps.ts`
+Replace file contents with the new array that adds `navigateTo` to each sidebar/nav step:
+- `planner-ceremonies` → `/`
+- `nav-events` → `/events`
+- `nav-vendors` → `/vendors`
+- `nav-messages` → `/chats`
+- `nav-quotes` → `/quotes`
+- `nav-orders` → `/bookings`
+- Final center step → `/`
 
-### Fix 2 — `src/config/plannerTourSteps.ts`
+### 3. `src/config/vendorTourSteps.ts`
+Replace file contents with the new array that adds `navigateTo` to each step:
+- `vendor-kpis` → `/vendor-dashboard`
+- `vendor-quick-links` → `/vendor-dashboard`
+- `nav-messages` → `/chats`
+- `nav-vendor-quotations` → `/vendor-dashboard/quotations`
+- `nav-vendor-orders` → `/vendor-dashboard/orders`
+- Final center step → `/vendor-dashboard`
 
-Change the `[data-tour="planner-ceremonies"]` step's `placement` from `'bottom'` to `'top'` so the tooltip doesn't get pushed off-screen by the tall ceremony grid.
-
-### Note on Settings.tsx
-
-The three Settings.tsx fixes described in the message are already present in the current file (email filter, address fields in edit/view, `justify-start` on the Edit Vendor Profile button). No changes needed there.
+No other files touched.
