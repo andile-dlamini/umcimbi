@@ -245,6 +245,24 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Help / Replay tour */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <HelpCircle className="h-4 w-4" /> Help
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              New to Umcimbi? Replay the guided platform tour at any time.
+            </p>
+            <Button variant="outline" className="w-full" onClick={handleReplayTour}>
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Replay platform tour
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
