@@ -26,7 +26,14 @@ export default function SettingsPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editData, setEditData] = useState({ full_name: '', phone_number: '' });
+  const [editData, setEditData] = useState({
+    full_name: '',
+    phone_number: '',
+    address_line_1: '',
+    address_line_2: '',
+    city: '',
+    postal_code: '',
+  });
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -50,6 +57,10 @@ export default function SettingsPage() {
     setEditData({
       full_name: profile?.full_name || '',
       phone_number: profile?.phone_number || '',
+      address_line_1: (profile as any)?.address_line_1 || '',
+      address_line_2: (profile as any)?.address_line_2 || '',
+      city: (profile as any)?.city || '',
+      postal_code: (profile as any)?.postal_code || '',
     });
     setIsEditing(true);
   };
@@ -59,7 +70,14 @@ export default function SettingsPage() {
     setIsSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: editData.full_name || null, phone_number: editData.phone_number || null })
+      .update({
+        full_name: editData.full_name || null,
+        phone_number: editData.phone_number || null,
+        address_line_1: editData.address_line_1 || null,
+        address_line_2: editData.address_line_2 || null,
+        city: editData.city || null,
+        postal_code: editData.postal_code || null,
+      })
       .eq('user_id', user.id);
     if (error) {
       toast.error('Failed to update profile');
@@ -107,13 +125,30 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Input value={editData.full_name} onChange={(e) => setEditData({ ...editData, full_name: e.target.value })} placeholder="Full name" className="h-8" />
                     <Input value={editData.phone_number} onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })} placeholder="Phone number" className="h-8" />
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <Input value={editData.address_line_1} onChange={(e) => setEditData({ ...editData, address_line_1: e.target.value })} placeholder="Address line 1" className="h-8" />
+                    <Input value={editData.address_line_2} onChange={(e) => setEditData({ ...editData, address_line_2: e.target.value })} placeholder="Address line 2 (optional)" className="h-8" />
+                    <div className="flex gap-2">
+                      <Input value={editData.city} onChange={(e) => setEditData({ ...editData, city: e.target.value })} placeholder="City" className="h-8 flex-1" />
+                      <Input value={editData.postal_code} onChange={(e) => setEditData({ ...editData, postal_code: e.target.value })} placeholder="Postal code" className="h-8 w-24" />
+                    </div>
+                    {user?.email && !user.email.includes('@phone.isiko.app') && (
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    )}
                   </div>
                 ) : (
                   <div>
                     <h3 className="text-base font-semibold text-foreground">{profile?.full_name || 'User'}</h3>
-                    {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+                    {user?.email && !user.email.includes('@phone.isiko.app') && (
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    )}
                     {profile?.phone_number && <p className="text-sm text-muted-foreground">{profile.phone_number}</p>}
+                    {(profile as any)?.city && (
+                      <p className="text-sm text-muted-foreground">
+                        {[(profile as any)?.address_line_1, (profile as any)?.city, (profile as any)?.postal_code]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </p>
+                    )}
                     <div className="flex gap-1.5 mt-2">
                       <Badge variant="secondary" className="text-xs">
                         {activeRole === 'vendor' ? 'Vendor' : 'Organiser'}
@@ -153,7 +188,7 @@ export default function SettingsPage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 )}
-                <Button variant="outline" className="w-full" onClick={() => navigate('/profile/vendor')}>
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/profile/vendor')}>
                   Edit Vendor Profile
                 </Button>
               </>
