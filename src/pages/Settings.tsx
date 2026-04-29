@@ -188,7 +188,7 @@ export default function SettingsPage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 )}
-                <Button variant="outline" className="w-full" onClick={() => navigate('/profile/vendor')}>
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/profile/vendor')}>
                   Edit Vendor Profile
                 </Button>
               </>
