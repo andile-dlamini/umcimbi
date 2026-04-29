@@ -12,8 +12,7 @@ export function useOnboardingTour(role: TourRole) {
 
   useEffect(() => {
     if (!localStorage.getItem(KEYS[role])) {
-      const t = setTimeout(() => setTourActive(true), 900);
-      return () => clearTimeout(t);
+      setTourActive(true);
     }
   }, [role]);
 

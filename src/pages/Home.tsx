@@ -13,9 +13,6 @@ import { getEventTypeInfo, EventType } from '@/types/database';
 import { learnArticles } from '@/data/learnArticles';
 import { differenceInDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
-import { useOnboardingTour } from '@/hooks/useOnboardingTour';
-import { PLANNER_TOUR_STEPS } from '@/config/plannerTourSteps';
 
 const SUPPORTED_TYPES: EventType[] = ['lobola', 'umembeso', 'umbondo', 'umabo', 'umemulo', 'imbeleko', 'ancestral_ritual'];
 

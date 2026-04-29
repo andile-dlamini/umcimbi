@@ -3,6 +3,12 @@ import { useLocation } from 'react-router-dom';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { InstallPrompt } from '@/components/shared/InstallPrompt';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import { useRole } from '@/context/RoleContext';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { useOnboardingTour } from '@/hooks/useOnboardingTour';
+import { PLANNER_TOUR_STEPS } from '@/config/plannerTourSteps';
+import { VENDOR_TOUR_STEPS } from '@/config/vendorTourSteps';
 
 interface AppShellProps {
   children: ReactNode;
@@ -10,6 +16,23 @@ interface AppShellProps {
 
 /** Pages that should NOT show the sidebar */
 const HIDE_NAV_ROUTES = ['/onboarding', '/auth', '/chat/'];
+
+function TourController() {
+  const { isVendor } = useAuth();
+  const { activeRole } = useRole();
+  const isInVendorMode = isVendor && activeRole === 'vendor';
+
+  const planner = useOnboardingTour('planner');
+  const vendor = useOnboardingTour('vendor');
+
+  if (isInVendorMode && vendor.tourActive) {
+    return <OnboardingTour steps={VENDOR_TOUR_STEPS} onComplete={vendor.completeTour} />;
+  }
+  if (!isInVendorMode && planner.tourActive) {
+    return <OnboardingTour steps={PLANNER_TOUR_STEPS} onComplete={planner.completeTour} />;
+  }
+  return null;
+}
 
 export function AppShell({ children }: AppShellProps) {
   const location = useLocation();
@@ -28,6 +51,7 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </main>
       <InstallPrompt />
+      <TourController />
     </div>
   );
 }
