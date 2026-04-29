@@ -22,7 +22,12 @@ export function useOnboardingTour(role: TourRole) {
     setTourActive(false);
   };
 
-  return { tourActive, completeTour };
+  const replayTour = () => {
+    localStorage.removeItem(KEYS[role]);
+    setTourActive(true);
+  };
+
+  return { tourActive, completeTour, replayTour };
 }
 
 // Exported so Settings page can clear and re-trigger tours by navigating back

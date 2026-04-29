@@ -17,7 +17,7 @@ export default function VendorDashboard() {
   const { vendorProfile } = useAuth();
   const { quotes, isLoading: quotesLoading } = useVendorQuotes();
   const { bookings, isLoading: bookingsLoading } = useVendorBookings();
-  const { tourActive, completeTour } = useOnboardingTour('vendor');
+  const { tourActive, completeTour, replayTour } = useOnboardingTour('vendor');
 
   const isLoading = quotesLoading || bookingsLoading;
   const thirtyDaysAgo = subDays(new Date(), 30);
@@ -76,7 +76,7 @@ export default function VendorDashboard() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground"
-            onClick={() => { localStorage.removeItem('umcimbi_vendor_tour_v1'); window.location.reload(); }}
+            onClick={replayTour}
             title="Replay tour"
           >
             <HelpCircle className="h-4 w-4" />
