@@ -8,16 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useVendorQuotes } from '@/hooks/useQuotes';
 import { useVendorBookings } from '@/hooks/useBookings';
 import { subDays, isAfter } from 'date-fns';
-import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useOnboardingTour } from '@/hooks/useOnboardingTour';
-import { VENDOR_TOUR_STEPS } from '@/config/vendorTourSteps';
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
   const { vendorProfile } = useAuth();
   const { quotes, isLoading: quotesLoading } = useVendorQuotes();
   const { bookings, isLoading: bookingsLoading } = useVendorBookings();
-  const { tourActive, completeTour, replayTour } = useOnboardingTour('vendor');
+  const { replayTour } = useOnboardingTour('vendor');
 
   const isLoading = quotesLoading || bookingsLoading;
   const thirtyDaysAgo = subDays(new Date(), 30);
@@ -177,9 +175,6 @@ export default function VendorDashboard() {
           </Button>
         </div>
       </div>
-      {tourActive && (
-        <OnboardingTour steps={VENDOR_TOUR_STEPS} onComplete={completeTour} />
-      )}
     </div>
   );
 }
