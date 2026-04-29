@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { X, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export interface TourStep {
   placement: 'center' | 'right' | 'bottom' | 'top';
   title: string;
   body: string;
+  navigateTo?: string; // optional route to navigate to when this step becomes active
 }
 
 interface OnboardingTourProps {
@@ -29,6 +31,7 @@ function getSpot(selector: string): DOMRect | null {
 export function OnboardingTour({ steps, onComplete }: OnboardingTourProps) {
   const [index, setIndex] = useState(0);
   const [spot, setSpot] = useState<DOMRect | null>(null);
+  const navigate = useNavigate();
 
   const step = steps[index];
 
@@ -43,12 +46,21 @@ export function OnboardingTour({ steps, onComplete }: OnboardingTourProps) {
   }, [measure]);
 
   useEffect(() => {
+    if (step.navigateTo) {
+      navigate(step.navigateTo);
+    }
     if (step.target !== 'center') {
-      const el = document.querySelector(step.target);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        setTimeout(measure, 420);
-      }
+      // Wait for navigation + render before measuring and scrolling
+      const t = setTimeout(() => {
+        const el = document.querySelector(step.target);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          setTimeout(measure, 420);
+        } else {
+          measure();
+        }
+      }, 150);
+      return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
