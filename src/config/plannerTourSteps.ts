@@ -9,7 +9,7 @@ export const PLANNER_TOUR_STEPS: TourStep[] = [
   },
   {
     target: '[data-tour="planner-ceremonies"]',
-    placement: 'bottom',
+    placement: 'top',
     title: 'Start by choosing a ceremony',
     body: "Each tile represents a ceremony type — Lobola, Umabo, Umemulo, and more. Tap any one to create an event and start planning. Umcimbi will guide you through every step.",
   },
