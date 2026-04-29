@@ -39,6 +39,8 @@ project_id = "pnnckeqrzjglcwkyzzxg"
     verify_jwt = false
   [functions.send-quote]
     verify_jwt = false
+  [functions.test-payout-verification]
+    verify_jwt = false
   [functions.trigger-vendor-payout]
     verify_jwt = false
   [functions.upload-delivery-proof]
