@@ -8,6 +8,13 @@ export const PLANNER_TOUR_STEPS: TourStep[] = [
     body: "Umcimbi connects families planning traditional Zulu ceremonies with trusted, vetted vendors. Let's take 2 minutes to show you how everything works.",
   },
   {
+    target: '[data-tour="nav-home"]',
+    placement: 'right',
+    navigateTo: '/',
+    title: 'Your home base',
+    body: 'This is where you start every session. From here you can launch a new ceremony, pick up where you left off, and see your planning journey at a glance.',
+  },
+  {
     target: '[data-tour="planner-ceremonies"]',
     placement: 'top',
     navigateTo: '/',

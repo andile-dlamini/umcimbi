@@ -8,6 +8,13 @@ export const VENDOR_TOUR_STEPS: TourStep[] = [
     body: "You're now part of Umcimbi's vendor network. Let's walk you through your dashboard so you know exactly what to do when your first booking request arrives.",
   },
   {
+    target: '[data-tour="nav-vendor-home"]',
+    placement: 'right',
+    navigateTo: '/vendor-dashboard',
+    title: 'Your vendor dashboard',
+    body: 'This is your home as a vendor. It shows your performance stats and quick links to manage your profile. You will land here every time you log in.',
+  },
+  {
     target: '[data-tour="vendor-kpis"]',
     placement: 'bottom',
     navigateTo: '/vendor-dashboard',
