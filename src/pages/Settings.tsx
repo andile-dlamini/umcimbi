@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight } from 'lucide-react';
+import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle } from 'lucide-react';
+import { clearTour } from '@/hooks/useOnboardingTour';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -34,6 +35,16 @@ export default function SettingsPage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const handleReplayTour = () => {
+    if (activeRole === 'vendor' && canSwitchRole) {
+      clearTour('vendor');
+      navigate('/vendor-dashboard');
+    } else {
+      clearTour('planner');
+      navigate('/');
+    }
+  };
 
   const startEditing = () => {
     setEditData({
