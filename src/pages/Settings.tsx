@@ -26,7 +26,14 @@ export default function SettingsPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editData, setEditData] = useState({ full_name: '', phone_number: '' });
+  const [editData, setEditData] = useState({
+    full_name: '',
+    phone_number: '',
+    address_line_1: '',
+    address_line_2: '',
+    city: '',
+    postal_code: '',
+  });
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -50,6 +57,10 @@ export default function SettingsPage() {
     setEditData({
       full_name: profile?.full_name || '',
       phone_number: profile?.phone_number || '',
+      address_line_1: (profile as any)?.address_line_1 || '',
+      address_line_2: (profile as any)?.address_line_2 || '',
+      city: (profile as any)?.city || '',
+      postal_code: (profile as any)?.postal_code || '',
     });
     setIsEditing(true);
   };
@@ -59,7 +70,14 @@ export default function SettingsPage() {
     setIsSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: editData.full_name || null, phone_number: editData.phone_number || null })
+      .update({
+        full_name: editData.full_name || null,
+        phone_number: editData.phone_number || null,
+        address_line_1: editData.address_line_1 || null,
+        address_line_2: editData.address_line_2 || null,
+        city: editData.city || null,
+        postal_code: editData.postal_code || null,
+      })
       .eq('user_id', user.id);
     if (error) {
       toast.error('Failed to update profile');
