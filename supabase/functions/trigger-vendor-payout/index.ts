@@ -66,9 +66,11 @@ function normalizeInitialStatus(response: Record<string, unknown>, ok: boolean) 
   const ps = getPayoutStatusObject(response);
   if (ps) {
     const code = Number(ps.status ?? ps.Status);
-    const subCode = Number(ps.subStatus ?? ps.SubStatus);
-    if ((code === 1 || code === 3) && subCode === 101) return "failed";
-    if (code === 1 || code === 3) return "submitted";
+    if (code === 1 || code === 3) {
+      const sub = Number(ps.subStatus ?? ps.SubStatus ?? 0);
+      if (sub === 101) return "failed";
+      return "submitted";
+    }
     return "failed";
   }
   // Fallback: legacy string-based status checking
@@ -189,7 +191,7 @@ Deno.serve(async (req) => {
     // 2. References (max 20 chars; alphanumeric + dashes)
     const internalReference = `UMC-P-${Date.now()}-${booking.id.replace(/-/g, "").slice(0, 8)}`;
     const merchantReference = (booking.order_number ?? booking.id).substring(0, 20);
-    const customerBankReference = `UMC-${booking.id.substring(0, 14)}`.substring(0, 20);
+    const customerBankReference = `UMC-${booking.id.substring(0, 9)}-${Date.now().toString().slice(-4)}`.substring(0, 20);
     const amountInCents = Math.round(amount * 100);
 
     // 3. Encrypt account number per Ozow spec (AES-256-CBC, base64 output)
