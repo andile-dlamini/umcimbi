@@ -96,6 +96,7 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 Deno.serve(async (req) => {
+  console.log("[VERIFY] Incoming request:", req.method, req.url, JSON.stringify(Object.fromEntries(req.headers.entries())));
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (!["GET", "POST"].includes(req.method)) return jsonResponse({ IsVerified: false, Reason: "Method not allowed" }, 405);
 
