@@ -13,19 +13,25 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+    let booking_id = "824a1cb4-970a-4069-a2c9-89b04e429dce";
+    try {
+      const body = await req.json();
+      if (body?.booking_id) booking_id = body.booking_id;
+    } catch (_) { /* ignore */ }
+
     const upstream = await fetch(`${supabaseUrl}/functions/v1/trigger-vendor-payout`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${serviceKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ booking_id: "2b5849ae-2250-4a65-9422-445f8815a0e5" }),
+      body: JSON.stringify({ booking_id }),
     });
 
     const text = await upstream.text();
 
     return new Response(
-      JSON.stringify({ status: upstream.status, body: text }),
+      JSON.stringify({ status: upstream.status, body: text, booking_id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
