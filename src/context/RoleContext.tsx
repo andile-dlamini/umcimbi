@@ -25,6 +25,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       } else {
         setActiveRole('organiser');
       }
+    } else if (!savedRole && isVendor) {
+      // No saved preference — default vendors to vendor mode automatically
+      setActiveRole('vendor');
     }
   }, [isVendor]);
 
