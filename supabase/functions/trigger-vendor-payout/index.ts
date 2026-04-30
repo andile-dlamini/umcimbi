@@ -66,6 +66,8 @@ function normalizeInitialStatus(response: Record<string, unknown>, ok: boolean) 
   const ps = getPayoutStatusObject(response);
   if (ps) {
     const code = Number(ps.status ?? ps.Status);
+    const subCode = Number(ps.subStatus ?? ps.SubStatus);
+    if ((code === 1 || code === 3) && subCode === 101) return "failed";
     if (code === 1 || code === 3) return "submitted";
     return "failed";
   }
