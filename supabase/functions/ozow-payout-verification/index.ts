@@ -97,7 +97,7 @@ function bytesToHex(bytes: Uint8Array): string {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (!["GET", "POST"].includes(req.method)) return jsonResponse({ isVerified: false, reason: "Method not allowed" }, 405);
+  if (!["GET", "POST"].includes(req.method)) return jsonResponse({ IsVerified: false, Reason: "Method not allowed" }, 405);
 
   try {
     const configuredToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
 
     if (!configuredToken || !ozowSiteCode || !ozowPayoutApiKey) {
-      return jsonResponse({ isVerified: false, reason: "Verification unavailable" }, 500);
+      return jsonResponse({ IsVerified: false, Reason: "Verification unavailable" }, 500);
     }
 
     const payload = req.method === "GET" ? Object.fromEntries(new URL(req.url).searchParams) : await parsePayload(req);
@@ -178,23 +178,23 @@ Deno.serve(async (req) => {
     });
 
     if (!tokenAuthorized) {
-      return jsonResponse({ payoutId: payoutId, isVerified: false, reason: "Unauthorized" }, 401);
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Unauthorized" }, 401);
     }
     if (!vendorPayout || !vendorPayout.encryption_key) {
-      return jsonResponse({ payoutId: payoutId, isVerified: false, reason: "Payout not found" }, 404);
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Payout not found" }, 404);
     }
     if (!hashOk) {
-      return jsonResponse({ payoutId: payoutId, isVerified: false, reason: "Hash mismatch" }, 200);
+      return jsonResponse({ PayoutId: payoutId, IsVerified: false, Reason: "Hash mismatch" }, 200);
     }
 
     return jsonResponse({
-      payoutId: payoutId,
-      isVerified: true,
-      accountNumberDecryptionKey: vendorPayout.encryption_key,
-      reason: "",
+      PayoutId: payoutId,
+      IsVerified: true,
+      AccountNumberDecryptionKey: vendorPayout.encryption_key,
+      Reason: "",
     });
   } catch (err) {
     console.error("ozow-payout-verification error:", err);
-    return jsonResponse({ isVerified: false, reason: "Internal server error" }, 500);
+    return jsonResponse({ IsVerified: false, Reason: "Internal server error" }, 500);
   }
 });
