@@ -1,13 +1,39 @@
-## Plan
+# Fix ozow-payout-verification hash computation
 
-Update `src/context/RoleContext.tsx` so newly registered vendors land in vendor mode by default.
+Apply two targeted fixes to `supabase/functions/ozow-payout-verification/index.ts` so the hash matches what Ozow sends during the verification callback.
 
-### Change
+## Fix 1 — Extract nested `bankingDetails` fields
 
-In the `useEffect` that loads the saved role preference, add an `else if` branch: when there is no `savedRole` in localStorage and `isVendor` is true, call `setActiveRole('vendor')`.
+After the existing `pick()` calls for `branchCode` and `incomingHash`, add resolution helpers that fall back to fields nested under `payload.bankingDetails`:
 
-### File
+```typescript
+const bankingDetails = (payload.bankingDetails as Record<string, unknown>) ?? {};
+const resolvedBankGroupId = bankGroupId || String(bankingDetails.bankGroupId ?? bankingDetails.BankGroupId ?? "");
+const resolvedAccountNumber = accountNumber || String(bankingDetails.accountNumber ?? bankingDetails.AccountNumber ?? "");
+const resolvedBranchCode = branchCode || String(bankingDetails.branchCode ?? bankingDetails.BranchCode ?? "");
+```
 
-- `src/context/RoleContext.tsx` — replace the existing `useEffect` block (lines ~19-29) with the version that includes the new `else if (!savedRole && isVendor)` branch defaulting vendors to vendor mode.
+Then in the hash computation (the `[ payoutId, ozowSiteCode, amountInCents, ... ].join("")` array), replace:
+- `bankGroupId` → `resolvedBankGroupId`
+- `accountNumber` → `resolvedAccountNumber`
+- `branchCode` → `resolvedBranchCode`
 
-No other files are touched.
+## Fix 2 — Convert amount to cents for hash
+
+Replace:
+
+```typescript
+const amountInCents = pick(payload, ["AmountInCents", "amountInCents", "amount_in_cents", "Amount", "amount"]);
+```
+
+With:
+
+```typescript
+const rawAmount = pick(payload, ["AmountInCents", "amountInCents", "amount_in_cents", "Amount", "amount"]);
+const amountInCents = String(Math.round(parseFloat(rawAmount || "0") * 100));
+```
+
+## Deploy & verify
+
+- Redeploy `ozow-payout-verification`.
+- No other lines in the file change.

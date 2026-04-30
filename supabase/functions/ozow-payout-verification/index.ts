@@ -117,13 +117,20 @@ Deno.serve(async (req) => {
     const payoutId = pick(payload, ["PayoutId", "payoutId", "payout_id"]);
     const merchantReference = pick(payload, ["MerchantReference", "merchantReference", "merchant_reference"]);
     const customerBankReference = pick(payload, ["CustomerBankReference", "customerBankReference", "customer_bank_reference"]);
-    const amountInCents = pick(payload, ["AmountInCents", "amountInCents", "amount_in_cents", "Amount", "amount"]);
+    const rawAmount = pick(payload, ["AmountInCents", "amountInCents", "amount_in_cents", "Amount", "amount"]);
+    const amountInCents = String(Math.round(parseFloat(rawAmount || "0") * 100));
     const isRtc = pick(payload, ["IsRtc", "isRtc", "is_rtc"]);
     const notifyUrl = pick(payload, ["NotifyUrl", "notifyUrl", "notify_url"]);
     const bankGroupId = pick(payload, ["BankGroupId", "bankGroupId", "bank_group_id"]);
     const accountNumber = pick(payload, ["AccountNumber", "accountNumber", "account_number"]);
     const branchCode = pick(payload, ["BranchCode", "branchCode", "branch_code"]);
     const incomingHash = pick(payload, ["HashCheck", "hashCheck", "hash_check"]);
+
+    // Extract bankingDetails nested fields if present
+    const bankingDetails = (payload.bankingDetails as Record<string, unknown>) ?? {};
+    const resolvedBankGroupId = bankGroupId || String(bankingDetails.bankGroupId ?? bankingDetails.BankGroupId ?? "");
+    const resolvedAccountNumber = accountNumber || String(bankingDetails.accountNumber ?? bankingDetails.AccountNumber ?? "");
+    const resolvedBranchCode = branchCode || String(bankingDetails.branchCode ?? bankingDetails.BranchCode ?? "");
 
     // Locate the payout by any reference we have
     let vendorPayout: { id: string; encryption_key: string | null } | null = null;
@@ -151,9 +158,9 @@ Deno.serve(async (req) => {
         customerBankReference,
         isRtc,
         notifyUrl,
-        bankGroupId,
-        accountNumber,
-        branchCode,
+        resolvedBankGroupId,
+        resolvedAccountNumber,
+        resolvedBranchCode,
         ozowPayoutApiKey,
       ].join("").toLowerCase();
       const hashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(hashInput));
