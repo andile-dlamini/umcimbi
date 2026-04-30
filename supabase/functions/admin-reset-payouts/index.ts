@@ -7,14 +7,34 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, serviceKey);
   const { booking_id } = await req.json();
-  const { data, error } = await supabase
+
+  const { data: updated, error } = await supabase
     .from("vendor_payouts")
     .update({ status: "failed" })
     .eq("booking_id", booking_id)
     .select("id, status");
-  return new Response(JSON.stringify({ data, error }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+  const triggerRes = await fetch(`${supabaseUrl}/functions/v1/test-trigger-payout`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${serviceKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ booking_id }),
   });
+  const triggerText = await triggerRes.text();
+  let triggerBody: unknown = triggerText;
+  try { triggerBody = JSON.parse(triggerText); } catch { /* keep text */ }
+
+  return new Response(
+    JSON.stringify({
+      reset: { updated, error },
+      trigger: { status: triggerRes.status, body: triggerBody },
+    }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 });
