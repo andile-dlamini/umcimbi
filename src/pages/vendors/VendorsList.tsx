@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { trackEvent } from '@/lib/trackEvent';
+import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,7 @@ export default function VendorsList() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
   const { events } = useEvents();
+  const { user } = useAuth();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
     selectedEventId || undefined,
     { 
