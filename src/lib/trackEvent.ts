@@ -24,14 +24,14 @@ function getSessionId(): string {
 
 export async function trackEvent(payload: TrackEventPayload): Promise<void> {
   try {
-    await supabase.from('platform_events').insert({
+    await supabase.from('platform_events').insert([{
       event_type: payload.event_type,
       actor_type: payload.actor_type,
       actor_id: payload.actor_id ?? null,
       session_id: getSessionId(),
       ceremony_type: payload.ceremony_type ?? null,
-      metadata: payload.metadata ?? {},
-    });
+      metadata: (payload.metadata ?? {}) as never,
+    }]);
   } catch {
     // Silent — tracking must never interrupt the user experience
   }
