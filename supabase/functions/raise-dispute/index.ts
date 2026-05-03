@@ -122,31 +122,84 @@ Deno.serve(async (req) => {
         .eq("id", conv.id);
     }
 
-    // Send admin notification email (fail-safe)
+    // Send admin notification email via the working enqueue_email pattern
+    // (matches auth-email-hook). The transactional_emails pgmq queue is drained
+    // by the process-email-queue cron, which actually delivers the email.
     try {
       const adminEmail = Deno.env.get("ADMIN_EMAIL");
       if (adminEmail) {
-        await fetch(supabaseUrl + "/functions/v1/send-transactional-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + supabaseServiceKey,
-          },
-          body: JSON.stringify({
-            to: adminEmail,
-            subject: `🚨 Dispute raised — Booking ${booking_id}`,
-            html: `
-              <h2>Dispute Raised on Umcimbi</h2>
-              <p><strong>Booking ID:</strong> ${booking_id}</p>
-              <p><strong>Raised by:</strong> ${raised_by}</p>
-              <p><strong>Raised at:</strong> ${new Date().toISOString()}</p>
-              <p><strong>Amount held:</strong> R${booking.balance_amount?.toLocaleString()}</p>
-              <p><strong>Client ID:</strong> ${booking.client_id}</p>
-              <p><strong>Vendor ID:</strong> ${booking.vendor_id}</p>
-              <p><a href="https://www.umcimbi.co.za/admin/bookings/${booking_id}">View booking</a></p>
-            `,
-          }),
+        const messageId = crypto.randomUUID();
+        const raisedAt = new Date().toISOString();
+        const amountHeld = booking.balance_amount
+          ? `R${Number(booking.balance_amount).toLocaleString("en-ZA")}`
+          : "Unknown";
+        const subject = `Dispute raised — Booking ${booking_id}`;
+
+        // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+        await supabase.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "admin_dispute_alert",
+          recipient_email: adminEmail,
+          status: "pending",
         });
+
+        const html = `<!DOCTYPE html>
+<html><body style="font-family: Arial, sans-serif; background:#ffffff; color:#1a1a1a; padding:24px;">
+  <div style="max-width:560px; margin:0 auto; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+    <div style="background:#4B0082; color:#ffffff; padding:20px 24px;">
+      <h2 style="margin:0; font-size:20px;">Dispute raised</h2>
+      <p style="margin:4px 0 0; font-size:13px; opacity:0.85;">Action required</p>
+    </div>
+    <div style="padding:24px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+        <tr><td style="padding:6px 0; color:#555;">Booking ID</td><td style="padding:6px 0;"><strong>${booking_id}</strong></td></tr>
+        <tr><td style="padding:6px 0; color:#555;">Raised by</td><td style="padding:6px 0;"><strong>${raised_by}</strong></td></tr>
+        <tr><td style="padding:6px 0; color:#555;">Raised at</td><td style="padding:6px 0;">${raisedAt}</td></tr>
+        <tr><td style="padding:6px 0; color:#555;">Amount held</td><td style="padding:6px 0;"><strong>${amountHeld}</strong></td></tr>
+        <tr><td style="padding:6px 0; color:#555;">Client ID</td><td style="padding:6px 0;">${booking.client_id}</td></tr>
+        <tr><td style="padding:6px 0; color:#555;">Vendor ID</td><td style="padding:6px 0;">${booking.vendor_id}</td></tr>
+      </table>
+      <div style="margin-top:24px;">
+        <a href="https://www.umcimbi.co.za/admin/bookings/${booking_id}" style="display:inline-block; background:#4B0082; color:#ffffff; padding:12px 20px; border-radius:8px; text-decoration:none; font-weight:600;">View booking</a>
+      </div>
+    </div>
+    <div style="padding:14px 24px; background:#f9fafb; font-size:12px; color:#6b7280;">UMCIMBI admin alert</div>
+  </div>
+</body></html>`;
+
+        const text = `Dispute raised on UMCIMBI
+
+Booking ID: ${booking_id}
+Raised by: ${raised_by}
+Raised at: ${raisedAt}
+Amount held: ${amountHeld}
+Client ID: ${booking.client_id}
+Vendor ID: ${booking.vendor_id}
+
+View booking: https://www.umcimbi.co.za/admin/bookings/${booking_id}`;
+
+        const { error: enqueueError } = await supabase.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
+          payload: {
+            message_id: messageId,
+            to: adminEmail,
+            from: "UMCIMBI <noreply@umcimbi.co.za>",
+            sender_domain: "notify.umcimbi.co.za",
+            subject,
+            html,
+            text,
+            purpose: "transactional",
+            label: "admin_dispute_alert",
+            queued_at: new Date().toISOString(),
+          },
+        });
+
+        if (enqueueError) {
+          console.error("Failed to enqueue dispute email:", enqueueError);
+          await supabase.from("email_send_log")
+            .update({ status: "failed", error_message: "Failed to enqueue: " + enqueueError.message })
+            .eq("message_id", messageId);
+        }
       }
     } catch (emailErr) {
       console.error("Admin dispute email failed:", emailErr);
