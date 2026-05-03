@@ -257,6 +257,37 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* AI Daily Brief */}
+      <Card className="border-l-4 border-l-primary bg-gradient-to-br from-primary/5 to-transparent">
+        {briefLoading ? (
+          <CardContent className="p-5 space-y-3">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/6" />
+          </CardContent>
+        ) : (
+          <>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Daily Brief
+              </CardTitle>
+              {dailyBrief && (
+                <span className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(dailyBrief.generated_at), { addSuffix: true })}
+                </span>
+              )}
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                {dailyBrief?.brief_text ?? 'Your first brief will appear here at 07:00 SAST tomorrow. You will also receive it by email.'}
+              </p>
+            </CardContent>
+          </>
+        )}
+      </Card>
+
       {/* Real account statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {accountCards.map(card => {
