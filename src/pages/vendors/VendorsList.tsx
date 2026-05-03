@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { trackEvent } from '@/lib/trackEvent';
+import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,7 @@ export default function VendorsList() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
   const { events } = useEvents();
+  const { user } = useAuth();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
     selectedEventId || undefined,
     { 
@@ -32,6 +35,29 @@ export default function VendorsList() {
       superVendorsOnly,
     }
   );
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      trackEvent({
+        event_type: vendors.length === 0 ? 'search_zero_results' : 'search_performed',
+        actor_type: 'organiser',
+        actor_id: user?.id,
+        metadata: {
+          query: search || null,
+          category: category !== 'all' ? category : null,
+          location: locationFilter || null,
+          verified_only: verifiedOnly,
+          super_vendors_only: superVendorsOnly,
+          results_count: vendors.length,
+        },
+      });
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [search, category, locationFilter, verifiedOnly, superVendorsOnly, vendors.length, isLoading, user?.id]);
 
   return (
     <div className="min-h-screen pb-safe">

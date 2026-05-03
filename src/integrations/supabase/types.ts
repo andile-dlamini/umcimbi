@@ -282,6 +282,30 @@ export type Database = {
           },
         ]
       }
+      daily_briefs: {
+        Row: {
+          brief_text: string
+          email_sent: boolean
+          generated_at: string
+          id: string
+          raw_stats: Json
+        }
+        Insert: {
+          brief_text: string
+          email_sent?: boolean
+          generated_at?: string
+          id?: string
+          raw_stats?: Json
+        }
+        Update: {
+          brief_text?: string
+          email_sent?: boolean
+          generated_at?: string
+          id?: string
+          raw_stats?: Json
+        }
+        Relationships: []
+      }
       delivery_proofs: {
         Row: {
           booking_id: string
@@ -724,6 +748,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_events: {
+        Row: {
+          actor_id: string | null
+          actor_type: string | null
+          ceremony_type: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          session_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type?: string | null
+          ceremony_type?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          session_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string | null
+          ceremony_type?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          session_id?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
