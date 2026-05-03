@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Store, BarChart3, Users } from 'lucide-react';
+import { Store, BarChart3, Users, Sparkles } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,23 @@ export default function AdminDashboard() {
   const [vendorsJoinedThisMonth, setVendorsJoinedThisMonth] = useState(0);
   const [totalOrganisers, setTotalOrganisers] = useState(0);
   const [organisersJoinedThisMonth, setOrganisersJoinedThisMonth] = useState(0);
+
+  // AI Daily Brief
+  const [dailyBrief, setDailyBrief] = useState<{ brief_text: string; generated_at: string } | null>(null);
+  const [briefLoading, setBriefLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('daily_briefs')
+        .select('brief_text, generated_at')
+        .order('generated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setDailyBrief(data ?? null);
+      setBriefLoading(false);
+    })();
+  }, []);
 
   useEffect(() => {
     const fetchAll = async () => {
