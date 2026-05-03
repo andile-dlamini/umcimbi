@@ -3,6 +3,8 @@ project_id = "pnnckeqrzjglcwkyzzxg"
 [functions]
   [functions.accept-quote]
     verify_jwt = false
+  [functions.admin-daily-brief]
+    verify_jwt = false
   [functions.analyse-quote]
     verify_jwt = false
   [functions.auth-email-hook]
