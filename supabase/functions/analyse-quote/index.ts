@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,6 +71,30 @@ serve(async (req) => {
         : 'neutral';
     } catch (e) {
       console.error('JSON parse error:', e, 'rawText:', rawText);
+    }
+
+    try {
+      const _supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+      await _supabase.from('platform_events').insert({
+        event_type: 'quote_analyser_called',
+        actor_type: 'system',
+        ceremony_type: ceremonyType ?? null,
+        metadata: {
+          price,
+          category,
+          ceremony_type: ceremonyType,
+          sentiment_returned: sentiment,
+          vendor_jobs_completed: jobsCompleted ?? null,
+          is_verified: isVerified ?? false,
+          vendor_rating: vendorRating ?? null,
+          review_count: reviewCount ?? null,
+        },
+      });
+    } catch (logErr) {
+      console.error('quote_analyser_called log failed:', logErr);
     }
 
     return new Response(
