@@ -24,7 +24,7 @@ function getSessionId(): string {
 
 export async function trackEvent(payload: TrackEventPayload): Promise<void> {
   try {
-    await supabase.from('platform_events').insert({
+    await (supabase.from('platform_events' as never) as never as { insert: (row: unknown) => Promise<unknown> }).insert({
       event_type: payload.event_type,
       actor_type: payload.actor_type,
       actor_id: payload.actor_id ?? null,
