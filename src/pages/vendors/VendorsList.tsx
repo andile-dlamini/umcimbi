@@ -36,6 +36,29 @@ export default function VendorsList() {
     }
   );
 
+  useEffect(() => {
+    if (isLoading) return;
+    if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      trackEvent({
+        event_type: vendors.length === 0 ? 'search_zero_results' : 'search_performed',
+        actor_type: 'organiser',
+        actor_id: user?.id,
+        metadata: {
+          query: search || null,
+          category: category !== 'all' ? category : null,
+          location: locationFilter || null,
+          verified_only: verifiedOnly,
+          super_vendors_only: superVendorsOnly,
+          results_count: vendors.length,
+        },
+      });
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [search, category, locationFilter, verifiedOnly, superVendorsOnly, vendors.length, isLoading, user?.id]);
+
   return (
     <div className="min-h-screen pb-safe">
       <PageHeader title="Vendors" subtitle="Find trusted service providers" />
