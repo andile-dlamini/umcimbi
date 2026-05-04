@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     const incomingHash = pick(payload, ["HashCheck", "hashCheck", "hash_check"]);
 
     // Extract bankingDetails nested fields if present
-    const bankingDetails = (payload.bankingDetails as Record<string, unknown>) ?? {};
+    const bankingDetails = (payload.bankingDetails ?? payload.BankingDetails ?? {}) as Record<string, unknown>;
     const resolvedBankGroupId = bankGroupId || String(bankingDetails.bankGroupId ?? bankingDetails.BankGroupId ?? "");
     const resolvedAccountNumber = accountNumber || String(bankingDetails.accountNumber ?? bankingDetails.AccountNumber ?? "");
     const resolvedBranchCode = branchCode || String(bankingDetails.branchCode ?? bankingDetails.BranchCode ?? "");
