@@ -10,6 +10,7 @@ import {
   Star,
   ShieldCheck,
   Clock,
+  MessageSquare,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -33,6 +34,7 @@ const navItems = [
   { label: 'Super Vendors', to: '/admin/super-vendors', icon: Star },
   { label: 'Bulk Upload', to: '/admin/bulk-vendors', icon: Upload },
   { label: 'Waitlist', to: '/admin/waitlist', icon: Clock },
+  { label: 'Feedback', to: '/admin/feedback', icon: MessageSquare },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];
 
