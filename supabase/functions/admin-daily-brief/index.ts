@@ -195,6 +195,26 @@ Write Andile's morning brief.`,
 
       const text = `UMCIMBI AI Daily Brief — ${dateStr}\n\n${briefText}\n\nView dashboard: https://www.umcimbi.co.za/admin`;
 
+      let unsubscribeToken: string | null = null;
+      const { data: existingToken } = await supabase
+        .from('email_unsubscribe_tokens')
+        .select('token')
+        .eq('email', adminEmail)
+        .maybeSingle();
+
+      unsubscribeToken = existingToken?.token ?? null;
+
+      if (!unsubscribeToken) {
+        const { data: newToken, error: tokenError } = await supabase
+          .from('email_unsubscribe_tokens')
+          .insert({ email: adminEmail, token: crypto.randomUUID() })
+          .select('token')
+          .single();
+
+        if (tokenError) throw tokenError;
+        unsubscribeToken = newToken.token;
+      }
+
       const { error: enqueueError } = await supabase.rpc('enqueue_email', {
         queue_name: 'transactional_emails',
         payload: {
@@ -206,7 +226,8 @@ Write Andile's morning brief.`,
           html,
           text,
           purpose: 'transactional',
-          idempotency_key: `admin-daily-brief-${now.toISOString().slice(0, 10)}`,
+          idempotency_key: `admin-daily-brief-${now.toISOString().slice(0, 10)}-${messageId}`,
+          unsubscribe_token: unsubscribeToken,
           label: 'admin_daily_brief',
           queued_at: now.toISOString(),
         },
