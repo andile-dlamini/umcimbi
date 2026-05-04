@@ -178,18 +178,36 @@ Vendor ID: ${booking.vendor_id}
 
 View booking: https://www.umcimbi.co.za/admin/bookings/${booking_id}`;
 
+        // Get or create unsubscribe token for this admin email (required by email API)
+        let unsubscribeToken: string | null = null;
+        const { data: existingToken } = await supabase
+          .from("email_unsubscribe_tokens")
+          .select("token")
+          .eq("email", adminEmail)
+          .maybeSingle();
+        if (existingToken?.token) {
+          unsubscribeToken = existingToken.token;
+        } else {
+          unsubscribeToken = crypto.randomUUID();
+          await supabase
+            .from("email_unsubscribe_tokens")
+            .insert({ email: adminEmail, token: unsubscribeToken });
+        }
+
         const { error: enqueueError } = await supabase.rpc("enqueue_email", {
           queue_name: "transactional_emails",
           payload: {
             message_id: messageId,
             to: adminEmail,
-            from: "UMCIMBI <noreply@umcimbi.co.za>",
-            sender_domain: "notify.umcimbi.co.za",
+            from: "UMCIMBI <noreply@mail.umcimbi.co.za>",
+            sender_domain: "mail.umcimbi.co.za",
             subject,
             html,
             text,
             purpose: "transactional",
+            idempotency_key: `admin-dispute-alert-${booking_id}-${messageId}`,
             label: "admin_dispute_alert",
+            unsubscribe_token: unsubscribeToken,
             queued_at: new Date().toISOString(),
           },
         });
