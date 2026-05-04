@@ -47,6 +47,7 @@ import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminWaitlist from "@/pages/admin/AdminWaitlist";
+import AdminFeedback from "@/pages/admin/AdminFeedback";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
@@ -138,6 +139,7 @@ function AppRoutes() {
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="waitlist" element={<AdminWaitlist />} />
+          <Route path="feedback" element={<AdminFeedback />} />
         </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={<Navigate to="/" replace />} />

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { InstallPrompt } from '@/components/shared/InstallPrompt';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/context/AuthContext';
 import { useRole } from '@/context/RoleContext';
@@ -51,6 +52,7 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </main>
       <InstallPrompt />
+      <FeedbackButton />
       <TourController />
     </div>
   );

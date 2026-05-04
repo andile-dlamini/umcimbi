@@ -1,37 +1,73 @@
-## UMCIMBI Pre-Launch Data Foundation
+# Plan: In-App Feedback Mechanism
 
-Implements the spec exactly as approved. Scoped strictly to additive changes — no payment, escrow, auth, or onboarding files touched.
+## Recipient
+All feedback emails will be sent to **feedback@umcimbi.co.za** (instead of `admin@umcimbi.co.za`). Configurable later via a `FEEDBACK_EMAIL` edge-function env var, defaulting to `feedback@umcimbi.co.za`.
 
-### Files created
+## UX
+- A small floating **"Feedback"** button (bottom-right, above the InstallPrompt, hidden on mobile bottom-nav overlap).
+- Visible on every authenticated page **except** `/onboarding`, `/auth`, and `/chat/*` (same exclusions as `AppShell`).
+- Clicking opens a modal with:
+  - **Type** select: Bug / Idea / Praise / Other
+  - **Message** textarea (required, 10–2000 chars)
+  - Optional **page URL** auto-captured (read-only, shown as small caption)
+  - Submit / Cancel
+- Toast on success: "Thanks — we got your feedback."
 
-1. **Migration: `platform_events`** — table, 3 indexes, RLS enabled, 4 policies (authenticated insert-own, anon insert-anonymous, service_role insert, admin select via `user_roles`).
-2. **Migration: `daily_briefs`** — table, 1 index, RLS enabled, 2 policies (admin select, service_role insert).
-3. **`src/lib/trackEvent.ts`** — fire-and-forget client utility with `sessionStorage`-based session id; never throws.
-4. **`supabase/functions/admin-daily-brief/index.ts`** — pulls vendors/profiles/events/service_requests/quotes/bookings/platform_events/previous brief in parallel, computes `rawStats`, calls Claude Sonnet 4 with the operations-brief system prompt, stores result in `daily_briefs`, enqueues email via `enqueue_email` RPC into `transactional_emails` queue, logs `pending` row in `email_send_log`, updates `email_sent` flag.
+## Backend
 
-### Files edited (additive only)
+### New table: `feedback`
+| column | type | notes |
+|---|---|---|
+| id | uuid PK | |
+| user_id | uuid null | FK auth.users (no cascade) |
+| user_email | text null | snapshot for unauthed-context safety |
+| user_role | text null | 'planner' \| 'vendor' \| 'admin' |
+| feedback_type | text | 'bug' \| 'idea' \| 'praise' \| 'other' |
+| message | text not null | |
+| page_url | text null | |
+| user_agent | text null | |
+| status | text default 'new' | 'new' \| 'reviewed' \| 'resolved' |
+| created_at | timestamptz default now() | |
 
-5. **`supabase/functions/analyse-quote/index.ts`** — add `createClient` import; insert one `try/catch` block logging `quote_analyser_called` to `platform_events` immediately before the final success `return`. Existing logic and response shape unchanged.
-6. **`src/pages/vendors/VendorsList.tsx`** — add `useEffect`, `trackEvent`, `useAuth` imports; pull `user` from `useAuth()`; add a debounced (1500ms) `useEffect` firing `search_performed` or `search_zero_results` when any filter is non-default and results have loaded.
-7. **`src/pages/admin/AdminDashboard.tsx`** — add `formatDistanceToNow` import; add `dailyBrief` + `briefLoading` state; fetch latest row from `daily_briefs` inside existing `fetchAll`; render an "AI Daily Brief" Card as the first element of the main content area with skeleton fallback and empty-state copy.
+**RLS**:
+- INSERT: any authenticated user can insert their own row (`auth.uid() = user_id`).
+- SELECT: only admins (`has_role(auth.uid(), 'admin')`).
+- UPDATE: only admins (to change status).
 
-### Config
+### New edge function: `send-feedback`
+- `verify_jwt = true` (only logged-in users can submit).
+- Validates input with Zod (type enum, message length).
+- Inserts row into `feedback` table (using the caller's JWT — RLS enforced).
+- Enqueues an email to `feedback@umcimbi.co.za` via `enqueue_email` RPC, applying the same fix pattern we just used:
+  - `sender_domain: 'mail.umcimbi.co.za'`
+  - `from: 'UMCIMBI <noreply@umcimbi.co.za>'`
+  - lookup/create `unsubscribe_token` for `feedback@umcimbi.co.za`
+  - `idempotency_key: feedback-${row.id}`
+  - Logs `pending` row to `email_send_log`.
+- Email body: branded indigo-header template (matches daily brief / dispute style) with submitter name/email/role, type badge, message, page URL, and a "View in Admin" link to `/admin/feedback`.
 
-8. `supabase/config.toml` — add `[functions.admin-daily-brief] verify_jwt = false` block (called by pg_cron with bearer token; matches existing pattern for other system functions).
+## Admin page: `/admin/feedback`
+- New nav item "Feedback" in `AdminSidebar` (icon: `MessageSquare`).
+- Lists feedback rows newest-first with: type chip, snippet, submitter, page, date, status.
+- Click row → drawer with full message + status dropdown (new/reviewed/resolved).
+- Filter by type and status.
 
-### Manual step (user-performed, post-deploy)
+## Files to create
+- `supabase/functions/send-feedback/index.ts`
+- `src/components/feedback/FeedbackButton.tsx` (floating button + modal)
+- `src/pages/admin/AdminFeedback.tsx`
+- New migration: `feedback` table + RLS
 
-9. Add pg_cron job `admin-daily-brief` at `0 5 * * *` (07:00 SAST) calling the function via `net.http_post` with the vault-stored service-role key, per the SQL block in the spec.
+## Files to edit
+- `src/components/layout/AppShell.tsx` — mount `<FeedbackButton />` next to `<InstallPrompt />` (with same `hideNav` exclusion).
+- `src/components/admin/AdminSidebar.tsx` — add "Feedback" nav item.
+- `src/App.tsx` — register `/admin/feedback` route under `AdminGuard`.
+- `supabase/config.toml` — no change needed (verify_jwt defaults are fine).
 
-### Notes / clarifications before I implement
+## Out of scope (v1)
+- Screenshot attachments
+- Email replies / threading
+- Public roadmap / upvoting
+- Anonymous (unauthed) feedback
 
-- The Step 6 code block in the spec arrived with rendering corruption: the HTML template is mostly blank lines, the `from` string shows as `'UMCIMBI @umcimbi.co.za>'`, and the `escapedBrief` regex shows empty patterns. I will write the **intended** literal values:
-  - `from: "UMCIMBI <noreply@umcimbi.co.za>"` (matches the project-wide convention used in `auth-email-hook` and `raise-dispute`)
-  - `sender_domain: "notify.umcimbi.co.za"`
-  - `escapedBrief` will properly escape `&` → `&amp;`, `<` → `&lt;`, `>` → `&gt;`
-  - HTML body will be a branded indigo-header template with the brief in a styled card and a "View dashboard" link to `https://www.umcimbi.co.za/admin`, structurally matching the dispute-alert email.
-- All other code blocks will be written verbatim as specified.
-- No changes to existing migrations, RLS, payments, escrow, auth, or onboarding files.
-- Acceptance criteria 1–10 will all be met after deploy.
-
-Ready to proceed on approval.
+Approve and I'll build it.
