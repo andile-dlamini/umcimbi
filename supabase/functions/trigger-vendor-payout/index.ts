@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
 
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
-    const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim();
+    const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim().replace(/\/+$/, "");
     const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
