@@ -163,7 +163,8 @@ Deno.serve(async (req) => {
         },
       });
       if (!banksRes.ok) {
-        console.error("getavailablebanks non-OK status:", banksRes.status);
+        const errBody = await banksRes.text();
+        console.error("getavailablebanks non-OK status:", banksRes.status, "body:", errBody);
         return jsonResponse({ error: "Failed to fetch supported banks from Ozow" }, 502);
       }
       banks = await banksRes.json();
