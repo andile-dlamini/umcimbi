@@ -1,4 +1,1 @@
 project_id = "pnnckeqrzjglcwkyzzxg"
-
-[functions.test-get-payout]
-verify_jwt = false
