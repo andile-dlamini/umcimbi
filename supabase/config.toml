@@ -1,1 +1,4 @@
 project_id = "pnnckeqrzjglcwkyzzxg"
+
+[functions.test-set-mock-config]
+verify_jwt = false
