@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
 
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
-    const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim();
+    const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim().replace(/\/+$/, "");
     const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
     const ozowPayoutApiKey = (Deno.env.get("OZOW_PAYOUT_API_KEY") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_PAYOUT_NOTIFY_URL") ?? "").trim();
@@ -150,8 +150,10 @@ Deno.serve(async (req) => {
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
     let banks: Array<{ bankGroupId: string; bankGroupName: string; universalBranchCode: string }> = [];
+    const banksUrl = `${payoutApiUrl}/getavailablebanks`;
+    console.log("[BANKS DEBUG] GET", banksUrl, "siteCode:", ozowSiteCode, "apiKeyLen:", ozowPayoutApiKey.length);
     try {
-      const banksRes = await fetch(`${payoutApiUrl}/getavailablebanks`, {
+      const banksRes = await fetch(banksUrl, {
         method: "GET",
         headers: {
           "ApiKey": ozowPayoutApiKey,
@@ -161,7 +163,8 @@ Deno.serve(async (req) => {
         },
       });
       if (!banksRes.ok) {
-        console.error("getavailablebanks non-OK status:", banksRes.status);
+        const errBody = await banksRes.text();
+        console.error("getavailablebanks non-OK status:", banksRes.status, "body:", errBody);
         return jsonResponse({ error: "Failed to fetch supported banks from Ozow" }, 502);
       }
       banks = await banksRes.json();
