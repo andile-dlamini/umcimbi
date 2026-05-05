@@ -80,13 +80,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
   try {
-    const configuredToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
-    if (!configuredToken) return jsonResponse({ error: "Notification unavailable" }, 500);
-
     const payload = await parsePayload(req);
-    const token = getToken(req, payload);
-    if (!token || token !== configuredToken) return jsonResponse({ error: "Unauthorized" }, 401);
-
     const refs = extractRefs(payload);
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
