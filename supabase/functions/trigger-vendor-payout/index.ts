@@ -150,8 +150,10 @@ Deno.serve(async (req) => {
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
     let banks: Array<{ bankGroupId: string; bankGroupName: string; universalBranchCode: string }> = [];
+    const banksUrl = `${payoutApiUrl}/getavailablebanks`;
+    console.log("[BANKS DEBUG] GET", banksUrl, "siteCode:", ozowSiteCode, "apiKeyLen:", ozowPayoutApiKey.length);
     try {
-      const banksRes = await fetch(`${payoutApiUrl}/getavailablebanks`, {
+      const banksRes = await fetch(banksUrl, {
         method: "GET",
         headers: {
           "ApiKey": ozowPayoutApiKey,
