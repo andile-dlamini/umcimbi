@@ -50,11 +50,6 @@ async function parsePayload(req: Request) {
   }
 }
 
-function getToken(req: Request, payload: Record<string, unknown>) {
-  const auth = req.headers.get("authorization") ?? "";
-  if (auth.toLowerCase().startsWith("bearer ")) return auth.slice(7).trim();
-  return String(req.headers.get("x-access-token") ?? payload.AccessToken ?? payload.accessToken ?? payload.access_token ?? "").trim();
-}
 
 function normalizeStatus(status: string) {
   const value = status.toLowerCase();
