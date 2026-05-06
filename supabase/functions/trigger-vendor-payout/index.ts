@@ -291,11 +291,6 @@ Deno.serve(async (req) => {
         "SiteCode": ozowSiteCode,
         "ApiKey": ozowPayoutApiKey,
       };
-      console.log("[OZOW DEBUG] POST", `${payoutApiUrl}/requestpayout`);
-      console.log("[OZOW DEBUG] header keys:", Object.keys(outboundHeaders));
-      console.log("[OZOW DEBUG] SiteCode value:", ozowSiteCode);
-      console.log("[OZOW DEBUG] ApiKey length:", ozowPayoutApiKey.length, "preview:", ozowPayoutApiKey.slice(0, 4) + "..." + ozowPayoutApiKey.slice(-4));
-      console.log("[OZOW DEBUG] body:", JSON.stringify(payoutPayload));
       const ozowRes = await fetch(`${payoutApiUrl}/requestpayout`, {
         method: "POST",
         headers: outboundHeaders,
