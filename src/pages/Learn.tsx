@@ -12,7 +12,7 @@ const iconMap: Record<string, LucideIcon> = {
   'umbondo': Package,
   'umabo': Heart,
   'umemulo': Sparkles,
-  'funeral': Flower2,
+  
   'ancestral-rituals': Flame,
   'combining-ceremonies': Calendar,
 };
@@ -25,7 +25,7 @@ const colorMap: Record<string, string> = {
   'umbondo': 'bg-accent/20 text-accent',
   'umabo': 'bg-accent/20 text-accent',
   'umemulo': 'bg-accent/20 text-accent',
-  'funeral': 'bg-accent/20 text-accent',
+  
   'ancestral-rituals': 'bg-accent/20 text-accent',
   'combining-ceremonies': 'bg-accent/20 text-accent',
 };

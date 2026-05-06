@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     // 1. Resolve BankGroupId via Ozow getavailablebanks
     let banks: Array<{ bankGroupId: string; bankGroupName: string; universalBranchCode: string }> = [];
     const banksUrl = `${payoutApiUrl}/getavailablebanks`;
-    console.log("[BANKS DEBUG] GET", banksUrl, "siteCode:", ozowSiteCode, "apiKeyLen:", ozowPayoutApiKey.length);
+    
     try {
       const banksRes = await fetch(banksUrl, {
         method: "GET",
@@ -291,11 +291,6 @@ Deno.serve(async (req) => {
         "SiteCode": ozowSiteCode,
         "ApiKey": ozowPayoutApiKey,
       };
-      console.log("[OZOW DEBUG] POST", `${payoutApiUrl}/requestpayout`);
-      console.log("[OZOW DEBUG] header keys:", Object.keys(outboundHeaders));
-      console.log("[OZOW DEBUG] SiteCode value:", ozowSiteCode);
-      console.log("[OZOW DEBUG] ApiKey length:", ozowPayoutApiKey.length, "preview:", ozowPayoutApiKey.slice(0, 4) + "..." + ozowPayoutApiKey.slice(-4));
-      console.log("[OZOW DEBUG] body:", JSON.stringify(payoutPayload));
       const ozowRes = await fetch(`${payoutApiUrl}/requestpayout`, {
         method: "POST",
         headers: outboundHeaders,
@@ -304,7 +299,7 @@ Deno.serve(async (req) => {
       responseOk = ozowRes.ok;
       responseStatus = ozowRes.status;
       const text = await ozowRes.text();
-      console.log("[OZOW DEBUG] response status:", responseStatus, "body:", text);
+      
       responsePayload = text ? JSON.parse(text) : {};
     } catch (err) {
       responsePayload = { error: err instanceof Error ? err.message : "Ozow payout request failed" };
