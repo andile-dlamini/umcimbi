@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     // 1. Resolve BankGroupId via Ozow getavailablebanks
     let banks: Array<{ bankGroupId: string; bankGroupName: string; universalBranchCode: string }> = [];
     const banksUrl = `${payoutApiUrl}/getavailablebanks`;
-    console.log("[BANKS DEBUG] GET", banksUrl, "siteCode:", ozowSiteCode, "apiKeyLen:", ozowPayoutApiKey.length);
+    
     try {
       const banksRes = await fetch(banksUrl, {
         method: "GET",
@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
       responseOk = ozowRes.ok;
       responseStatus = ozowRes.status;
       const text = await ozowRes.text();
-      console.log("[OZOW DEBUG] response status:", responseStatus, "body:", text);
+      
       responsePayload = text ? JSON.parse(text) : {};
     } catch (err) {
       responsePayload = { error: err instanceof Error ? err.message : "Ozow payout request failed" };

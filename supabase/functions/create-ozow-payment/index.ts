@@ -110,15 +110,6 @@ Deno.serve(async (req) => {
     const cancelUrl = (Deno.env.get("OZOW_CANCEL_URL") ?? "").trim();
     const notifyUrl = (Deno.env.get("OZOW_NOTIFY_URL") ?? "").trim();
 
-    console.log("DIAG: secrets check", { 
-      hasSiteCode: !!OZOW_SITE_CODE, 
-      hasPrivateKey: !!OZOW_PRIVATE_KEY, 
-      hasApiKey: !!OZOW_API_KEY,
-      hasSuccessUrl: !!successUrl,
-      hasNotifyUrl: !!notifyUrl,
-      notifyUrl
-    });
-
     if (!OZOW_SITE_CODE || !OZOW_PRIVATE_KEY || !OZOW_API_KEY) {
       console.error("DIAG: missing Ozow secrets", { hasSiteCode: !!OZOW_SITE_CODE, hasPrivateKey: !!OZOW_PRIVATE_KEY, hasApiKey: !!OZOW_API_KEY });
       return new Response(JSON.stringify({ error: "Payment service not configured" }), {
@@ -182,13 +173,6 @@ Deno.serve(async (req) => {
       CancelUrl: cancelUrl,
       HashCheck,
     };
-
-    console.log("Ozow payload (no key):", JSON.stringify({
-      ...ozowPayload,
-      HashCheck: ozowPayload.HashCheck.slice(0, 8) + "...",
-    }));
-    console.log("Private key length:", OZOW_PRIVATE_KEY.length);
-    console.log("Site code:", OZOW_SITE_CODE);
 
     const ozowRes = await fetch(OZOW_API_URL, {
       method: "POST",

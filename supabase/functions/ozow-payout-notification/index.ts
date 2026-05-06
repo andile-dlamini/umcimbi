@@ -62,7 +62,18 @@ function normalizeStatus(status: string) {
 
 function extractRefs(payload: Record<string, unknown>) {
   return {
-    status: String(payload.Status ?? payload.status ?? payload.PayoutStatus ?? payload.payoutStatus ?? "pending"),
+    status: (() => {
+      const ps = (payload.PayoutStatus ?? payload.payoutStatus) as Record<string, unknown> | undefined;
+      if (ps && typeof ps === "object") {
+        const code = Number(ps.Status ?? ps.status ?? 0);
+        if (code === 5) return "paid";
+        if (code === 99) return "rejected";
+        if (code === 4) return "failed";
+        if (code === 3 || code === 1 || code === 2) return "submitted";
+        return "pending";
+      }
+      return String(payload.Status ?? payload.status ?? "pending");
+    })(),
     internalReference: String(payload.InternalReference ?? payload.internalReference ?? payload.internal_reference ?? payload.PayoutReference ?? payload.payoutReference ?? payload.Reference ?? payload.reference ?? "").trim(),
     ozowReference: String(payload.OzowReference ?? payload.ozowReference ?? payload.OzowPayoutReference ?? payload.ozowPayoutReference ?? "").trim(),
     ozowPayoutId: String(payload.OzowPayoutId ?? payload.ozowPayoutId ?? payload.PayoutId ?? payload.payoutId ?? "").trim(),
