@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     const payoutBody = {
       SiteCode: SITE_CODE_LITERAL,
       Amount: 1.00,
-      MerchantReference: "UMC-MOCK-TEST",
+      MerchantReference: `UMC-M-${Date.now().toString().slice(-8)}`,
       CustomerBankReference: "UMC-MOCK-REF-001",
       IsRtc: false,
       NotifyUrl: "https://pnnckeqrzjglcwkyzzxg.supabase.co/functions/v1/ozow-payout-notification",
