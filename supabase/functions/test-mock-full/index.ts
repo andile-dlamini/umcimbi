@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       step5 = { skipped: true, reason: "no payoutId in step4" };
     } else {
       step5 = await doStep(`${BASE}/getpayout?payoutId=${encodeURIComponent(payoutId)}`, {
-        method: "GET", headers: { SiteCode: SITE_CODE_LITERAL },
+        method: "GET", headers: { SiteCode: SITE_CODE_LITERAL, ApiKey: apiKey },
       });
     }
 
