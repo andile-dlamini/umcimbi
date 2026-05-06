@@ -178,6 +178,8 @@ Deno.serve(async (req) => {
       method: "POST", headers: authedJsonHeaders, body: JSON.stringify(payoutBody),
     });
 
+    await new Promise(r => setTimeout(r, 10000));
+
     // Step 5
     const payoutId = extractPayoutId((step4 as { body?: unknown }).body);
     let step5: unknown;
