@@ -123,8 +123,16 @@ Deno.serve(async (req) => {
     });
 
     // Step 2
-    const setBody: Record<string, unknown> = { siteCode: SITE_CODE_LITERAL };
-    for (const s of SCENARIOS) setBody[s] = (s === scenario);
+    const setBody = {
+      siteCode: SITE_CODE_LITERAL,
+      isAccountDecryptionFailed: scenario === "isAccountDecryptionFailed",
+      isNullResponse: false,
+      isInvalidStatusCode: false,
+      isPayoutMismatch: false,
+      isNotVerifiedResponse: scenario === "isNotVerifiedResponse",
+      isAccountNumberDecryptionKeyMissing: scenario === "isAccountNumberDecryptionKeyMissing",
+      hasRetriedCountBeenExceeded: false,
+    };
     const step2 = await doStep(`${BASE}/settestconfiguration`, {
       method: "POST", headers: authedJsonHeaders, body: JSON.stringify(setBody),
     });
