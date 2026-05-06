@@ -19,6 +19,65 @@ async function doStep(url: string, init: RequestInit) {
   }
 }
 
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function buildEncryptedAccountAndHash(opts: {
+  siteCode: string;
+  amount: number;
+  merchantReference: string;
+  customerBankReference: string;
+  isRtc: boolean;
+  notifyUrl: string;
+  bankGroupId: string;
+  branchCode: string;
+  accountNumber: string;
+  apiKey: string;
+}) {
+  const amountInCents = Math.round(opts.amount * 100);
+  const rawKey = crypto.randomUUID().replace(/-/g, "").substring(0, 20);
+  let encryptionKey = rawKey;
+  while (encryptionKey.length < 32) encryptionKey += rawKey;
+  encryptionKey = encryptionKey.substring(0, 32);
+
+  const ivInput = `${opts.merchantReference}${amountInCents}${rawKey}`.toLowerCase();
+  const ivHashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(ivInput));
+  const ivHex = bytesToHex(new Uint8Array(ivHashBuffer));
+  const iv = ivHex.substring(0, 16);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(encryptionKey),
+    { name: "AES-CBC" },
+    false,
+    ["encrypt"],
+  );
+  const encryptedBuffer = await crypto.subtle.encrypt(
+    { name: "AES-CBC", iv: new TextEncoder().encode(iv) },
+    cryptoKey,
+    new TextEncoder().encode(opts.accountNumber),
+  );
+  const encryptedAccountNumber = btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer)));
+
+  const hashInput = [
+    opts.siteCode,
+    amountInCents,
+    opts.merchantReference,
+    opts.customerBankReference,
+    opts.isRtc,
+    opts.notifyUrl,
+    opts.bankGroupId,
+    encryptedAccountNumber,
+    opts.branchCode,
+    opts.apiKey,
+  ].join("").toLowerCase();
+  const hashBuffer = await crypto.subtle.digest("SHA-512", new TextEncoder().encode(hashInput));
+  const hashCheck = bytesToHex(new Uint8Array(hashBuffer));
+
+  return { encryptedAccountNumber, hashCheck };
+}
+
 function extractPayoutId(body: unknown): string | null {
   if (!body || typeof body !== "object") return null;
   const b = body as Record<string, unknown>;
