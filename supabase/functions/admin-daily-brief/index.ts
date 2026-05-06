@@ -27,7 +27,13 @@ serve(async (req) => {
       quotesResult, bookingsResult, platformEventsResult, previousBriefResult,
     ] = await Promise.all([
       supabase.from('vendors').select('id, name, owner_user_id, created_at, logo_url, about, price_range_text, bank_name, signup_source'),
-      supabase.from('profiles').select('user_id, created_at'),
+      supabase.from('user_roles').select('user_id, role').eq('role', 'user').then(async (res: any) => {
+        if (res.error || !res.data) return res;
+        const ids = res.data.map((r: any) => r.user_id);
+        if (ids.length === 0) return { data: [], error: null };
+        const { data } = await supabase.from('profiles').select('user_id, created_at').in('user_id', ids);
+        return { data: data ?? [], error: null };
+      }),
       supabase.from('events').select('id, owner_user_id, type, created_at'),
       supabase.from('service_requests').select('id, status, created_at, vendor_id, requester_user_id, responded_at'),
       supabase.from('quotes').select('id, status, created_at'),
