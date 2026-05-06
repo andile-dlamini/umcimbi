@@ -135,19 +135,36 @@ Deno.serve(async (req) => {
     });
 
     // Step 4
+    const merchantReference = `UMC-M-${Date.now().toString().slice(-8)}`;
+    const customerBankReference = "UMC-MOCK-REF-001";
+    const notifyUrl = "https://pnnckeqrzjglcwkyzzxg.supabase.co/functions/v1/ozow-payout-notification";
+    const bankGroupId = "3284a0ad-ba78-4838-8c2b-102981286a2b";
+    const branchCode = "632005";
+    const { encryptedAccountNumber, hashCheck } = await buildEncryptedAccountAndHash({
+      siteCode: SITE_CODE_LITERAL,
+      amount: 1.00,
+      merchantReference,
+      customerBankReference,
+      isRtc: false,
+      notifyUrl,
+      bankGroupId,
+      branchCode,
+      accountNumber: "4050338500",
+      apiKey,
+    });
     const payoutBody = {
       SiteCode: SITE_CODE_LITERAL,
       Amount: 1.00,
-      MerchantReference: `UMC-M-${Date.now().toString().slice(-8)}`,
-      CustomerBankReference: "UMC-MOCK-REF-001",
+      MerchantReference: merchantReference,
+      CustomerBankReference: customerBankReference,
       IsRtc: false,
-      NotifyUrl: "https://pnnckeqrzjglcwkyzzxg.supabase.co/functions/v1/ozow-payout-notification",
+      NotifyUrl: notifyUrl,
       bankingDetails: {
-        bankGroupId: "3284a0ad-ba78-4838-8c2b-102981286a2b",
-        accountNumber: "dummyEncrypted==",
-        branchCode: "632005",
+        bankGroupId,
+        accountNumber: encryptedAccountNumber,
+        branchCode,
       },
-      HashCheck: "dummyhash",
+      HashCheck: hashCheck,
     };
     const step4 = await doStep(`${BASE}/requestpayout`, {
       method: "POST", headers: authedJsonHeaders, body: JSON.stringify(payoutBody),
