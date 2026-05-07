@@ -183,9 +183,7 @@ export default function BookingDetail() {
 
   const status = statusConfig[booking.booking_status];
   const depositDue = booking.deposit_status === 'due' || (booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit');
-  const balanceDue =
-    booking.balance_status === 'due' ||
-    (booking.deposit_status === 'paid' && booking.balance_status !== 'paid');
+  const balanceDue = booking.balance_status === 'due';
   const fundsReleased = !!(booking as any).funds_released_at;
   const eventDatePassed = booking.event_date_time && new Date(booking.event_date_time) < new Date();
 

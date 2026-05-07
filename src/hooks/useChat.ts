@@ -88,19 +88,15 @@ export const useConversations = () => {
 
           // Fetch latest booking status for this conversation's user+vendor
           let bookingStatus: string | null = null;
-          let balanceStatus: string | null = null;
           const { data: latestBooking } = await supabase
             .from('bookings')
-            .select('booking_status, balance_status')
+            .select('booking_status')
             .eq('client_id', conv.user_id)
             .eq('vendor_id', conv.vendor_id)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
-          if (latestBooking) {
-            bookingStatus = latestBooking.booking_status;
-            balanceStatus = latestBooking.balance_status;
-          }
+          if (latestBooking) bookingStatus = latestBooking.booking_status;
 
           // Fetch latest quote status if no booking
           let quoteStatus: string | null = null;
@@ -130,7 +126,6 @@ export const useConversations = () => {
             last_message: lastMsg || undefined,
             unread_count: totalCount,
             booking_status: bookingStatus,
-            balance_status: balanceStatus,
             quote_status: quoteStatus,
           } as ConversationWithDetails;
         })

@@ -154,7 +154,6 @@ const ChatsList = () => {
           <div className="mt-1">
             <ConversationStatusChip
               bookingStatus={(conv as any).booking_status}
-              balanceStatus={(conv as any).balance_status}
               quoteStatus={(conv as any).quote_status}
             />
           </div>
@@ -234,7 +233,6 @@ const ChatsList = () => {
                         )}
                         <ConversationStatusChip
                           bookingStatus={(latestConv as any).booking_status}
-                          balanceStatus={(latestConv as any).balance_status}
                           quoteStatus={(latestConv as any).quote_status}
                         />
                       </div>

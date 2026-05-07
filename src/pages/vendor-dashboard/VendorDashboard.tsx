@@ -18,11 +18,25 @@ export default function VendorDashboard() {
   const { replayTour } = useOnboardingTour('vendor');
 
   const isLoading = quotesLoading || bookingsLoading;
-  const thirtyDaysAgo = useMemo(() => subDays(new Date(), 30), []);
+  const thirtyDaysAgo = subDays(new Date(), 30);
+
+  if (!vendorProfile) {
+    return (
+      <div className="min-h-screen">
+        <PageHeader title="Dashboard" showBack />
+        <div className="px-4 py-12 text-center">
+          <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-lg font-semibold mb-2">No vendor profile</h2>
+          <p className="text-muted-foreground mb-6">Register as a vendor to access this dashboard</p>
+          <Button onClick={() => navigate('/vendors/onboarding')}>Become a vendor</Button>
+        </div>
+      </div>
+    );
+  }
 
   const kpis = useMemo(() => {
     // Profile views (all-time since we don't have date tracking on views)
-    const profileViews = vendorProfile?.view_count || 0;
+    const profileViews = vendorProfile.view_count || 0;
 
     // Quotes sent in last 30 days
     const quotesSent = quotes.filter(q =>
@@ -47,20 +61,6 @@ export default function VendorDashboard() {
 
     return { profileViews, quotesSent, ordersCompleted, totalPayout };
   }, [vendorProfile, quotes, bookings, thirtyDaysAgo]);
-
-  if (!vendorProfile) {
-    return (
-      <div className="min-h-screen">
-        <PageHeader title="Dashboard" showBack />
-        <div className="px-4 py-12 text-center">
-          <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">No vendor profile</h2>
-          <p className="text-muted-foreground mb-6">Register as a vendor to access this dashboard</p>
-          <Button onClick={() => navigate('/vendors/onboarding')}>Become a vendor</Button>
-        </div>
-      </div>
-    );
-  }
 
   // Profile completeness check for quick registration
   const isProfileIncomplete = !vendorProfile.about && !vendorProfile.price_range_text;
