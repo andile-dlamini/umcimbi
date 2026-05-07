@@ -120,7 +120,10 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
 
   const isClient = !isVendorView;
   const depositDue = booking && (booking.deposit_status === 'due' || (booking.deposit_status === 'not_due' && booking.booking_status === 'pending_deposit'));
-  const balanceDue = booking && booking.balance_status === 'due';
+  const balanceDue =
+    booking &&
+    (booking.balance_status === 'due' ||
+      (booking.deposit_status === 'paid' && booking.balance_status !== 'paid'));
 
   return (
     <>
