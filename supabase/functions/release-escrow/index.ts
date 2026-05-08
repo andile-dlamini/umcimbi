@@ -59,6 +59,7 @@ async function releaseBooking(bookingId: string, supabase: any, supabaseUrl: str
       sender_user_id: null,
       message_type: "system",
       content: `🎉 Funds of R${booking.balance_amount?.toLocaleString()} have been released to ${vendorName}. Thank you for using Umcimbi!`,
+      metadata: { visibility: "both" },
     });
 
     await supabase
