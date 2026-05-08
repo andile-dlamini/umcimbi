@@ -98,6 +98,8 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const authHeader = req.headers.get("Authorization") ?? "";
 
+    console.log("[PAYOUT] Invoked. Auth header length:", authHeader.length, "Service key length:", serviceKey.length, "Match:", authHeader === `Bearer ${serviceKey}`);
+
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim().replace(/\/+$/, "");

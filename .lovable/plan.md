@@ -1,37 +1,47 @@
-## Plan
+## Changes to `supabase/functions/trigger-vendor-payout/index.ts`
 
-Three small, surgical edits — no logic changes beyond what's specified.
+Two narrowly scoped edits, nothing else touched.
 
-### 1. `supabase/functions/ozow-payout-notification/index.ts`
-In `extractRefs`, replace the single `status:` line with the new IIFE that unwraps the nested `PayoutStatus` object and maps Ozow numeric status codes:
-- `5` → `paid`
-- `99` → `rejected`
-- `4` → `failed`
-- `1`/`2`/`3` → `submitted`
-- otherwise → `pending`
-- Falls back to top-level `Status`/`status` string if `PayoutStatus` isn't an object.
+### 1. Add diagnostic log at start of try block
 
-### 2. Remove debug `console.log` lines (keep `console.error`)
+Insert immediately after the auth variables are set (after line 99, before the auth check on line 101):
 
-**`supabase/functions/trigger-vendor-payout/index.ts`** — delete 7 lines:
-- L154 `[BANKS DEBUG] GET ...`
-- L294–298 `[OZOW DEBUG] POST/header/SiteCode/ApiKey/body`
-- L307 `[OZOW DEBUG] response status ...`
+```ts
+console.log("[PAYOUT] Invoked. Auth header length:", authHeader.length, "Service key length:", serviceKey.length, "Match:", authHeader === `Bearer ${serviceKey}`);
+```
 
-**`supabase/functions/create-ozow-payment/index.ts`** — delete 4 log statements:
-- L113 `console.log("DIAG: secrets check", { ... })` (multi-line block)
-- L186 `console.log("Ozow payload (no key):", ...)` (multi-line block)
-- L190 `console.log("Private key length:", ...)`
-- L191 `console.log("Site code:", ...)`
+### 2. Include `deposit_amount` in the booking select
 
-**`supabase/functions/ozow-payout-verification/index.ts`** — delete the `console.log("[VERIFY] Incoming request:", ...)` line.
+Update the select on line 121 from:
 
-### 3. `src/pages/Learn.tsx`
-Remove the two `'funeral'` entries:
-- L15: `'funeral': Flower2,` from the icon map
-- L28: `'funeral': 'bg-accent/20 text-accent',` from the colour map
+```ts
+.select("id, vendor_id, agreed_price, balance_amount, deposit_status, booking_status, funds_released_at, order_number")
+```
 
-`learnArticles.ts` is left untouched.
+to:
 
-### Deploy
-After edits, the three modified edge functions auto-deploy.
+```ts
+.select("id, vendor_id, agreed_price, deposit_amount, balance_amount, deposit_status, booking_status, funds_released_at, order_number")
+```
+
+### 3. Fix amount calculation for deposit payouts
+
+Replace lines 158–160:
+
+```ts
+const amount = override_amount !== null
+  ? override_amount
+  : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
+```
+
+with:
+
+```ts
+const amount = override_amount !== null
+  ? override_amount
+  : payout_type === "deposit"
+    ? Math.round((Number(booking.deposit_amount) / 1.08) * 100) / 100
+    : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
+```
+
+No other code, logic, or files are modified.
