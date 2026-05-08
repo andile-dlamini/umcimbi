@@ -75,7 +75,7 @@ async function releaseBooking(bookingId: string, supabase: any, supabaseUrl: str
         "Content-Type": "application/json",
         "Authorization": "Bearer " + serviceKey,
       },
-      body: JSON.stringify({ booking_id: bookingId }),
+      body: JSON.stringify({ booking_id: bookingId, payout_type: "balance" }),
     });
   } catch (payoutErr) {
     console.error("trigger-vendor-payout call failed:", payoutErr);
