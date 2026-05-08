@@ -214,6 +214,7 @@ Deno.serve(async (req) => {
               sender_user_id: null,
               message_type: "system",
               content: `✅ Your balance payment of R${amount?.toLocaleString()} is secured and held by Umcimbi. Your vendor has been notified and is ready to deliver. After the service, you will be asked to confirm delivery to release funds. You're all set! 🎉`,
+              metadata: { visibility: "client" },
             });
             await supabase.from("messages").insert({
               conversation_id: conv.id,
@@ -221,6 +222,7 @@ Deno.serve(async (req) => {
               sender_user_id: null,
               message_type: "system",
               content: `💰 The balance payment of R${amount?.toLocaleString()} has been received and is held securely by Umcimbi. Once you have delivered your service, upload your proof of delivery from this booking to release your payment. Funds clear within 48 hours of upload.`,
+              metadata: { visibility: "vendor" },
             });
           } else {
             const amount = bookingData.deposit_amount;
@@ -230,6 +232,40 @@ Deno.serve(async (req) => {
               sender_user_id: null,
               message_type: "system",
               content: `✅ Deposit payment of R${amount?.toLocaleString()} confirmed. Booking is now active!`,
+              metadata: { visibility: "both" },
+            });
+
+            // Balance due reminders
+            const balanceDueIso = (updates.balance_due_at as string | undefined) || now;
+            const balanceDueDateFormatted = new Date(balanceDueIso).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+
+            const { data: clientProfile } = await supabase
+              .from("profiles")
+              .select("full_name, first_name")
+              .eq("user_id", bookingData.client_id)
+              .single();
+            const clientName =
+              clientProfile?.full_name || clientProfile?.first_name || "The client";
+
+            await supabase.from("messages").insert({
+              conversation_id: conv.id,
+              sender_type: "system",
+              sender_user_id: null,
+              message_type: "system",
+              content: `⏰ Your balance of R${bookingData?.balance_amount?.toLocaleString()} is due by ${balanceDueDateFormatted}. You can pay early anytime from your orders.`,
+              metadata: { visibility: "client" },
+            });
+            await supabase.from("messages").insert({
+              conversation_id: conv.id,
+              sender_type: "system",
+              sender_user_id: null,
+              message_type: "system",
+              content: `⏰ ${clientName} has until ${balanceDueDateFormatted} to pay the balance of R${bookingData?.balance_amount?.toLocaleString()}.`,
+              metadata: { visibility: "vendor" },
             });
           }
 

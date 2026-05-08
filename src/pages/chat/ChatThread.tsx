@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star, Upload, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Loader2, Image as ImageIcon, Info, X, Star, Upload, CheckCircle, AlertTriangle, Clock, ChevronRight } from 'lucide-react';
 import { useConversationBooking } from '@/hooks/useConversationBooking';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -453,6 +453,30 @@ const ChatThread = () => {
 
             // System message
             if (isSystem) {
+              const isProofNotice = typeof message.content === 'string'
+                && message.content.includes('uploaded proof of service delivery');
+              const proofBookingId = activeBooking?.id || (metadata?.booking_id as string | undefined);
+
+              if (isProofNotice && proofBookingId) {
+                return (
+                  <div key={message.id} className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/bookings/${proofBookingId}`)}
+                      className="max-w-[70%] rounded-xl px-4 py-2 bg-muted/50 border border-border hover:bg-muted transition-colors text-left group"
+                    >
+                      <p className="text-sm text-center whitespace-pre-wrap text-muted-foreground underline decoration-dotted underline-offset-4">
+                        {message.content}
+                        <ChevronRight className="inline h-4 w-4 ml-1 -mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+                        {formatMessageTime(message.created_at)}
+                      </p>
+                    </button>
+                  </div>
+                );
+              }
+
               return (
                 <div key={message.id} className="flex justify-center">
                   <div className="max-w-[70%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
