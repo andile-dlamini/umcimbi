@@ -159,7 +159,9 @@ Deno.serve(async (req) => {
 
     const amount = override_amount !== null
       ? override_amount
-      : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
+      : payout_type === "deposit"
+        ? Math.round((Number(booking.deposit_amount) / 1.08) * 100) / 100
+        : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
     if (!Number.isFinite(amount) || amount <= 0) return jsonResponse({ error: "Invalid payout amount" }, 400);
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
