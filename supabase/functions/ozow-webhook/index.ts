@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
 
         const { data: bookingForDate } = await supabase
           .from("bookings")
-          .select("event_date_time")
+          .select("event_date_time, deposit_amount, vendor_id")
           .eq("id", booking_id)
           .single();
 
