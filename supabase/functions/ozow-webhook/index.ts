@@ -87,8 +87,7 @@ Deno.serve(async (req) => {
 
     if (expectedHash.toLowerCase().replace(/^0+/, "") !== (Hash || "").toLowerCase().replace(/^0+/, "")) {
       console.error("Hash mismatch! Expected:", expectedHash, "Got:", Hash);
-      // TODO: restore hard rejection once production private key is confirmed with Ozow
-      // Proceeding anyway for launch testing
+      return new Response("invalid hash", { status: 200, headers: corsHeaders });
     }
 
     const booking_id = Optional1;
