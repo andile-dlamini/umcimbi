@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
       Optional3,
       Optional4,
       Optional5,
+      CurrencyCode,
       IsTest,
       StatusMessage,
       Hash,
@@ -71,6 +72,7 @@ Deno.serve(async (req) => {
       Optional3 || "",
       Optional4 || "",
       Optional5 || "",
+      CurrencyCode || "",
       IsTest || "",
       StatusMessage || "",
     ].join("") + OZOW_PRIVATE_KEY;
@@ -83,7 +85,7 @@ Deno.serve(async (req) => {
 
     console.log("[HASH DEBUG] Expected hash:", expectedHash.substring(0,16), "Got:", (Hash || "").substring(0,16));
 
-    if (expectedHash.toLowerCase() !== (Hash || "").toLowerCase()) {
+    if (expectedHash.toLowerCase().replace(/^0+/, "") !== (Hash || "").toLowerCase().replace(/^0+/, "")) {
       console.error("Hash mismatch! Expected:", expectedHash, "Got:", Hash);
       // TODO: restore hard rejection once production private key is confirmed with Ozow
       // Proceeding anyway for launch testing
