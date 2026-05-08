@@ -127,6 +127,26 @@ Deno.serve(async (req) => {
         console.error("Failed to update booking:", updateError);
       }
 
+      if (payment_type === "deposit" && bookingForDate?.deposit_amount) {
+        const vendorDepositAmount = Math.round((Number(bookingForDate.deposit_amount) / 1.08) * 100) / 100;
+        try {
+          await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/trigger-vendor-payout", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              booking_id: booking_id,
+              payout_type: "deposit",
+              override_amount: vendorDepositAmount,
+            }),
+          });
+        } catch (payoutErr) {
+          console.error("Deposit payout trigger failed:", payoutErr);
+        }
+      }
+
       // Store payment record
       const amountCents = Amount ? Math.round(parseFloat(Amount) * 100) : null;
 
