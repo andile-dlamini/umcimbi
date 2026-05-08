@@ -155,7 +155,9 @@ Deno.serve(async (req) => {
     const missingFields = REQUIRED_BANK_FIELDS.filter((field) => !String(vendor[field] ?? "").trim());
     if (missingFields.length > 0) return jsonResponse({ error: "Vendor payout details incomplete", missing_fields: missingFields }, 400);
 
-    const amount = Number(booking.agreed_price);
+    const amount = override_amount !== null
+      ? override_amount
+      : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
     if (!Number.isFinite(amount) || amount <= 0) return jsonResponse({ error: "Invalid payout amount" }, 400);
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
