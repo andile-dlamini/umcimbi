@@ -98,6 +98,8 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const authHeader = req.headers.get("Authorization") ?? "";
 
+    console.log("[PAYOUT] Invoked. Auth header length:", authHeader.length, "Service key length:", serviceKey.length, "Match:", authHeader === `Bearer ${serviceKey}`);
+
     if (authHeader !== `Bearer ${serviceKey}`) return jsonResponse({ error: "Unauthorized" }, 401);
 
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim().replace(/\/+$/, "");
@@ -118,7 +120,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("id, vendor_id, agreed_price, balance_amount, deposit_status, booking_status, funds_released_at, order_number")
+      .select("id, vendor_id, agreed_price, deposit_amount, balance_amount, deposit_status, booking_status, funds_released_at, order_number")
       .eq("id", booking_id)
       .single();
 
@@ -157,7 +159,9 @@ Deno.serve(async (req) => {
 
     const amount = override_amount !== null
       ? override_amount
-      : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
+      : payout_type === "deposit"
+        ? Math.round((Number(booking.deposit_amount) / 1.08) * 100) / 100
+        : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
     if (!Number.isFinite(amount) || amount <= 0) return jsonResponse({ error: "Invalid payout amount" }, 400);
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
