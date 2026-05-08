@@ -92,17 +92,20 @@ Deno.serve(async (req) => {
         ozow_transaction_id: TransactionId,
       };
 
+      let bookingForDate: { event_date_time: string | null; deposit_amount: number | null; vendor_id: string | null } | null = null;
+
       if (payment_type === "deposit") {
         updates.deposit_status = "paid";
         updates.deposit_paid_at = now;
         updates.booking_status = "confirmed";
         updates.balance_status = "due";
 
-        const { data: bookingForDate } = await supabase
+        const { data } = await supabase
           .from("bookings")
           .select("event_date_time, deposit_amount, vendor_id")
           .eq("id", booking_id)
           .single();
+        bookingForDate = data as typeof bookingForDate;
 
         if (bookingForDate?.event_date_time) {
           const ceremonyDate = new Date(bookingForDate.event_date_time);
