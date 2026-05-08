@@ -69,6 +69,12 @@ Deno.serve(async (req) => {
 
     const expectedHash = await sha512Hex(hashFields.toLowerCase());
 
+    console.log("[HASH DEBUG] Private key length:", OZOW_PRIVATE_KEY.length, "first4:", OZOW_PRIVATE_KEY.substring(0,4), "last4:", OZOW_PRIVATE_KEY.slice(-4));
+
+    console.log("[HASH DEBUG] Hash input fields:", JSON.stringify({ SiteCode, TransactionId, TransactionReference, Amount, Status, Optional1, Optional2, Optional3, Optional4, Optional5, IsTest, StatusMessage }));
+
+    console.log("[HASH DEBUG] Expected hash:", expectedHash.substring(0,16), "Got:", (Hash || "").substring(0,16));
+
     if (expectedHash.toLowerCase() !== (Hash || "").toLowerCase()) {
       console.error("Hash mismatch! Expected:", expectedHash, "Got:", Hash);
       return new Response("invalid hash", { status: 200, headers: corsHeaders });
