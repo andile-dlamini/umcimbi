@@ -96,7 +96,14 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 Deno.serve(async (req) => {
-  
+  console.log("[VERIFY] Request received:", req.method, "expect:", req.headers.get("expect") || "none");
+
+  if (req.headers.get("expect")?.includes("100-continue")) {
+    // Some HTTP clients send Expect: 100-continue before the body
+    // We need to handle this gracefully
+    console.log("[VERIFY] Expect header detected:", req.headers.get("expect"));
+  }
+
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (!["GET", "POST"].includes(req.method)) return jsonResponse({ IsVerified: false, Reason: "Method not allowed" }, 405);
 
