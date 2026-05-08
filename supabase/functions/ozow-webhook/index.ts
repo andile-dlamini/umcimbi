@@ -92,17 +92,20 @@ Deno.serve(async (req) => {
         ozow_transaction_id: TransactionId,
       };
 
+      let bookingForDate: { event_date_time: string | null; deposit_amount: number | null; vendor_id: string | null } | null = null;
+
       if (payment_type === "deposit") {
         updates.deposit_status = "paid";
         updates.deposit_paid_at = now;
         updates.booking_status = "confirmed";
         updates.balance_status = "due";
 
-        const { data: bookingForDate } = await supabase
+        const { data } = await supabase
           .from("bookings")
-          .select("event_date_time")
+          .select("event_date_time, deposit_amount, vendor_id")
           .eq("id", booking_id)
           .single();
+        bookingForDate = data as typeof bookingForDate;
 
         if (bookingForDate?.event_date_time) {
           const ceremonyDate = new Date(bookingForDate.event_date_time);
@@ -125,6 +128,26 @@ Deno.serve(async (req) => {
 
       if (updateError) {
         console.error("Failed to update booking:", updateError);
+      }
+
+      if (payment_type === "deposit" && bookingForDate?.deposit_amount) {
+        const vendorDepositAmount = Math.round((Number(bookingForDate.deposit_amount) / 1.08) * 100) / 100;
+        try {
+          await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/trigger-vendor-payout", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              booking_id: booking_id,
+              payout_type: "deposit",
+              override_amount: vendorDepositAmount,
+            }),
+          });
+        } catch (payoutErr) {
+          console.error("Deposit payout trigger failed:", payoutErr);
+        }
       }
 
       // Store payment record

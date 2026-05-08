@@ -109,25 +109,35 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Payout service not configured" }, 500);
     }
 
-    const { booking_id } = await req.json();
+    const body = await req.json();
+    const { booking_id } = body;
+    const payout_type: string = body.payout_type || "balance";
+    const override_amount: number | null = body.override_amount ?? null;
     if (!booking_id) return jsonResponse({ error: "booking_id is required" }, 400);
 
     const supabase = createClient(supabaseUrl, serviceKey);
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("id, vendor_id, agreed_price, booking_status, funds_released_at, order_number")
+      .select("id, vendor_id, agreed_price, balance_amount, deposit_status, booking_status, funds_released_at, order_number")
       .eq("id", booking_id)
       .single();
 
     if (bookingError || !booking) return jsonResponse({ error: "Booking not found" }, 404);
-    if (booking.booking_status !== "completed" || !booking.funds_released_at) {
-      return jsonResponse({ error: "Booking is not eligible for payout" }, 400);
+    if (payout_type === "deposit") {
+      if (booking.booking_status !== "confirmed" || booking.deposit_status !== "paid") {
+        return jsonResponse({ error: "Booking deposit not eligible for payout" }, 400);
+      }
+    } else {
+      if (booking.booking_status !== "completed" || !booking.funds_released_at) {
+        return jsonResponse({ error: "Booking is not eligible for payout" }, 400);
+      }
     }
 
     const { data: duplicate } = await supabase
       .from("vendor_payouts")
       .select("id, status")
       .eq("booking_id", booking_id)
+      .eq("payout_type", payout_type)
       .in("status", ["pending", "submitted", "paid"])
       .limit(1)
       .maybeSingle();
@@ -145,7 +155,9 @@ Deno.serve(async (req) => {
     const missingFields = REQUIRED_BANK_FIELDS.filter((field) => !String(vendor[field] ?? "").trim());
     if (missingFields.length > 0) return jsonResponse({ error: "Vendor payout details incomplete", missing_fields: missingFields }, 400);
 
-    const amount = Number(booking.agreed_price);
+    const amount = override_amount !== null
+      ? override_amount
+      : Math.round((Number(booking.balance_amount) / 1.08) * 100) / 100;
     if (!Number.isFinite(amount) || amount <= 0) return jsonResponse({ error: "Invalid payout amount" }, 400);
 
     // 1. Resolve BankGroupId via Ozow getavailablebanks
@@ -272,6 +284,7 @@ Deno.serve(async (req) => {
         currency: "ZAR",
         internal_reference: internalReference,
         status: "pending",
+        payout_type,
         request_payload: redactValue(payoutPayload),
         encryption_key: rawKey,
         bank_group_id: bankGroupId,

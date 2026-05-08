@@ -1235,6 +1235,7 @@ export type Database = {
           ozow_payout_id: string | null
           ozow_reference: string | null
           paid_at: string | null
+          payout_type: string
           request_payload: Json | null
           response_payload: Json | null
           status: string
@@ -1256,6 +1257,7 @@ export type Database = {
           ozow_payout_id?: string | null
           ozow_reference?: string | null
           paid_at?: string | null
+          payout_type?: string
           request_payload?: Json | null
           response_payload?: Json | null
           status?: string
@@ -1277,6 +1279,7 @@ export type Database = {
           ozow_payout_id?: string | null
           ozow_reference?: string | null
           paid_at?: string | null
+          payout_type?: string
           request_payload?: Json | null
           response_payload?: Json | null
           status?: string
