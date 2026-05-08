@@ -284,6 +284,7 @@ Deno.serve(async (req) => {
         currency: "ZAR",
         internal_reference: internalReference,
         status: "pending",
+        payout_type,
         request_payload: redactValue(payoutPayload),
         encryption_key: rawKey,
         bank_group_id: bankGroupId,
