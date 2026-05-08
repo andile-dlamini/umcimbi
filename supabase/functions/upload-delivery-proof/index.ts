@@ -110,6 +110,7 @@ Deno.serve(async (req) => {
         sender_user_id: null,
         message_type: "system",
         content: `📸 ${vendor.name} has uploaded proof of service delivery. Please confirm receipt in your booking, or funds will be released automatically within 48 hours.`,
+        metadata: { visibility: "client", booking_id },
       });
 
       // Message for vendor
@@ -119,6 +120,7 @@ Deno.serve(async (req) => {
         sender_user_id: null,
         message_type: "system",
         content: `✅ Your proof of delivery has been submitted. Payment of R${booking.balance_amount?.toLocaleString()} will be released within 48 hours unless the client raises a dispute.`,
+        metadata: { visibility: "vendor" },
       });
 
       await supabase
