@@ -94,13 +94,13 @@ export function MakeQuotationSheet({
   const depositAmount = clientTotal * (depositPercentage / 100);
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     const validItems = lineItems.filter(i => i.description.trim() && i.unit_price > 0 && (Number(i.quantity) || 0) >= 1);
     if (validItems.length === 0) {
       toast.error('Add at least one line item with description, quantity (≥1) and price');
+      setIsSubmitting(false);
       return;
     }
-
-    setIsSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-quote', {
         body: {
@@ -279,7 +279,7 @@ export function MakeQuotationSheet({
         </div>
 
         <SheetFooter className="mt-4">
-          <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || subtotal === 0}>
+          <Button className="w-full" onClick={() => { if (isSubmitting) return; handleSubmit(); }} disabled={isSubmitting || subtotal === 0}>
             {isSubmitting ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {isAdjustment ? 'Updating...' : 'Sending...'}</>
             ) : (
