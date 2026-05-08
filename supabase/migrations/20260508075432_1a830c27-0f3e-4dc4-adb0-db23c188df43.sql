@@ -1,0 +1,1 @@
+ALTER TABLE public.vendor_payouts ADD COLUMN IF NOT EXISTS payout_type text NOT NULL DEFAULT 'balance';
