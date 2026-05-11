@@ -354,7 +354,7 @@ export default function OnboardingLanguage() {
             {[
             { step: 1 as const, title: 'Share your ceremony needs', body: 'The type, date, location, and what you need.' },
             { step: 2 as const, title: 'Receive & compare quotations', body: 'Vendors respond with structured quotations you can review.' },
-            { step: 3 as const, title: 'Confirm & manage delivery', body: 'Track tasks, confirmations, and delivery proof.' }].
+            { step: 3 as const, title: 'Confirm & manage delivery', body: 'Place an order and pay safely online' }].
             map(({ step, title, body }) =>
             <div key={step} className="group text-center space-y-5">
                 <div className="mx-auto w-20 h-20 rounded-3xl bg-primary/[0.08] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
