@@ -26,13 +26,15 @@ serve(async (req) => {
       vendorsResult, organisersResult, eventsResult, requestsResult,
       quotesResult, bookingsResult, platformEventsResult, previousBriefResult,
     ] = await Promise.all([
-      supabase.from('vendors').select('id, name, owner_user_id, created_at, logo_url, about, price_range_text, bank_name, signup_source'),
+      supabase.from('vendors').select('id, name, owner_user_id, created_at, logo_url, about, price_range_text, bank_name, signup_source').not('owner_user_id', 'is', null),
       supabase.from('user_roles').select('user_id, role').then(async (res: any) => {
         if (res.error || !res.data) return res;
-        // Exclude any user who also has the vendor role — organisers are user-only accounts
-        const vendorIds = new Set(res.data.filter((r: any) => r.role === 'vendor').map((r: any) => r.user_id));
+        // A "vendor" = a user who actually owns a vendor profile record.
+        // Users with the vendor role but no vendor record (abandoned onboarding) count as organisers.
+        const { data: vendorOwners } = await supabase.from('vendors').select('owner_user_id').not('owner_user_id', 'is', null);
+        const vendorOwnerIds = new Set((vendorOwners ?? []).map((v: any) => v.owner_user_id));
         const organiserIds = Array.from(new Set(
-          res.data.filter((r: any) => r.role === 'user' && !vendorIds.has(r.user_id)).map((r: any) => r.user_id)
+          res.data.filter((r: any) => r.role === 'user' && !vendorOwnerIds.has(r.user_id)).map((r: any) => r.user_id)
         ));
         if (organiserIds.length === 0) return { data: [], error: null };
         const { data } = await supabase.from('profiles').select('user_id, created_at').in('user_id', organiserIds);
