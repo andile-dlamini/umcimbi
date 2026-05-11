@@ -79,8 +79,13 @@ export function useVendor(vendorId: string | undefined) {
         setVendor(data as Vendor | null);
         
         // Increment view count via RPC to avoid race conditions (fire and forget)
+        // NOTE: must call .then() — PostgrestBuilder is lazy and won't execute otherwise
         if (data) {
-          supabase.rpc('increment_vendor_view_count' as any, { vendor_id_input: vendorId });
+          supabase
+            .rpc('increment_vendor_view_count' as any, { vendor_id_input: vendorId })
+            .then(({ error: rpcError }) => {
+              if (rpcError) console.error('Error incrementing vendor view count:', rpcError);
+            });
         }
       }
       setIsLoading(false);
