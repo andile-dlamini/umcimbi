@@ -18,7 +18,31 @@ export default function VendorDashboard() {
   const { replayTour } = useOnboardingTour('vendor');
 
   const isLoading = quotesLoading || bookingsLoading;
-  const thirtyDaysAgo = subDays(new Date(), 30);
+  const thirtyDaysAgo = useMemo(() => subDays(new Date(), 30), []);
+
+  const kpis = useMemo(() => {
+    const profileViews = vendorProfile?.view_count || 0;
+
+    const quotesSent = quotes.filter(q =>
+      isAfter(new Date(q.created_at), thirtyDaysAgo)
+    ).length;
+
+    const ordersCompleted = bookings.filter(b =>
+      b.booking_status === 'completed' &&
+      b.updated_at &&
+      isAfter(new Date(b.updated_at), thirtyDaysAgo)
+    ).length;
+
+    const totalPayout = bookings
+      .filter(b =>
+        b.booking_status === 'completed' &&
+        b.updated_at &&
+        isAfter(new Date(b.updated_at), thirtyDaysAgo)
+      )
+      .reduce((sum, b) => sum + (b.agreed_price || 0), 0);
+
+    return { profileViews, quotesSent, ordersCompleted, totalPayout };
+  }, [vendorProfile, quotes, bookings, thirtyDaysAgo]);
 
   if (!vendorProfile) {
     return (
@@ -33,34 +57,6 @@ export default function VendorDashboard() {
       </div>
     );
   }
-
-  const kpis = useMemo(() => {
-    // Profile views (all-time since we don't have date tracking on views)
-    const profileViews = vendorProfile.view_count || 0;
-
-    // Quotes sent in last 30 days
-    const quotesSent = quotes.filter(q =>
-      isAfter(new Date(q.created_at), thirtyDaysAgo)
-    ).length;
-
-    // Orders completed in last 30 days
-    const ordersCompleted = bookings.filter(b =>
-      b.booking_status === 'completed' &&
-      b.updated_at &&
-      isAfter(new Date(b.updated_at), thirtyDaysAgo)
-    ).length;
-
-    // Total payout in last 30 days (sum of agreed_price for completed bookings)
-    const totalPayout = bookings
-      .filter(b =>
-        b.booking_status === 'completed' &&
-        b.updated_at &&
-        isAfter(new Date(b.updated_at), thirtyDaysAgo)
-      )
-      .reduce((sum, b) => sum + (b.agreed_price || 0), 0);
-
-    return { profileViews, quotesSent, ordersCompleted, totalPayout };
-  }, [vendorProfile, quotes, bookings, thirtyDaysAgo]);
 
   // Profile completeness check for quick registration
   const isProfileIncomplete = !vendorProfile.about && !vendorProfile.price_range_text;
