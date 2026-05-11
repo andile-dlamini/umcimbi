@@ -18,7 +18,7 @@ import {
   ShieldCheck,
   BarChart3,
   Inbox,
-  Lock,
+  Lock as LockIcon,
   Users,
   Zap,
   HandshakeIcon,
