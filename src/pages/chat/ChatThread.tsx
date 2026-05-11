@@ -390,6 +390,47 @@ const ChatThread = () => {
         )}
       </div>
 
+      {conversation.event && (
+        <div className="border-b border-border bg-primary/5 px-4 py-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary capitalize">
+              {conversation.event.type}
+            </span>
+            <span className="text-sm font-semibold text-foreground truncate">
+              {conversation.event.name}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-1">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="shrink-0">📅</span>
+              <span>
+                {conversation.event.date
+                  ? format(new Date(conversation.event.date), 'dd MMMM yyyy')
+                  : 'Date not specified'}
+              </span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="shrink-0">📍</span>
+              <span>{conversation.event.location || 'Location not specified'}</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="shrink-0">👥</span>
+              <span>
+                {conversation.event.estimated_guest_count
+                  ? `${conversation.event.estimated_guest_count} guests`
+                  : 'Guest count not specified'}
+              </span>
+            </div>
+            {conversation.event.notes && (
+              <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <span className="shrink-0">📝</span>
+                <span>{conversation.event.notes}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
