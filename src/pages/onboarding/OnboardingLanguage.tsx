@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   BarChart3,
   Inbox,
+  Lock,
   Users,
   Zap,
   HandshakeIcon,
@@ -210,7 +211,7 @@ export default function OnboardingLanguage() {
             {[
             { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15 border border-primary/10 shadow-sm', iconColor: 'text-primary' },
             { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side i.e. scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary border border-secondary-foreground/10 shadow-sm', iconColor: 'text-secondary-foreground' },
-            { icon: Inbox, title: 'One organised plan', body: 'Tasks, messages, and confirmations in one flow.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15 border border-accent/10 shadow-sm', iconColor: 'text-accent' }].
+            { icon: Lock, title: 'Pay safely online', body: 'Your money is safely held until your ceremony is complete and you confirm delivery. No more cash risk.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15 border border-accent/10 shadow-sm', iconColor: 'text-accent' }].
             map(({ icon: Icon, title, body, gradient, iconBg, iconColor }) =>
             <div key={title} className={`group rounded-3xl bg-gradient-to-b ${gradient} border border-border/40 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
                 <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center mb-5`}>
