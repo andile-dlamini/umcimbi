@@ -53,14 +53,6 @@ Deno.serve(async (req) => {
     // Verify hash
     const OZOW_PRIVATE_KEY = Deno.env.get("OZOW_PRIVATE_KEY")!;
 
-    console.log("[HASH DEBUG2] content-type:", req.headers.get("content-type"));
-
-    console.log("[HASH DEBUG2] raw fields:", JSON.stringify({ SiteCode, TransactionId, TransactionReference, Amount, Status, Optional1, Optional2, Optional3, Optional4, Optional5, IsTest, StatusMessage, Hash }));
-
-    console.log("[HASH DEBUG2] key length:", OZOW_PRIVATE_KEY.length, "charCodes first3:", OZOW_PRIVATE_KEY.charCodeAt(0), OZOW_PRIVATE_KEY.charCodeAt(1), OZOW_PRIVATE_KEY.charCodeAt(2));
-
-    console.log("[HASH DEBUG2] hash input string:", ([ SiteCode||"", TransactionId||"", TransactionReference||"", Amount||"", Status||"", Optional1||"", Optional2||"", Optional3||"", Optional4||"", Optional5||"", IsTest||"", StatusMessage||"" ].join("") + OZOW_PRIVATE_KEY).toLowerCase().substring(0, 80));
-
     const hashFields = [
       SiteCode || "",
       TransactionId || "",
