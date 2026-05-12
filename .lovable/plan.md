@@ -1,20 +1,27 @@
-# Add Event Brief card to ChatThread
+## Three targeted cleanup edits
 
-Insert a read-only Event Brief card in `src/pages/chat/ChatThread.tsx`, between the sticky header's closing `</div>` and the `{/* Messages */}` comment. Renders only when `conversation.event` is present.
+### 1. `supabase/functions/ozow-webhook/index.ts`
+Remove every line containing `[HASH DEBUG]`, `[HASH DEBUG2]`, or `[AMOUNT DEBUG]`. All other `console.log` / `console.error` lines stay intact. (Note: prior cleanup already removed the HASH DEBUG lines — this pass will confirm none remain and remove any AMOUNT DEBUG line if present.)
 
-## Content
+### 2. `supabase/functions/trigger-vendor-payout/index.ts`
+Delete line 101:
+```ts
+console.log("[PAYOUT] Invoked. Auth header length:", authHeader.length, "Service key length:", serviceKey.length, "Match:", authHeader === `Bearer ${serviceKey}`);
+```
 
-- Pill with `event.type` (capitalized) + event name
-- Date row: formatted `dd MMMM yyyy`, fallback "Date not specified"
-- Location row: fallback "Location not specified"
-- Guest count row: rendered as `"{count} guests"` (e.g. "100 guests"), fallback "Guest count not specified"
-- Notes row: only if present
+### 3. Balance-due derivation fix (treat paid deposit + unpaid balance as "due")
 
-## Constraints
+**`src/pages/bookings/BookingDetail.tsx`**
+```ts
+const balanceDue = booking.balance_status === 'due' ||
+  (booking.deposit_status === 'paid' && booking.balance_status !== 'paid');
+```
 
-- Single insertion; no other edits
-- Use existing `format` import (already present)
-- No role gating — visible to both organizer and vendor
-- Keep the existing "Regarding: ..." pill in the header unchanged
-- Do not modify `useChat.ts`, `MakeQuotationSheet`, or any other file
-- Use semantic tokens already in the snippet (`border-border`, `bg-primary/5`, `text-primary`, `text-foreground`, `text-muted-foreground`)
+**`src/components/chat/ChatDetailsDrawer.tsx`**
+```ts
+const balanceDue = booking &&
+  (booking.balance_status === 'due' ||
+    (booking.deposit_status === 'paid' && booking.balance_status !== 'paid'));
+```
+
+No other files, logic, or styling will be touched.
