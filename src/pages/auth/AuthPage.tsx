@@ -303,9 +303,12 @@ export default function AuthPage() {
   const { signIn } = useAuth();
 
   const refSource = searchParams.get('ref');
+  const methodParam = searchParams.get('method');
   const initialRole: UserRole | null = searchParams.get('role') === 'vendor' ? 'vendor' : null;
   const initialStep: Step = searchParams.get('mode') === 'signup'
-    ? (initialRole ? 'auth_method' : 'role')
+    ? (initialRole
+        ? (methodParam === 'phone' ? 'details' : 'auth_method')
+        : 'role')
     : 'login';
   const [step, setStep] = useState<Step>(initialStep);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(initialRole);
