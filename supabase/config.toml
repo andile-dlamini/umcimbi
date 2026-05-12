@@ -1,1 +1,4 @@
 project_id = "pnnckeqrzjglcwkyzzxg"
+
+[functions.trigger-vendor-payout]
+verify_jwt = false
