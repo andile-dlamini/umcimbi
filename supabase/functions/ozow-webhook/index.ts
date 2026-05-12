@@ -135,10 +135,10 @@ Deno.serve(async (req) => {
       if (payment_type === "deposit" && bookingForDate?.deposit_amount) {
         const vendorDepositAmount = Math.round((Number(bookingForDate.deposit_amount) / 1.08) * 100) / 100;
         try {
-          await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/trigger-vendor-payout", {
+          const payoutRes = await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/trigger-vendor-payout", {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              "Authorization": `Bearer ${supabaseServiceKey}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -147,8 +147,10 @@ Deno.serve(async (req) => {
               override_amount: vendorDepositAmount,
             }),
           });
+          const payoutText = await payoutRes.text();
+          console.log("[DEPOSIT PAYOUT] status:", payoutRes.status, "body:", payoutText.substring(0, 200));
         } catch (payoutErr) {
-          console.error("Deposit payout trigger failed:", payoutErr);
+          console.error("[DEPOSIT PAYOUT] Trigger failed:", payoutErr);
         }
       }
 
