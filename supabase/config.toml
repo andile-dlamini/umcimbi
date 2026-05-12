@@ -4,5 +4,3 @@ project_id = "pnnckeqrzjglcwkyzzxg"
 verify_jwt = false
 
 
-[functions.test-simulate-deposit]
-verify_jwt = false
