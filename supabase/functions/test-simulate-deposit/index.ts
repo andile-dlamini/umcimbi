@@ -1,8 +1,12 @@
 Deno.serve(async (_req) => {
-  const payoutRes = await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/trigger-vendor-payout", {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  console.log("URL set:", !!url, "KEY set:", !!key, "KEY len:", key?.length ?? 0);
+
+  const payoutRes = await fetch(url + "/functions/v1/trigger-vendor-payout", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      "Authorization": `Bearer ${key}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -12,7 +16,7 @@ Deno.serve(async (_req) => {
     }),
   });
   const payoutText = await payoutRes.text();
-  return new Response(JSON.stringify({ status: payoutRes.status, body: payoutText }), {
+  return new Response(JSON.stringify({ status: payoutRes.status, body: payoutText, keyLen: key?.length ?? 0 }), {
     headers: { "Content-Type": "application/json" },
   });
 });
