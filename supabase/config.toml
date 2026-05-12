@@ -3,4 +3,7 @@ project_id = "pnnckeqrzjglcwkyzzxg"
 [functions.trigger-vendor-payout]
 verify_jwt = false
 
+[functions.release-escrow]
+verify_jwt = false
+
 

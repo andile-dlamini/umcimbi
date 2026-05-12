@@ -1,17 +1,14 @@
 ## Plan
 
-Lower the auth-header length guard in `supabase/functions/trigger-vendor-payout/index.ts` so it accepts the new short-format `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`, length 41) used by `ozow-webhook` and other internal callers.
+`trigger-vendor-payout` block already exists at lines 3-4 of `supabase/config.toml`. Append a matching block for `release-escrow` so its internal call to `trigger-vendor-payout` (and any service-role JWT it uses) bypasses the gateway's JWT verification.
 
 ### Change
 
-`supabase/functions/trigger-vendor-payout/index.ts`, line 101:
+Append to `supabase/config.toml`:
 
-```ts
-// before
-if (!authHeader.startsWith("Bearer ") || authHeader.length < 50) return jsonResponse({ error: "Unauthorized" }, 401);
-
-// after
-if (!authHeader.startsWith("Bearer ") || authHeader.length < 20) return jsonResponse({ error: "Unauthorized" }, 401);
+```toml
+[functions.release-escrow]
+verify_jwt = false
 ```
 
-No other changes.
+No other lines touched.
