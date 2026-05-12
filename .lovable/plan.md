@@ -1,14 +1,17 @@
 ## Plan
 
-Add a function-specific config block to `supabase/config.toml` so the `trigger-vendor-payout` edge function deploys with `verify_jwt = false`. This bypasses the Supabase Edge gateway's JWT verification (which currently rejects the legacy service-role JWT sent by `ozow-webhook`), allowing the function's own in-code auth check to run.
+Lower the auth-header length guard in `supabase/functions/trigger-vendor-payout/index.ts` so it accepts the new short-format `SUPABASE_SERVICE_ROLE_KEY` (`sb_secret_...`, length 41) used by `ozow-webhook` and other internal callers.
 
 ### Change
 
-Append to `supabase/config.toml`:
+`supabase/functions/trigger-vendor-payout/index.ts`, line 101:
 
-```toml
-[functions.trigger-vendor-payout]
-verify_jwt = false
+```ts
+// before
+if (!authHeader.startsWith("Bearer ") || authHeader.length < 50) return jsonResponse({ error: "Unauthorized" }, 401);
+
+// after
+if (!authHeader.startsWith("Bearer ") || authHeader.length < 20) return jsonResponse({ error: "Unauthorized" }, 401);
 ```
 
-No other lines in the file are touched. After approval and deploy, the next `ozow-webhook` deposit trigger should reach `trigger-vendor-payout` and create a `vendor_payouts` row.
+No other changes.
