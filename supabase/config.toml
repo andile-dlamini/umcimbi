@@ -3,5 +3,3 @@ project_id = "pnnckeqrzjglcwkyzzxg"
 [functions.trigger-vendor-payout]
 verify_jwt = false
 
-[functions.test-simulate-deposit]
-verify_jwt = false
