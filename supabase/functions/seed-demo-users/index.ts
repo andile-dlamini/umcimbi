@@ -32,11 +32,24 @@ Deno.serve(async (req) => {
   const results: any[] = [];
 
   for (const acc of accounts) {
-    // Delete if exists (by email)
+    // Delete if exists (match by email OR phone, also clear old umcimbi.co.za demo emails)
     const { data: existing } = await supabase.auth.admin.listUsers();
-    const match = existing.users.find((u) => u.email === acc.email);
-    if (match) {
-      await supabase.auth.admin.deleteUser(match.id);
+    const matches = existing.users.filter(
+      (u) =>
+        u.email === acc.email ||
+        u.phone === acc.phone.replace("+", "") ||
+        u.email === `demo.organiser@umcimbi.co.za` ||
+        u.email === `demo.vendor@umcimbi.co.za`
+    );
+    for (const m of matches) {
+      if (
+        m.email === acc.email ||
+        m.phone === acc.phone.replace("+", "") ||
+        (acc.role === "user" && m.email === "demo.organiser@umcimbi.co.za") ||
+        (acc.role === "vendor" && m.email === "demo.vendor@umcimbi.co.za")
+      ) {
+        await supabase.auth.admin.deleteUser(m.id);
+      }
     }
 
     const { data: created, error } = await supabase.auth.admin.createUser({
