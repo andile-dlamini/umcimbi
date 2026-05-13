@@ -135,6 +135,31 @@ function CompareCard({ vendor, onOpenChat, ceremonyType }: { vendor: ScoredVendo
           </div>
         )}
 
+        {/* Umcimbi breakdown - placed near score for context */}
+        <div className="rounded-lg bg-muted/50 p-3 mb-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Umcimbi Score Breakdown</p>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-muted-foreground">Trust</span>
+                <span className="font-medium text-foreground">{Math.round(vendor.trustScore * 100)}</span>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full">
+                <div className="h-full bg-amber-400 rounded-full" style={{ width: `${Math.max(vendor.trustScore * 100, 4)}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-muted-foreground">Price</span>
+                <span className="font-medium text-foreground">{Math.round(vendor.priceScore * 100)}</span>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full">
+                <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.max(vendor.priceScore * 100, 4)}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Price details */}
         <div className="space-y-1.5 mb-3">
           <div className="flex justify-between">
