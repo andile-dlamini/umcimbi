@@ -16,20 +16,18 @@ Deno.serve(async (req) => {
   const password = "DemoUmcimbi2026!";
   const accounts = [
     {
-      email: "demo.organiser@umcimbi.co.za",
       phone: "+27820000901",
       first_name: "Demo",
       surname: "Organiser",
       role: "user" as const,
     },
     {
-      email: "demo.vendor@umcimbi.co.za",
       phone: "+27820000902",
       first_name: "Demo",
       surname: "Vendor",
       role: "vendor" as const,
     },
-  ];
+  ].map((a) => ({ ...a, email: `${a.phone.replace("+", "")}@phone.isiko.app` }));
 
   const results: any[] = [];
 
