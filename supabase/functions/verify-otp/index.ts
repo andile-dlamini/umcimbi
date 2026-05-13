@@ -137,6 +137,7 @@ Deno.serve(async (req) => {
       .from("otp_requests")
       .update({ verified: true })
       .eq("id", otpRecord.id);
+    } // end non-demo OTP verification block
 
     // Create user account via Supabase Auth
     const signUpEmail = email && email.trim() ? email.trim() : `${normalized.replace("+", "")}@phone.isiko.app`;
