@@ -430,9 +430,11 @@ export default function CompareQuotes() {
           </Button>
         </div>
 
-        {scoredVendors.map(v => (
-          <CompareCard key={v.quoteId} vendor={v} onOpenChat={handleOpenChat} ceremonyType={ceremonyType} />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {scoredVendors.map(v => (
+            <CompareCard key={v.quoteId} vendor={v} onOpenChat={handleOpenChat} ceremonyType={ceremonyType} />
+          ))}
+        </div>
       </div>
     </div>
   );
