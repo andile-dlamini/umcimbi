@@ -141,7 +141,22 @@ Deno.serve(async (req) => {
 
     // Create user account via Supabase Auth
     const signUpEmail = email && email.trim() ? email.trim() : `${normalized.replace("+", "")}@phone.isiko.app`;
-    
+
+    // For demo phones: wipe any existing user with this phone/email so registration can be replayed
+    if (isDemoPhone) {
+      try {
+        const { data: list } = await supabase.auth.admin.listUsers();
+        const existing = list.users.filter(
+          (u) => u.email === signUpEmail || u.phone === normalized.replace("+", "")
+        );
+        for (const u of existing) {
+          await supabase.auth.admin.deleteUser(u.id);
+        }
+      } catch (e) {
+        console.error("Demo user cleanup failed:", e);
+      }
+    }
+
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: signUpEmail,
       password,
