@@ -404,6 +404,18 @@ export default function AuthPage() {
     setIsLoading(true);
     try {
       const email = phoneToEmail(loginPhone);
+      // Demo accounts: accept any password by resetting it server-side first
+      const DEMO_PHONES = ['0820000901', '0820000902', '0820000903', '0820000904'];
+      const normalizedLogin = loginPhone.replace(/\s/g, '');
+      if (DEMO_PHONES.includes(normalizedLogin)) {
+        try {
+          await fetch(`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/demo-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone_number: loginPhone, password: loginPassword }),
+          });
+        } catch (err) { console.error('demo-login failed', err); }
+      }
       const { error } = await signIn(email, loginPassword);
       if (error) {
         toast.error(error.message.includes('Invalid login credentials') ? 'Invalid phone number or password' : error.message);
