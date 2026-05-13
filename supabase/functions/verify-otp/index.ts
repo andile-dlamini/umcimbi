@@ -61,6 +61,22 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // Demo phone bypass: accept fixed OTP 123456 without DB lookup
+    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904"];
+    const isDemoPhone = DEMO_PHONES.includes(normalized);
+    const isDemoOtp = isDemoPhone && otp === "123456";
+
+    if (isDemoPhone && !isDemoOtp) {
+      return new Response(
+        JSON.stringify({ error: "Invalid verification code. Use 123456 for demo accounts." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (isDemoOtp) {
+      // Skip OTP record check entirely for demo numbers
+    } else {
+
     // Find latest OTP request for this phone
     const { data: otpRecords, error: fetchError } = await supabase
       .from("otp_requests")
