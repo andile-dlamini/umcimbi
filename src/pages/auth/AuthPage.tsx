@@ -300,7 +300,7 @@ function CompleteProfileStep() {
 export default function AuthPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
 
   const refSource = searchParams.get('ref');
   const methodParam = searchParams.get('method');
@@ -315,6 +315,15 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
+
+  // If user is already logged in AND not in the middle of the signup wizard, send them home.
+  // Wizard steps (business/showcase/success) need to stay rendered after auto sign-in.
+  const wizardSteps: Step[] = ['business', 'showcase', 'success'];
+  useEffect(() => {
+    if (user && !wizardSteps.includes(step) && step === 'login') {
+      navigate('/', { replace: true });
+    }
+  }, [user, step, navigate]);
 
   // Login state
   const [loginPhone, setLoginPhone] = useState('');
