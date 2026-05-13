@@ -47,6 +47,15 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Demo phone bypass: skip SMS and accept fixed OTP 123456
+    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904"];
+    if (DEMO_PHONES.includes(normalized)) {
+      return new Response(
+        JSON.stringify({ success: true, demo: true, message: "Demo number — use code 123456." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Restrict to South African numbers only
     if (!normalized.startsWith("+27")) {
       return new Response(
