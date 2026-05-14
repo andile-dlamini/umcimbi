@@ -53,11 +53,6 @@ export default function AdminOperations() {
     const calculated = Math.round((d.balance_amount / 1.08 * percentage / 100) * 100) / 100;
     setSubmitting(true);
     try {
-      const { error: invokeError } = await supabase.functions.invoke('trigger-vendor-payout', {
-        body: { booking_id: d.id, payout_type: 'balance', override_amount: calculated },
-      });
-      if (invokeError) throw invokeError;
-
       const { error: updateError } = await supabase
         .from('bookings')
         .update({
@@ -66,6 +61,11 @@ export default function AdminOperations() {
         })
         .eq('id', d.id);
       if (updateError) throw updateError;
+
+      const { error: invokeError } = await supabase.functions.invoke('trigger-vendor-payout', {
+        body: { booking_id: d.id, payout_type: 'balance', override_amount: calculated },
+      });
+      if (invokeError) throw invokeError;
 
       toast.success(`Resolution confirmed — R${calculated.toFixed(2)} released to vendor`);
       setDisputes((prev) => prev.filter((x) => x.id !== d.id));
