@@ -90,7 +90,7 @@ export const useConversations = () => {
           let bookingStatus: string | null = null;
           const { data: latestBooking } = await supabase
             .from('bookings')
-            .select('booking_status')
+            .select('booking_status, balance_status')
             .eq('client_id', conv.user_id)
             .eq('vendor_id', conv.vendor_id)
             .order('created_at', { ascending: false })
@@ -126,6 +126,7 @@ export const useConversations = () => {
             last_message: lastMsg || undefined,
             unread_count: totalCount,
             booking_status: bookingStatus,
+            balance_status: latestBooking?.balance_status ?? null,
             quote_status: quoteStatus,
           } as ConversationWithDetails;
         })
