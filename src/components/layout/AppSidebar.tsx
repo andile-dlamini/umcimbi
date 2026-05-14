@@ -135,7 +135,7 @@ export function AppSidebar() {
   { to: '/vendors', icon: Store, label: 'Vendors', dataTour: 'nav-vendors' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount, dataTour: 'nav-messages' },
   { to: '/quotes', icon: Receipt, label: 'Quotations', dataTour: 'nav-quotes' },
-  { to: '/bookings', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-orders' }];
+  { to: '/bookings', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-orders', alert: ordersAlert }];
 
 
   const vendorItems = [
@@ -188,7 +188,7 @@ export function AppSidebar() {
 
         {/* Main nav */}
         <nav className="flex-1 py-2 overflow-y-auto">
-          {navItems.map(({ to, icon: Icon, label, badge, dataTour }) => {
+          {navItems.map(({ to, icon: Icon, label, badge, dataTour, alert }: any) => {
             const active = isActive(to);
             const button =
             <button
