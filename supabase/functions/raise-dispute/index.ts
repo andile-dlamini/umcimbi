@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     // Fetch booking
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("id, client_id, vendor_id, balance_amount, booking_status")
+      .select("id, client_id, vendor_id, balance_amount, booking_status, order_number")
       .eq("id", booking_id)
       .single();
 
@@ -97,15 +97,14 @@ Deno.serve(async (req) => {
       })
       .eq("id", booking_id);
 
-    // Post system message
-    const { data: conv } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("user_id", booking.client_id)
-      .eq("vendor_id", booking.vendor_id)
-      .order("last_message_at", { ascending: false })
+    // Post system message — find conversation containing this booking's order_number
+    const { data: convMessages } = await supabase
+      .from("messages")
+      .select("conversation_id")
+      .ilike("content", `%${booking.order_number}%`)
       .limit(1)
       .maybeSingle();
+    const conv = convMessages ? { id: convMessages.conversation_id } : null;
 
     if (conv) {
       await supabase.from("messages").insert({

@@ -28,7 +28,40 @@ export function AppSidebar() {
   const { activeRole, canSwitchRole } = useRole();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [ordersAlert, setOrdersAlert] = useState(false);
   const prevCountRef = useRef(0);
+
+  // Orders alert: confirmed bookings (as client) with proof uploaded but not yet confirmed
+  useEffect(() => {
+    if (!user || isVendor) {
+      setOrdersAlert(false);
+      return;
+    }
+    const checkOrdersAlert = async () => {
+      try {
+        const { data: bks } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('client_id', user.id)
+          .eq('booking_status', 'confirmed')
+          .is('client_confirmed_at', null);
+        const ids = bks?.map((b) => b.id) || [];
+        if (ids.length === 0) {
+          setOrdersAlert(false);
+          return;
+        }
+        const { data: proofs } = await supabase
+          .from('delivery_proofs')
+          .select('booking_id')
+          .in('booking_id', ids)
+          .limit(1);
+        setOrdersAlert((proofs?.length ?? 0) > 0);
+      } catch (e) {
+        console.error('Orders alert check error:', e);
+      }
+    };
+    checkOrdersAlert();
+  }, [user, isVendor]);
 
   // Unread messages
   useEffect(() => {
@@ -102,7 +135,7 @@ export function AppSidebar() {
   { to: '/vendors', icon: Store, label: 'Vendors', dataTour: 'nav-vendors' },
   { to: '/chats', icon: MessageCircle, label: 'Messages', badge: unreadCount, dataTour: 'nav-messages' },
   { to: '/quotes', icon: Receipt, label: 'Quotations', dataTour: 'nav-quotes' },
-  { to: '/bookings', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-orders' }];
+  { to: '/bookings', icon: ShoppingBag, label: 'Orders', dataTour: 'nav-orders', alert: ordersAlert }];
 
 
   const vendorItems = [
@@ -155,7 +188,7 @@ export function AppSidebar() {
 
         {/* Main nav */}
         <nav className="flex-1 py-2 overflow-y-auto">
-          {navItems.map(({ to, icon: Icon, label, badge, dataTour }) => {
+          {navItems.map(({ to, icon: Icon, label, badge, dataTour, alert }: any) => {
             const active = isActive(to);
             const button =
             <button
@@ -182,6 +215,12 @@ export function AppSidebar() {
               )}>
                     {badge > 99 ? '99+' : badge}
                   </Badge> :
+              null}
+                {alert ?
+              <span className={cn(
+                'rounded-full bg-destructive',
+                collapsed ? 'absolute top-1 right-1 h-2 w-2' : 'h-2 w-2'
+              )} /> :
               null}
               </button>;
 
