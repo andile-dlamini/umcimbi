@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Booking deposit not eligible for payout" }, 400);
       }
     } else {
-      if (booking.booking_status !== "completed" || !booking.funds_released_at) {
+      if (!["completed", "disputed"].includes(booking.booking_status)) {
         return jsonResponse({ error: "Booking is not eligible for payout" }, 400);
       }
     }
