@@ -155,6 +155,7 @@ const ChatsList = () => {
             <ConversationStatusChip
               bookingStatus={(conv as any).booking_status}
               quoteStatus={(conv as any).quote_status}
+              balanceStatus={(conv as any).balance_status}
             />
           </div>
         </div>
@@ -234,6 +235,7 @@ const ChatsList = () => {
                         <ConversationStatusChip
                           bookingStatus={(latestConv as any).booking_status}
                           quoteStatus={(latestConv as any).quote_status}
+                          balanceStatus={(latestConv as any).balance_status}
                         />
                       </div>
                     </div>
