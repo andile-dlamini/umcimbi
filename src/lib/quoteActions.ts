@@ -20,7 +20,6 @@ function openBlobUrl(blobUrl: string) {
  * Returns the URL on success, null on failure.
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
-  console.log('[VIEW_PDF] clicked', quoteId);
 
   try {
     const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
@@ -33,7 +32,6 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
       return null;
     }
 
-    console.log('[VIEW_PDF] raw data', data, typeof data);
 
     const url =
       typeof data === 'string'
@@ -72,7 +70,6 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
  */
 
 export async function acceptQuoteAction(quoteId: string): Promise<{ success: boolean; bookingId?: string }> {
-  console.log('[ACCEPT] clicked', quoteId);
   try {
     const { data, error } = await supabase.functions.invoke('accept-quote', {
       body: { quote_id: quoteId },
@@ -96,7 +93,6 @@ export async function acceptQuoteAction(quoteId: string): Promise<{ success: boo
       return { success: false };
     }
 
-    console.log('[ACCEPT] success', data);
     toast.success('Quote accepted! Pay deposit to confirm booking.');
     return { success: true, bookingId: data.booking_id };
   } catch (err: any) {
@@ -107,7 +103,6 @@ export async function acceptQuoteAction(quoteId: string): Promise<{ success: boo
 }
 
 export async function declineQuoteAction(quoteId: string): Promise<boolean> {
-  console.log('[DECLINE] clicked', quoteId);
   try {
     const { data, error } = await supabase.functions.invoke('decline-quote', {
       body: { quote_id: quoteId },
@@ -125,7 +120,6 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
       return false;
     }
 
-    console.log('[DECLINE] success', data);
     toast.info('Quote declined');
     return true;
   } catch (err: any) {
