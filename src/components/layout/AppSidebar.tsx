@@ -216,6 +216,12 @@ export function AppSidebar() {
                     {badge > 99 ? '99+' : badge}
                   </Badge> :
               null}
+                {alert ?
+              <span className={cn(
+                'rounded-full bg-destructive',
+                collapsed ? 'absolute top-1 right-1 h-2 w-2' : 'h-2 w-2'
+              )} /> :
+              null}
               </button>;
 
 
