@@ -76,16 +76,35 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Insert delivery proof
-    const { error: insertError } = await supabase.from("delivery_proofs").insert({
-      booking_id,
-      uploaded_by: user.id,
-      photos: [photo_url],
-      notes: notes || null,
-    });
+    // Append to existing delivery_proofs row, or insert new one
+    const { data: existingProof } = await supabase
+      .from("delivery_proofs")
+      .select("id, photos")
+      .eq("booking_id", booking_id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    let insertError: any = null;
+    if (existingProof) {
+      const newPhotos = [...(existingProof.photos || []), photo_url];
+      const { error } = await supabase
+        .from("delivery_proofs")
+        .update({ photos: newPhotos, notes: notes || null })
+        .eq("id", existingProof.id);
+      insertError = error;
+    } else {
+      const { error } = await supabase.from("delivery_proofs").insert({
+        booking_id,
+        uploaded_by: user.id,
+        photos: [photo_url],
+        notes: notes || null,
+      });
+      insertError = error;
+    }
 
     if (insertError) {
-      console.error("Failed to insert delivery proof:", insertError);
+      console.error("Failed to save delivery proof:", insertError);
       return new Response(JSON.stringify({ error: "Failed to save proof" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -103,30 +122,40 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (conv) {
-      // Message for client
-      await supabase.from("messages").insert({
-        conversation_id: conv.id,
-        sender_type: "system",
-        sender_user_id: null,
-        message_type: "system",
-        content: `📸 ${vendor.name} has uploaded proof of service delivery. Please confirm receipt in your booking, or funds will be released automatically within 48 hours.`,
-        metadata: { visibility: "client", booking_id },
-      });
+      // Skip duplicate proof messages if already posted for this conversation
+      const { count: existingProofMsgCount } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conv.id)
+        .eq("sender_type", "system")
+        .ilike("content", "%proof of delivery%");
 
-      // Message for vendor
-      await supabase.from("messages").insert({
-        conversation_id: conv.id,
-        sender_type: "system",
-        sender_user_id: null,
-        message_type: "system",
-        content: `✅ Your proof of delivery has been submitted. Payment of R${booking.balance_amount?.toLocaleString()} will be released within 48 hours unless the client raises a dispute.`,
-        metadata: { visibility: "vendor" },
-      });
+      if (!existingProofMsgCount || existingProofMsgCount === 0) {
+        // Message for client
+        await supabase.from("messages").insert({
+          conversation_id: conv.id,
+          sender_type: "system",
+          sender_user_id: null,
+          message_type: "system",
+          content: `📸 ${vendor.name} has uploaded proof of service delivery. Please confirm receipt in your booking, or funds will be released automatically within 48 hours.`,
+          metadata: { visibility: "client", booking_id },
+        });
 
-      await supabase
-        .from("conversations")
-        .update({ last_message_at: new Date().toISOString() })
-        .eq("id", conv.id);
+        // Message for vendor
+        await supabase.from("messages").insert({
+          conversation_id: conv.id,
+          sender_type: "system",
+          sender_user_id: null,
+          message_type: "system",
+          content: `✅ Your proof of delivery has been submitted. Payment of R${booking.balance_amount?.toLocaleString()} will be released within 48 hours unless the client raises a dispute.`,
+          metadata: { visibility: "vendor" },
+        });
+
+        await supabase
+          .from("conversations")
+          .update({ last_message_at: new Date().toISOString() })
+          .eq("id", conv.id);
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {
