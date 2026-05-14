@@ -518,6 +518,27 @@ const ChatThread = () => {
                 );
               }
 
+              const isBalanceDue = typeof message.content === 'string' && message.content.includes('is due by');
+              const balanceBookingId = activeBooking?.id;
+              if (isBalanceDue && balanceBookingId) {
+                return (
+                  <div key={message.id} className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/bookings/${balanceBookingId}`)}
+                      className="max-w-[70%] rounded-xl px-4 py-2 bg-muted/50 border border-border hover:bg-muted transition-colors text-left group"
+                    >
+                      <p className="text-sm text-center whitespace-pre-wrap text-muted-foreground underline decoration-dotted underline-offset-4">
+                        {message.content}
+                        <ChevronRight className="inline h-4 w-4 ml-1 -mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+                        {formatMessageTime(message.created_at)}
+                      </p>
+                    </button>
+                  </div>
+                );
+              }
               return (
                 <div key={message.id} className="flex justify-center">
                   <div className="max-w-[70%] rounded-xl px-4 py-2 bg-muted/50 border border-border">
