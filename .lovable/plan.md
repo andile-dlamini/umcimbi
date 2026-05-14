@@ -1,14 +1,25 @@
-Three focused edits to surface balance payment state in conversation status chips.
+## Goal
 
-## 1. `src/hooks/useChat.ts`
-- In the latest-booking query (~line 93), change select from `'booking_status'` to `'booking_status, balance_status'`.
-- In the returned enriched conversation object (~line 128), add `balance_status: latestBooking?.balance_status ?? null`.
+When a logged-in user lands on `/auth` with `?role=vendor` (e.g. via `/join/vendor`), and they already have the `vendor` role but no row in `vendors`, route them into the vendor business setup instead of bouncing them home.
 
-## 2. `src/pages/chat/ChatsList.tsx`
-- On the `<ConversationStatusChip />` usages at lines 155 and 234, pass `balanceStatus={(conv as any).balance_status}` and `balanceStatus={(latestConv as any).balance_status}` respectively.
+## File
 
-## 3. `src/components/chat/ConversationStatusChip.tsx`
-- Add `balanceStatus?: string | null` to `ConversationStatusChipProps`.
-- Replace the component body with a special-case branch: when `bookingStatus === 'confirmed'`, render "All Settled" (emerald) if `balanceStatus === 'paid'`, otherwise "Balance Due" (amber). All other branches (statusMap, quoteMap, fallback Negotiating) remain unchanged.
+`src/pages/auth/AuthPage.tsx` — modify only the redirect `useEffect` at lines 319–326.
 
-No other files or logic touched.
+## Change
+
+Replace the existing effect with an async check:
+
+1. If `user` is logged in AND `step === 'login'` AND not in a wizard step:
+   - If URL has `role=vendor`:
+     - Query `supabase.from('vendors').select('id').eq('owner_user_id', user.id).maybeSingle()`.
+     - If no row exists → `setSelectedRole('vendor')` and `setStep('business')` (keeps them in this page to finish the vendor wizard). No navigation.
+     - If a vendor row exists → `navigate('/', { replace: true })` (current behaviour).
+   - Otherwise → `navigate('/', { replace: true })` (current behaviour).
+
+Use a cancelled flag inside the effect to avoid setting state after unmount. Add `searchParams` to the dependency array.
+
+## Out of scope
+
+- The alternative `/vendor-dashboard/onboarding` redirect mentioned in the request is not used — staying on AuthPage and jumping to the `business` step matches the existing wizard flow (`business` is already a valid `Step`, and the form's submit handler at line ~588 already inserts the vendor row for the current `auth.uid()`).
+- No other logic, styling, or files are touched.
