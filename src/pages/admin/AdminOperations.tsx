@@ -4,13 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface DisputedBooking {
   id: string;
   agreed_price: number;
+  balance_amount: number;
   service_category: string | null;
   updated_at: string;
   created_at: string;
@@ -41,6 +45,37 @@ export default function AdminOperations() {
   const [stuckReleases, setStuckReleases] = useState<StuckRelease[]>([]);
   const [pendingVerifications, setPendingVerifications] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [percentage, setPercentage] = useState<number>(100);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirmResolution = async (d: DisputedBooking) => {
+    const calculated = Math.round((d.balance_amount / 1.08 * percentage / 100) * 100) / 100;
+    setSubmitting(true);
+    try {
+      const { error: invokeError } = await supabase.functions.invoke('trigger-vendor-payout', {
+        body: { booking_id: d.id, payout_type: 'balance', override_amount: calculated },
+      });
+      if (invokeError) throw invokeError;
+
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({
+          booking_status: 'completed',
+          funds_released_at: new Date().toISOString(),
+        })
+        .eq('id', d.id);
+      if (updateError) throw updateError;
+
+      toast.success(`Resolution confirmed — R${calculated.toFixed(2)} released to vendor`);
+      setDisputes((prev) => prev.filter((x) => x.id !== d.id));
+      setResolvingId(null);
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to confirm resolution');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -48,7 +83,7 @@ export default function AdminOperations() {
       const { data: disputeData } = await supabase
         .from('bookings')
         .select(`
-          id, agreed_price, service_category, updated_at, created_at, client_id,
+          id, agreed_price, balance_amount, service_category, updated_at, created_at, client_id,
           vendor:vendors(id, name, category),
           event:events(id, name, date)
         `)
@@ -151,34 +186,80 @@ export default function AdminOperations() {
             <p className="text-sm text-muted-foreground">No disputed bookings. All clear! ✅</p>
           ) : (
             <div className="space-y-3">
-              {disputes.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">
-                      {d.vendor?.name || 'Unknown Vendor'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {d.event?.name || 'Unknown Event'}
-                      {d.service_category && ` • ${d.service_category}`}
-                      {' • '}R{Number(d.agreed_price).toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Reported {format(new Date(d.updated_at), 'dd MMM yyyy, HH:mm')}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/bookings/${d.id}`)}
+              {disputes.map((d) => {
+                const isResolving = resolvingId === d.id;
+                const calculated = (Number(d.balance_amount || 0) / 1.08 * percentage / 100);
+                return (
+                  <div
+                    key={d.id}
+                    className="rounded-lg border border-border bg-muted/30"
                   >
-                    <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                    View
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center justify-between p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">
+                          {d.vendor?.name || 'Unknown Vendor'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {d.event?.name || 'Unknown Event'}
+                          {d.service_category && ` • ${d.service_category}`}
+                          {' • '}R{Number(d.agreed_price).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Reported {format(new Date(d.updated_at), 'dd MMM yyyy, HH:mm')}
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setResolvingId(isResolving ? null : d.id);
+                          setPercentage(100);
+                        }}
+                      >
+                        Resolve
+                      </Button>
+                    </div>
+                    {isResolving && (
+                      <div className="border-t border-border p-3 space-y-3 bg-background/50">
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`pct-${d.id}`} className="text-xs">
+                            Vendor receives (%)
+                          </Label>
+                          <Input
+                            id={`pct-${d.id}`}
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={percentage}
+                            onChange={(e) => setPercentage(Number(e.target.value))}
+                            className="h-9 w-32"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Vendor amount: <span className="font-medium text-foreground">R{calculated.toFixed(2)}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirmResolution(d)}
+                            disabled={submitting || percentage < 0 || percentage > 100}
+                          >
+                            {submitting ? 'Confirming…' : 'Confirm Resolution'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setResolvingId(null)}
+                            disabled={submitting}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
