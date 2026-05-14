@@ -83,7 +83,7 @@ export default function AdminOperations() {
       const { data: disputeData } = await supabase
         .from('bookings')
         .select(`
-          id, agreed_price, service_category, updated_at, created_at, client_id,
+          id, agreed_price, balance_amount, service_category, updated_at, created_at, client_id,
           vendor:vendors(id, name, category),
           event:events(id, name, date)
         `)
