@@ -606,34 +606,35 @@ const ChatThread = () => {
           isVendorView
           && activeBooking.booking_status === 'confirmed'
           && activeBooking.balance_status === 'paid'
-          && bookingProofs.length === 0
           && !activeBooking.funds_released_at
           ? (
-            <div className="mb-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
-                💰 Payment secured — upload proof to release your funds
-              </p>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => proofFileInputRef.current?.click()}
-                disabled={isUploadingProof}
-              >
-                {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
-                {isUploadingProof ? 'Uploading...' : 'Upload Proof of Delivery'}
-              </Button>
-            </div>
-          )
-          : isVendorView
-          && activeBooking.booking_status === 'confirmed'
-          && bookingProofs.length > 0
-          && !activeBooking.funds_released_at
-          ? (
-            <div className="mb-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-              <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                ✅ Proof submitted — payment releases within 48 hours or when client confirms
-              </p>
+            <div className="mb-3 space-y-2">
+              {bookingProofs.length > 0 && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    ✅ Proof submitted — payment releases within 48 hours or when client confirms
+                  </p>
+                </div>
+              )}
+              {bookingProofs.length < 3 && (
+                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                  {bookingProofs.length === 0 && (
+                    <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                      💰 Payment secured — upload proof to release your funds
+                    </p>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => proofFileInputRef.current?.click()}
+                    disabled={isUploadingProof}
+                  >
+                    {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                    {isUploadingProof ? 'Uploading...' : `Upload Proof of Delivery (${bookingProofs.length}/3)`}
+                  </Button>
+                </div>
+              )}
             </div>
           )
           : !isVendorView
