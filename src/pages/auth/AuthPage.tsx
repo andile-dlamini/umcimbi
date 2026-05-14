@@ -318,12 +318,30 @@ export default function AuthPage() {
 
   // If user is already logged in AND not in the middle of the signup wizard, send them home.
   // Wizard steps (business/showcase/success) need to stay rendered after auto sign-in.
+  // Exception: if URL has role=vendor and user has vendor role but no vendors row yet,
+  // drop them into the 'business' step so they can finish vendor setup.
   const wizardSteps: Step[] = ['business', 'showcase', 'success'];
   useEffect(() => {
-    if (user && !wizardSteps.includes(step) && step === 'login') {
-      navigate('/', { replace: true });
-    }
-  }, [user, step, navigate]);
+    if (!(user && !wizardSteps.includes(step) && step === 'login')) return;
+    let cancelled = false;
+    (async () => {
+      if (searchParams.get('role') === 'vendor') {
+        const { data: existingVendor } = await supabase
+          .from('vendors')
+          .select('id')
+          .eq('owner_user_id', user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (!existingVendor) {
+          setSelectedRole('vendor');
+          setStep('business');
+          return;
+        }
+      }
+      if (!cancelled) navigate('/', { replace: true });
+    })();
+    return () => { cancelled = true; };
+  }, [user, step, navigate, searchParams]);
 
   // Login state
   const [loginPhone, setLoginPhone] = useState('');
