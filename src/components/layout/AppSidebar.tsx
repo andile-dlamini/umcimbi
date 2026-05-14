@@ -28,7 +28,40 @@ export function AppSidebar() {
   const { activeRole, canSwitchRole } = useRole();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [ordersAlert, setOrdersAlert] = useState(false);
   const prevCountRef = useRef(0);
+
+  // Orders alert: confirmed bookings (as client) with proof uploaded but not yet confirmed
+  useEffect(() => {
+    if (!user || isVendor) {
+      setOrdersAlert(false);
+      return;
+    }
+    const checkOrdersAlert = async () => {
+      try {
+        const { data: bks } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('client_id', user.id)
+          .eq('booking_status', 'confirmed')
+          .is('client_confirmed_at', null);
+        const ids = bks?.map((b) => b.id) || [];
+        if (ids.length === 0) {
+          setOrdersAlert(false);
+          return;
+        }
+        const { data: proofs } = await supabase
+          .from('delivery_proofs')
+          .select('booking_id')
+          .in('booking_id', ids)
+          .limit(1);
+        setOrdersAlert((proofs?.length ?? 0) > 0);
+      } catch (e) {
+        console.error('Orders alert check error:', e);
+      }
+    };
+    checkOrdersAlert();
+  }, [user, isVendor]);
 
   // Unread messages
   useEffect(() => {
