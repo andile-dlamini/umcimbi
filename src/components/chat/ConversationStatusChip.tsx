@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 interface ConversationStatusChipProps {
   bookingStatus?: string | null;
   quoteStatus?: string | null;
+  balanceStatus?: string | null;
 }
 
 const statusMap: Record<string, { label: string; className: string }> = {
@@ -21,8 +22,15 @@ const quoteMap: Record<string, { label: string; className: string }> = {
   expired: { label: 'Expired', className: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800/30 dark:text-gray-400' },
 };
 
-export function ConversationStatusChip({ bookingStatus, quoteStatus }: ConversationStatusChipProps) {
-  // Booking status takes precedence
+export function ConversationStatusChip({ bookingStatus, quoteStatus, balanceStatus }: ConversationStatusChipProps) {
+  // Special case: confirmed booking with balance info
+  if (bookingStatus === 'confirmed') {
+    if (balanceStatus === 'paid') {
+      return <Badge className="text-[10px] px-1.5 py-0 bg-emerald-100 text-emerald-800 border-emerald-200">All Settled</Badge>;
+    }
+    return <Badge className="text-[10px] px-1.5 py-0 bg-amber-100 text-amber-800 border-amber-200">Balance Due</Badge>;
+  }
+
   if (bookingStatus && statusMap[bookingStatus]) {
     const s = statusMap[bookingStatus];
     return <Badge className={`text-[10px] px-1.5 py-0 ${s.className}`}>{s.label}</Badge>;
