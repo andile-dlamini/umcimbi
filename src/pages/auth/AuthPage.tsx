@@ -662,6 +662,7 @@ export default function AuthPage() {
         if (!uploadErr) {
           const { data: urlData } = supabase.storage.from('vendor-images').getPublicUrl(path);
           uploadedUrls.push(urlData.publicUrl);
+          await supabase.from('vendors').update({ logo_url: urlData.publicUrl }).eq('id', vendorData.id);
         }
       }
       for (let i = 0; i < showcaseFiles.length; i++) {
