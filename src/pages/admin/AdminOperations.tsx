@@ -45,6 +45,37 @@ export default function AdminOperations() {
   const [stuckReleases, setStuckReleases] = useState<StuckRelease[]>([]);
   const [pendingVerifications, setPendingVerifications] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [percentage, setPercentage] = useState<number>(100);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirmResolution = async (d: DisputedBooking) => {
+    const calculated = Math.round((d.balance_amount / 1.08 * percentage / 100) * 100) / 100;
+    setSubmitting(true);
+    try {
+      const { error: invokeError } = await supabase.functions.invoke('trigger-vendor-payout', {
+        body: { booking_id: d.id, payout_type: 'balance', override_amount: calculated },
+      });
+      if (invokeError) throw invokeError;
+
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({
+          booking_status: 'completed',
+          funds_released_at: new Date().toISOString(),
+        })
+        .eq('id', d.id);
+      if (updateError) throw updateError;
+
+      toast.success(`Resolution confirmed — R${calculated.toFixed(2)} released to vendor`);
+      setDisputes((prev) => prev.filter((x) => x.id !== d.id));
+      setResolvingId(null);
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to confirm resolution');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
