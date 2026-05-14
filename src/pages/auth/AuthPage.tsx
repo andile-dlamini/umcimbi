@@ -231,8 +231,15 @@ function CompleteProfileStep() {
         toast.error('Failed to save profile. Please try again.');
         console.error('Profile update error:', error);
       } else {
-        toast.success('Profile complete! Welcome to UMCIMBI.');
-        navigate('/', { replace: true });
+        const role = new URLSearchParams(window.location.search).get('role');
+        if (role === 'vendor') {
+          await supabase.from('profiles').update({ role: 'vendor' } as any).eq('user_id', user.id);
+          toast.success('Profile complete! Let\'s set up your business.');
+          navigate('/auth?mode=signup&role=vendor&step=business-setup', { replace: true });
+        } else {
+          toast.success('Profile complete! Welcome to UMCIMBI.');
+          navigate('/', { replace: true });
+        }
       }
     } catch {
       toast.error('Something went wrong. Please try again.');
@@ -305,11 +312,13 @@ export default function AuthPage() {
   const refSource = searchParams.get('ref');
   const methodParam = searchParams.get('method');
   const initialRole: UserRole | null = searchParams.get('role') === 'vendor' ? 'vendor' : null;
-  const initialStep: Step = searchParams.get('mode') === 'signup'
-    ? (initialRole
-        ? (methodParam === 'phone' ? 'details' : 'auth_method')
-        : 'role')
-    : 'login';
+  const initialStep: Step = searchParams.get('step') === 'business-setup' && searchParams.get('role') === 'vendor'
+    ? 'business'
+    : searchParams.get('mode') === 'signup'
+      ? (initialRole
+          ? (methodParam === 'phone' ? 'details' : 'auth_method')
+          : 'role')
+      : 'login';
   const [step, setStep] = useState<Step>(initialStep);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(initialRole);
   const [isLoading, setIsLoading] = useState(false);
@@ -322,7 +331,7 @@ export default function AuthPage() {
   // drop them into the 'business' step so they can finish vendor setup.
   const wizardSteps: Step[] = ['business', 'showcase', 'success'];
   useEffect(() => {
-    if (!(user && !wizardSteps.includes(step) && step === 'login')) return;
+    if (!(user && !wizardSteps.includes(step))) return;
     let cancelled = false;
     (async () => {
       if (searchParams.get('role') === 'vendor') {
@@ -333,8 +342,8 @@ export default function AuthPage() {
           .maybeSingle();
         if (cancelled) return;
         if (!existingVendor) {
-          setSelectedRole('vendor');
-          setStep('business');
+          await supabase.auth.signOut();
+          if (!cancelled) navigate('/join/vendor', { replace: true });
           return;
         }
       }
