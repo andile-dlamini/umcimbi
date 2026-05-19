@@ -1,0 +1,20 @@
+# UMCIMBI
+
+> A South African platform that helps families plan traditional ceremonies — lobola, umembeso, umabo, umemulo, imbeleko, umbondo and ancestral rituals — and connects them with vetted vendors across KwaZulu-Natal and nationally.
+
+UMCIMBI (operated by ISINTU DIGITAL) is a chat-first marketplace and planning tool. Planners create an event, request quotes from vetted vendors, negotiate in-chat, pay a 30% deposit into escrow, and the balance is released to the vendor 48 hours after proof of service. Vendors apply, get verified, list services with category-aware pricing, and receive payouts via Ozow.
+
+## Pages
+
+- [Home](/): Overview, what UMCIMBI does, sign-in or get started.
+- [Get Started / Onboarding](/onboarding): Choose Planner or Vendor and create an account.
+- [Find Vendors](/vendors): Browse vetted vendors by ceremony, category, and location.
+- [Become a Vendor](/join/vendor): Apply to list your business on UMCIMBI.
+- [Learn](/learn): Guides to each traditional ceremony — lobola, umembeso, umabo, umemulo, imbeleko, umbondo and ancestral rituals.
+- [Waitlist](/waitlist): Pre-launch signup for early access.
+- [Contact](/contact): Get in touch with the team.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)
