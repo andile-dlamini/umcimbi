@@ -12,3 +12,21 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
+Disallow: /settings
+Disallow: /chat/
+Disallow: /chats
+Disallow: /bookings
+Disallow: /bookings/
+Disallow: /quotes
+Disallow: /quotes/
+Disallow: /payment/
+Disallow: /vendor-dashboard
+Disallow: /vendor-dashboard/
+Disallow: /profile
+Disallow: /profile/
+
+Sitemap: https://www.umcimbi.co.za/sitemap.xml
