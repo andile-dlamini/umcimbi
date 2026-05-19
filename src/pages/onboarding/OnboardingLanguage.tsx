@@ -48,6 +48,64 @@ export default function OnboardingLanguage() {
     document.title = 'UMCIMBI — Plan your ceremony with confidence';
   }, []);
 
+  // Inject FAQPage JSON-LD for SEO
+  useEffect(() => {
+    const faq = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What is a traditional ceremony in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Traditional ceremonies in South Africa vary by culture and include lobola negotiations, umembeso, umemulo, umabo, imbeleko, Xhosa ulwaluko, Venda tshikanda, Sotho lebollo and many more. Each ceremony marks an important life event and brings families together.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'How do I find vendors for a traditional ceremony in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "UMCIMBI is South Africa's first digital marketplace connecting families planning traditional ceremonies with vetted vendors for catering, decor, photography, transport and more — across all cultures and provinces."
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'What is lobola?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "Lobola is a traditional Southern African custom practised across many cultures including Zulu, Xhosa, Ndebele, Sotho and Venda, where the groom's family negotiates and pays bride wealth to the bride's family, formally joining two families."
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'How much do traditional ceremony vendors cost in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Costs vary depending on the type of ceremony, vendor category, location and number of guests. UMCIMBI lets you request quotes from multiple vetted vendors so you can compare and choose what works for your budget.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I book vendors for any South African traditional ceremony on UMCIMBI?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. UMCIMBI supports all South African traditional ceremonies regardless of culture or province. Vendors are vetted and you can pay safely through our escrow payment system.'
+          }
+        }
+      ]
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'umcimbi-faq-jsonld';
+    script.text = JSON.stringify(faq);
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById('umcimbi-faq-jsonld')?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -139,13 +197,25 @@ export default function OnboardingLanguage() {
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Planning UMCIMBI has<br className="hidden sm:block" /> never felt so{' '}
-              <span className="text-secondary">light.</span>
+              Plan Your Traditional Ceremony — <span className="text-secondary">Find Trusted Vendors Across South Africa</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">Find trusted vendors, compare quotes, and keep everything organised. All in one place.
-
+            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
+              UMCIMBI connects South African families with vetted vendors for traditional ceremonies — from Zulu to Xhosa, Venda, Sotho and all cultural celebrations. Quotes, payments and reviews in one place.
             </p>
+
+            <ul className="space-y-3 max-w-lg mx-auto md:mx-0 text-left">
+              {[
+                'Find trusted vendors for any traditional ceremony near you',
+                'Compare quotes from vetted vendors across South Africa',
+                'Pay safely with escrow protection'
+              ].map((text) => (
+                <li key={text} className="flex gap-3 items-start text-[15px] sm:text-base text-white/85 leading-relaxed drop-shadow-md">
+                  <CheckCircle2 className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
               <Link to="/waitlist">
