@@ -139,13 +139,25 @@ export default function OnboardingLanguage() {
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Planning UMCIMBI has<br className="hidden sm:block" /> never felt so{' '}
-              <span className="text-secondary">light.</span>
+              Plan Your Traditional Ceremony — <span className="text-secondary">Find Trusted Vendors Across South Africa</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">Find trusted vendors, compare quotes, and keep everything organised. All in one place.
-
+            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
+              UMCIMBI connects South African families with vetted vendors for traditional ceremonies — from Zulu to Xhosa, Venda, Sotho and all cultural celebrations. Quotes, payments and reviews in one place.
             </p>
+
+            <ul className="space-y-3 max-w-lg mx-auto md:mx-0 text-left">
+              {[
+                'Find trusted vendors for any traditional ceremony near you',
+                'Compare quotes from vetted vendors across South Africa',
+                'Pay safely with escrow protection'
+              ].map((text) => (
+                <li key={text} className="flex gap-3 items-start text-[15px] sm:text-base text-white/85 leading-relaxed drop-shadow-md">
+                  <CheckCircle2 className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
               <Link to="/waitlist">
