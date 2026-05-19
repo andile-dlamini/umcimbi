@@ -48,6 +48,64 @@ export default function OnboardingLanguage() {
     document.title = 'UMCIMBI — Plan your ceremony with confidence';
   }, []);
 
+  // Inject FAQPage JSON-LD for SEO
+  useEffect(() => {
+    const faq = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What is a traditional ceremony in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Traditional ceremonies in South Africa vary by culture and include lobola negotiations, umembeso, umemulo, umabo, imbeleko, Xhosa ulwaluko, Venda tshikanda, Sotho lebollo and many more. Each ceremony marks an important life event and brings families together.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'How do I find vendors for a traditional ceremony in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "UMCIMBI is South Africa's first digital marketplace connecting families planning traditional ceremonies with vetted vendors for catering, decor, photography, transport and more — across all cultures and provinces."
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'What is lobola?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: "Lobola is a traditional Southern African custom practised across many cultures including Zulu, Xhosa, Ndebele, Sotho and Venda, where the groom's family negotiates and pays bride wealth to the bride's family, formally joining two families."
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'How much do traditional ceremony vendors cost in South Africa?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Costs vary depending on the type of ceremony, vendor category, location and number of guests. UMCIMBI lets you request quotes from multiple vetted vendors so you can compare and choose what works for your budget.'
+          }
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I book vendors for any South African traditional ceremony on UMCIMBI?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. UMCIMBI supports all South African traditional ceremonies regardless of culture or province. Vendors are vetted and you can pay safely through our escrow payment system.'
+          }
+        }
+      ]
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'umcimbi-faq-jsonld';
+    script.text = JSON.stringify(faq);
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById('umcimbi-faq-jsonld')?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
