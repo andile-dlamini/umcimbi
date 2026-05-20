@@ -311,7 +311,8 @@ export default function AuthPage() {
 
   const refSource = searchParams.get('ref');
   const methodParam = searchParams.get('method');
-  const initialRole: UserRole | null = searchParams.get('role') === 'vendor' ? 'vendor' : null;
+  const roleParam = searchParams.get('role');
+  const initialRole: UserRole | null = roleParam === 'vendor' ? 'vendor' : roleParam === 'planner' ? 'planner' : null;
   const initialStep: Step = searchParams.get('step') === 'business-setup' && searchParams.get('role') === 'vendor'
     ? 'business'
     : searchParams.get('mode') === 'signup'
