@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle } from 'lucide-react';
+import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle, Star } from 'lucide-react';
+import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { clearTour } from '@/hooks/useOnboardingTour';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,6 +43,26 @@ export default function SettingsPage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const [vendorStats, setVendorStats] = useState<{
+    id: string;
+    rating: number;
+    review_count: number;
+    business_verification_status: string | null;
+    is_super_vendor: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!user || !isVendor) { setVendorStats(null); return; }
+    supabase
+      .from('vendors')
+      .select('id, rating, review_count, business_verification_status, is_super_vendor')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setVendorStats(data as any);
+      });
+  }, [user, isVendor]);
 
   const handleReplayTour = () => {
     if (activeRole === 'vendor' && canSwitchRole) {
@@ -149,12 +170,29 @@ export default function SettingsPage() {
                           .join(', ')}
                       </p>
                     )}
-                    <div className="flex gap-1.5 mt-2">
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <Badge variant="secondary" className="text-xs">
                         {activeRole === 'vendor' ? 'Vendor' : 'Organiser'}
                       </Badge>
                       {isAdmin && <Badge variant="outline" className="text-xs">Admin</Badge>}
+                      {activeRole === 'vendor' && vendorStats && (
+                        <VendorBadges
+                          businessVerificationStatus={vendorStats.business_verification_status}
+                          isSuperVendor={vendorStats.is_super_vendor}
+                          className="ml-1"
+                        />
+                      )}
                     </div>
+                    {activeRole === 'vendor' && vendorStats && vendorStats.review_count > 0 && (
+                      <button
+                        onClick={() => navigate(`/vendors/${vendorStats.id}`)}
+                        className="inline-flex items-center gap-1 mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="font-medium text-foreground">{Number(vendorStats.rating).toFixed(1)}</span>
+                        <span>({vendorStats.review_count} review{vendorStats.review_count === 1 ? '' : 's'})</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
