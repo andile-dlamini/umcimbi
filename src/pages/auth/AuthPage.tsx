@@ -316,9 +316,7 @@ export default function AuthPage() {
   const initialStep: Step = searchParams.get('step') === 'business-setup' && searchParams.get('role') === 'vendor'
     ? 'business'
     : searchParams.get('mode') === 'signup'
-      ? (initialRole
-          ? (methodParam === 'phone' ? 'details' : 'auth_method')
-          : 'role')
+      ? (initialRole ? 'details' : 'role')
       : 'login';
   const [step, setStep] = useState<Step>(initialStep);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(initialRole);
