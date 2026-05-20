@@ -1047,7 +1047,7 @@ export default function AuthPage() {
 
               {/* Vendor Card */}
               <button
-                onClick={() => { setSelectedRole('vendor'); setStep('auth_method'); }}
+                onClick={() => { setSelectedRole('vendor'); setStep('details'); }}
                 className={cn(
                   'relative p-6 rounded-2xl border-2 text-left transition-all group',
                   'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-[hsl(174,82%,29%)]',
