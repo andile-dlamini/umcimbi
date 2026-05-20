@@ -168,6 +168,80 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
             </div>
           ) : (
             <div className="space-y-4 mt-4">
+              {/* Planner Profile (vendor view only) */}
+              {isVendorView && planner && (
+                <Card>
+                  <CardContent className="p-3 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={planner.avatar_url || undefined} alt={planner.full_name || 'Planner'} />
+                        <AvatarFallback>
+                          <UserIcon className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">
+                          {planner.full_name || [planner.first_name, planner.surname].filter(Boolean).join(' ') || 'Planner'}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Star className="h-3 w-3 fill-warning text-warning" />
+                          <span className="font-medium text-foreground">
+                            {plannerReviews && plannerReviews.length > 0 ? plannerAvgRating.toFixed(1) : '—'}
+                          </span>
+                          <span>({plannerReviews?.length ?? 0} {plannerReviews?.length === 1 ? 'review' : 'reviews'})</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {plannerReviews && plannerReviews.length > 0 && (
+                      <>
+                        <Separator />
+                        <div className="space-y-3">
+                          {plannerReviews.slice(0, plannerReviewsVisible).map((r) => (
+                            <div key={r.id} className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <div className="flex gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star
+                                      key={s}
+                                      className={`h-3 w-3 ${s <= (r.rating || 0) ? 'fill-warning text-warning' : 'text-muted-foreground/40'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">
+                                  {format(new Date(r.created_at), 'MMM d, yyyy')}
+                                </span>
+                              </div>
+                              {r.comment && (
+                                <p className="text-xs text-muted-foreground">{r.comment}</p>
+                              )}
+                            </div>
+                          ))}
+                          {plannerReviews.length > PLANNER_REVIEWS_INITIAL && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() =>
+                                setPlannerReviewsVisible((c) =>
+                                  c >= plannerReviews.length
+                                    ? PLANNER_REVIEWS_INITIAL
+                                    : Math.min(c + PLANNER_REVIEWS_STEP, plannerReviews.length)
+                                )
+                              }
+                            >
+                              {plannerReviewsVisible >= plannerReviews.length
+                                ? 'Show less'
+                                : `Show more reviews (${plannerReviews.length - plannerReviewsVisible} remaining)`}
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Event Summary */}
               {event && (
                 <Card>
