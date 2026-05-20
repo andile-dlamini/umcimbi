@@ -1024,7 +1024,7 @@ export default function AuthPage() {
             <div className="grid gap-4">
               {/* Planner Card */}
               <button
-                onClick={() => { setSelectedRole('planner'); setStep('auth_method'); }}
+                onClick={() => { setSelectedRole('planner'); setStep('details'); }}
                 className={cn(
                   'relative p-6 rounded-2xl border-2 text-left transition-all group',
                   'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-accent',
