@@ -44,6 +44,26 @@ export default function SettingsPage() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  const [vendorStats, setVendorStats] = useState<{
+    id: string;
+    rating: number;
+    review_count: number;
+    business_verification_status: string | null;
+    is_super_vendor: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!user || !isVendor) { setVendorStats(null); return; }
+    supabase
+      .from('vendors')
+      .select('id, rating, review_count, business_verification_status, is_super_vendor')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setVendorStats(data as any);
+      });
+  }, [user, isVendor]);
+
   const handleReplayTour = () => {
     if (activeRole === 'vendor' && canSwitchRole) {
       clearTour('vendor');
