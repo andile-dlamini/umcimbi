@@ -66,6 +66,9 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const INITIAL_VISIBLE = 3;
+  const STEP = 5;
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
   // Update local state when userReview changes
   useEffect(() => {
