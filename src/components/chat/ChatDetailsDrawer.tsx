@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, Banknote, FileText, CreditCard, Star, ExternalLink, Upload, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Banknote, FileText, CreditCard, Star, ExternalLink, Upload, Loader2, User as UserIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
@@ -25,6 +26,8 @@ interface ConversationDetails {
   latestQuote?: any;
   booking?: any;
   reviews?: any[];
+  planner?: any;
+  plannerReviews?: any[];
 }
 
 const paymentStatusLabels: Record<string, { label: string; className: string }> = {
@@ -98,19 +101,46 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
         reviews = reviewData || [];
       }
 
-      setDetails({ event, latestQuote, booking, reviews });
+      // Vendor view: fetch planner profile + reviews they've received from vendors
+      let planner: any = null;
+      let plannerReviews: any[] = [];
+      if (isVendorView && conv.user_id) {
+        const { data: plannerData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, first_name, surname, avatar_url')
+          .eq('user_id', conv.user_id)
+          .maybeSingle();
+        planner = plannerData;
+
+        const { data: prData } = await supabase
+          .from('booking_reviews')
+          .select('id, rating, comment, created_at, reviewer_id, reviewer_type, communication_rating, service_rating, payment_rating')
+          .eq('reviewed_party_id', conv.user_id)
+          .eq('reviewer_type', 'vendor')
+          .order('created_at', { ascending: false });
+        plannerReviews = prData || [];
+      }
+
+      setDetails({ event, latestQuote, booking, reviews, planner, plannerReviews });
     } catch (err) {
       console.error('Error fetching details:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [conversationId]);
+  }, [conversationId, isVendorView]);
 
   useEffect(() => {
     if (open) fetchDetails();
   }, [open, fetchDetails]);
 
-  const { event, latestQuote, booking, reviews } = details;
+  const { event, latestQuote, booking, reviews, planner, plannerReviews } = details;
+
+  const plannerAvgRating = plannerReviews && plannerReviews.length > 0
+    ? plannerReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / plannerReviews.length
+    : 0;
+  const PLANNER_REVIEWS_INITIAL = 3;
+  const PLANNER_REVIEWS_STEP = 5;
+  const [plannerReviewsVisible, setPlannerReviewsVisible] = useState(PLANNER_REVIEWS_INITIAL);
 
   const hasReviewed = reviews?.some(r => r.reviewer_id === user?.id);
   const canReview = booking?.booking_status === 'completed'
@@ -138,6 +168,80 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
             </div>
           ) : (
             <div className="space-y-4 mt-4">
+              {/* Planner Profile (vendor view only) */}
+              {isVendorView && planner && (
+                <Card>
+                  <CardContent className="p-3 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={planner.avatar_url || undefined} alt={planner.full_name || 'Planner'} />
+                        <AvatarFallback>
+                          <UserIcon className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">
+                          {planner.full_name || [planner.first_name, planner.surname].filter(Boolean).join(' ') || 'Planner'}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Star className="h-3 w-3 fill-warning text-warning" />
+                          <span className="font-medium text-foreground">
+                            {plannerReviews && plannerReviews.length > 0 ? plannerAvgRating.toFixed(1) : '—'}
+                          </span>
+                          <span>({plannerReviews?.length ?? 0} {plannerReviews?.length === 1 ? 'review' : 'reviews'})</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {plannerReviews && plannerReviews.length > 0 && (
+                      <>
+                        <Separator />
+                        <div className="space-y-3">
+                          {plannerReviews.slice(0, plannerReviewsVisible).map((r) => (
+                            <div key={r.id} className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <div className="flex gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star
+                                      key={s}
+                                      className={`h-3 w-3 ${s <= (r.rating || 0) ? 'fill-warning text-warning' : 'text-muted-foreground/40'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">
+                                  {format(new Date(r.created_at), 'MMM d, yyyy')}
+                                </span>
+                              </div>
+                              {r.comment && (
+                                <p className="text-xs text-muted-foreground">{r.comment}</p>
+                              )}
+                            </div>
+                          ))}
+                          {plannerReviews.length > PLANNER_REVIEWS_INITIAL && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() =>
+                                setPlannerReviewsVisible((c) =>
+                                  c >= plannerReviews.length
+                                    ? PLANNER_REVIEWS_INITIAL
+                                    : Math.min(c + PLANNER_REVIEWS_STEP, plannerReviews.length)
+                                )
+                              }
+                            >
+                              {plannerReviewsVisible >= plannerReviews.length
+                                ? 'Show less'
+                                : `Show more reviews (${plannerReviews.length - plannerReviewsVisible} remaining)`}
+                            </Button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Event Summary */}
               {event && (
                 <Card>
