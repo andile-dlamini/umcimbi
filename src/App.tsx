@@ -67,6 +67,13 @@ const VendorJoinRedirect = () => {
   return <Navigate to={to} replace />;
 };
 
+const PlannerJoinRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const ref = searchParams.get('ref');
+  const to = `/auth?mode=signup&role=planner${ref ? `&ref=${ref}` : ''}`;
+  return <Navigate to={to} replace />;
+};
+
 function AppRoutes() {
   const { user, isLoading, isProfileComplete } = useAuth();
 
