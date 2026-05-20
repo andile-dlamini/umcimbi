@@ -184,7 +184,7 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
           <p className="text-sm text-muted-foreground">No reviews yet</p>
         ) : (
           <div className="space-y-4">
-            {reviews.map((review) => (
+            {reviews.slice(0, visibleCount).map((review) => (
               <div key={review.id} className="space-y-1">
                 <div className="flex items-center justify-between">
                   <StarRating rating={review.rating} size="sm" />
@@ -200,6 +200,21 @@ export function VendorRating({ vendorId }: VendorRatingProps) {
                 )}
               </div>
             ))}
+            {reviews.length > INITIAL_VISIBLE && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  setVisibleCount((c) =>
+                    c >= reviews.length ? INITIAL_VISIBLE : Math.min(c + STEP, reviews.length)
+                  )
+                }
+              >
+                {visibleCount >= reviews.length
+                  ? 'Show less'
+                  : `Show more reviews (${reviews.length - visibleCount} remaining)`}
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
