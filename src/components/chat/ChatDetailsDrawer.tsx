@@ -26,6 +26,8 @@ interface ConversationDetails {
   latestQuote?: any;
   booking?: any;
   reviews?: any[];
+  planner?: any;
+  plannerReviews?: any[];
 }
 
 const paymentStatusLabels: Record<string, { label: string; className: string }> = {
