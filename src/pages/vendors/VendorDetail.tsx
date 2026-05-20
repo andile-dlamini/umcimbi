@@ -159,7 +159,7 @@ export default function VendorDetail() {
               <div className="flex items-center gap-4 text-sm mt-1 flex-wrap">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-warning text-warning" />
-                  <span className="font-medium">{vendor.rating}</span>
+                  <span className="font-medium">{Number(vendor.rating ?? 0).toFixed(1)}</span>
                   <span className="text-muted-foreground">({vendor.review_count} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
