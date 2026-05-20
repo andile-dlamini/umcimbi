@@ -68,7 +68,7 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false }
             <div className="flex items-center gap-3 mt-1 text-sm flex-wrap">
               <div className="flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-warning text-warning" />
-                <span className="font-medium">{vendor.rating}</span>
+                <span className="font-medium">{Number(vendor.rating).toFixed(1)}</span>
                 <span className="text-muted-foreground">({vendor.review_count})</span>
               </div>
               
