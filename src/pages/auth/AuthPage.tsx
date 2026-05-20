@@ -335,7 +335,10 @@ export default function AuthPage() {
     if (!(user && !wizardSteps.includes(step))) return;
     let cancelled = false;
     (async () => {
-      if (searchParams.get('role') === 'vendor') {
+      // Only enforce vendor-row check during the signup wizard flow.
+      // During plain login we must never sign the user out just because
+      // ?role=vendor is in the URL — that kicks legitimate users out.
+      if (searchParams.get('mode') === 'signup' && searchParams.get('role') === 'vendor') {
         const { data: existingVendor } = await supabase
           .from('vendors')
           .select('id')
