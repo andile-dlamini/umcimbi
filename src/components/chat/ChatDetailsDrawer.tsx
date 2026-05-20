@@ -101,13 +101,33 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
         reviews = reviewData || [];
       }
 
-      setDetails({ event, latestQuote, booking, reviews });
+      // Vendor view: fetch planner profile + reviews they've received from vendors
+      let planner: any = null;
+      let plannerReviews: any[] = [];
+      if (isVendorView && conv.user_id) {
+        const { data: plannerData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, first_name, surname, avatar_url')
+          .eq('user_id', conv.user_id)
+          .maybeSingle();
+        planner = plannerData;
+
+        const { data: prData } = await supabase
+          .from('booking_reviews')
+          .select('id, rating, comment, created_at, reviewer_id, reviewer_type, communication_rating, service_rating, payment_rating')
+          .eq('reviewed_party_id', conv.user_id)
+          .eq('reviewer_type', 'vendor')
+          .order('created_at', { ascending: false });
+        plannerReviews = prData || [];
+      }
+
+      setDetails({ event, latestQuote, booking, reviews, planner, plannerReviews });
     } catch (err) {
       console.error('Error fetching details:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [conversationId]);
+  }, [conversationId, isVendorView]);
 
   useEffect(() => {
     if (open) fetchDetails();
