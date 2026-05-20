@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle } from 'lucide-react';
+import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle, Star } from 'lucide-react';
+import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { clearTour } from '@/hooks/useOnboardingTour';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
