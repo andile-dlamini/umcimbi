@@ -1098,7 +1098,7 @@ export default function AuthPage() {
               <span className="inline-block text-xs font-medium uppercase tracking-wide text-muted-foreground bg-muted px-3 py-1 rounded-full">
                 Registering as: {selectedRole === 'vendor' ? 'Service Provider' : 'Ceremony Planner'}
               </span>
-              <h1 className="text-2xl font-bold text-foreground">How would you like to sign up?</h1>
+              <h1 className="text-2xl font-bold text-foreground">Sign up</h1>
             </div>
 
             {/* Referral welcome banner */}
