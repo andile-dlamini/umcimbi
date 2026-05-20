@@ -170,12 +170,29 @@ export default function SettingsPage() {
                           .join(', ')}
                       </p>
                     )}
-                    <div className="flex gap-1.5 mt-2">
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <Badge variant="secondary" className="text-xs">
                         {activeRole === 'vendor' ? 'Vendor' : 'Organiser'}
                       </Badge>
                       {isAdmin && <Badge variant="outline" className="text-xs">Admin</Badge>}
+                      {activeRole === 'vendor' && vendorStats && (
+                        <VendorBadges
+                          businessVerificationStatus={vendorStats.business_verification_status}
+                          isSuperVendor={vendorStats.is_super_vendor}
+                          className="ml-1"
+                        />
+                      )}
                     </div>
+                    {activeRole === 'vendor' && vendorStats && vendorStats.review_count > 0 && (
+                      <button
+                        onClick={() => navigate(`/vendors/${vendorStats.id}`)}
+                        className="inline-flex items-center gap-1 mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="font-medium text-foreground">{Number(vendorStats.rating).toFixed(1)}</span>
+                        <span>({vendorStats.review_count} review{vendorStats.review_count === 1 ? '' : 's'})</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
