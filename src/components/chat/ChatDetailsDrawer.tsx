@@ -133,7 +133,14 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
     if (open) fetchDetails();
   }, [open, fetchDetails]);
 
-  const { event, latestQuote, booking, reviews } = details;
+  const { event, latestQuote, booking, reviews, planner, plannerReviews } = details;
+
+  const plannerAvgRating = plannerReviews && plannerReviews.length > 0
+    ? plannerReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / plannerReviews.length
+    : 0;
+  const PLANNER_REVIEWS_INITIAL = 3;
+  const PLANNER_REVIEWS_STEP = 5;
+  const [plannerReviewsVisible, setPlannerReviewsVisible] = useState(PLANNER_REVIEWS_INITIAL);
 
   const hasReviewed = reviews?.some(r => r.reviewer_id === user?.id);
   const canReview = booking?.booking_status === 'completed'
