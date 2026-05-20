@@ -94,6 +94,7 @@ function AppRoutes() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
         <Route path="/join/vendor" element={<VendorJoinRedirect />} />
+        <Route path="/join/planner" element={<PlannerJoinRedirect />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
