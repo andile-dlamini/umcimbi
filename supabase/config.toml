@@ -9,8 +9,6 @@ verify_jwt = false
 [functions.release-escrow]
 verify_jwt = false
 
-[functions.test-security-checks]
-verify_jwt = false
 
 
 
