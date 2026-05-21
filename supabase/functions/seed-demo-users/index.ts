@@ -8,9 +8,18 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const expectedAuth = `Bearer ${serviceKey}`;
+  if (req.headers.get("authorization") !== expectedAuth) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    serviceKey
   );
 
   const password = "DemoUmcimbi2026!";
@@ -91,7 +100,14 @@ Deno.serve(async (req) => {
     results.push({ email: acc.email, user_id: created.user.id, ok: true });
   }
 
-  return new Response(JSON.stringify({ password, results }, null, 2), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      seeded: results.filter((r) => r.ok).length,
+      results: results.map((r) => ({ email: r.email, user_id: r.user_id, ok: !!r.ok, error: r.error })),
+    }, null, 2),
+    {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    }
+  );
 });

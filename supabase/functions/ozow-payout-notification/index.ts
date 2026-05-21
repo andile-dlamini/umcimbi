@@ -85,6 +85,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
+  const expectedAccessToken = Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "";
+  const providedAccessToken = req.headers.get("accesstoken") ?? req.headers.get("AccessToken") ?? req.headers.get("x-access-token") ?? "";
+  if (!expectedAccessToken || providedAccessToken !== expectedAccessToken) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+
+
   try {
     const payload = await parsePayload(req);
     const refs = extractRefs(payload);
