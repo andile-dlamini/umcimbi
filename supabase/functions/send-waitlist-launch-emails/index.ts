@@ -112,8 +112,8 @@ Deno.serve(async (req) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${anonKey}`,
-              apikey: anonKey,
+              Authorization: `Bearer ${serviceKey}`,
+              apikey: serviceKey,
             },
             body: JSON.stringify({
               templateName: 'launch-announcement',
