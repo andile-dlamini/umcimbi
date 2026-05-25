@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
 
   const connectMobileKey = Deno.env.get('CONNECT_MOBILE_API_KEY')
   const SITE_URL = 'https://umcimbi.co.za'
-  const SMS_BODY = `UMCIMBI is live! Your spot is ready. Sign in to start planning or claim your vendor profile: ${SITE_URL} — Andile`
+  const SMS_BODY = `Sawubona! UMCIMBI is live 🎉 Thank you for waiting. Your spot is ready - find vendors, get quotes, pay safely: ${SITE_URL} - Andile`
 
   let emailSent = 0
   let smsSent = 0
