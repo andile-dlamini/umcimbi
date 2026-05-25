@@ -157,8 +157,9 @@ export default function VendorsList() {
 
         {/* Results */}
         <div className="space-y-3 pt-2">
+          {(() => null)()}
           <p className="text-sm text-muted-foreground">
-            {isLoading ? 'Loading...' : `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''} found`}
+            {isLoading ? 'Loading...' : `Showing ${Math.min(page * PAGE_SIZE, vendors.length)} of ${vendors.length} vendor${vendors.length !== 1 ? 's' : ''}`}
             {selectedEventId && !hasEventCoordinates && (
               <span className="block text-xs mt-1">
                 Set ceremony location to see distances
@@ -166,22 +167,39 @@ export default function VendorsList() {
             )}
           </p>
 
-          {vendors.map((vendor) => (
-            <VendorCard 
-              key={vendor.id} 
-              vendor={vendor} 
-              showDistance={!!selectedEventId && hasEventCoordinates}
-            />
-          ))}
+          {(() => {
+            const paginatedVendors = vendors.slice(0, page * PAGE_SIZE);
+            const hasMore = vendors.length > page * PAGE_SIZE;
+            return (
+              <>
+                {paginatedVendors.map((vendor) => (
+                  <VendorCard
+                    key={vendor.id}
+                    vendor={vendor}
+                    showDistance={!!selectedEventId && hasEventCoordinates}
+                  />
+                ))}
 
-          {!isLoading && vendors.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No vendors found</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Try adjusting your filters
-              </p>
-            </div>
-          )}
+                {hasMore && (
+                  <button
+                    onClick={() => setPage(p => p + 1)}
+                    className="w-full py-3 text-sm font-medium text-primary border border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
+                  >
+                    Show more vendors ({vendors.length - page * PAGE_SIZE} remaining)
+                  </button>
+                )}
+
+                {!isLoading && vendors.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No vendors found</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Try adjusting your filters
+                    </p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
