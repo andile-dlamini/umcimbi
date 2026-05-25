@@ -715,15 +715,17 @@ export default function OnboardingLanguage() {
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Ceremonies</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Built for the moments that matter most</h2>
-            <p className="text-lg text-white/60 mt-3">Supporting the ceremonies your family treasures.</p>
+            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Ceremonies we support</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Ceremonies we support</h2>
+            <p className="text-lg text-white/60 mt-3">Supporting families across all South African cultures and provinces.</p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <CeremonyTile name="Umembeso" description="The bride's family presents gifts to the groom's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-primary" icon="🎁" />
-            <CeremonyTile name="Umabo" description="The bride is formally welcomed into the groom's family." categories={['Attire', 'Catering', 'Livestock']} accentClass="bg-primary" icon="👰" />
-            <CeremonyTile name="Umbondo" description="The bride's family delivers groceries and essentials." categories={['Transport', 'Groceries', 'Planning']} accentClass="bg-primary" icon="🧺" />
-            <CeremonyTile name="Umemulo" description="A coming-of-age celebration for a young woman." categories={['Catering', 'Attire', 'Music']} accentClass="bg-primary" icon="🌸" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <CeremonyTile name="Lobola" description="Bride wealth negotiations — practised across Zulu, Xhosa, Venda, Sotho and all South African cultures." categories={['Planning', 'Catering', 'Attire']} accentClass="bg-primary" icon="🤝" />
+            <CeremonyTile name="Umembeso" description="The gift-giving ceremony where the groom's family honours the bride's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-primary" icon="🎁" />
+            <CeremonyTile name="Umemulo" description="A Zulu coming-of-age celebration honouring a young woman's transition to adulthood." categories={['Catering', 'Attire', 'Music']} accentClass="bg-primary" icon="🌸" />
+            <CeremonyTile name="Ulwaluko" description="The sacred Xhosa male initiation ceremony marking the transition to manhood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🌿" />
+            <CeremonyTile name="Domba" description="The Venda pre-marriage initiation ceremony for young women — the python dance." categories={['Attire', 'Music', 'Catering']} accentClass="bg-primary" icon="🐍" />
+            <CeremonyTile name="Lebollo" description="The Sotho initiation school marking the passage from youth to adulthood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🔥" />
           </div>
 
           {/* Additional ceremony types */}
@@ -731,9 +733,12 @@ export default function OnboardingLanguage() {
             <p className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Also supporting</p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
-              { icon: '🤝', name: 'Lobola' },
+              { icon: '👰', name: 'Umabo' },
+              { icon: '🧺', name: 'Umbondo' },
               { icon: '👶', name: 'Imbeleko' },
-              { icon: '🙏', name: 'Ancestral Ritual' }].
+              { icon: '🙏', name: 'Ancestral Ritual' },
+              { icon: '🌀', name: 'Tshikanda' },
+              { icon: '📿', name: 'Intonjane' }].
               map((c) =>
               <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-sm font-medium text-white shadow-sm">
                   <span>{c.icon}</span> {c.name}
