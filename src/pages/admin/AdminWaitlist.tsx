@@ -136,7 +136,8 @@ export default function AdminWaitlist() {
         toast.success(`Launch ${channel}`);
         await loadEntries();
       } else {
-        toast.error('Could not send. Check logs for details.');
+        const firstError = (data as any)?.errors?.[0]?.error;
+        toast.error(firstError ? `Could not send: ${firstError}` : 'Could not send. Check logs for details.');
       }
     } catch (e: any) {
       toast.error(e?.message || 'Failed to send');
@@ -160,7 +161,12 @@ export default function AdminWaitlist() {
       if (emailSent) parts.push(`${emailSent} email${emailSent === 1 ? '' : 's'}`);
       if (smsSent) parts.push(`${smsSent} SMS`);
       const summary = parts.length ? parts.join(' + ') : '0 sent';
-      toast.success(`${summary}${failed ? ` · ${failed} failed` : ''}`);
+      if (emailSent + smsSent > 0) {
+        toast.success(`${summary}${failed ? ` · ${failed} failed` : ''}`);
+      } else {
+        const firstError = (data as any)?.errors?.[0]?.error;
+        toast.error(firstError ? `Could not send: ${firstError}` : 'Could not send. Check logs for details.');
+      }
       await loadEntries();
     } catch (e: any) {
       toast.error(e?.message || 'Bulk send failed');

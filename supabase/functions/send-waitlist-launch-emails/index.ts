@@ -112,8 +112,8 @@ Deno.serve(async (req) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${serviceKey}`,
-              apikey: serviceKey,
+              Authorization: `Bearer ${anonKey}`,
+              apikey: anonKey,
             },
             body: JSON.stringify({
               templateName: 'launch-announcement',
@@ -129,6 +129,7 @@ Deno.serve(async (req) => {
           const text = await res.text()
           failed++
           errors.push({ id: s.id, channel: 'email', error: `${res.status}: ${text.slice(0, 200)}` })
+          console.error('Launch email failed', { id: s.id, status: res.status, response: text.slice(0, 500) })
           continue
         }
 
