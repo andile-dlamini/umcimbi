@@ -136,7 +136,8 @@ export default function AdminWaitlist() {
         toast.success(`Launch ${channel}`);
         await loadEntries();
       } else {
-        toast.error('Could not send. Check logs for details.');
+        const firstError = (data as any)?.errors?.[0]?.error;
+        toast.error(firstError ? `Could not send: ${firstError}` : 'Could not send. Check logs for details.');
       }
     } catch (e: any) {
       toast.error(e?.message || 'Failed to send');
