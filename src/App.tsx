@@ -154,6 +154,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         {/* Keep AuthPage mounted post-login so signup wizard (vendor business/showcase, success) can finish after auto sign-in */}
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
