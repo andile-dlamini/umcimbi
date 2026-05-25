@@ -23,6 +23,8 @@ export default function VendorsList() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const { events } = useEvents();
   const { user } = useAuth();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
