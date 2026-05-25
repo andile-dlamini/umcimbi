@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   // and has either an email or a phone number.
   let query = admin
     .from('waitlist_signups')
-    .select('id, full_name, email, phone_number, launch_email_sent_at, launch_sms_sent_at')
+    .select('id, full_name, email, phone_number, role, business_name, launch_email_sent_at, launch_sms_sent_at')
 
   if (signupId) {
     query = query.eq('id', signupId)
