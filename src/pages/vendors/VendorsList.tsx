@@ -38,6 +38,8 @@ export default function VendorsList() {
     }
   );
 
+  useEffect(() => { setPage(1); }, [search, category, locationFilter, verifiedOnly, superVendorsOnly]);
+
   useEffect(() => {
     if (isLoading) return;
     if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
