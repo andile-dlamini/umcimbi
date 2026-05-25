@@ -1580,6 +1580,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          launch_email_sent_at: string | null
           phone_number: string | null
           role: string | null
           source: string | null
@@ -1590,6 +1591,7 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          launch_email_sent_at?: string | null
           phone_number?: string | null
           role?: string | null
           source?: string | null
@@ -1600,6 +1602,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          launch_email_sent_at?: string | null
           phone_number?: string | null
           role?: string | null
           source?: string | null

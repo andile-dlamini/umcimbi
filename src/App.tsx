@@ -15,6 +15,7 @@ import ContactPage from "@/pages/contact/ContactPage";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import WaitlistPage from "@/pages/WaitlistPage";
+import EmailUnsubscribe from "@/pages/EmailUnsubscribe";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
@@ -93,6 +94,7 @@ function AppRoutes() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
+        <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/join/vendor" element={<VendorJoinRedirect />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -152,6 +154,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         {/* Keep AuthPage mounted post-login so signup wizard (vendor business/showcase, success) can finish after auto sign-in */}
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
