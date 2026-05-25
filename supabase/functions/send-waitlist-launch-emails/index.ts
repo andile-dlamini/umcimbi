@@ -112,6 +112,7 @@ Deno.serve(async (req) => {
             recipientEmail: s.email,
             idempotencyKey: `waitlist-launch-${s.id}`,
             templateData: { name: firstName },
+            from: 'Andile from UMCIMBI <andile@umcimbi.co.za>',
           }),
         }
       )
