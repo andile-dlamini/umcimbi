@@ -128,9 +128,12 @@ export default function AdminWaitlist() {
         { body: { signupId: entry.id } }
       );
       if (error) throw error;
-      const sent = (data as any)?.sent ?? 0;
+      const emailSent = (data as any)?.emailSent ?? 0;
+      const smsSent = (data as any)?.smsSent ?? 0;
+      const sent = emailSent + smsSent;
       if (sent > 0) {
-        toast.success(`Launch email sent to ${entry.email}`);
+        const channel = emailSent > 0 ? `email to ${entry.email}` : `SMS to ${entry.phone_number}`;
+        toast.success(`Launch ${channel}`);
         await loadEntries();
       } else {
         toast.error('Could not send. Check logs for details.');
