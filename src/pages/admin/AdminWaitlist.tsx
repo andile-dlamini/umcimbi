@@ -153,9 +153,14 @@ export default function AdminWaitlist() {
         { body: {} }
       );
       if (error) throw error;
-      const sent = (data as any)?.sent ?? 0;
+      const emailSent = (data as any)?.emailSent ?? 0;
+      const smsSent = (data as any)?.smsSent ?? 0;
       const failed = (data as any)?.failed ?? 0;
-      toast.success(`Sent ${sent} launch email${sent === 1 ? '' : 's'}${failed ? ` · ${failed} failed` : ''}`);
+      const parts: string[] = [];
+      if (emailSent) parts.push(`${emailSent} email${emailSent === 1 ? '' : 's'}`);
+      if (smsSent) parts.push(`${smsSent} SMS`);
+      const summary = parts.length ? parts.join(' + ') : '0 sent';
+      toast.success(`${summary}${failed ? ` · ${failed} failed` : ''}`);
       await loadEntries();
     } catch (e: any) {
       toast.error(e?.message || 'Bulk send failed');
