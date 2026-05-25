@@ -1,31 +1,11 @@
-Update the ceremony tiles section in `src/pages/onboarding/OnboardingLanguage.tsx` to reflect pan-cultural support across all South African cultures.
+Add simple pagination to VendorsList.tsx to show 10 vendors at a time.
 
-### Changes
+Changes:
+1. Add `page` state and `PAGE_SIZE = 10` constant after existing state declarations.
+2. Add `useEffect` to reset `page` to 1 whenever `search`, `category`, `locationFilter`, `verifiedOnly`, or `superVendorsOnly` changes.
+3. Derive `paginatedVendors` and `hasMore` by slicing the `vendors` array.
+4. Render `paginatedVendors` instead of `vendors` in the `.map()`.
+5. Add a "Load more" button after the vendor cards that increments the page when clicked.
+6. Update the results count text from "X vendors found" to "Showing Y of X vendors".
 
-1. **Heading / subheading** (lines 717-720):
-   - Change section label from `"Ceremonies"` to `"Ceremonies we support"`
-   - Change H2 from `"Built for the moments that matter most"` to `"Ceremonies we support"`
-   - Change subheading from `"Supporting the ceremonies your family treasures."` to `"Supporting families across all South African cultures and provinces."`
-
-2. **Ceremony tiles grid** (lines 722-727):
-   - Update grid class from `grid sm:grid-cols-2 gap-5` to `grid sm:grid-cols-2 lg:grid-cols-3 gap-5`
-   - Replace the 4 existing `<CeremonyTile />` entries with 6 new pan-cultural tiles:
-     - Lobola (🤝)
-     - Umembeso (🎁)
-     - Umemulo (🌸)
-     - Ulwaluko (🌿)
-     - Domba (🐍)
-     - Lebollo (🔥)
-   - Each tile gets updated `name`, `description`, `categories`, `accentClass="bg-primary"`, and `icon` props.
-
-3. **"Also supporting" pills** (lines 730-743):
-   - Replace the 3 existing pill entries with 6:
-     - Umabo (👰)
-     - Umbondo (🧺)
-     - Imbeleko (👶)
-     - Ancestral Ritual (🙏)
-     - Tshikanda (🌀)
-     - Intonjane (📿)
-   - Keep the section label `"Also supporting"` and styling unchanged.
-
-No other changes to the file.
+No other logic changes.
