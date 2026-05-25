@@ -1,0 +1,1 @@
+ALTER TABLE public.waitlist_signups ADD COLUMN IF NOT EXISTS launch_sms_sent_at timestamptz;
