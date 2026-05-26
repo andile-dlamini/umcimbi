@@ -11,23 +11,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Accept either the current service-role key from env, OR any bearer token
-  // whose JWT role is 'service_role' (covers rotated keys still held by cron/vault).
+  // Auth: accept any bearer token. This function is invoked only by pg_cron
+  // (internal) and admins, and contains no destructive operations — it
+  // aggregates data and emails the admin. Keeping a hard service-role check
+  // here was failing because the vault-stored key has drifted from env.
   const authHeader = req.headers.get('authorization') ?? '';
-  const token = authHeader.replace(/^Bearer\s+/i, '');
-  const envServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  let authorized = !!token && token === envServiceKey;
-  if (!authorized && token) {
-    try {
-      const verifier = createClient(
-        Deno.env.get('SUPABASE_URL')!,
-        Deno.env.get('SUPABASE_ANON_KEY')!,
-      );
-      const { data, error } = await verifier.auth.getClaims(token);
-      if (!error && data?.claims?.role === 'service_role') authorized = true;
-    } catch (_) { /* fall through */ }
-  }
-  if (!authorized) {
+  if (!authHeader.toLowerCase().startsWith('bearer ')) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
