@@ -11,8 +11,23 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const expectedAuth = `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}`;
-  if (req.headers.get('authorization') !== expectedAuth) {
+  // Accept either the current service-role key from env, OR any bearer token
+  // whose JWT role is 'service_role' (covers rotated keys still held by cron/vault).
+  const authHeader = req.headers.get('authorization') ?? '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const envServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  let authorized = !!token && token === envServiceKey;
+  if (!authorized && token) {
+    try {
+      const verifier = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+      );
+      const { data, error } = await verifier.auth.getClaims(token);
+      if (!error && data?.claims?.role === 'service_role') authorized = true;
+    } catch (_) { /* fall through */ }
+  }
+  if (!authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
