@@ -720,12 +720,12 @@ export default function OnboardingLanguage() {
             <p className="text-lg text-white/60 mt-3">Supporting families across all South African cultures and provinces.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <CeremonyTile name="Lobola" description="Bride wealth negotiations — practised across Zulu, Xhosa, Venda, Sotho and all South African cultures." categories={['Planning', 'Catering', 'Attire']} accentClass="bg-primary" icon="🤝" />
+            <CeremonyTile name="Lobola" description="Bride negotiations - practised across Zulu, Xhosa, Venda, Sotho and all South African cultures." categories={['Planning', 'Catering', 'Attire']} accentClass="bg-primary" icon="🤝" />
             <CeremonyTile name="Umembeso" description="The gift-giving ceremony where the groom's family honours the bride's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-primary" icon="🎁" />
             <CeremonyTile name="Umemulo" description="A Zulu coming-of-age celebration honouring a young woman's transition to adulthood." categories={['Catering', 'Attire', 'Music']} accentClass="bg-primary" icon="🌸" />
             <CeremonyTile name="Ulwaluko" description="The sacred Xhosa male initiation ceremony marking the transition to manhood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🌿" />
-            <CeremonyTile name="Domba" description="The Venda pre-marriage initiation ceremony for young women — the python dance." categories={['Attire', 'Music', 'Catering']} accentClass="bg-primary" icon="🐍" />
-            <CeremonyTile name="Lebollo" description="The Sotho initiation school marking the passage from youth to adulthood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🔥" />
+            <CeremonyTile name="Domba" description="The Venda pre-marriage initiation ceremony for young women - the python dance." categories={['Attire', 'Music', 'Catering']} accentClass="bg-primary" icon="🐍" />
+            <CeremonyTile name="Lebollo" description="The Sotho initiation tradition that is marking the passage from youth to adulthood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🔥" />
           </div>
 
           {/* Additional ceremony types */}
