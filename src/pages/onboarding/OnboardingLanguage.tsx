@@ -34,7 +34,7 @@ import {
   Music2 } from
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
-import StepIllustration from '@/components/illustrations/StepIllustration';
+import HowItWorks from '@/components/onboarding/HowItWorks';
 import CeremonyTile from '@/components/illustrations/CeremonyTile';
 import FeatureIcon from '@/components/illustrations/FeatureIcon';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -415,29 +415,7 @@ export default function OnboardingLanguage() {
       {/* ═══ HOW IT WORKS — Light band ═══ */}
       <section id="how" className="py-28 bg-background scroll-mt-20">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-16">
-            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Simple process</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">How UMCIMBI works</h2>
-            <p className="text-muted-foreground mt-3 text-lg">Three simple steps to your ceremony.</p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-8">
-            {[
-            { step: 1 as const, title: 'Share your ceremony needs', body: 'The type, date, location, and what you need.' },
-            { step: 2 as const, title: 'Receive & compare quotations', body: 'Vendors respond with structured quotations you can review.' },
-            { step: 3 as const, title: 'Confirm & manage delivery', body: 'Place an order and pay safely online' }].
-            map(({ step, title, body }) =>
-            <div key={step} className="group text-center space-y-5">
-                <div className="mx-auto w-20 h-20 rounded-3xl bg-primary/[0.08] flex items-center justify-center group-hover:bg-primary/[0.12] transition-colors">
-                  <StepIllustration step={step} />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold mx-auto shadow-lg shadow-primary/20">
-                  {step}
-                </div>
-                <h3 className="font-bold text-[17px] text-foreground">{title}</h3>
-                <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xs mx-auto">{body}</p>
-              </div>
-            )}
-          </div>
+          <HowItWorks />
           <div className="text-center mt-12">
             <Link to="/auth?mode=signup">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
