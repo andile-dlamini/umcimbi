@@ -98,7 +98,34 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const authHeader = req.headers.get("Authorization") ?? "";
 
-    if (!authHeader.startsWith("Bearer ") || authHeader.length < 20) return jsonResponse({ error: "Unauthorized" }, 401);
+    if (!authHeader.startsWith("Bearer ")) return jsonResponse({ error: "Unauthorized" }, 401);
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) return jsonResponse({ error: "Unauthorized" }, 401);
+
+    let isAuthorized = false;
+
+    // Path 1: Machine-to-machine via service role key
+    if (token === serviceKey) {
+      isAuthorized = true;
+    } else {
+      // Path 2: Human admin via validated JWT
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const authClient = createClient(supabaseUrl, anonKey);
+      const { data: { user }, error: userErr } = await authClient.auth.getUser(token);
+      if (userErr || !user) return jsonResponse({ error: "Unauthorized" }, 401);
+
+      const adminClient = createClient(supabaseUrl, serviceKey);
+      const { data: roleRow } = await adminClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roleRow?.role === "admin") isAuthorized = true;
+    }
+
+    if (!isAuthorized) return jsonResponse({ error: "Forbidden" }, 403);
 
     const payoutApiUrl = (Deno.env.get("OZOW_PAYOUT_API_URL") ?? "").trim().replace(/\/+$/, "");
     const ozowSiteCode = (Deno.env.get("OZOW_SITE_CODE") ?? "").trim();
