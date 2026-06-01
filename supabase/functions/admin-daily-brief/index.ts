@@ -11,12 +11,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Auth: accept any bearer token. This function is invoked only by pg_cron
-  // (internal) and admins, and contains no destructive operations — it
-  // aggregates data and emails the admin. Keeping a hard service-role check
-  // here was failing because the vault-stored key has drifted from env.
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const authHeader = req.headers.get('authorization') ?? '';
-  if (!authHeader.toLowerCase().startsWith('bearer ')) {
+  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
