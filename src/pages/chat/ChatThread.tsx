@@ -262,13 +262,9 @@ const ChatThread = () => {
         .upload(path, file);
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('delivery-proofs')
-        .getPublicUrl(path);
-
       const { data, error } = await supabase.functions.invoke(
         'upload-delivery-proof',
-        { body: { booking_id: activeBooking.id, photo_url: urlData.publicUrl } }
+        { body: { booking_id: activeBooking.id, photo_path: path } }
       );
       if (error || data?.error) throw error || new Error(data.error);
 

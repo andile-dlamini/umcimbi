@@ -36,10 +36,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { booking_id, photo_url, notes } = await req.json();
+    const { booking_id, photo_path, notes } = await req.json();
 
-    if (!booking_id || !photo_url) {
-      return new Response(JSON.stringify({ error: "booking_id and photo_url are required" }), {
+    if (!booking_id || !photo_path) {
+      return new Response(JSON.stringify({ error: "booking_id and photo_path are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
 
     let insertError: any = null;
     if (existingProof) {
-      const newPhotos = [...(existingProof.photos || []), photo_url];
+      const newPhotos = [...(existingProof.photos || []), photo_path];
       const { error } = await supabase
         .from("delivery_proofs")
         .update({ photos: newPhotos, notes: notes || null })
@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       const { error } = await supabase.from("delivery_proofs").insert({
         booking_id,
         uploaded_by: user.id,
-        photos: [photo_url],
+        photos: [photo_path],
         notes: notes || null,
       });
       insertError = error;

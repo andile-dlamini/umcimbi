@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock, Clock, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,39 @@ import { toast } from 'sonner';
 import { viewQuotePdfAction, viewOrderPdfAction } from '@/lib/quoteActions';
 
 const statusConfig = bookingStatusConfig;
+
+function DeliveryProofPhotos({ proofs }: { proofs: any[] }) {
+  const [signedUrls, setSignedUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const allPaths = proofs.flatMap(p => p.photos as string[]);
+    if (allPaths.length === 0) return;
+
+    Promise.all(
+      allPaths.map(async (path) => {
+        const { data } = await supabase.storage
+          .from('delivery-proofs')
+          .createSignedUrl(path, 300);
+        return data?.signedUrl ?? '';
+      })
+    ).then(urls => setSignedUrls(urls.filter(Boolean)));
+  }, [proofs]);
+
+  if (signedUrls.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {signedUrls.map((url, idx) => (
+        <img
+          key={idx}
+          src={url}
+          alt="Delivery proof"
+          className="w-full h-24 object-cover rounded-md"
+        />
+      ))}
+    </div>
+  );
+}
 
 const paymentStatusCfg: Record<string, { label: string; color: string }> = {
   not_due: { label: 'Not Due', color: 'text-muted-foreground' },
@@ -393,18 +426,7 @@ export default function BookingDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-2">
-                {deliveryProofs.flatMap(proof => 
-                  proof.photos.map((photo: string, idx: number) => (
-                    <img
-                      key={`${proof.id}-${idx}`}
-                      src={photo}
-                      alt="Delivery proof"
-                      className="w-full h-24 object-cover rounded-md"
-                    />
-                  ))
-                )}
-              </div>
+              <DeliveryProofPhotos proofs={deliveryProofs} />
             </CardContent>
           </Card>
         )}
