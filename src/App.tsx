@@ -103,6 +103,9 @@ function AppRoutes() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
+        <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
+        <Route path="/feedback/vendor" element={<FeedbackVendor />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
