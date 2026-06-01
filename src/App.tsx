@@ -113,8 +113,13 @@ function AppRoutes() {
 
   // Fully authenticated
   return (
-    <AppShell>
-      <Routes>
+    <Routes>
+      <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
+      <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
+      <Route path="/feedback/vendor" element={<FeedbackVendor />} />
+      <Route path="*" element={
+        <AppShell>
+          <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<EventsList />} />
         <Route path="/events/new" element={<CreateEvent />} />
