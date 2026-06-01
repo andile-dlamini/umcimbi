@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       const { error } = await supabase.from("delivery_proofs").insert({
         booking_id,
         uploaded_by: user.id,
-        photos: [photo_url],
+        photos: [photo_path],
         notes: notes || null,
       });
       insertError = error;
