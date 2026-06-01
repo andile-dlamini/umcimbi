@@ -164,14 +164,8 @@ export default function BookingDetail() {
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('delivery-proofs')
-        .getPublicUrl(path);
-
-      const photoUrl = urlData.publicUrl;
-
       const { data, error } = await supabase.functions.invoke('upload-delivery-proof', {
-        body: { booking_id: bookingId, photo_url: photoUrl },
+        body: { booking_id: bookingId, photo_path: path },
       });
 
       if (error || data?.error) throw error || new Error(data.error);
