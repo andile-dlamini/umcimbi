@@ -167,8 +167,10 @@ function AppRoutes() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppShell>
+          </Routes>
+        </AppShell>
+      } />
+    </Routes>
   );
 }
 
