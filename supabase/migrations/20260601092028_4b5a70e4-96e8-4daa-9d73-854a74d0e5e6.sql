@@ -1,28 +1,17 @@
-## Vendor RLS hardening migration
-
-Single Supabase migration to tighten read access on `public.vendors` and add a security-definer accessor for the owner's bank details. No edge function or frontend changes.
-
-### SQL to run
-
-```sql
--- 1. Drop the broad SELECT policy
 DROP POLICY IF EXISTS "Active vendors viewable by authenticated users" ON public.vendors;
 
--- 2. Re-create the broad SELECT policy (row-level; column hardening handled via SECURITY DEFINER fn below)
 CREATE POLICY "Active vendors viewable by authenticated users"
 ON public.vendors
 FOR SELECT
 TO authenticated
 USING (is_active = true);
 
--- 3. Ensure owners can always view their own full row (active or not)
 DROP POLICY IF EXISTS "Vendor owners can view their own profile" ON public.vendors;
 CREATE POLICY "Vendor owners can view their own profile"
 ON public.vendors
 FOR SELECT
 USING (auth.uid() = owner_user_id);
 
--- 4. SECURITY DEFINER accessor for owner-only bank details
 CREATE OR REPLACE FUNCTION public.get_own_vendor_bank_details(vendor_id UUID)
 RETURNS TABLE (
   bank_name text,
@@ -51,10 +40,3 @@ $$;
 
 REVOKE ALL ON FUNCTION public.get_own_vendor_bank_details(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_own_vendor_bank_details(UUID) TO authenticated;
-```
-
-### Notes
-- No changes to edge functions (incl. `trigger-vendor-payout`, which uses service role).
-- No frontend changes.
-- No other tables or policies touched.
-- RLS remains row-level; true column hardening for bank fields will require future frontend migration to call `get_own_vendor_bank_details()` instead of selecting columns directly — out of scope here.

@@ -1767,6 +1767,17 @@ export type Database = {
           vendors_joined_this_month: number
         }[]
       }
+      get_own_vendor_bank_details: {
+        Args: { vendor_id: string }
+        Returns: {
+          bank_account_holder_name: string
+          bank_account_number: string
+          bank_account_type: string
+          bank_branch_code: string
+          bank_name: string
+          payout_method: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
