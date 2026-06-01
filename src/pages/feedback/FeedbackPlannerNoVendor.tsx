@@ -74,12 +74,12 @@ export default function FeedbackPlannerNoVendor() {
     }
     setSubmitting(true);
     const willing = q8 === "Yes";
-    const { error } = await supabase.from("survey_responses").insert({
+    const { error } = await supabase.from("survey_responses").insert([{
       survey_type: "planner_no_vendor",
       responses: { q1, q2, q3, q4, q5, q6, q7, q8 },
       willing_to_call: willing,
       whatsapp_number: willing ? phone : null,
-    });
+    }]);
     setSubmitting(false);
     if (error) {
       toast.error("Could not submit. Please try again.");

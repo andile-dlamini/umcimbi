@@ -88,12 +88,12 @@ export default function FeedbackVendor() {
     if (q1 === "no_profile") Object.assign(responses, { q2a, q3a, q4a });
     if (q1 === "has_profile") Object.assign(responses, { q2b, q3b, q4b });
 
-    const { error } = await supabase.from("survey_responses").insert({
+    const { error } = await supabase.from("survey_responses").insert([{
       survey_type: "vendor",
       responses,
       willing_to_call: willing,
       whatsapp_number: willing ? phone : null,
-    });
+    }]);
     setSubmitting(false);
     if (error) {
       toast.error("Could not submit. Please try again.");
