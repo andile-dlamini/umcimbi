@@ -1,60 +1,40 @@
-## Vendor RLS hardening migration
+## Plan: Harden admin-daily-brief auth to service-role key check
 
-Single Supabase migration to tighten read access on `public.vendors` and add a security-definer accessor for the owner's bank details. No edge function or frontend changes.
+### What we're changing
+Replace the permissive auth block in `supabase/functions/admin-daily-brief/index.ts` (lines 14–24) with a strict Bearer-token check against the `SUPABASE_SERVICE_ROLE_KEY` environment variable. This prevents unauthenticated or loosely-authenticated callers from accessing the admin daily-brief endpoint.
 
-### SQL to run
-
-```sql
--- 1. Drop the broad SELECT policy
-DROP POLICY IF EXISTS "Active vendors viewable by authenticated users" ON public.vendors;
-
--- 2. Re-create the broad SELECT policy (row-level; column hardening handled via SECURITY DEFINER fn below)
-CREATE POLICY "Active vendors viewable by authenticated users"
-ON public.vendors
-FOR SELECT
-TO authenticated
-USING (is_active = true);
-
--- 3. Ensure owners can always view their own full row (active or not)
-DROP POLICY IF EXISTS "Vendor owners can view their own profile" ON public.vendors;
-CREATE POLICY "Vendor owners can view their own profile"
-ON public.vendors
-FOR SELECT
-USING (auth.uid() = owner_user_id);
-
--- 4. SECURITY DEFINER accessor for owner-only bank details
-CREATE OR REPLACE FUNCTION public.get_own_vendor_bank_details(vendor_id UUID)
-RETURNS TABLE (
-  bank_name text,
-  bank_account_holder_name text,
-  bank_account_number text,
-  bank_account_type text,
-  bank_branch_code text,
-  payout_method text
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT
-    bank_name,
-    bank_account_holder_name,
-    bank_account_number,
-    bank_account_type,
-    bank_branch_code,
-    payout_method
-  FROM public.vendors
-  WHERE id = vendor_id
-    AND owner_user_id = auth.uid();
-$$;
-
-REVOKE ALL ON FUNCTION public.get_own_vendor_bank_details(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_own_vendor_bank_details(UUID) TO authenticated;
+### Exact diff
+**Remove lines 14–24:**
+```
+  // Auth: accept any bearer token. This function is invoked only by pg_cron
+  // (internal) and admins, and contains no destructive operations — it
+  // aggregates data and emails the admin. Keeping a hard service-role check
+  // here was failing because the vault-stored key has drifted from env.
+  const authHeader = req.headers.get('authorization') ?? '';
+  if (!authHeader.toLowerCase().startsWith('bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 ```
 
-### Notes
-- No changes to edge functions (incl. `trigger-vendor-payout`, which uses service role).
-- No frontend changes.
-- No other tables or policies touched.
-- RLS remains row-level; true column hardening for bank fields will require future frontend migration to call `get_own_vendor_bank_details()` instead of selecting columns directly — out of scope here.
+**Insert in its place:**
+```
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const authHeader = req.headers.get('authorization') ?? '';
+  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+```
+
+### No other changes
+- No modification to Anthropic prompt, data queries, email logic, or any other function code
+- No changes to `corsHeaders`
+- No frontend or other file changes
+
+### Deployment
+After the edit, deploy only: `supabase functions deploy admin-daily-brief`
