@@ -84,7 +84,7 @@ export default function FeedbackVendor() {
     }
     setSubmitting(true);
     const willing = q6 === "Yes";
-    const responses: Record<string, unknown> = { q1, q5, q6 };
+    const responses: Record<string, any> = { q1, q5, q6 };
     if (q1 === "no_profile") Object.assign(responses, { q2a, q3a, q4a });
     if (q1 === "has_profile") Object.assign(responses, { q2b, q3b, q4b });
 
