@@ -16,6 +16,9 @@ import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import WaitlistPage from "@/pages/WaitlistPage";
 import EmailUnsubscribe from "@/pages/EmailUnsubscribe";
+import FeedbackPlannerNoEvent from "@/pages/feedback/FeedbackPlannerNoEvent";
+import FeedbackPlannerNoVendor from "@/pages/feedback/FeedbackPlannerNoVendor";
+import FeedbackVendor from "@/pages/feedback/FeedbackVendor";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
