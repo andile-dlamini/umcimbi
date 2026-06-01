@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar, MapPin, Banknote, CheckCircle, AlertTriangle, Star, Camera, CreditCard, Loader2, FileText, ExternalLink, Lock, Clock, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { bookingStatusConfig } from '@/lib/statusConfig';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { useClientBookings } from '@/hooks/useBookings';
 import { supabase } from '@/integrations/supabase/client';
