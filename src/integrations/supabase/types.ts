@@ -1152,6 +1152,33 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          created_at: string
+          id: string
+          responses: Json
+          survey_type: string
+          whatsapp_number: string | null
+          willing_to_call: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          responses?: Json
+          survey_type: string
+          whatsapp_number?: string | null
+          willing_to_call?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          responses?: Json
+          survey_type?: string
+          whatsapp_number?: string | null
+          willing_to_call?: boolean
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee_name: string | null
