@@ -426,18 +426,7 @@ export default function BookingDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-2">
-                {deliveryProofs.flatMap(proof => 
-                  proof.photos.map((photo: string, idx: number) => (
-                    <img
-                      key={`${proof.id}-${idx}`}
-                      src={photo}
-                      alt="Delivery proof"
-                      className="w-full h-24 object-cover rounded-md"
-                    />
-                  ))
-                )}
-              </div>
+              <DeliveryProofPhotos proofs={deliveryProofs} />
             </CardContent>
           </Card>
         )}
