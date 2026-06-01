@@ -1,29 +1,53 @@
-## Drop-off bucket export — past 8 days
 
-I queried the database for the 50 users who registered in the last 8 days and classified them by funnel stage.
+## Public Feedback Surveys
 
-### Buckets found
+Three public, no-auth survey pages for post-launch user research, backed by a new `survey_responses` table.
 
-**Planners (40)**
-- `P1 — Registered, no event created`: **24**
-- `P2 — Event created, never contacted a vendor` (no service request, no chat): **15**
-- `P3 — Contacted vendor, no booking`: **1**
-- `P4 — Booking created, deposit unpaid`: 0
-- `P5 — Paid deposit`: 0
+### 1. Database migration
 
-**Vendors (10)**
-- `V1 — Vendor role chosen, no vendor profile created`: **7**
-- `V2 — Vendor profile created, no activity` (no quotes, no chats, no requests received): **3**
-- `V2b — Vendor received request but never responded`: 0
-- `V3 — Vendor active` (sent a quote or chatted): 0
+Create `public.survey_responses`:
 
-### Deliverable
+- Columns: `id`, `created_at`, `survey_type` (text, CHECK in `planner_no_event` | `planner_no_vendor` | `vendor`), `responses` (jsonb default `{}`), `whatsapp_number` (text), `willing_to_call` (boolean default false).
+- GRANT `INSERT` to `anon` and `authenticated`; `ALL` to `service_role`.
+- Enable RLS; single policy "Anyone can insert survey responses" (INSERT, anon + authenticated, WITH CHECK true). No SELECT policy — responses are write-only from the public surfaces.
 
-Generate `/mnt/documents/dropoff_buckets_past_8_days.csv` with one row per user, columns:
-`bucket, role, first_name, surname, phone_number, registered_at`
+### 2. Survey pages
 
-Sorted by bucket then registration date. One row in the data has null name/phone (orphan profile) — it will be included under P1 with blank fields.
+Create three files under `src/pages/feedback/`:
 
-No code or schema changes. Single CSV artifact produced via a script, then surfaced with `<presentation-artifact>`.
+- `FeedbackPlannerNoEvent.tsx` — `survey_type = 'planner_no_event'`
+- `FeedbackPlannerNoVendor.tsx` — `survey_type = 'planner_no_vendor'`
+- `FeedbackVendor.tsx` — `survey_type = 'vendor'`
 
-Approve to run.
+Shared layout per page:
+
+- No `AppShell` / nav — rendered in the public Routes block.
+- Dark indigo header bar (`#111872`) with "UMCIMBI" wordmark in gold (`#E8A838`), page title, subtitle.
+- White question cards (shadcn `Card`) with `RadioGroup`, `Checkbox`, `Textarea`, `Input`, `Label` from existing UI primitives.
+- Conditional questions rendered based on prior answers (Q2 in NoEvent; branch A/B in Vendor; WhatsApp field on "Yes" to call question).
+- Deep blue submit button (`#0A2A92`) — inline styles for the brand colors to avoid touching the design system.
+- Required-field validation client-side before submit.
+- On submit: `supabase.from('survey_responses').insert({ survey_type, responses, willing_to_call, whatsapp_number })` where `responses` is a JSON object keyed by question id (e.g. `q1`, `q2`, `q3` arrays for checkboxes, strings for radios/textareas). Only writes the 4 allowed columns — no `user_id`.
+- Success: replace page content with full-page thank-you ("Siyabonga! 🙏" + English subtext).
+- Failure: `toast.error(...)` via sonner; keep form interactive (do not block).
+
+Each file implements the exact question set, options, ordering, and conditional logic from the spec.
+
+### 3. Routes
+
+In `src/App.tsx`:
+
+- Add 3 imports for the new pages.
+- Add 3 `<Route>` entries inside the unauthenticated Routes block (next to `/contact`, `/privacy`, `/terms`):
+  - `/feedback/planner-no-event`
+  - `/feedback/planner-no-vendor`
+  - `/feedback/vendor`
+- Also add the same 3 routes inside the authenticated Routes block, rendered without `AppShell` is not possible there — instead, leave only the unauthenticated routes. Logged-in users hitting those paths fall through to `*` → `/`. To make the survey links work for everyone, I'll add the 3 routes **outside** `AppShell` in the authenticated branch as well, by placing them before the `<AppShell>` wrapper.
+
+Concretely: refactor `AppRoutes` so that the 3 feedback routes are matched first (no shell, no auth gate) regardless of login state, then fall through to the existing logged-in / logged-out trees. This keeps the surveys publicly accessible while preserving every other route exactly as-is.
+
+### Notes
+
+- No existing pages, components, edge functions, or other routes are modified beyond adding the 3 imports and routes in `App.tsx`.
+- Uses existing shadcn primitives and the existing `supabase` client.
+- Toasts use `sonner` (already wired in `App.tsx`).
