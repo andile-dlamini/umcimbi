@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
 
     let insertError: any = null;
     if (existingProof) {
-      const newPhotos = [...(existingProof.photos || []), photo_url];
+      const newPhotos = [...(existingProof.photos || []), photo_path];
       const { error } = await supabase
         .from("delivery_proofs")
         .update({ photos: newPhotos, notes: notes || null })
