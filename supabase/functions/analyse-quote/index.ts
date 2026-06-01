@@ -17,6 +17,25 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authHeader = req.headers.get('authorization') ?? '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const authClient = createClient(supabaseUrl, anonKey);
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { price, category, ceremonyType, vendorRating, reviewCount, isVerified, jobsCompleted, notes } = await req.json();
 
     const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
@@ -28,6 +47,7 @@ serve(async (req) => {
       );
     }
 
+    const safenotes = notes ? String(notes).slice(0, 500) : null;
     const anthropicResponse = await fetch(
       "https://api.anthropic.com/v1/messages",
       {
@@ -44,7 +64,7 @@ serve(async (req) => {
           messages: [
             {
               role: "user",
-              content: `A vendor has quoted R${price} for ${category} services for a ${ceremonyType} ceremony. The vendor has ${jobsCompleted} completed jobs on the platform, a rating of ${vendorRating ?? 'no rating yet'} from ${reviewCount} reviews, and is ${isVerified ? 'verified' : 'not yet verified'} by UMCIMBI. ${notes ? `Their quote notes say: "${notes}"` : ''} Give a brief, helpful insight about whether this quote seems reasonable for this type of ceremony in South Africa.`
+              content: `A vendor has quoted R${price} for ${category} services for a ${ceremonyType} ceremony. The vendor has ${jobsCompleted} completed jobs on the platform, a rating of ${vendorRating ?? 'no rating yet'} from ${reviewCount} reviews, and is ${isVerified ? 'verified' : 'not yet verified'} by UMCIMBI. ${safenotes ? `Their quote notes say: "${safenotes}"` : ''} Give a brief, helpful insight about whether this quote seems reasonable for this type of ceremony in South Africa.`
             }
           ]
         })
