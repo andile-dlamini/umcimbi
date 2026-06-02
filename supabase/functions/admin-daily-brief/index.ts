@@ -11,54 +11,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  const authHeader = req.headers.get('authorization') ?? '';
-  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  // Auth is enforced by Supabase gateway (verify_jwt = true in config.toml).
+  // The cron job authenticates with the service-role JWT stored in vault.
 
-  console.log('[admin-daily-brief] auth check', {
-    hasServiceKey: !!serviceKey,
-    serviceKeyLen: serviceKey.length,
-    serviceKeyPrefix: serviceKey.slice(0, 20),
-    hasBearer: !!bearer,
-    bearerLen: bearer.length,
-    bearerPrefix: bearer.slice(0, 20),
-    match: !!serviceKey && bearer === serviceKey,
-  });
-
-  let authorized = !!serviceKey && bearer === serviceKey;
-  if (!authorized && serviceKey && bearer) {
-    try {
-      const adminClient = createClient(
-        Deno.env.get('SUPABASE_URL')!,
-        serviceKey,
-      );
-      const { data, error } = await adminClient
-        .schema('vault' as any)
-        .from('decrypted_secrets')
-        .select('decrypted_secret')
-        .eq('name', 'email_queue_service_role_key')
-        .maybeSingle();
-      console.log('[admin-daily-brief] vault lookup', {
-        haveData: !!data,
-        error: error?.message,
-        vaultLen: data?.decrypted_secret?.length,
-        vaultPrefix: data?.decrypted_secret?.slice(0, 20),
-        vaultMatch: data?.decrypted_secret && bearer === data.decrypted_secret,
-      });
-      if (data?.decrypted_secret && bearer === data.decrypted_secret) {
-        authorized = true;
-      }
-    } catch (e) {
-      console.error('[admin-daily-brief] vault lookup threw', e);
-    }
-  }
-
-  if (!authorized) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
 
 
 
