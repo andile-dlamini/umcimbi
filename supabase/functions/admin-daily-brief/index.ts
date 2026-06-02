@@ -15,8 +15,16 @@ serve(async (req) => {
   const authHeader = req.headers.get('authorization') ?? '';
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
-  // Accept either the env service-role key OR the vault-stored cron key
-  // (the cron job authenticates with the vault secret `email_queue_service_role_key`).
+  console.log('[admin-daily-brief] auth check', {
+    hasServiceKey: !!serviceKey,
+    serviceKeyLen: serviceKey.length,
+    serviceKeyPrefix: serviceKey.slice(0, 20),
+    hasBearer: !!bearer,
+    bearerLen: bearer.length,
+    bearerPrefix: bearer.slice(0, 20),
+    match: !!serviceKey && bearer === serviceKey,
+  });
+
   let authorized = !!serviceKey && bearer === serviceKey;
   if (!authorized && serviceKey && bearer) {
     try {
@@ -24,17 +32,24 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_URL')!,
         serviceKey,
       );
-      const { data } = await adminClient
+      const { data, error } = await adminClient
         .schema('vault' as any)
         .from('decrypted_secrets')
         .select('decrypted_secret')
         .eq('name', 'email_queue_service_role_key')
         .maybeSingle();
+      console.log('[admin-daily-brief] vault lookup', {
+        haveData: !!data,
+        error: error?.message,
+        vaultLen: data?.decrypted_secret?.length,
+        vaultPrefix: data?.decrypted_secret?.slice(0, 20),
+        vaultMatch: data?.decrypted_secret && bearer === data.decrypted_secret,
+      });
       if (data?.decrypted_secret && bearer === data.decrypted_secret) {
         authorized = true;
       }
-    } catch (_e) {
-      // fall through to unauthorized
+    } catch (e) {
+      console.error('[admin-daily-brief] vault lookup threw', e);
     }
   }
 
@@ -44,6 +59,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
 
 
 
