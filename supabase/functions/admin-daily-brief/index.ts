@@ -13,12 +13,38 @@ serve(async (req) => {
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const authHeader = req.headers.get('authorization') ?? '';
-  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+  // Accept either the env service-role key OR the vault-stored cron key
+  // (the cron job authenticates with the vault secret `email_queue_service_role_key`).
+  let authorized = !!serviceKey && bearer === serviceKey;
+  if (!authorized && serviceKey && bearer) {
+    try {
+      const adminClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        serviceKey,
+      );
+      const { data } = await adminClient
+        .schema('vault' as any)
+        .from('decrypted_secrets')
+        .select('decrypted_secret')
+        .eq('name', 'email_queue_service_role_key')
+        .maybeSingle();
+      if (data?.decrypted_secret && bearer === data.decrypted_secret) {
+        authorized = true;
+      }
+    } catch (_e) {
+      // fall through to unauthorized
+    }
+  }
+
+  if (!authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
 
 
 
