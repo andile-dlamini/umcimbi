@@ -11,14 +11,11 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  const authHeader = req.headers.get('authorization') ?? '';
-  if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Auth is enforced by Supabase gateway (verify_jwt = true in config.toml).
+  // The cron job authenticates with the service-role JWT stored in vault.
+
+
+
 
 
 
