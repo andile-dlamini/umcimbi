@@ -50,11 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRoles(rolesData.map(r => r.role as AppRole));
     }
 
+    // Owner can load their own vendor regardless of is_active.
+    // Inactive vendors (e.g. demo sandbox accounts) are hidden from the
+    // marketplace via RLS + .eq('is_active', true) filters on public lists,
+    // but the owner still needs to access their own vendor dashboard.
     const { data: vendorData } = await supabase
       .from('vendors')
       .select('*')
       .eq('owner_user_id', userId)
-      .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(1);
     
