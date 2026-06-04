@@ -1,53 +1,58 @@
+## Summary
+Two targeted file changes: update image limits in the vendor gallery component, and add social link URL fields to the vendor profile edit/view page.
 
-## Public Feedback Surveys
+---
 
-Three public, no-auth survey pages for post-launch user research, backed by a new `survey_responses` table.
+## FILE 1: src/components/vendors/VendorImageGallery.tsx
 
-### 1. Database migration
+Update every hardcoded limit of `5` to `15`, and adjust derived values:
 
-Create `public.survey_responses`:
+1. **Gallery slice** (line 29): `imageUrls.slice(1, 5)` → `imageUrls.slice(1, 15)`
+2. **Can-add flag** (line 30): `imageUrls.length < 5` → `imageUrls.length < 15`
+3. **Remaining slots** (line 93): `5 - imageUrls.length` → `15 - imageUrls.length`
+4. **Toast message** (line 95): `'Maximum 5 images allowed'` → `'Maximum 15 images allowed'`
+5. **Gallery label** (line 244): `'Gallery Images ({galleryImages.length}/4)'` → `'Gallery Images ({galleryImages.length}/14)'`
+6. **Thumbnail grid** (line 245): `grid-cols-4` → `grid-cols-5`
+7. **Help text** (line 288): `'Upload up to 5 images total.'` → `'Upload up to 15 images total.'`
+8. **Add-button condition** (line 267): `galleryImages.length < 4` → `galleryImages.length < 14`
 
-- Columns: `id`, `created_at`, `survey_type` (text, CHECK in `planner_no_event` | `planner_no_vendor` | `vendor`), `responses` (jsonb default `{}`), `whatsapp_number` (text), `willing_to_call` (boolean default false).
-- GRANT `INSERT` to `anon` and `authenticated`; `ALL` to `service_role`.
-- Enable RLS; single policy "Anyone can insert survey responses" (INSERT, anon + authenticated, WITH CHECK true). No SELECT policy — responses are write-only from the public surfaces.
+---
 
-### 2. Survey pages
+## FILE 2: src/pages/profile/VendorProfile.tsx
 
-Create three files under `src/pages/feedback/`:
+Add three optional social URL fields, wired to `editData` state and included in save/load.
 
-- `FeedbackPlannerNoEvent.tsx` — `survey_type = 'planner_no_event'`
-- `FeedbackPlannerNoVendor.tsx` — `survey_type = 'planner_no_vendor'`
-- `FeedbackVendor.tsx` — `survey_type = 'vendor'`
+### State (line 26-34)
+Add to `editData` initial state:
+- `instagram_url: ''`
+- `tiktok_url: ''`
+- `facebook_url: ''`
 
-Shared layout per page:
+### Load into edit mode (line 66-74, `startEditing`)
+Pull from `vendor`:
+- `instagram_url: vendor.instagram_url || ''`
+- `tiktok_url: vendor.tiktok_url || ''`
+- `facebook_url: vendor.facebook_url || ''`
 
-- No `AppShell` / nav — rendered in the public Routes block.
-- Dark indigo header bar (`#111872`) with "UMCIMBI" wordmark in gold (`#E8A838`), page title, subtitle.
-- White question cards (shadcn `Card`) with `RadioGroup`, `Checkbox`, `Textarea`, `Input`, `Label` from existing UI primitives.
-- Conditional questions rendered based on prior answers (Q2 in NoEvent; branch A/B in Vendor; WhatsApp field on "Yes" to call question).
-- Deep blue submit button (`#0A2A92`) — inline styles for the brand colors to avoid touching the design system.
-- Required-field validation client-side before submit.
-- On submit: `supabase.from('survey_responses').insert({ survey_type, responses, willing_to_call, whatsapp_number })` where `responses` is a JSON object keyed by question id (e.g. `q1`, `q2`, `q3` arrays for checkboxes, strings for radios/textareas). Only writes the 4 allowed columns — no `user_id`.
-- Success: replace page content with full-page thank-you ("Siyabonga! 🙏" + English subtext).
-- Failure: `toast.error(...)` via sonner; keep form interactive (do not block).
+### Save payload (line 80-88, `handleSave`)
+Pass to `updateVendorProfile`:
+- `instagram_url: editData.instagram_url || null`
+- `tiktok_url: editData.tiktok_url || null`
+- `facebook_url: editData.facebook_url || null`
 
-Each file implements the exact question set, options, ordering, and conditional logic from the spec.
+### Edit-mode UI
+New section after the **About** textarea (since `website_url` is not in the edit form):
+- Heading: "Social links (optional)"
+- Three `Input` fields: Instagram URL, TikTok URL, Facebook URL, each with placeholder and wired to `editData`
 
-### 3. Routes
+### View-mode UI
+New block after the existing `website_url` link (inside the contact info stack):
+- Conditionally render each URL as a clickable external link with its platform label
+- Only show if at least one social URL exists
 
-In `src/App.tsx`:
+---
 
-- Add 3 imports for the new pages.
-- Add 3 `<Route>` entries inside the unauthenticated Routes block (next to `/contact`, `/privacy`, `/terms`):
-  - `/feedback/planner-no-event`
-  - `/feedback/planner-no-vendor`
-  - `/feedback/vendor`
-- Also add the same 3 routes inside the authenticated Routes block, rendered without `AppShell` is not possible there — instead, leave only the unauthenticated routes. Logged-in users hitting those paths fall through to `*` → `/`. To make the survey links work for everyone, I'll add the 3 routes **outside** `AppShell` in the authenticated branch as well, by placing them before the `<AppShell>` wrapper.
-
-Concretely: refactor `AppRoutes` so that the 3 feedback routes are matched first (no shell, no auth gate) regardless of login state, then fall through to the existing logged-in / logged-out trees. This keeps the surveys publicly accessible while preserving every other route exactly as-is.
-
-### Notes
-
-- No existing pages, components, edge functions, or other routes are modified beyond adding the 3 imports and routes in `App.tsx`.
-- Uses existing shadcn primitives and the existing `supabase` client.
-- Toasts use `sonner` (already wired in `App.tsx`).
+## Out of scope
+- No changes to `VendorOnboarding.tsx`
+- No database migration (columns already added)
+- No other files touched

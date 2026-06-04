@@ -26,8 +26,8 @@ export function VendorImageGallery({
   const mainImageInputRef = useRef<HTMLInputElement>(null);
 
   const mainImage = imageUrls[0] || null;
-  const galleryImages = imageUrls.slice(1, 5);
-  const canAddMore = imageUrls.length < 5;
+  const galleryImages = imageUrls.slice(1, 15);
+  const canAddMore = imageUrls.length < 15;
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
