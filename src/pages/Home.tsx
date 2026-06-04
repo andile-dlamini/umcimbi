@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRole } from '@/context/RoleContext';
 import { useEvents } from '@/hooks/useEvents';
 import { useTasks } from '@/hooks/useTasks';
+import { useSavedVendors } from '@/hooks/useVendors';
 import { Baby, Users, Handshake, Gift, Package, Heart, Sparkles, Flame, Search, MessageSquare, CalendarDays, Plus, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,8 @@ export default function Home() {
   const { activeRole } = useRole();
   const navigate = useNavigate();
   const { events, isLoading } = useEvents();
+  const { savedVendors } = useSavedVendors();
+  
   
 
   if (activeRole === 'vendor' && isVendor) {
@@ -185,6 +188,53 @@ export default function Home() {
               </Button>
             </CardContent>
           </Card>
+        )}
+
+        {/* Saved vendors */}
+        {savedVendors.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                <h2 className="text-sm font-semibold text-foreground">Saved vendors</h2>
+              </div>
+              <button
+                className="text-xs text-primary hover:underline"
+                onClick={() => navigate('/vendors')}
+              >
+                See all
+              </button>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4">
+              {savedVendors.map(v => (
+                <button
+                  key={v.id}
+                  onClick={() => navigate(`/vendors/${v.id}`)}
+                  className="flex-shrink-0 w-[72px] text-left tap-highlight-none"
+                >
+                  <div className="w-[72px] h-[72px] rounded-lg overflow-hidden bg-muted">
+                    {v.image_urls && v.image_urls[0] ? (
+                      <img
+                        src={v.image_urls[0]}
+                        alt={v.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <Heart className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[12px] font-medium text-foreground truncate mt-1.5">
+                    {v.name}
+                  </p>
+                  <Badge variant="secondary" className="text-[11px] mt-0.5 px-1.5 py-0 h-4 font-normal">
+                    {v.category}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Quick Actions */}

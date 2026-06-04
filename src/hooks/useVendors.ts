@@ -235,6 +235,88 @@ export function useMyVendorProfile() {
   };
 }
 
+export type SavedVendorItem = {
+  id: string;
+  name: string;
+  category: string;
+  image_urls: string[] | null;
+  rating: number | null;
+  review_count: number | null;
+};
+
+export function useSavedVendors() {
+  const { user } = useAuth();
+  const [savedVendors, setSavedVendors] = useState<SavedVendorItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchSaved = useCallback(async () => {
+    if (!user) {
+      setSavedVendors([]);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('saved_vendors')
+      .select('vendor_id, vendors(id, name, category, image_urls, rating, review_count)')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error fetching saved vendors:', error);
+      setSavedVendors([]);
+    } else {
+      const list = (data || [])
+        .map((row: any) => row.vendors)
+        .filter(Boolean) as SavedVendorItem[];
+      setSavedVendors(list);
+    }
+    setIsLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchSaved();
+  }, [fetchSaved]);
+
+  const isSaved = useCallback(
+    (vendorId: string) => savedVendors.some(v => v.id === vendorId),
+    [savedVendors]
+  );
+
+  const toggleSave = useCallback(
+    async (vendorId: string) => {
+      if (!user) {
+        toast.error('Please sign in first');
+        return;
+      }
+      if (isSaved(vendorId)) {
+        const { error } = await supabase
+          .from('saved_vendors')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('vendor_id', vendorId);
+        if (error) {
+          console.error('Error removing saved vendor:', error);
+          toast.error('Failed to remove vendor');
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from('saved_vendors')
+          .insert({ user_id: user.id, vendor_id: vendorId });
+        if (error) {
+          console.error('Error saving vendor:', error);
+          toast.error('Failed to save vendor');
+          return;
+        }
+      }
+      await fetchSaved();
+    },
+    [user, isSaved, fetchSaved]
+  );
+
+  return { savedVendors, isLoading, toggleSave, isSaved };
+}
+
 // Get unique locations from vendors
 export function useVendorLocations() {
   const [locations, setLocations] = useState<string[]>(['All Locations']);
