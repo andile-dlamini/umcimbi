@@ -1,58 +1,39 @@
-## Summary
-Two targeted file changes: update image limits in the vendor gallery component, and add social link URL fields to the vendor profile edit/view page.
+## Plan
 
----
+### File 1: `src/hooks/useVendors.ts`
+Add a new exported hook `useSavedVendors` after the existing hooks.
 
-## FILE 1: src/components/vendors/VendorImageGallery.tsx
+**Query:** Join `saved_vendors` with `vendors` on `vendor_id`, selecting `vendors(id, name, category, image_urls, rating, review_count)` and filtering `saved_vendors.user_id = auth.uid()`.
 
-Update every hardcoded limit of `5` to `15`, and adjust derived values:
+**State:** `savedVendors` array, `isLoading` boolean.
 
-1. **Gallery slice** (line 29): `imageUrls.slice(1, 5)` → `imageUrls.slice(1, 15)`
-2. **Can-add flag** (line 30): `imageUrls.length < 5` → `imageUrls.length < 15`
-3. **Remaining slots** (line 93): `5 - imageUrls.length` → `15 - imageUrls.length`
-4. **Toast message** (line 95): `'Maximum 5 images allowed'` → `'Maximum 15 images allowed'`
-5. **Gallery label** (line 244): `'Gallery Images ({galleryImages.length}/4)'` → `'Gallery Images ({galleryImages.length}/14)'`
-6. **Thumbnail grid** (line 245): `grid-cols-4` → `grid-cols-5`
-7. **Help text** (line 288): `'Upload up to 5 images total.'` → `'Upload up to 15 images total.'`
-8. **Add-button condition** (line 267): `galleryImages.length < 4` → `galleryImages.length < 14`
+**Functions:**
+- `toggleSave(vendorId)`: if `isSaved(vendorId)` is true, `delete().eq('user_id', uid).eq('vendor_id', vendorId)` then refetch. Otherwise `insert({ user_id, vendor_id })` then refetch.
+- `isSaved(vendorId)`: checks if `vendorId` exists in the fetched `savedVendors` list.
+- `refetch`: re-runs the join query.
+- Guarded: only executes when `user` is present (authenticated).
 
----
+**Returns:** `{ savedVendors, isLoading, toggleSave, isSaved }`
 
-## FILE 2: src/pages/profile/VendorProfile.tsx
+### File 2: `src/pages/Home.tsx`
+Add a "Saved vendors" horizontal-scroll section between the events hero/plan-next block and the Quick Actions grid.
 
-Add three optional social URL fields, wired to `editData` state and included in save/load.
+**Imports:** Add `Heart` from lucide-react (already imported) and import `useSavedVendors` from the hook.
 
-### State (line 26-34)
-Add to `editData` initial state:
-- `instagram_url: ''`
-- `tiktok_url: ''`
-- `facebook_url: ''`
+**Placement:** After the `nextEvent ? <NextEventHeroCard...>` block and before the Quick Actions grid.
 
-### Load into edit mode (line 66-74, `startEditing`)
-Pull from `vendor`:
-- `instagram_url: vendor.instagram_url || ''`
-- `tiktok_url: vendor.tiktok_url || ''`
-- `facebook_url: vendor.facebook_url || ''`
+**Visibility:** Only renders when `savedVendors.length > 0`.
 
-### Save payload (line 80-88, `handleSave`)
-Pass to `updateVendorProfile`:
-- `instagram_url: editData.instagram_url || null`
-- `tiktok_url: editData.tiktok_url || null`
-- `facebook_url: editData.facebook_url || null`
+**Layout:**
+- Section header row: `<Heart className="h-4 w-4 text-red-500" />` + "Saved vendors" text + a "See all" text link that navigates to `/vendors`.
+- Horizontal scroll container (`overflow-x-auto flex gap-3 pb-1`) of compact inline cards.
+- Each card is a clickable div that navigates to `/vendors/${vendor.id}`:
+  - Square thumbnail: `w-[72px] h-[72px] rounded-lg object-cover` from `vendor.image_urls[0]` with a fallback.
+  - Vendor name: `text-xs font-medium truncate max-w-[72px]`.
+  - Category badge: `text-[11px]`.
 
-### Edit-mode UI
-New section after the **About** textarea (since `website_url` is not in the edit form):
-- Heading: "Social links (optional)"
-- Three `Input` fields: Instagram URL, TikTok URL, Facebook URL, each with placeholder and wired to `editData`
+**No new component files** — vendor card stays inline in Home.tsx.
 
-### View-mode UI
-New block after the existing `website_url` link (inside the contact info stack):
-- Conditionally render each URL as a clickable external link with its platform label
-- Only show if at least one social URL exists
-
----
-
-## Out of scope
-- No changes to `VendorOnboarding.tsx`
-- No database migration (columns already added)
-- No other files touched
+### Out of scope
+- No changes to any other files (vendor list page, vendor detail, onboarding, etc.).
+- No migrations (saved_vendors table and RLS already exist).
