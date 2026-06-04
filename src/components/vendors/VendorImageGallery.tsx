@@ -241,8 +241,8 @@ export function VendorImageGallery({
 
         {/* Gallery Images */}
         <div className="space-y-2">
-          <Label>Gallery Images ({galleryImages.length}/4)</Label>
-          <div className="grid grid-cols-4 gap-2">
+          <Label>Gallery Images ({galleryImages.length}/14)</Label>
+          <div className="grid grid-cols-5 gap-2">
             {galleryImages.map((url, index) => (
               <div 
                 key={index} 
