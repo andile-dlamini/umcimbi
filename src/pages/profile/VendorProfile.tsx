@@ -272,6 +272,33 @@ export default function VendorProfile() {
                     onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                   />
                 </div>
+                <div className="space-y-3 pt-2 border-t">
+                  <Label className="text-sm font-medium">Social links (optional)</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Instagram URL</Label>
+                    <Input
+                      value={editData.instagram_url}
+                      onChange={(e) => setEditData({ ...editData, instagram_url: e.target.value })}
+                      placeholder="https://instagram.com/yourbusiness"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">TikTok URL</Label>
+                    <Input
+                      value={editData.tiktok_url}
+                      onChange={(e) => setEditData({ ...editData, tiktok_url: e.target.value })}
+                      placeholder="https://tiktok.com/@yourbusiness"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Facebook URL</Label>
+                    <Input
+                      value={editData.facebook_url}
+                      onChange={(e) => setEditData({ ...editData, facebook_url: e.target.value })}
+                      placeholder="https://facebook.com/yourbusiness"
+                    />
+                  </div>
+                </div>
                 <Button variant="outline" className="w-full" onClick={() => setIsEditing(false)}>
                   Cancel
                 </Button>
