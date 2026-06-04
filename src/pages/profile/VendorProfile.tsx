@@ -91,7 +91,10 @@ export default function VendorProfile() {
       email: editData.email || null,
       location: editData.location || null,
       image_urls: editData.image_urls,
-    });
+      instagram_url: editData.instagram_url || null,
+      tiktok_url: editData.tiktok_url || null,
+      facebook_url: editData.facebook_url || null,
+    } as any);
     setIsSaving(false);
     if (success) {
       setIsEditing(false);
