@@ -31,6 +31,9 @@ export default function VendorProfile() {
     email: '',
     location: '',
     image_urls: [] as string[],
+    instagram_url: '',
+    tiktok_url: '',
+    facebook_url: '',
   });
 
   if (isLoading) {
@@ -71,6 +74,9 @@ export default function VendorProfile() {
       email: vendor.email || '',
       location: vendor.location || '',
       image_urls: vendor.image_urls || [],
+      instagram_url: (vendor as any).instagram_url || '',
+      tiktok_url: (vendor as any).tiktok_url || '',
+      facebook_url: (vendor as any).facebook_url || '',
     });
     setIsEditing(true);
   };
@@ -85,7 +91,10 @@ export default function VendorProfile() {
       email: editData.email || null,
       location: editData.location || null,
       image_urls: editData.image_urls,
-    });
+      instagram_url: editData.instagram_url || null,
+      tiktok_url: editData.tiktok_url || null,
+      facebook_url: editData.facebook_url || null,
+    } as any);
     setIsSaving(false);
     if (success) {
       setIsEditing(false);
@@ -263,6 +272,33 @@ export default function VendorProfile() {
                     onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                   />
                 </div>
+                <div className="space-y-3 pt-2 border-t">
+                  <Label className="text-sm font-medium">Social links (optional)</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Instagram URL</Label>
+                    <Input
+                      value={editData.instagram_url}
+                      onChange={(e) => setEditData({ ...editData, instagram_url: e.target.value })}
+                      placeholder="https://instagram.com/yourbusiness"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">TikTok URL</Label>
+                    <Input
+                      value={editData.tiktok_url}
+                      onChange={(e) => setEditData({ ...editData, tiktok_url: e.target.value })}
+                      placeholder="https://tiktok.com/@yourbusiness"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Facebook URL</Label>
+                    <Input
+                      value={editData.facebook_url}
+                      onChange={(e) => setEditData({ ...editData, facebook_url: e.target.value })}
+                      placeholder="https://facebook.com/yourbusiness"
+                    />
+                  </div>
+                </div>
                 <Button variant="outline" className="w-full" onClick={() => setIsEditing(false)}>
                   Cancel
                 </Button>
@@ -308,6 +344,26 @@ export default function VendorProfile() {
                       <a href={vendor.website_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         {vendor.website_url}
                       </a>
+                    </div>
+                  )}
+                  {((vendor as any).instagram_url || (vendor as any).tiktok_url || (vendor as any).facebook_url) && (
+                    <div className="pt-2 space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Social</p>
+                      {(vendor as any).instagram_url && (
+                        <a href={(vendor as any).instagram_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          Instagram
+                        </a>
+                      )}
+                      {(vendor as any).tiktok_url && (
+                        <a href={(vendor as any).tiktok_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          TikTok
+                        </a>
+                      )}
+                      {(vendor as any).facebook_url && (
+                        <a href={(vendor as any).facebook_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          Facebook
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>

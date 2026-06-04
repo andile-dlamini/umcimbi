@@ -26,8 +26,8 @@ export function VendorImageGallery({
   const mainImageInputRef = useRef<HTMLInputElement>(null);
 
   const mainImage = imageUrls[0] || null;
-  const galleryImages = imageUrls.slice(1, 5);
-  const canAddMore = imageUrls.length < 5;
+  const galleryImages = imageUrls.slice(1, 15);
+  const canAddMore = imageUrls.length < 15;
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
@@ -90,9 +90,9 @@ export function VendorImageGallery({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const remainingSlots = 5 - imageUrls.length;
+    const remainingSlots = 15 - imageUrls.length;
     if (remainingSlots <= 0) {
-      toast.error('Maximum 5 images allowed');
+      toast.error('Maximum 15 images allowed');
       return;
     }
 
@@ -241,8 +241,8 @@ export function VendorImageGallery({
 
         {/* Gallery Images */}
         <div className="space-y-2">
-          <Label>Gallery Images ({galleryImages.length}/4)</Label>
-          <div className="grid grid-cols-4 gap-2">
+          <Label>Gallery Images ({galleryImages.length}/14)</Label>
+          <div className="grid grid-cols-5 gap-2">
             {galleryImages.map((url, index) => (
               <div 
                 key={index} 
@@ -264,7 +264,7 @@ export function VendorImageGallery({
             ))}
             
             {/* Add more button */}
-            {canAddMore && galleryImages.length < 4 && (
+            {canAddMore && galleryImages.length < 14 && (
               <div 
                 className={cn(
                   "aspect-square overflow-hidden rounded-lg bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center",
@@ -285,7 +285,7 @@ export function VendorImageGallery({
             onChange={handleGalleryImagesAdd}
           />
           <p className="text-xs text-muted-foreground">
-            Upload up to 5 images total. First image is your main image.
+            Upload up to 15 images total. First image is your main image.
           </p>
         </div>
       </CardContent>
