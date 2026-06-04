@@ -90,9 +90,9 @@ export function VendorImageGallery({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const remainingSlots = 5 - imageUrls.length;
+    const remainingSlots = 15 - imageUrls.length;
     if (remainingSlots <= 0) {
-      toast.error('Maximum 5 images allowed');
+      toast.error('Maximum 15 images allowed');
       return;
     }
 
