@@ -1022,6 +1022,42 @@ export type Database = {
           },
         ]
       }
+      saved_vendors: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_requests: {
         Row: {
           budget_range: string | null
@@ -1458,8 +1494,10 @@ export type Database = {
           country: string | null
           created_at: string | null
           email: string | null
+          facebook_url: string | null
           id: string
           image_urls: string[] | null
+          instagram_url: string | null
           is_active: boolean | null
           is_super_vendor: boolean
           jobs_completed: number
@@ -1485,6 +1523,7 @@ export type Database = {
           state_province: string | null
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
+          tiktok_url: string | null
           updated_at: string | null
           vat_number: string | null
           vendor_business_type: Database["public"]["Enums"]["vendor_business_type"]
@@ -1510,8 +1549,10 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           email?: string | null
+          facebook_url?: string | null
           id?: string
           image_urls?: string[] | null
+          instagram_url?: string | null
           is_active?: boolean | null
           is_super_vendor?: boolean
           jobs_completed?: number
@@ -1537,6 +1578,7 @@ export type Database = {
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
+          tiktok_url?: string | null
           updated_at?: string | null
           vat_number?: string | null
           vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
@@ -1562,8 +1604,10 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           email?: string | null
+          facebook_url?: string | null
           id?: string
           image_urls?: string[] | null
+          instagram_url?: string | null
           is_active?: boolean | null
           is_super_vendor?: boolean
           jobs_completed?: number
@@ -1589,6 +1633,7 @@ export type Database = {
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
+          tiktok_url?: string | null
           updated_at?: string | null
           vat_number?: string | null
           vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
