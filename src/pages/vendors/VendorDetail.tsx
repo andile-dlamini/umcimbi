@@ -196,7 +196,7 @@ export default function VendorDetail() {
     'inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/95 shadow-md backdrop-blur-sm hover:bg-background transition-colors';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col max-w-2xl mx-auto w-full">
       {/* Photo grid with floating topbar */}
       <div className="relative">
         {/* Floating topbar */}
