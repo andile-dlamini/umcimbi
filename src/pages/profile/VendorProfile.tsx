@@ -346,6 +346,26 @@ export default function VendorProfile() {
                       </a>
                     </div>
                   )}
+                  {((vendor as any).instagram_url || (vendor as any).tiktok_url || (vendor as any).facebook_url) && (
+                    <div className="pt-2 space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Social</p>
+                      {(vendor as any).instagram_url && (
+                        <a href={(vendor as any).instagram_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          Instagram
+                        </a>
+                      )}
+                      {(vendor as any).tiktok_url && (
+                        <a href={(vendor as any).tiktok_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          TikTok
+                        </a>
+                      )}
+                      {(vendor as any).facebook_url && (
+                        <a href={(vendor as any).facebook_url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline">
+                          Facebook
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}
