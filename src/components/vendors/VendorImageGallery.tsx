@@ -264,7 +264,7 @@ export function VendorImageGallery({
             ))}
             
             {/* Add more button */}
-            {canAddMore && galleryImages.length < 4 && (
+            {canAddMore && galleryImages.length < 14 && (
               <div 
                 className={cn(
                   "aspect-square overflow-hidden rounded-lg bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center",
