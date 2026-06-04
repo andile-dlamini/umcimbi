@@ -31,6 +31,9 @@ export default function VendorProfile() {
     email: '',
     location: '',
     image_urls: [] as string[],
+    instagram_url: '',
+    tiktok_url: '',
+    facebook_url: '',
   });
 
   if (isLoading) {
