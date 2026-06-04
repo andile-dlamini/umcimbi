@@ -285,7 +285,7 @@ export function VendorImageGallery({
             onChange={handleGalleryImagesAdd}
           />
           <p className="text-xs text-muted-foreground">
-            Upload up to 5 images total. First image is your main image.
+            Upload up to 15 images total. First image is your main image.
           </p>
         </div>
       </CardContent>
