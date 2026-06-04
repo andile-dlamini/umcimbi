@@ -74,6 +74,9 @@ export default function VendorProfile() {
       email: vendor.email || '',
       location: vendor.location || '',
       image_urls: vendor.image_urls || [],
+      instagram_url: (vendor as any).instagram_url || '',
+      tiktok_url: (vendor as any).tiktok_url || '',
+      facebook_url: (vendor as any).facebook_url || '',
     });
     setIsEditing(true);
   };
