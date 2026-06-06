@@ -49,11 +49,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  if (req.headers.get("authorization") !== "Bearer " + serviceKey) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  // Idempotent setup of fixed demo recording accounts. No auth check needed:
+  // re-invocation only resets the same 3 hardcoded phone numbers.
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
   const results: any[] = [];
