@@ -54,6 +54,9 @@ const vendorSchema = z.object({
   price_range_text: z.string().trim().max(100).optional().or(z.literal('')),
   email: z.string().trim().email('Please enter a valid email address').max(255).optional().or(z.literal('')),
   website_url: z.string().trim().max(500).optional().or(z.literal('')),
+  instagram_url: z.string().trim().max(500).optional().or(z.literal('')),
+  tiktok_url: z.string().trim().max(500).optional().or(z.literal('')),
+  facebook_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
 
 const quickVendorSchema = z.object({
@@ -93,6 +96,9 @@ export default function VendorOnboarding() {
     phone_number: '',
     email: '',
     website_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+    facebook_url: '',
     languages: ['English'],
     is_registered_business: false,
     registered_business_name: '',
@@ -139,9 +145,9 @@ export default function VendorOnboarding() {
   const handleShowcaseAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const remaining = 5 - showcaseFiles.length;
+    const remaining = 15 - showcaseFiles.length;
     if (remaining <= 0) {
-      toast.error('Maximum 5 showcase images allowed');
+      toast.error('Maximum 15 showcase images allowed');
       return;
     }
     const toAdd = Array.from(files).slice(0, remaining);
@@ -228,6 +234,9 @@ export default function VendorOnboarding() {
       whatsapp_number: null,
       email: formData.email.trim() || null,
       website_url: websiteUrl,
+      instagram_url: formData.instagram_url.trim() || null,
+      tiktok_url: formData.tiktok_url.trim() || null,
+      facebook_url: formData.facebook_url.trim() || null,
       languages: formData.languages,
       image_urls: [],
       address_line_1: address.address_line_1.trim(),
@@ -553,7 +562,7 @@ export default function VendorOnboarding() {
               {/* Showcase Images — show single optional photo in quick mode, full in standard */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label>Showcase your work (up to 5 images)</Label>
+                <Label>Showcase your work (up to 15 images)</Label>
                 <div className="grid grid-cols-5 gap-2">
                   {showcaseFiles.map((item, index) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted group">
@@ -568,7 +577,7 @@ export default function VendorOnboarding() {
                       </button>
                     </div>
                   ))}
-                  {showcaseFiles.length < 5 && (
+                  {showcaseFiles.length < 15 && (
                     <div
                       className="aspect-square rounded-lg bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center"
                       onClick={() => showcaseInputRef.current?.click()}
