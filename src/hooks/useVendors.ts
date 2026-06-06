@@ -115,6 +115,7 @@ export function useMyVendorProfile() {
       .select('*')
       .eq('owner_user_id', user.id)
       .eq('is_active', true)
+      .eq('is_demo', false)
       .order('created_at', { ascending: false })
       .limit(1);
 
