@@ -1,39 +1,42 @@
-## Plan
+## Goal
+Add three new demo accounts that mirror the existing `0820000901` demo setup, with easy on/off visibility control.
 
-### File 1: `src/hooks/useVendors.ts`
-Add a new exported hook `useSavedVendors` after the existing hooks.
+## Accounts to create
+| Phone | Name | Role | Vendor name |
+|---|---|---|---|
+| 0710000002 | Maswazi Catering | vendor | Maswazi Catering |
+| 0710000003 | Isizwe Catering | vendor | Isizwe Catering |
+| 0710000004 | Luyanda | planner (user) | — |
 
-**Query:** Join `saved_vendors` with `vendors` on `vendor_id`, selecting `vendors(id, name, category, image_urls, rating, review_count)` and filtering `saved_vendors.user_id = auth.uid()`.
+All use password `Demo123!` (matching existing demo) and are marked `is_demo = true` on their profile.
 
-**State:** `savedVendors` array, `isLoading` boolean.
+## Implementation
 
-**Functions:**
-- `toggleSave(vendorId)`: if `isSaved(vendorId)` is true, `delete().eq('user_id', uid).eq('vendor_id', vendorId)` then refetch. Otherwise `insert({ user_id, vendor_id })` then refetch.
-- `isSaved(vendorId)`: checks if `vendorId` exists in the fetched `savedVendors` list.
-- `refetch`: re-runs the join query.
-- Guarded: only executes when `user` is present (authenticated).
+### 1. New edge function: `setup-demo-accounts`
+Modeled on `supabase/functions/setup-demo-account/index.ts`, but seeds all three accounts in one call (idempotent: delete + recreate by phone/email).
 
-**Returns:** `{ savedVendors, isLoading, toggleSave, isSaved }`
+For each account:
+- Create auth user (`<digits>@phone.isiko.app`, phone confirmed, password `Demo123!`)
+- Complete profile (first_name, surname, `is_demo = true`, `phone_verified = true`, `is_profile_complete = true`)
+- For vendors: insert `user_roles` vendor row + insert `vendors` row with `is_active = false`, `signup_source = 'demo_sandbox'`, category `catering`, location `Demo, ZA`, a clear "DEMO ONLY" about text
+- For Luyanda: planner only — default `user` role from `handle_new_user` trigger is sufficient, no vendor row
 
-### File 2: `src/pages/Home.tsx`
-Add a "Saved vendors" horizontal-scroll section between the events hero/plan-next block and the Quick Actions grid.
+Returns a JSON summary of all three accounts with credentials.
 
-**Imports:** Add `Heart` from lucide-react (already imported) and import `useSavedVendors` from the hook.
+### 2. Visibility toggle
+Vendor visibility is already controlled by `vendors.is_active` (RLS hides inactive vendors from the marketplace; the owner can still see their own). To activate/deactivate, flip that flag.
 
-**Placement:** After the `nextEvent ? <NextEventHeroCard...>` block and before the Quick Actions grid.
+I'll add a tiny admin-only edge function `toggle-demo-vendor` that accepts `{ phone, active }` and updates `vendors.is_active` for the vendor owned by that phone's user. This means you can turn each demo vendor on/off on demand by calling the function (same pattern we used manually for `0820000901`).
 
-**Visibility:** Only renders when `savedVendors.length > 0`.
+The planner account has no marketplace visibility concept — it's just a login. No toggle needed.
 
-**Layout:**
-- Section header row: `<Heart className="h-4 w-4 text-red-500" />` + "Saved vendors" text + a "See all" text link that navigates to `/vendors`.
-- Horizontal scroll container (`overflow-x-auto flex gap-3 pb-1`) of compact inline cards.
-- Each card is a clickable div that navigates to `/vendors/${vendor.id}`:
-  - Square thumbnail: `w-[72px] h-[72px] rounded-lg object-cover` from `vendor.image_urls[0]` with a fallback.
-  - Vendor name: `text-xs font-medium truncate max-w-[72px]`.
-  - Category badge: `text-[11px]`.
+### 3. Run the seeder once
+After the function deploys, invoke `setup-demo-accounts` once with the service role to create all three. Subsequent calls are safe (idempotent).
 
-**No new component files** — vendor card stays inline in Home.tsx.
+## Files touched
+- `supabase/functions/setup-demo-accounts/index.ts` (new — bulk seeder)
+- `supabase/functions/toggle-demo-vendor/index.ts` (new — on/off switch)
+- No schema migration needed (uses existing `vendors`, `profiles`, `user_roles`, `is_demo`, `is_active`)
 
-### Out of scope
-- No changes to any other files (vendor list page, vendor detail, onboarding, etc.).
-- No migrations (saved_vendors table and RLS already exist).
+## After build
+I'll invoke `setup-demo-accounts` to create the three accounts, then confirm they're in the DB and both vendors start as `is_active = false` (hidden). You can then ask me to "activate Maswazi" / "deactivate Isizwe" etc. at any time.
