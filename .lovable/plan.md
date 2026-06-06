@@ -1,41 +1,39 @@
+## Plan
 
-## Recording Demo Accounts
+### File 1: `src/hooks/useVendors.ts`
+Add a new exported hook `useSavedVendors` after the existing hooks.
 
-Add 3 always-on demo accounts (1 planner, 2 catering vendors) for platform demo recordings. Accounts bypass OTP and are auto-created when the migration runs.
+**Query:** Join `saved_vendors` with `vendors` on `vendor_id`, selecting `vendors(id, name, category, image_urls, rating, review_count)` and filtering `saved_vendors.user_id = auth.uid()`.
 
-### Part 1 — New edge function
-Create `supabase/functions/setup-recording-accounts/index.ts` following the `setup-demo-account` pattern, but:
-- Service-role Bearer auth check
-- Iterates over 3 accounts (Luyanda Dlamini planner, Maswazi Ngcobo + Anele Mkhize vendors)
-- Vendors get `is_active: true`, `is_demo: true`
-- Idempotent (deletes existing users with same phone/email first)
-- Password `RecordUmcimbi2026!`, OTP fallback `123456`
+**State:** `savedVendors` array, `isLoading` boolean.
 
-Add to `supabase/config.toml`:
-```
-[functions.setup-recording-accounts]
-verify_jwt = false
-```
+**Functions:**
+- `toggleSave(vendorId)`: if `isSaved(vendorId)` is true, `delete().eq('user_id', uid).eq('vendor_id', vendorId)` then refetch. Otherwise `insert({ user_id, vendor_id })` then refetch.
+- `isSaved(vendorId)`: checks if `vendorId` exists in the fetched `savedVendors` list.
+- `refetch`: re-runs the join query.
+- Guarded: only executes when `user` is present (authenticated).
 
-### Part 2 — Migration
-- `ALTER TABLE vendors ADD COLUMN is_demo boolean NOT NULL DEFAULT false`
-- `ALTER TABLE profiles ADD COLUMN is_demo boolean NOT NULL DEFAULT false`
-- `CREATE INDEX idx_vendors_is_demo`
-- Trigger the new function via `extensions.http_post(...)` using `current_setting('app.supabase_url')` and `current_setting('app.supabase_service_role_key')`, same pattern as admin-daily-brief
+**Returns:** `{ savedVendors, isLoading, toggleSave, isSaved }`
 
-### Part 3 — Whitelist phones
-Append `+27710000002/3/4` to the `DEMO_PHONES` array in:
-- `supabase/functions/send-otp/index.ts`
-- `supabase/functions/verify-otp/index.ts`
-- `supabase/functions/demo-login/index.ts`
+### File 2: `src/pages/Home.tsx`
+Add a "Saved vendors" horizontal-scroll section between the events hero/plan-next block and the Quick Actions grid.
 
-### Part 4 — Hide demo vendors from real users
-In `src/hooks/useVendors.ts`, add `.eq('is_demo', false)` immediately after each of the 3 `.eq('is_active', true)` lines.
+**Imports:** Add `Heart` from lucide-react (already imported) and import `useSavedVendors` from the hook.
 
-### Part 5 — Deploy
-Deploy `setup-recording-accounts`, `send-otp`, `verify-otp`, `demo-login`.
+**Placement:** After the `nextEvent ? <NextEventHeroCard...>` block and before the Quick Actions grid.
 
-### Notes
-- No changes to existing 0820000901-904 demo accounts or `setup-demo-account`
-- No page-component changes
-- Memory will be updated to record the new is_demo filter convention
+**Visibility:** Only renders when `savedVendors.length > 0`.
+
+**Layout:**
+- Section header row: `<Heart className="h-4 w-4 text-red-500" />` + "Saved vendors" text + a "See all" text link that navigates to `/vendors`.
+- Horizontal scroll container (`overflow-x-auto flex gap-3 pb-1`) of compact inline cards.
+- Each card is a clickable div that navigates to `/vendors/${vendor.id}`:
+  - Square thumbnail: `w-[72px] h-[72px] rounded-lg object-cover` from `vendor.image_urls[0]` with a fallback.
+  - Vendor name: `text-xs font-medium truncate max-w-[72px]`.
+  - Category badge: `text-[11px]`.
+
+**No new component files** — vendor card stays inline in Home.tsx.
+
+### Out of scope
+- No changes to any other files (vendor list page, vendor detail, onboarding, etc.).
+- No migrations (saved_vendors table and RLS already exist).

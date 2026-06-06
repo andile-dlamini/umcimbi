@@ -19,7 +19,6 @@ export function useVendors(filters?: {
       .from('vendors')
       .select('*')
       .eq('is_active', true)
-      .eq('is_demo', false)
       .order('rating', { ascending: false });
 
     if (filters?.category && filters.category !== 'all') {
@@ -115,7 +114,6 @@ export function useMyVendorProfile() {
       .select('*')
       .eq('owner_user_id', user.id)
       .eq('is_active', true)
-      .eq('is_demo', false)
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -329,7 +327,6 @@ export function useVendorLocations() {
         .from('vendors')
         .select('location')
         .eq('is_active', true)
-        .eq('is_demo', false)
         .not('location', 'is', null);
 
       if (data) {

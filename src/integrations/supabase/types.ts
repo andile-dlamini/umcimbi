@@ -837,7 +837,6 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string
-          is_demo: boolean
           is_profile_complete: boolean | null
           notifications_enabled: boolean | null
           phone_number: string | null
@@ -863,7 +862,6 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
-          is_demo?: boolean
           is_profile_complete?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
@@ -889,7 +887,6 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
-          is_demo?: boolean
           is_profile_complete?: boolean | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
@@ -1502,7 +1499,6 @@ export type Database = {
           image_urls: string[] | null
           instagram_url: string | null
           is_active: boolean | null
-          is_demo: boolean
           is_super_vendor: boolean
           jobs_completed: number
           languages: string[] | null
@@ -1558,7 +1554,6 @@ export type Database = {
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
-          is_demo?: boolean
           is_super_vendor?: boolean
           jobs_completed?: number
           languages?: string[] | null
@@ -1614,7 +1609,6 @@ export type Database = {
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
-          is_demo?: boolean
           is_super_vendor?: boolean
           jobs_completed?: number
           languages?: string[] | null

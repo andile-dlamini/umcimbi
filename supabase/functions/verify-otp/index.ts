@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Demo phone bypass: accept fixed OTP 123456 without DB lookup
-    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904", "+27710000002", "+27710000003", "+27710000004"];
+    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904"];
     const isDemoPhone = DEMO_PHONES.includes(normalized);
     const isDemoOtp = isDemoPhone && otp === "123456";
 

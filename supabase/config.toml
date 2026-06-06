@@ -6,9 +6,6 @@ verify_jwt = false
 [functions.seed-demo-users]
 verify_jwt = false
 
-[functions.setup-recording-accounts]
-verify_jwt = false
-
 [functions.release-escrow]
 verify_jwt = false
 
