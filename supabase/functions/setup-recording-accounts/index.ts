@@ -57,11 +57,21 @@ Deno.serve(async (req) => {
 
   for (const acc of ACCOUNTS) {
     try {
-      const { data: list } = await supabase.auth.admin.listUsers();
-      const existing = list.users.filter(
-        (u) => u.email === acc.email || u.phone === acc.phone.replace("+", "")
-      );
-      for (const u of existing) await supabase.auth.admin.deleteUser(u.id);
+      // Paginate through all users to find existing matches (listUsers caps at 50/page)
+      const toDelete: string[] = [];
+      let page = 1;
+      while (true) {
+        const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+        if (!list?.users?.length) break;
+        for (const u of list.users) {
+          if (u.email === acc.email || u.phone === acc.phone.replace("+", "")) {
+            toDelete.push(u.id);
+          }
+        }
+        if (list.users.length < 200) break;
+        page++;
+      }
+      for (const id of toDelete) await supabase.auth.admin.deleteUser(id);
 
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: acc.email,
