@@ -38,11 +38,19 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false }
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-16 h-16 rounded-full bg-muted flex-shrink-0 overflow-hidden">
-            <img 
-              src={vendor.logo_url || vendor.image_urls?.[0] || '/placeholder.svg'} 
-              alt={vendor.name}
-              className="w-full h-full object-cover"
-            />
+            {vendor.logo_url || vendor.image_urls?.[0] ? (
+              <img
+                src={vendor.logo_url || vendor.image_urls?.[0]}
+                alt={vendor.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-primary flex items-center justify-center">
+                <span className="text-xl font-bold text-primary-foreground">
+                  {vendor.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
           </div>
           
           <div className="flex-1 min-w-0">
