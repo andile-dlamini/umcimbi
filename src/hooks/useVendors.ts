@@ -19,6 +19,7 @@ export function useVendors(filters?: {
       .from('vendors')
       .select('*')
       .eq('is_active', true)
+      .eq('is_demo', false)
       .order('rating', { ascending: false });
 
     if (filters?.category && filters.category !== 'all') {
