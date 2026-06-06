@@ -256,6 +256,21 @@ export default function VendorDetail() {
 
       {/* Vendor info block */}
       <div className="px-3 py-3.5">
+        <div className="flex items-center gap-3 mb-3">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={vendor.name}
+              className="h-12 w-12 rounded-full object-cover flex-shrink-0 border border-border"
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-lg font-bold text-primary-foreground">
+                {vendor.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+        </div>
         <h1
           className="text-foreground leading-tight font-medium"
           style={{ fontSize: '18px' }}
