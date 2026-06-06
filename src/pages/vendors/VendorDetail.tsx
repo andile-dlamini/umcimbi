@@ -162,7 +162,9 @@ export default function VendorDetail() {
     );
   }
 
-  const images = vendor.image_urls ?? [];
+  const allImages = vendor.image_urls ?? [];
+  const logoUrl = allImages[0] ?? null;
+  const images = allImages.slice(1);
   const totalImages = images.length;
   const v = vendor as any;
   const instagramUrl: string | null = v.instagram_url ?? null;
