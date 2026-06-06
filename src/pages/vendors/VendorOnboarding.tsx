@@ -250,7 +250,7 @@ export default function VendorOnboarding() {
       registered_business_name: formData.is_registered_business ? formData.registered_business_name.trim() || null : null,
       registration_number: formData.is_registered_business ? formData.registration_number.trim() || null : null,
       vat_number: formData.is_registered_business ? formData.vat_number.trim() || null : null,
-    });
+    } as any);
 
     if (!result) {
       setIsLoading(false);
