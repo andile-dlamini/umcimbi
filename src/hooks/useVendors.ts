@@ -329,6 +329,7 @@ export function useVendorLocations() {
         .from('vendors')
         .select('location')
         .eq('is_active', true)
+        .eq('is_demo', false)
         .not('location', 'is', null);
 
       if (data) {
