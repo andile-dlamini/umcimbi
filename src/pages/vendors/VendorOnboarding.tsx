@@ -711,6 +711,64 @@ export default function VendorOnboarding() {
               </div>
               )}
 
+              {/* Instagram — hidden in quick mode */}
+              {!isQuickMode && (
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                <div className="relative">
+                  <Camera className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="instagram"
+                    type="text"
+                    placeholder="https://instagram.com/yourbusiness"
+                    value={formData.instagram_url}
+                    onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
+                    className={`pl-10 h-12 ${errors.instagram_url ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.instagram_url && <p className="text-sm text-destructive">{errors.instagram_url}</p>}
+              </div>
+              )}
+
+              {/* TikTok — hidden in quick mode */}
+              {!isQuickMode && (
+              <div className="space-y-2">
+                <Label htmlFor="tiktok">TikTok</Label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="tiktok"
+                    type="text"
+                    placeholder="https://tiktok.com/@yourbusiness"
+                    value={formData.tiktok_url}
+                    onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
+                    className={`pl-10 h-12 ${errors.tiktok_url ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.tiktok_url && <p className="text-sm text-destructive">{errors.tiktok_url}</p>}
+              </div>
+              )}
+
+              {/* Facebook — hidden in quick mode */}
+              {!isQuickMode && (
+              <div className="space-y-2">
+                <Label htmlFor="facebook">Facebook</Label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="facebook"
+                    type="text"
+                    placeholder="https://facebook.com/yourbusiness"
+                    value={formData.facebook_url}
+                    onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
+                    className={`pl-10 h-12 ${errors.facebook_url ? 'border-destructive' : ''}`}
+                  />
+                </div>
+                {errors.facebook_url && <p className="text-sm text-destructive">{errors.facebook_url}</p>}
+              </div>
+              )}
+
+
               <Button type="submit" className="w-full h-12 mt-6" disabled={isLoading}>
                 {isLoading ? 'Creating profile...' : 'Create vendor profile'}
               </Button>
