@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     }
 
     // Demo phone bypass: skip SMS and accept fixed OTP 123456
-    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904"];
+    const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904", "+27710000002", "+27710000003", "+27710000004"];
     if (DEMO_PHONES.includes(normalized)) {
       return new Response(
         JSON.stringify({ success: true, demo: true, message: "Demo number — use code 123456." }),
