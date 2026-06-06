@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904"];
+const DEMO_PHONES = ["+27820000901", "+27820000902", "+27820000903", "+27820000904", "+27710000002", "+27710000003", "+27710000004"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
