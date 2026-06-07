@@ -1486,6 +1486,7 @@ export type Database = {
           added_to_events_count: number | null
           address_line_1: string | null
           address_line_2: string | null
+          avg_response_time_minutes: number | null
           bank_account_holder_name: string | null
           bank_account_number: string | null
           bank_account_type: string | null
@@ -1528,9 +1529,14 @@ export type Database = {
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
           tiktok_url: string | null
+          trust_score: number | null
+          trust_score_breakdown: Json | null
+          trust_score_calculated_at: string | null
           updated_at: string | null
           vat_number: string | null
           vendor_business_type: Database["public"]["Enums"]["vendor_business_type"]
+          vendor_tier: string | null
+          vendor_tier_override: boolean
           verification_reviewed_at: string | null
           verification_reviewed_by: string | null
           view_count: number | null
@@ -1542,6 +1548,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          avg_response_time_minutes?: number | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
           bank_account_type?: string | null
@@ -1584,9 +1591,14 @@ export type Database = {
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
           tiktok_url?: string | null
+          trust_score?: number | null
+          trust_score_breakdown?: Json | null
+          trust_score_calculated_at?: string | null
           updated_at?: string | null
           vat_number?: string | null
           vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
+          vendor_tier?: string | null
+          vendor_tier_override?: boolean
           verification_reviewed_at?: string | null
           verification_reviewed_by?: string | null
           view_count?: number | null
@@ -1598,6 +1610,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          avg_response_time_minutes?: number | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
           bank_account_type?: string | null
@@ -1640,9 +1653,14 @@ export type Database = {
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
           tiktok_url?: string | null
+          trust_score?: number | null
+          trust_score_breakdown?: Json | null
+          trust_score_calculated_at?: string | null
           updated_at?: string | null
           vat_number?: string | null
           vendor_business_type?: Database["public"]["Enums"]["vendor_business_type"]
+          vendor_tier?: string | null
+          vendor_tier_override?: boolean
           verification_reviewed_at?: string | null
           verification_reviewed_by?: string | null
           view_count?: number | null
@@ -1826,6 +1844,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_vendor_trust_score: {
+        Args: { p_vendor_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1884,6 +1906,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      recalculate_all_trust_scores: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "user" | "vendor" | "admin"
