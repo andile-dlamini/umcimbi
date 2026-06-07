@@ -37,6 +37,9 @@ interface QuoteRow {
     is_super_vendor: boolean;
     jobs_completed: number;
   };
+  request: {
+    event_id: string | null;
+  } | null;
 }
 
 function ScoreBadge({ badge }: { badge: string }) {
@@ -316,7 +319,14 @@ export default function CompareQuotes() {
   const handleOpenChat = async (quoteId: string) => {
     const quote = quotes.find(q => q.id === quoteId);
     if (!quote?.vendor?.id) return;
-    const convId = await startConversation(quote.vendor.id, selectedEventId || undefined);
+    // Use the event_id from the quote's service request — this is the event
+    // the conversation was originally created for
+    const quoteEventId = (quote as any).request?.event_id || selectedEventId || undefined;
+    let convId = await startConversation(quote.vendor.id, quoteEventId);
+    // If no conversation found with event_id, fall back to any conversation with this vendor
+    if (!convId) {
+      convId = await startConversation(quote.vendor.id, undefined);
+    }
     if (convId) navigate(`/chat/${convId}`);
     else toast.error('Could not open chat');
   };
