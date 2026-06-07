@@ -97,6 +97,10 @@ Deno.serve(async (req) => {
       })
       .eq("id", booking_id);
 
+    // Non-blocking trust score recalculation
+    supabase.rpc('calculate_vendor_trust_score', { p_vendor_id: booking.vendor_id })
+      .catch((e: any) => console.error('Trust score recalc failed (non-blocking):', e));
+
     // Post system message — find conversation containing this booking's order_number
     const { data: convMessages } = await supabase
       .from("messages")
