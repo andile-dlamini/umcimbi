@@ -69,7 +69,6 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false }
               {vendor.name}
               <VendorBadges 
                 businessVerificationStatus={(vendor as any).business_verification_status} 
-                isSuperVendor={(vendor as any).is_super_vendor} 
               />
             </h3>
             

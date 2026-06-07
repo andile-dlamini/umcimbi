@@ -89,11 +89,11 @@ export function useVendorsWithDistance(
       ),
     }));
 
-    // Sort with badge boost: super vendors first, then verified, then by selected sort
+    // Sort with badge boost: verified vendors first, then by selected sort
     return withDistance.sort((a, b) => {
       // Badge boost
-      const aBoost = ((a as any).is_super_vendor ? 2 : 0) + ((a as any).business_verification_status === 'verified' ? 1 : 0);
-      const bBoost = ((b as any).is_super_vendor ? 2 : 0) + ((b as any).business_verification_status === 'verified' ? 1 : 0);
+      const aBoost = ((a as any).business_verification_status === 'verified' ? 1 : 0);
+      const bBoost = ((b as any).business_verification_status === 'verified' ? 1 : 0);
       if (aBoost !== bBoost) return bBoost - aBoost;
 
       switch (sortBy) {
