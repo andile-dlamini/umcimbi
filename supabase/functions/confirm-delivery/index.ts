@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     // Fetch booking
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("id, client_id, booking_status")
+      .select("id, client_id, vendor_id, booking_status")
       .eq("id", booking_id)
       .single();
 
@@ -95,6 +95,10 @@ Deno.serve(async (req) => {
       .from("bookings")
       .update({ client_confirmed_at: new Date().toISOString() })
       .eq("id", booking_id);
+
+    // Non-blocking trust score recalculation
+    supabase.rpc('calculate_vendor_trust_score', { p_vendor_id: booking.vendor_id })
+      .catch((e: any) => console.error('Trust score recalc failed (non-blocking):', e));
 
     // Invoke release-escrow
     await fetch(supabaseUrl + "/functions/v1/release-escrow", {
