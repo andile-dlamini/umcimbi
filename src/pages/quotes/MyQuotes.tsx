@@ -41,7 +41,7 @@ function QuoteCard({ quote }: { quote: QuoteWithDetails }) {
   }, [quote.request?.event_id]);
   const handleOpenChat = async () => {
     if (!quote.vendor?.id) return;
-    const convId = await startConversation(quote.vendor.id);
+    const convId = await startConversation(quote.vendor.id, quote.request?.event_id || undefined);
     if (convId) {
       navigate(`/chat/${convId}`);
     } else {

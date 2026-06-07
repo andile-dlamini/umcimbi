@@ -26,7 +26,7 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
   const handleOpenChat = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!booking.vendor?.id) return;
-    const convId = await startConversation(booking.vendor.id);
+    const convId = await startConversation(booking.vendor.id, booking.event_id || undefined);
     if (convId) {
       navigate(`/chat/${convId}`);
     } else {

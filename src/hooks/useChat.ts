@@ -393,6 +393,23 @@ export const useStartConversation = () => {
         return existing.id;
       }
 
+      // Fallback: if event_id was provided but no match found,
+      // look for any conversation between this user and vendor
+      if (eventId) {
+        const { data: fallback } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('vendor_id', vendorId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (fallback) {
+          return fallback.id;
+        }
+      }
+
       // Create new conversation
       const { data: newConv, error } = await supabase
         .from('conversations')
