@@ -46,6 +46,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
 import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
 import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
+import VendorTrust from "@/pages/admin/VendorTrust";
 import AdminInsights from "@/pages/admin/AdminInsights";
 import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
@@ -158,6 +159,7 @@ function AppRoutes() {
           <Route path="bulk-vendors" element={<BulkVendorUpload />} />
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
+          <Route path="vendor-trust" element={<VendorTrust />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="feedback" element={<AdminFeedback />} />
