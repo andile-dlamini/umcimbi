@@ -20,7 +20,6 @@ function openBlobUrl(blobUrl: string) {
  * Returns the URL on success, null on failure.
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
-
   try {
     const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
       body: { quote_id: quoteId },
@@ -31,7 +30,6 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
       toast.error('Failed to load PDF');
       return null;
     }
-
 
     const url =
       typeof data === 'string'
@@ -44,8 +42,14 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
       return null;
     }
 
-    // Navigate directly — window.open is blocked on mobile after async calls
-    window.location.href = url;
+    // Open via anchor element — works on mobile without popup blocker issues
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     return url;
   } catch (err: any) {
     console.error('[VIEW_PDF] exception:', err);
