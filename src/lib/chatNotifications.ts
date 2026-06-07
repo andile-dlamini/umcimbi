@@ -37,9 +37,10 @@ export async function sendChatNotification(
       }
     }
 
-    // If no event-specific conversation found and we have an eventId, create one for this event
-    // If no eventId, fall back to finding any conversation between user and vendor
-    if (!conversationId && !eventId) {
+    // If no event-specific conversation found, fall back to any conversation
+    // between this user and vendor — this handles conversations created without
+    // an event_id or with a different event_id
+    if (!conversationId) {
       const { data: anyConv } = await supabase
         .from('conversations')
         .select('id')

@@ -1,19 +1,47 @@
-Fix "Open Chat" navigation so it correctly finds existing conversations across the app by passing event_id at call sites and adding a fallback in the hook.
+## Change
+In `src/lib/chatNotifications.ts`, update the fallback conversation lookup block (lines 40-55) so it runs whenever no event-specific conversation was found, regardless of whether an `eventId` was provided.
 
-Changes (4 files only):
+### Current code
+```typescript
+    // If no event-specific conversation found and we have an eventId, create one for this event
+    // If no eventId, fall back to finding any conversation between user and vendor
+    if (!conversationId && !eventId) {
+      const { data: anyConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('vendor_id', vendorId)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
 
-1. src/hooks/useChat.ts
-   - In `startConversation`, after the existing-conversation lookup fails when `eventId` is provided, add a fallback query that searches for ANY conversation between the same user and vendor (ignoring event_id), ordered by newest first.
-   - This handles conversations created without an event_id or with a different one.
+      if (anyConv) {
+        conversationId = anyConv.id;
+      }
+    }
+```
 
-2. src/pages/quotes/MyQuotes.tsx
-   - In `QuoteCard.handleOpenChat`, pass `quote.request?.event_id || undefined` as the second argument to `startConversation`.
+### New code
+```typescript
+    // If no event-specific conversation found, fall back to any conversation
+    // between this user and vendor — this handles conversations created without
+    // an event_id or with a different event_id
+    if (!conversationId) {
+      const { data: anyConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('vendor_id', vendorId)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
 
-3. src/pages/bookings/ClientBookings.tsx
-   - In `BookingCard.handleOpenChat`, pass `booking.event_id || undefined` as the second argument to `startConversation`.
+      if (anyConv) {
+        conversationId = anyConv.id;
+      }
+    }
+```
 
-4. src/pages/quotes/CompareQuotes.tsx
-   - In `handleOpenChat`, use `quote.request?.event_id` directly with `selectedEventId` as fallback, instead of only `selectedEventId`.
-   - Remove the manual fallback call to `startConversation(vendorId, undefined)` since the hook now handles that internally.
-
-No migrations, no other files touched.
+### Impact
+- Notifications will now reuse an existing conversation between a user and vendor even when scoped to a specific event, preventing duplicate chat threads.
+- No other files touched. No migration needed.
