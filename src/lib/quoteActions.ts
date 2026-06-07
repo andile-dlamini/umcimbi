@@ -44,19 +44,9 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
       return null;
     }
 
-    const fileRes = await fetch(url);
-    if (!fileRes.ok) {
-      console.error('[VIEW_PDF] fetch failed', fileRes.status);
-      toast.error('Failed to download document');
-      return null;
-    }
-
-    const htmlContent = await fileRes.text();
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const blobUrl = URL.createObjectURL(blob);
-
-    openBlobUrl(blobUrl);
-    return blobUrl;
+    // Navigate directly — window.open is blocked on mobile after async calls
+    window.location.href = url;
+    return url;
   } catch (err: any) {
     console.error('[VIEW_PDF] exception:', err);
     toast.error(err?.message || 'Failed to load PDF');
