@@ -316,7 +316,7 @@ export default function CompareQuotes() {
   const handleOpenChat = async (quoteId: string) => {
     const quote = quotes.find(q => q.id === quoteId);
     if (!quote?.vendor?.id) return;
-    const convId = await startConversation(quote.vendor.id);
+    const convId = await startConversation(quote.vendor.id, selectedEventId || undefined);
     if (convId) navigate(`/chat/${convId}`);
     else toast.error('Could not open chat');
   };
