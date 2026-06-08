@@ -1,62 +1,47 @@
-## Part A — Migration
+## Rewrite `src/pages/admin/VendorVerificationQueue.tsx`
 
-Add to `public.vendors`:
-- `is_banned boolean NOT NULL DEFAULT false`
-- `admin_approval_notes text`
-- `selfie_request_token text`
-- `selfie_request_sent_at timestamptz`
-- `selfie_photo_url text`
+Single-file replacement. No new components, no other files touched.
 
-Create private storage bucket `vendor-selfies` (via storage tool, not SQL INSERT).
+### Data
+- Fetch vendors where `is_active = false AND is_demo = false AND is_banned = false`, ordered `created_at` ASC, with all the specified columns.
+- Fetch `vendor_verification_documents` for the returned vendor IDs and group by `vendor_id`.
 
-Add two indexes:
-- `idx_vendors_selfie_token` (partial, on `selfie_request_token` where not null)
-- `idx_vendors_approval_queue` on `(is_active, is_banned, is_demo, created_at)`
+### Local state
+- `vendors` (list)
+- `docs` (map vendor_id → docs[])
+- `signedSelfies` (map vendor_id → signed URL) — resolved on load via `storage.from('vendor-selfies').createSignedUrl(path, 300)`
+- `notesDraft` (map vendor_id → string) for textarea binding
+- `checklist` (map vendor_id → 4 booleans) — local visual aid only
+- `confirmReject` (vendor_id | null) for the reject dialog
+- `loading`
 
-No RLS changes needed (Storage uploads go through service role from edge functions).
+### Card sections per vendor
+- **A — Identity**: large name, category badge, phone, relative `created_at` (date-fns `formatDistanceToNow`), Registered/Informal badge, reg/VAT numbers when registered.
+- **B — Profile preview**: logo from `image_urls[0]`, 4 thumbnails from `image_urls[1..4]`, full `about`, location, social icons (Instagram/TikTok/Facebook from lucide-react; only render when URL set, `target="_blank" rel="noreferrer"`), website link.
+- **C — Bank details**: render fields; mask account number to `••••` + last 4; "No bank details submitted" when all null.
+- **D — Documents**: list with doc_type humanized label + "View Document" link in new tab; "No documents submitted" fallback.
+- **E — Selfie**: signed image / "requested … awaiting submission" / "No selfie submitted". `Request Selfie` button generates `crypto.randomUUID()`, updates vendor (`selfie_request_token`, `selfie_request_sent_at = now()`), then fires `send-vendor-status-sms` twice: `request_selfie`, then `selfie_link` with `notes = ${window.location.origin}/verify/selfie?token=${token}`. Toast + refetch.
+- **F — Checklist**: 4 controlled checkboxes from shadcn `Checkbox`, local state only.
+- **G — Notes**: `Textarea` bound to `notesDraft[vendor.id]`, on blur if changed → `update vendors set admin_approval_notes = value where id = vendor.id`.
+- **H — Action buttons** (4):
+  1. Approve & Activate (green): `is_active = true`, invoke SMS `approved`, fire-and-forget `rpc('calculate_vendor_trust_score', { p_vendor_id })`, remove from list.
+  2. Verify Business (blue, hidden if already `verified`): set `business_verification_status='verified'`, `verification_reviewed_at = now()`, `verification_reviewed_by = user.id`; keep in list, refresh.
+  3. Request More Info (amber): require non-empty notes; invoke SMS `request_info` with notes; toast.
+  4. Reject (red outline): opens AlertDialog with two actions:
+     - Reject — can resubmit: `business_verification_status='rejected'`, SMS `rejected` w/ notes, remove from list.
+     - Permanent ban: `business_verification_status='rejected'`, `is_banned=true`, SMS `banned`, remove from list.
 
-## Part B — Edge Function `send-vendor-status-sms`
+### Page header
+`PageHeader` title `"Vendor Approval Queue"` + count `Badge` showing `vendors.length`.
 
-`supabase/functions/send-vendor-status-sms/index.ts` + `verify_jwt = false` in `config.toml`.
+### Empty state
+"All vendors reviewed — queue is clear 🎉" when `!loading && vendors.length === 0`.
 
-**Auth gate**: read `Authorization: Bearer <token>`.
-- If token === `SUPABASE_SERVICE_ROLE_KEY` → allow.
-- Else verify JWT via service-role client `auth.getUser(token)`, then check `user_roles` for `admin`. Reject 401/403 otherwise.
+### Imports
+shadcn `Card`, `Button`, `Badge`, `Textarea`, `Checkbox`, `AlertDialog*`; lucide icons (`Instagram`, `Music2` for TikTok, `Facebook`, `Globe`, `Phone`, `MapPin`, `FileText`, `CheckCircle`, `BadgeCheck`, `AlertCircle`, `XCircle`, `Camera`); `date-fns/formatDistanceToNow`; `toast` from sonner; `supabase` client; `useAuth`; `PageHeader`.
 
-**Body**: `{ vendor_id: uuid, sms_type: enum, notes?: string }` (Zod validated).
-Allowed `sms_type`: `registration | approved | request_info | request_selfie | selfie_link | rejected | banned`.
-
-**Flow**:
-1. Service-role client fetches `name, phone_number` from `vendors` by `vendor_id`.
-2. Build message from template (substitute `[name]` and `[notes]`; for `rejected` omit notes clause if absent; `banned` ignores notes).
-3. Normalize phone: strip non-digits; if starts with `0`, replace leading `0` with `27`; if starts with `27`, keep; else keep digits.
-4. GET `https://sms.connect-mobile.co.za/submit/single/?da={phone}&ud={encodeURIComponent(msg)}&id={crypto.randomUUID()}` with `Authorization: Bearer ${CONNECT_MOBILE_API_KEY}`.
-5. Return `{ success: true, sms_type }` or 502 with provider error.
-
-CORS headers on all responses.
-
-## Part C — Edge Function `vendor-selfie-submission`
-
-`supabase/functions/vendor-selfie-submission/index.ts` + `verify_jwt = false` in `config.toml`.
-
-No auth — token in body is the auth.
-
-**Body**: `{ token: string, photo_base64: string, mime_type: string }` (Zod validated; mime_type whitelist: `image/jpeg|image/png|image/webp`; max decoded size ~10 MB).
-
-**Flow**:
-1. Service-role client: `select id from vendors where selfie_request_token = token` → 404 if not found.
-2. Decode base64 → Uint8Array; choose extension from mime.
-3. Upload to `vendor-selfies` bucket at `{vendor_id}/selfie-{Date.now()}.{ext}` with `contentType`.
-4. Update vendor: `selfie_photo_url = <storage path>`, `selfie_request_token = null` (one-time use).
-5. Return `{ success: true }`.
-
-## Deploy
-Both functions auto-deploy as Lovable-managed.
-
-## Out of scope
-- No frontend changes
-- No admin page wiring (separate request)
-- No changes to existing functions
-
-## Secrets check
-`CONNECT_MOBILE_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL` are already configured.
+### Out of scope
+- No new component files
+- No migrations
+- No vendor-facing changes
+- No edits to other admin pages
