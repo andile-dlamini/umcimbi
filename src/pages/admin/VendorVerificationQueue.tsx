@@ -371,7 +371,7 @@ export default function VendorVerificationQueue() {
     <div className="min-h-screen pb-safe bg-background">
       <PageHeader
         title="Vendor Approval Queue"
-        right={
+        rightAction={
           <Badge variant="secondary" className="text-sm">
             {vendors.length} pending
           </Badge>
