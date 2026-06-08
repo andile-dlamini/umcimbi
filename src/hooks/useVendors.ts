@@ -146,7 +146,7 @@ export function useMyVendorProfile() {
       .insert({
         ...vendorData,
         owner_user_id: user.id,
-        is_active: true,
+        is_active: false,
         latitude: coordinates?.latitude ?? null,
         longitude: coordinates?.longitude ?? null,
       })
