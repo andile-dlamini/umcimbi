@@ -1486,6 +1486,7 @@ export type Database = {
           added_to_events_count: number | null
           address_line_1: string | null
           address_line_2: string | null
+          admin_approval_notes: string | null
           avg_response_time_minutes: number | null
           bank_account_holder_name: string | null
           bank_account_number: string | null
@@ -1503,6 +1504,7 @@ export type Database = {
           image_urls: string[] | null
           instagram_url: string | null
           is_active: boolean | null
+          is_banned: boolean
           is_demo: boolean
           is_super_vendor: boolean
           jobs_completed: number
@@ -1522,6 +1524,9 @@ export type Database = {
           registered_business_name: string | null
           registration_number: string | null
           review_count: number | null
+          selfie_photo_url: string | null
+          selfie_request_sent_at: string | null
+          selfie_request_token: string | null
           show_registration_on_pdf: boolean
           show_vat_on_pdf: boolean
           signup_source: string | null
@@ -1548,6 +1553,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          admin_approval_notes?: string | null
           avg_response_time_minutes?: number | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
@@ -1565,6 +1571,7 @@ export type Database = {
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
+          is_banned?: boolean
           is_demo?: boolean
           is_super_vendor?: boolean
           jobs_completed?: number
@@ -1584,6 +1591,9 @@ export type Database = {
           registered_business_name?: string | null
           registration_number?: string | null
           review_count?: number | null
+          selfie_photo_url?: string | null
+          selfie_request_sent_at?: string | null
+          selfie_request_token?: string | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
           signup_source?: string | null
@@ -1610,6 +1620,7 @@ export type Database = {
           added_to_events_count?: number | null
           address_line_1?: string | null
           address_line_2?: string | null
+          admin_approval_notes?: string | null
           avg_response_time_minutes?: number | null
           bank_account_holder_name?: string | null
           bank_account_number?: string | null
@@ -1627,6 +1638,7 @@ export type Database = {
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
+          is_banned?: boolean
           is_demo?: boolean
           is_super_vendor?: boolean
           jobs_completed?: number
@@ -1646,6 +1658,9 @@ export type Database = {
           registered_business_name?: string | null
           registration_number?: string | null
           review_count?: number | null
+          selfie_photo_url?: string | null
+          selfie_request_sent_at?: string | null
+          selfie_request_token?: string | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
           signup_source?: string | null
