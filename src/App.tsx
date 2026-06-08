@@ -19,6 +19,7 @@ import EmailUnsubscribe from "@/pages/EmailUnsubscribe";
 import FeedbackPlannerNoEvent from "@/pages/feedback/FeedbackPlannerNoEvent";
 import FeedbackPlannerNoVendor from "@/pages/feedback/FeedbackPlannerNoVendor";
 import FeedbackVendor from "@/pages/feedback/FeedbackVendor";
+import SelfieSubmission from "@/pages/vendor/SelfieSubmission";
 
 import Home from "@/pages/Home";
 import EventsList from "@/pages/events/EventsList";
@@ -107,6 +108,7 @@ function AppRoutes() {
         <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
         <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
         <Route path="/feedback/vendor" element={<FeedbackVendor />} />
+        <Route path="/verify/selfie" element={<SelfieSubmission />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
@@ -118,6 +120,7 @@ function AppRoutes() {
       <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
       <Route path="/feedback/vendor" element={<FeedbackVendor />} />
+      <Route path="/verify/selfie" element={<SelfieSubmission />} />
       <Route path="*" element={
         <AppShell>
           <Routes>
