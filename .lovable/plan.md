@@ -1,47 +1,26 @@
-## Change
-In `src/lib/chatNotifications.ts`, update the fallback conversation lookup block (lines 40-55) so it runs whenever no event-specific conversation was found, regardless of whether an `eventId` was provided.
+## Goal
+Apply two surgical code changes to enforce a pending-approval workflow for new vendor registrations.
 
-### Current code
-```typescript
-    // If no event-specific conversation found and we have an eventId, create one for this event
-    // If no eventId, fall back to finding any conversation between user and vendor
-    if (!conversationId && !eventId) {
-      const { data: anyConv } = await supabase
-        .from('conversations')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('vendor_id', vendorId)
-        .order('last_message_at', { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
+## Changes
 
-      if (anyConv) {
-        conversationId = anyConv.id;
-      }
-    }
-```
+### 1. New vendors start inactive (pending approval)
+**File:** `src/hooks/useVendors.ts` (line 149)
+- Change `is_active: true` → `is_active: false` inside `createVendorProfile`
+- Effect: all newly created vendor profiles are hidden from the public marketplace until an admin explicitly activates them
+- Existing vendors in the database are unaffected
 
-### New code
-```typescript
-    // If no event-specific conversation found, fall back to any conversation
-    // between this user and vendor — this handles conversations created without
-    // an event_id or with a different event_id
-    if (!conversationId) {
-      const { data: anyConv } = await supabase
-        .from('conversations')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('vendor_id', vendorId)
-        .order('last_message_at', { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
+### 2. Send registration confirmation SMS after onboarding
+**File:** `src/pages/vendors/VendorOnboarding.tsx` (lines 330–331)
+- After `createVendorProfile` succeeds and before `navigate(...)`, add a fire-and-forget Edge Function call:
+  ```
+  supabase.functions.invoke('send-vendor-status-sms', {
+    body: { vendor_id: result.id, sms_type: 'registration' }
+  }).catch(...)
+  ```
+- The call is non-blocking (not awaited) so navigation remains instant
+- If the SMS function fails, it logs to console and does not interrupt the user flow
 
-      if (anyConv) {
-        conversationId = anyConv.id;
-      }
-    }
-```
-
-### Impact
-- Notifications will now reuse an existing conversation between a user and vendor even when scoped to a specific event, preventing duplicate chat threads.
-- No other files touched. No migration needed.
+## Out of scope
+- No admin page changes
+- No database migrations
+- No changes to existing vendor-facing pages

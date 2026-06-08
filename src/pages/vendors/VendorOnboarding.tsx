@@ -328,6 +328,13 @@ export default function VendorOnboarding() {
     }
 
     setIsLoading(false);
+    // Send registration confirmation SMS non-blocking
+    if (result?.id) {
+      supabase.functions.invoke('send-vendor-status-sms', {
+        body: { vendor_id: result.id, sms_type: 'registration' }
+      }).catch((e: any) => console.error('Registration SMS failed (non-blocking):', e));
+    }
+
     navigate(isQuickMode ? '/vendor-dashboard' : '/profile/vendor');
   };
 
