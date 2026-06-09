@@ -67,6 +67,18 @@ const quickVendorSchema = z.object({
   phone_number: z.string().trim().min(1, 'Phone number is required'),
 });
 
+function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
+  const cleaned = handle.trim().replace(/^@/, '');
+  if (!cleaned) return null;
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
+  const bases = {
+    instagram: 'https://instagram.com/',
+    tiktok: 'https://tiktok.com/@',
+    facebook: 'https://facebook.com/',
+  };
+  return bases[platform] + cleaned;
+}
+
 export default function VendorOnboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
