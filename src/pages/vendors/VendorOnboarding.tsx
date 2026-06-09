@@ -733,7 +733,7 @@ export default function VendorOnboarding() {
               {/* Instagram — hidden in quick mode */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram</Label>
+                <Label htmlFor="instagram">Instagram username</Label>
                 <div className="relative">
                   <Camera className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
