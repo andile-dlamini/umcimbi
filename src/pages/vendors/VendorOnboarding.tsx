@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Store, Phone, Mail, Globe, ImagePlus, Camera, ChevronsUpDown, Check, Upload, Info } from 'lucide-react';
+import { Store, ImagePlus, Camera, ChevronsUpDown, Check, Upload, Info, AlertTriangle, ChevronRight } from 'lucide-react';
 import { PricingInput } from '@/components/vendors/PricingInput';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
@@ -16,6 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { useMyVendorProfile } from '@/hooks/useVendors';
+import { useAuth } from '@/context/AuthContext';
 import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { cn } from '@/lib/utils';
@@ -38,22 +39,16 @@ const toE164 = (phone: string, countryCode: string) => {
 };
 
 const vendorSchema = z.object({
-  name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100, 'Business name must be less than 100 characters'),
-  category: z.enum(VENDOR_CATEGORY_VALUES, {
-    required_error: 'Please select a category',
-  }),
+  name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
+  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  about: z.string().trim().min(10, 'Please describe your business (at least 10 characters)').max(2000),
+  price_range_text: z.string().trim().min(1, 'Please add your pricing'),
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
   state_province: z.string().trim().max(100).optional().or(z.literal('')),
   country: z.string().trim().min(1, 'Country is required'),
   postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
-  phone_country: z.string().min(1, 'Please select a country code'),
-  phone_number: z.string().trim().min(1, 'Phone number is required'),
-  about: z.string().trim().max(2000).optional().or(z.literal('')),
-  price_range_text: z.string().trim().max(100).optional().or(z.literal('')),
-  email: z.string().trim().email('Please enter a valid email address').max(255).optional().or(z.literal('')),
-  website_url: z.string().trim().max(500).optional().or(z.literal('')),
   instagram_url: z.string().trim().max(500).optional().or(z.literal('')),
   tiktok_url: z.string().trim().max(500).optional().or(z.literal('')),
   facebook_url: z.string().trim().max(500).optional().or(z.literal('')),
@@ -63,8 +58,6 @@ const quickVendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
   category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
-  phone_country: z.string().min(1, 'Please select a country code'),
-  phone_number: z.string().trim().min(1, 'Phone number is required'),
 });
 
 function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
@@ -79,11 +72,27 @@ function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: stri
   return bases[platform] + cleaned;
 }
 
+const SOUTH_AFRICAN_BANKS = [
+  { name: 'ABSA', branchCode: '632005' },
+  { name: 'African Bank', branchCode: '430000' },
+  { name: 'Capitec Bank', branchCode: '470010' },
+  { name: 'Discovery Bank', branchCode: '679000' },
+  { name: 'FNB / First National Bank', branchCode: '250655' },
+  { name: 'Investec', branchCode: '580105' },
+  { name: 'Nedbank', branchCode: '198765' },
+  { name: 'Standard Bank', branchCode: '051001' },
+  { name: 'TymeBank', branchCode: '678910' },
+];
+
+const ACCOUNT_TYPES = ['Current / Cheque', 'Savings', 'Transmission'];
+
 export default function VendorOnboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isQuickMode = searchParams.get('quick') === 'true';
+  const fromAuth = searchParams.get('fromAuth') === 'true';
   const { createVendorProfile, vendor: existingVendor, isLoading: isLoadingVendor } = useMyVendorProfile();
+  const { profile } = useAuth();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [justCreated, setJustCreated] = useState(false);
 
@@ -97,17 +106,13 @@ export default function VendorOnboarding() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [phoneCountryOpen, setPhoneCountryOpen] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<4 | 5>(4);
 
   const [formData, setFormData] = useState({
     name: '',
     category: '' as VendorCategory | '',
     about: '',
     price_range_text: '',
-    phone_country: 'ZA' as string,
-    phone_number: '',
-    email: '',
-    website_url: '',
     instagram_url: '',
     tiktok_url: '',
     facebook_url: '',
@@ -116,6 +121,11 @@ export default function VendorOnboarding() {
     registered_business_name: '',
     registration_number: '',
     vat_number: '',
+    bank_name: '',
+    bank_branch_code: '',
+    bank_account_holder_name: '',
+    bank_account_number: '',
+    bank_account_type: '',
   });
 
   const [address, setAddress] = useState<AddressData>({
@@ -127,6 +137,12 @@ export default function VendorOnboarding() {
     postal_code: '',
   });
 
+  // Quick-mode-only phone capture
+  const [quickPhoneCountry, setQuickPhoneCountry] = useState('ZA');
+  const [quickPhone, setQuickPhone] = useState('');
+  const [quickPhoneCountryOpen, setQuickPhoneCountryOpen] = useState(false);
+  const selectedQuickPhoneCountry = COUNTRIES.find(c => c.code === quickPhoneCountry) || COUNTRIES[0];
+
   // Logo placeholder (not uploaded until vendor is created)
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -136,8 +152,6 @@ export default function VendorOnboarding() {
   const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string; preview: string }[]>([]);
   const showcaseInputRef = useRef<HTMLInputElement>(null);
   const verificationInputRef = useRef<HTMLInputElement>(null);
-
-  const selectedPhoneCountry = COUNTRIES.find(c => c.code === formData.phone_country) || COUNTRIES[0];
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -187,12 +201,30 @@ export default function VendorOnboarding() {
     });
   };
 
+  const handleNextStep = () => {
+    const step4Errors: Record<string, string> = {};
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      step4Errors.name = 'Business name must be at least 2 characters';
+    }
+    if (!formData.category) {
+      step4Errors.category = 'Please select a category';
+    }
+    if (Object.keys(step4Errors).length > 0) {
+      setErrors(step4Errors);
+      toast.error('Please fill in the required fields');
+      return;
+    }
+    setErrors({});
+    setOnboardingStep(5);
+    window.scrollTo(0, 0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
     const dataToValidate = isQuickMode
-      ? { name: formData.name, category: formData.category, city: address.city, phone_country: formData.phone_country, phone_number: formData.phone_number }
+      ? { name: formData.name, category: formData.category, city: address.city }
       : { ...formData, ...address };
     const schema = isQuickMode ? quickVendorSchema : vendorSchema;
     const validation = schema.safeParse(dataToValidate);
@@ -210,22 +242,18 @@ export default function VendorOnboarding() {
       return;
     }
 
-    // Validate phone with country
-    if (!validateLocalPhone(formData.phone_number, formData.phone_country)) {
-      setErrors(prev => ({ ...prev, phone_number: `Please enter a valid ${selectedPhoneCountry.name} phone number` }));
-      toast.error(`Please enter a valid ${selectedPhoneCountry.name} phone number`);
-      return;
+    // Quick mode: phone is captured inline, validate it here
+    let quickE164: string | null = null;
+    if (isQuickMode) {
+      if (!validateLocalPhone(quickPhone, quickPhoneCountry)) {
+        setErrors(prev => ({ ...prev, phone_number: `Please enter a valid ${selectedQuickPhoneCountry.name} phone number` }));
+        toast.error(`Please enter a valid ${selectedQuickPhoneCountry.name} phone number`);
+        return;
+      }
+      quickE164 = toE164(quickPhone, quickPhoneCountry);
     }
 
     setIsLoading(true);
-
-    const e164Phone = toE164(formData.phone_number, formData.phone_country);
-
-    // Normalize website URL - add https:// if no protocol specified
-    let websiteUrl = formData.website_url.trim() || null;
-    if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) {
-      websiteUrl = 'https://' + websiteUrl;
-    }
 
     // Compose location from city + state for backward compatibility
     const locationParts = [address.city.trim(), address.state_province?.trim()].filter(Boolean);
@@ -242,10 +270,10 @@ export default function VendorOnboarding() {
       location: composedLocation,
       about: formData.about.trim() || null,
       price_range_text: formData.price_range_text.trim() || null,
-      phone_number: e164Phone,
+      phone_number: quickE164 || profile?.phone_number || null,
       whatsapp_number: null,
-      email: formData.email.trim() || null,
-      website_url: websiteUrl,
+      email: null,
+      website_url: null,
       instagram_url: toSocialUrl('instagram', formData.instagram_url),
       tiktok_url: toSocialUrl('tiktok', formData.tiktok_url),
       facebook_url: toSocialUrl('facebook', formData.facebook_url),
@@ -262,6 +290,11 @@ export default function VendorOnboarding() {
       registered_business_name: formData.is_registered_business ? formData.registered_business_name.trim() || null : null,
       registration_number: formData.is_registered_business ? formData.registration_number.trim() || null : null,
       vat_number: formData.is_registered_business ? formData.vat_number.trim() || null : null,
+      bank_name: formData.bank_name.trim() || null,
+      bank_branch_code: formData.bank_branch_code.trim() || null,
+      bank_account_holder_name: formData.bank_account_holder_name.trim() || null,
+      bank_account_number: formData.bank_account_number.trim() || null,
+      bank_account_type: formData.bank_account_type.trim() || null,
     } as any);
 
     if (!result) {
@@ -350,27 +383,206 @@ export default function VendorOnboarding() {
     navigate(isQuickMode ? '/vendor-dashboard' : '/profile/vendor');
   };
 
+  // ============================================================
+  // QUICK MODE — original single-card form (phone retained, email/website removed)
+  // ============================================================
+  if (isQuickMode) {
+    return (
+      <div className="min-h-screen pb-safe bg-background">
+        <PageHeader title="Become a Vendor" showBack />
+        <div className="px-4 py-6 max-w-lg mx-auto">
+          <Card>
+            <CardHeader>
+              <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
+                <Store className="h-6 w-6 text-secondary" />
+              </div>
+              <CardTitle>Register your business</CardTitle>
+              <CardDescription>
+                Join our marketplace and connect with families planning traditional ceremonies
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div
+                      className="w-20 h-20 rounded-xl bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center overflow-hidden"
+                      onClick={() => logoInputRef.current?.click()}
+                    >
+                      {logoPreview ? (
+                        <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1">
+                          <Camera className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground">Logo</span>
+                        </div>
+                      )}
+                    </div>
+                    <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="name">Business name *</Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Zulu Traditions Decor"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className={`h-12 ${errors.name ? 'border-destructive' : ''}`}
+                    />
+                    {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Category *</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(v) => setFormData({ ...formData, category: v as VendorCategory })}
+                  >
+                    <SelectTrigger className={`h-12 ${errors.category ? 'border-destructive' : ''}`}>
+                      <SelectValue placeholder="Select your service category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VENDOR_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>City / Suburb *</Label>
+                  <Input
+                    placeholder="e.g., Durban, Umlazi"
+                    value={address.city}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    className={`h-12 ${errors.city ? 'border-destructive' : ''}`}
+                  />
+                  {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Phone number *</Label>
+                  <div className="flex gap-2">
+                    <Popover open={quickPhoneCountryOpen} onOpenChange={setQuickPhoneCountryOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn('w-[120px] h-12 justify-between px-2 flex-shrink-0')}
+                        >
+                          <span className="flex items-center gap-1 text-sm truncate">
+                            <span>{selectedQuickPhoneCountry.flag}</span>
+                            <span>{selectedQuickPhoneCountry.dial}</span>
+                          </span>
+                          <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[280px] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search country..." />
+                          <CommandList>
+                            <CommandEmpty>No country found.</CommandEmpty>
+                            <CommandGroup>
+                              {COUNTRIES.map((c) => (
+                                <CommandItem
+                                  key={c.code}
+                                  value={`${c.name} ${c.dial}`}
+                                  onSelect={() => { setQuickPhoneCountry(c.code); setQuickPhoneCountryOpen(false); }}
+                                >
+                                  <Check className={cn('mr-2 h-4 w-4', quickPhoneCountry === c.code ? 'opacity-100' : 'opacity-0')} />
+                                  <span className="mr-2">{c.flag}</span>
+                                  <span className="flex-1">{c.name}</span>
+                                  <span className="text-muted-foreground text-sm">{c.dial}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <Input
+                      type="tel"
+                      placeholder="e.g., 082 123 4567"
+                      value={quickPhone}
+                      onChange={(e) => setQuickPhone(e.target.value)}
+                      className={`flex-1 h-12 ${errors.phone_number ? 'border-destructive' : ''}`}
+                    />
+                  </div>
+                  {errors.phone_number && <p className="text-sm text-destructive">{errors.phone_number}</p>}
+                </div>
+
+                <Button type="submit" className="w-full h-12 mt-6" disabled={isLoading}>
+                  {isLoading ? 'Creating profile...' : 'Create vendor profile'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // FULL FLOW — two-step stepper
+  // ============================================================
+  const stepperLabels = ['Details', 'Verify', 'Password', 'Business', 'Showcase'];
+
   return (
     <div className="min-h-screen pb-safe bg-background">
       <PageHeader title="Become a Vendor" showBack />
 
       <div className="px-4 py-6 max-w-lg mx-auto">
-        <Card>
-          <CardHeader>
-            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
-              <Store className="h-6 w-6 text-secondary" />
+        {/* Stepper */}
+        {fromAuth && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between relative">
+              {stepperLabels.map((label, i) => {
+                const stepNum = i + 1;
+                const isDone = stepNum < 4 || (stepNum === 4 && onboardingStep === 5);
+                const isActive = (stepNum === 4 && onboardingStep === 4) || (stepNum === 5 && onboardingStep === 5);
+                return (
+                  <div key={label} className="flex flex-col items-center gap-1 relative z-10 flex-1">
+                    <div className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-colors',
+                      isDone && 'bg-primary text-primary-foreground border-primary',
+                      isActive && 'bg-background text-primary border-primary',
+                      !isDone && !isActive && 'bg-background text-muted-foreground border-border'
+                    )}>
+                      {isDone ? '✓' : stepNum}
+                    </div>
+                    <span className={cn(
+                      'text-[10px] text-center',
+                      (isDone || isActive) ? 'text-foreground font-medium' : 'text-muted-foreground'
+                    )}>
+                      {label}
+                    </span>
+                  </div>
+                );
+              })}
+              {/* Connector line beneath circles */}
+              <div className="absolute top-4 left-0 right-0 h-0.5 bg-border -z-0" style={{ marginLeft: '10%', marginRight: '10%' }}>
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: onboardingStep === 5 ? '100%' : '75%' }}
+                />
+              </div>
             </div>
-            <CardTitle>Register your business</CardTitle>
-            <CardDescription>
-              Join our marketplace and connect with families planning traditional ceremonies
-            </CardDescription>
-          </CardHeader>
+          </div>
+        )}
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Business Name + Logo */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* STEP 4 — BUSINESS DETAILS */}
+          {onboardingStep === 4 && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-xl font-semibold">Business details</h2>
+                <p className="text-sm text-muted-foreground">Tell us about your business</p>
+              </div>
+
+              {/* Logo + Business Name */}
               <div className="flex items-start gap-4">
-                {/* Logo Upload Placeholder */}
                 <div className="flex-shrink-0">
                   <div
                     className="w-20 h-20 rounded-xl bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center overflow-hidden"
@@ -385,16 +597,9 @@ export default function VendorOnboarding() {
                       </div>
                     )}
                   </div>
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleLogoChange}
-                  />
+                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                  <p className="text-[10px] text-muted-foreground text-center mt-1">Optional</p>
                 </div>
-
-                {/* Business Name */}
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="name">Business name *</Label>
                   <Input
@@ -420,24 +625,19 @@ export default function VendorOnboarding() {
                   </SelectTrigger>
                   <SelectContent>
                     {VENDOR_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
+                      <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
               </div>
 
-              {/* Business Type — hidden in quick mode */}
-              {!isQuickMode && (
+              {/* Registered Business Toggle */}
               <div className="space-y-4 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Formally registered business?</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      e.g., CIPC / Company registration
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">e.g., CIPC / Company registration</p>
                   </div>
                   <Switch
                     checked={formData.is_registered_business}
@@ -449,7 +649,7 @@ export default function VendorOnboarding() {
                   <div className="space-y-3 pl-1 border-l-2 border-primary/30 ml-1">
                     <div className="pl-3 space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor="registered_business_name">Registered business name *</Label>
+                        <Label htmlFor="registered_business_name">Registered business name</Label>
                         <Input
                           id="registered_business_name"
                           placeholder="e.g., Zulu Traditions (Pty) Ltd"
@@ -459,7 +659,7 @@ export default function VendorOnboarding() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="registration_number">Registration number *</Label>
+                        <Label htmlFor="registration_number">Registration number</Label>
                         <Input
                           id="registration_number"
                           placeholder="e.g., 2024/123456/07"
@@ -479,10 +679,8 @@ export default function VendorOnboarding() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Verification documents</Label>
-                        <p className="text-xs text-muted-foreground">
-                          Upload CIPC registration and proof of address for verification.
-                        </p>
+                        <Label>Verification documents (optional)</Label>
+                        <p className="text-xs text-muted-foreground">Upload CIPC registration and proof of address.</p>
                         <div className="space-y-2">
                           {verificationFiles.map((item, index) => (
                             <div key={index} className="flex items-center gap-2 text-sm bg-muted rounded-lg p-2">
@@ -514,10 +712,7 @@ export default function VendorOnboarding() {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              if (file.size > 10 * 1024 * 1024) {
-                                toast.error('Document must be less than 10MB');
-                                return;
-                              }
+                              if (file.size > 10 * 1024 * 1024) { toast.error('Document must be less than 10MB'); return; }
                               setVerificationFiles(prev => [...prev, { file, docType: 'cipc_registration', preview: '' }]);
                               if (verificationInputRef.current) verificationInputRef.current.value = '';
                             }}
@@ -536,36 +731,121 @@ export default function VendorOnboarding() {
                   <div className="flex items-start gap-2 bg-muted rounded-lg p-3">
                     <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-muted-foreground">
-                      No worries! You can still earn a <strong>Super Vendor</strong> badge through great service and reviews.
+                      No worries! You can still build trust through great service and verified reviews on UMCIMBI.
                     </p>
                   </div>
                 )}
               </div>
-              )}
 
-              {/* Address Section — full in standard mode, city-only in quick mode */}
-              {isQuickMode ? (
-                <div className="space-y-2">
-                  <Label>City / Suburb *</Label>
-                  <Input
-                    placeholder="e.g., Durban, Umlazi"
-                    value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    className={`h-12 ${errors.city ? 'border-destructive' : ''}`}
-                  />
-                  {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+              {/* Bank Details */}
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-muted-foreground">
+                    Your profile won't go live without banking details. You can add these now or from your profile settings.
+                  </p>
                 </div>
-              ) : (
-              <div className="pt-2">
-                <h3 className="text-sm font-medium mb-3">Business Address *</h3>
-                <AddressFields data={address} onChange={setAddress} errors={errors} />
-              </div>
-              )}
 
-              {/* About — hidden in quick mode */}
-              {!isQuickMode && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Bank</Label>
+                    <Select
+                      value={formData.bank_name}
+                      onValueChange={(val) => {
+                        const bank = SOUTH_AFRICAN_BANKS.find(b => b.name === val);
+                        setFormData(prev => ({ ...prev, bank_name: val, bank_branch_code: bank?.branchCode || '' }));
+                      }}
+                    >
+                      <SelectTrigger className="h-12"><SelectValue placeholder="Select your bank" /></SelectTrigger>
+                      <SelectContent>
+                        {SOUTH_AFRICAN_BANKS.map(bank => (
+                          <SelectItem key={bank.name} value={bank.name}>{bank.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Account holder name</Label>
+                    <Input
+                      placeholder="As it appears on your bank account"
+                      value={formData.bank_account_holder_name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, bank_account_holder_name: e.target.value }))}
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Account number</Label>
+                    <Input
+                      placeholder="e.g., 1234567890"
+                      value={formData.bank_account_number}
+                      onChange={(e) => setFormData(prev => ({ ...prev, bank_account_number: e.target.value }))}
+                      className="h-12"
+                      inputMode="numeric"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Account type</Label>
+                    <Select
+                      value={formData.bank_account_type}
+                      onValueChange={(val) => setFormData(prev => ({ ...prev, bank_account_type: val }))}
+                    >
+                      <SelectTrigger className="h-12"><SelectValue placeholder="Select account type" /></SelectTrigger>
+                      <SelectContent>
+                        {ACCOUNT_TYPES.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Branch code</Label>
+                    <Input
+                      placeholder="Auto-filled from bank"
+                      value={formData.bank_branch_code}
+                      readOnly
+                      className="h-12 bg-muted"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Next button */}
+              <Button type="button" onClick={handleNextStep} className="w-full h-12 mt-4">
+                Next — Showcase your work <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* STEP 5 — SHOWCASE */}
+          {onboardingStep === 5 && (
+            <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="about">About your business</Label>
+                <button
+                  type="button"
+                  onClick={() => { setOnboardingStep(4); window.scrollTo(0, 0); }}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  ← Back
+                </button>
+                <div>
+                  <h2 className="text-xl font-semibold">Showcase your work</h2>
+                  <p className="text-sm text-muted-foreground">Help families see why you're the right choice</p>
+                </div>
+              </div>
+
+              {/* Info banner */}
+              <div className="flex items-start gap-2 bg-primary/5 rounded-lg p-3">
+                <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  A description and pricing are required before your profile goes live. You can complete photos and social links from your profile settings.
+                </p>
+              </div>
+
+              {/* About */}
+              <div className="space-y-2">
+                <Label htmlFor="about">About your business *</Label>
                 <Textarea
                   id="about"
                   placeholder="Describe your services, experience, and what makes you special..."
@@ -576,10 +856,22 @@ export default function VendorOnboarding() {
                 />
                 {errors.about && <p className="text-sm text-destructive">{errors.about}</p>}
               </div>
-              )}
 
-              {/* Showcase Images — show single optional photo in quick mode, full in standard */}
-              {!isQuickMode && (
+              {/* Address */}
+              <div className="pt-2">
+                <h3 className="text-sm font-medium mb-3">Business Address</h3>
+                <AddressFields data={address} onChange={setAddress} errors={errors} />
+              </div>
+
+              {/* Price Range */}
+              <PricingInput
+                category={formData.category}
+                value={formData.price_range_text}
+                onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
+              />
+              {errors.price_range_text && <p className="text-sm text-destructive">{errors.price_range_text}</p>}
+
+              {/* Gallery */}
               <div className="space-y-2">
                 <Label>Showcase your work (up to 15 images)</Label>
                 <div className="grid grid-cols-5 gap-2">
@@ -605,195 +897,55 @@ export default function VendorOnboarding() {
                     </div>
                   )}
                 </div>
-                <input
-                  ref={showcaseInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleShowcaseAdd}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Add photos of your work to attract clients. You can also add these later.
-                </p>
-              </div>
-              )}
-
-              {/* Price Range — hidden in quick mode */}
-              {!isQuickMode && (
-              <PricingInput
-                category={formData.category}
-                value={formData.price_range_text}
-                onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
-              />
-              )}
-
-              {/* Phone with Country Code */}
-              <div className="space-y-2">
-                <Label>Phone number *</Label>
-                <div className="flex gap-2">
-                  {/* Country Code Selector */}
-                  <Popover open={phoneCountryOpen} onOpenChange={setPhoneCountryOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          'w-[120px] h-12 justify-between px-2 flex-shrink-0',
-                          errors.phone_country && 'border-destructive'
-                        )}
-                      >
-                        <span className="flex items-center gap-1 text-sm truncate">
-                          <span>{selectedPhoneCountry.flag}</span>
-                          <span>{selectedPhoneCountry.dial}</span>
-                        </span>
-                        <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[280px] p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search country..." />
-                        <CommandList>
-                          <CommandEmpty>No country found.</CommandEmpty>
-                          <CommandGroup>
-                            {COUNTRIES.map((c) => (
-                              <CommandItem
-                                key={c.code}
-                                value={`${c.name} ${c.dial}`}
-                                onSelect={() => {
-                                  setFormData({ ...formData, phone_country: c.code });
-                                  setPhoneCountryOpen(false);
-                                }}
-                              >
-                                <Check className={cn('mr-2 h-4 w-4', formData.phone_country === c.code ? 'opacity-100' : 'opacity-0')} />
-                                <span className="mr-2">{c.flag}</span>
-                                <span className="flex-1">{c.name}</span>
-                                <span className="text-muted-foreground text-sm">{c.dial}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  <div className="relative flex-1">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="tel"
-                      placeholder={`e.g., 082 123 4567`}
-                      value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                      className={`pl-10 h-12 ${errors.phone_number ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                </div>
-                {errors.phone_number && <p className="text-sm text-destructive">{errors.phone_number}</p>}
-                {errors.phone_country && <p className="text-sm text-destructive">{errors.phone_country}</p>}
+                <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+                <p className="text-xs text-muted-foreground">Add photos of your work to attract clients. You can also add these later.</p>
               </div>
 
-              {/* Email — hidden in quick mode */}
-              {!isQuickMode && (
-              <div className="space-y-2">
-                <Label htmlFor="email">Business email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="business@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className={`pl-10 h-12 ${errors.email ? 'border-destructive' : ''}`}
-                  />
-                </div>
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-              )}
-
-              {/* Website — hidden in quick mode */}
-              {!isQuickMode && (
-              <div className="space-y-2">
-                <Label htmlFor="website">Website</Label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="website"
-                    type="text"
-                    placeholder="https://..."
-                    value={formData.website_url}
-                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    className={`pl-10 h-12 ${errors.website_url ? 'border-destructive' : ''}`}
-                  />
-                </div>
-                {errors.website_url && <p className="text-sm text-destructive">{errors.website_url}</p>}
-              </div>
-              )}
-
-              {/* Instagram — hidden in quick mode */}
-              {!isQuickMode && (
-              <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram username</Label>
-                <div className="relative">
-                  <Camera className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              {/* Social Links */}
+              <div className="space-y-3 pt-2 border-t border-border">
+                <Label className="text-sm font-medium">Social links (optional)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram" className="text-xs text-muted-foreground">Instagram username</Label>
                   <Input
                     id="instagram"
-                    type="text"
                     placeholder="e.g. maswazicatering"
                     value={formData.instagram_url}
                     onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
-                    className={`pl-10 h-12 ${errors.instagram_url ? 'border-destructive' : ''}`}
+                    className="h-12"
                   />
                 </div>
-                {errors.instagram_url && <p className="text-sm text-destructive">{errors.instagram_url}</p>}
-              </div>
-              )}
-
-              {/* TikTok — hidden in quick mode */}
-              {!isQuickMode && (
-              <div className="space-y-2">
-                <Label htmlFor="tiktok">TikTok username</Label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="space-y-2">
+                  <Label htmlFor="tiktok" className="text-xs text-muted-foreground">TikTok username</Label>
                   <Input
                     id="tiktok"
-                    type="text"
                     placeholder="e.g. maswazicatering"
                     value={formData.tiktok_url}
                     onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
-                    className={`pl-10 h-12 ${errors.tiktok_url ? 'border-destructive' : ''}`}
+                    className="h-12"
                   />
                 </div>
-                {errors.tiktok_url && <p className="text-sm text-destructive">{errors.tiktok_url}</p>}
-              </div>
-              )}
-
-              {/* Facebook — hidden in quick mode */}
-              {!isQuickMode && (
-              <div className="space-y-2">
-                <Label htmlFor="facebook">Facebook username or page name</Label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="space-y-2">
+                  <Label htmlFor="facebook" className="text-xs text-muted-foreground">Facebook username or page name</Label>
                   <Input
                     id="facebook"
-                    type="text"
                     placeholder="e.g. maswazicatering"
                     value={formData.facebook_url}
                     onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
-                    className={`pl-10 h-12 ${errors.facebook_url ? 'border-destructive' : ''}`}
+                    className="h-12"
                   />
                 </div>
-                {errors.facebook_url && <p className="text-sm text-destructive">{errors.facebook_url}</p>}
               </div>
-              )}
 
-
-              <Button type="submit" className="w-full h-12 mt-6" disabled={isLoading}>
-                {isLoading ? 'Creating profile...' : 'Create vendor profile'}
+              {/* Submit */}
+              <Button type="submit" className="w-full h-12 mt-4" disabled={isLoading}>
+                {isLoading ? 'Submitting...' : 'Submit for review'}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-center text-muted-foreground pb-8">
+                We'll review your profile within 48 hours and notify you by SMS.
+              </p>
+            </div>
+          )}
+        </form>
       </div>
     </div>
   );
