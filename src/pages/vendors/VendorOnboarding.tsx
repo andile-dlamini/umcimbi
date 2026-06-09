@@ -758,7 +758,7 @@ export default function VendorOnboarding() {
                   <Input
                     id="tiktok"
                     type="text"
-                    placeholder="https://tiktok.com/@yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.tiktok_url}
                     onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.tiktok_url ? 'border-destructive' : ''}`}
