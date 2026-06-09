@@ -739,7 +739,7 @@ export default function VendorOnboarding() {
                   <Input
                     id="instagram"
                     type="text"
-                    placeholder="https://instagram.com/yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.instagram_url}
                     onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.instagram_url ? 'border-destructive' : ''}`}
