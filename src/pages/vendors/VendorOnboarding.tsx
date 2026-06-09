@@ -771,7 +771,7 @@ export default function VendorOnboarding() {
               {/* Facebook — hidden in quick mode */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label htmlFor="facebook">Facebook</Label>
+                <Label htmlFor="facebook">Facebook username or page name</Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
