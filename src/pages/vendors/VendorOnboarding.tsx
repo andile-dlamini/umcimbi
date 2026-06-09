@@ -67,6 +67,18 @@ const quickVendorSchema = z.object({
   phone_number: z.string().trim().min(1, 'Phone number is required'),
 });
 
+function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
+  const cleaned = handle.trim().replace(/^@/, '');
+  if (!cleaned) return null;
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
+  const bases = {
+    instagram: 'https://instagram.com/',
+    tiktok: 'https://tiktok.com/@',
+    facebook: 'https://facebook.com/',
+  };
+  return bases[platform] + cleaned;
+}
+
 export default function VendorOnboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -234,9 +246,9 @@ export default function VendorOnboarding() {
       whatsapp_number: null,
       email: formData.email.trim() || null,
       website_url: websiteUrl,
-      instagram_url: formData.instagram_url.trim() || null,
-      tiktok_url: formData.tiktok_url.trim() || null,
-      facebook_url: formData.facebook_url.trim() || null,
+      instagram_url: toSocialUrl('instagram', formData.instagram_url),
+      tiktok_url: toSocialUrl('tiktok', formData.tiktok_url),
+      facebook_url: toSocialUrl('facebook', formData.facebook_url),
       languages: formData.languages,
       image_urls: [],
       address_line_1: address.address_line_1.trim(),
@@ -721,13 +733,13 @@ export default function VendorOnboarding() {
               {/* Instagram — hidden in quick mode */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label htmlFor="instagram">Instagram</Label>
+                <Label htmlFor="instagram">Instagram username</Label>
                 <div className="relative">
                   <Camera className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="instagram"
                     type="text"
-                    placeholder="https://instagram.com/yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.instagram_url}
                     onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.instagram_url ? 'border-destructive' : ''}`}
@@ -740,13 +752,13 @@ export default function VendorOnboarding() {
               {/* TikTok — hidden in quick mode */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label htmlFor="tiktok">TikTok</Label>
+                <Label htmlFor="tiktok">TikTok username</Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="tiktok"
                     type="text"
-                    placeholder="https://tiktok.com/@yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.tiktok_url}
                     onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.tiktok_url ? 'border-destructive' : ''}`}
@@ -759,13 +771,13 @@ export default function VendorOnboarding() {
               {/* Facebook — hidden in quick mode */}
               {!isQuickMode && (
               <div className="space-y-2">
-                <Label htmlFor="facebook">Facebook</Label>
+                <Label htmlFor="facebook">Facebook username or page name</Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="facebook"
                     type="text"
-                    placeholder="https://facebook.com/yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.facebook_url}
                     onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.facebook_url ? 'border-destructive' : ''}`}
