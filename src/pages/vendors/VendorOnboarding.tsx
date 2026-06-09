@@ -777,7 +777,7 @@ export default function VendorOnboarding() {
                   <Input
                     id="facebook"
                     type="text"
-                    placeholder="https://facebook.com/yourbusiness"
+                    placeholder="e.g. maswazicatering"
                     value={formData.facebook_url}
                     onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
                     className={`pl-10 h-12 ${errors.facebook_url ? 'border-destructive' : ''}`}
