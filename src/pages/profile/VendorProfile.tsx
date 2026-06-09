@@ -17,6 +17,21 @@ import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
 
+function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
+  const cleaned = handle.trim().replace(/^@/, '');
+  if (!cleaned) return null;
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
+  const bases = { instagram: 'https://instagram.com/', tiktok: 'https://tiktok.com/@', facebook: 'https://facebook.com/' };
+  return bases[platform] + cleaned;
+}
+
+function toHandle(url: string): string {
+  if (!url) return '';
+  return url
+    .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|facebook\.com)\/@?/, '')
+    .replace(/\/$/, '');
+}
+
 export default function VendorProfile() {
   const navigate = useNavigate();
   const { vendor, isLoading, updateVendorProfile, deleteVendorProfile } = useMyVendorProfile();
@@ -74,9 +89,9 @@ export default function VendorProfile() {
       email: vendor.email || '',
       location: vendor.location || '',
       image_urls: vendor.image_urls || [],
-      instagram_url: (vendor as any).instagram_url || '',
-      tiktok_url: (vendor as any).tiktok_url || '',
-      facebook_url: (vendor as any).facebook_url || '',
+      instagram_url: toHandle((vendor as any).instagram_url || ''),
+      tiktok_url: toHandle((vendor as any).tiktok_url || ''),
+      facebook_url: toHandle((vendor as any).facebook_url || ''),
     });
     setIsEditing(true);
   };
@@ -91,9 +106,9 @@ export default function VendorProfile() {
       email: editData.email || null,
       location: editData.location || null,
       image_urls: editData.image_urls,
-      instagram_url: editData.instagram_url || null,
-      tiktok_url: editData.tiktok_url || null,
-      facebook_url: editData.facebook_url || null,
+      instagram_url: toSocialUrl('instagram', editData.instagram_url),
+      tiktok_url: toSocialUrl('tiktok', editData.tiktok_url),
+      facebook_url: toSocialUrl('facebook', editData.facebook_url),
     } as any);
     setIsSaving(false);
     if (success) {
@@ -275,27 +290,27 @@ export default function VendorProfile() {
                 <div className="space-y-3 pt-2 border-t">
                   <Label className="text-sm font-medium">Social links (optional)</Label>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Instagram URL</Label>
+                    <Label className="text-xs text-muted-foreground">Instagram username</Label>
                     <Input
                       value={editData.instagram_url}
                       onChange={(e) => setEditData({ ...editData, instagram_url: e.target.value })}
-                      placeholder="https://instagram.com/yourbusiness"
+                      placeholder="e.g. maswazicatering"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">TikTok URL</Label>
+                    <Label className="text-xs text-muted-foreground">TikTok username</Label>
                     <Input
                       value={editData.tiktok_url}
                       onChange={(e) => setEditData({ ...editData, tiktok_url: e.target.value })}
-                      placeholder="https://tiktok.com/@yourbusiness"
+                      placeholder="e.g. maswazicatering"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Facebook URL</Label>
+                    <Label className="text-xs text-muted-foreground">Facebook username or page name</Label>
                     <Input
                       value={editData.facebook_url}
                       onChange={(e) => setEditData({ ...editData, facebook_url: e.target.value })}
-                      placeholder="https://facebook.com/yourbusiness"
+                      placeholder="e.g. maswazicatering"
                     />
                   </div>
                 </div>

@@ -1,5 +1,26 @@
-1. Add `toSocialUrl()` helper function before the `VendorOnboarding` component definition in `src/pages/vendors/VendorOnboarding.tsx`. It takes a platform and a raw handle, strips leading `@`, returns the handle unchanged if it already starts with `http://` or `https://`, otherwise prefixes it with the correct base URL.
+## Plan: Social URL UX improvements in VendorProfile
 
-2. Update the submit payload in `handleSubmit` so that `instagram_url`, `tiktok_url`, and `facebook_url` are passed through `toSocialUrl()` instead of being sent as raw trimmed strings.
+### Goal
+Improve the social-media editing experience in `VendorProfile.tsx` so vendors type plain usernames instead of full URLs, while the database continues to store canonical URLs.
 
-3. Update the `<Label>` text and `<Input>` placeholders for all three social fields to indicate username entry (e.g. "e.g. maswazicatering") rather than full URLs.
+### Changes
+
+#### 1. Add two helper functions before `VendorProfile`
+- `toSocialUrl(platform, handle)` — converts a raw handle into a canonical URL. Strips leading `@`; passes through if already a URL; otherwise prepends the correct base domain.
+- `toHandle(url)` — strips the base domain from a stored URL so the input field shows only the username/handle.
+
+#### 2. Strip base URLs when loading existing data
+In `startEditing`, replace the three social assignments with `toHandle(...)` so the edit form pre-fills with bare usernames rather than full URLs.
+
+#### 3. Update save payload, labels and placeholders
+In `handleSave`, wrap `editData.instagram_url`, `tiktok_url`, and `facebook_url` with `toSocialUrl(...)` before sending to the API.
+
+In the JSX editing block, update:
+- Instagram label from "Instagram URL" → "Instagram username"
+- TikTok label from "TikTok URL" → "TikTok username"
+- Facebook label from "Facebook URL" → "Facebook username or page name"
+- All three placeholders from full URLs → "e.g. maswazicatering"
+
+### Scope
+- **Only file changed:** `src/pages/profile/VendorProfile.tsx`
+- **No backend changes required.**
