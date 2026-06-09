@@ -556,7 +556,7 @@ export default function AuthPage() {
 
       if (selectedRole === 'vendor') {
         toast.success('Account created! Now set up your business.');
-        navigate('/vendors/onboarding', { replace: true });
+        navigate('/vendors/onboarding?fromAuth=true', { replace: true });
       } else {
         setStep('success');
         toast.success('Account created successfully!');
