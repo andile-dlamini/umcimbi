@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Store, BarChart3, Users, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Store, BarChart3, Users, Sparkles, BadgeCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -73,6 +74,7 @@ export default function AdminDashboard() {
   const [vendorsJoinedThisMonth, setVendorsJoinedThisMonth] = useState(0);
   const [totalOrganisers, setTotalOrganisers] = useState(0);
   const [organisersJoinedThisMonth, setOrganisersJoinedThisMonth] = useState(0);
+  const [pendingVendors, setPendingVendors] = useState(0);
 
   // AI Daily Brief
   const [dailyBrief, setDailyBrief] = useState<{ brief_text: string; generated_at: string } | null>(null);
@@ -145,6 +147,14 @@ export default function AdminDashboard() {
       setVendorsJoinedThisMonth(Number(stats?.vendors_joined_this_month || 0));
       setTotalOrganisers(Number(stats?.total_organisers || 0));
       setOrganisersJoinedThisMonth(Number(stats?.organisers_joined_this_month || 0));
+
+      const { count: pendingCount } = await supabase
+        .from('vendors')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', false)
+        .eq('is_demo', false)
+        .eq('is_banned', false);
+      setPendingVendors(pendingCount || 0);
 
       setNewOrganisers(await fetchCount('user_roles', '*', start, { role: 'user' }));
       setNewCeremonies(await fetchCount('events', '*', start));
@@ -289,7 +299,7 @@ export default function AdminDashboard() {
       </Card>
 
       {/* Real account statistics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {accountCards.map(card => {
           const Icon = card.icon;
           return (
@@ -317,6 +327,33 @@ export default function AdminDashboard() {
             </Card>
           );
         })}
+
+        <Link to="/admin/verification-queue" className="block">
+          <Card className={`border-l-4 ${pendingVendors > 0 ? 'border-l-amber-500' : 'border-l-primary'} hover:bg-muted/30 transition-colors h-full`}>
+            <CardContent className="p-4">
+              {isLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              ) : (
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pending vendors</p>
+                    <p className="text-3xl font-bold mt-1">{pendingVendors}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {pendingVendors > 0 ? 'Tap to review approvals' : 'Queue is clear'}
+                    </p>
+                  </div>
+                  <div className={`h-10 w-10 rounded-lg ${pendingVendors > 0 ? 'bg-amber-500/10 text-amber-600' : 'bg-primary/10 text-primary'} flex items-center justify-center shrink-0`}>
+                    <BadgeCheck className="h-5 w-5" />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Tier 1 — Revenue strip */}
