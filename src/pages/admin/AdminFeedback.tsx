@@ -268,6 +268,29 @@ export default function AdminFeedback() {
                     ))}
                   </div>
                 </div>
+
+                {selectedPhone && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Reply</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 text-emerald-700 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:text-emerald-800"
+                      onClick={() => {
+                        let num = selectedPhone.replace(/\D/g, '');
+                        if (num.startsWith('0')) num = '27' + num.slice(1);
+                        if (!num.startsWith('27')) num = '27' + num;
+                        const text = encodeURIComponent(
+                          `Hi, thanks for your feedback on UMCIMBI. We're following up on your ${selected.feedback_type === 'bug' ? 'bug report' : selected.feedback_type}.`
+                        );
+                        window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+                      }}
+                    >
+                      <Phone className="h-4 w-4" />
+                      Reply on WhatsApp
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}
