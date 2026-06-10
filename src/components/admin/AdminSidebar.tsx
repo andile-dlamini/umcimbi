@@ -29,7 +29,7 @@ const navItems = [
   { label: 'Revenue', to: '/admin/revenue', icon: DollarSign },
   { label: 'AI Insights', to: '/admin/insights', icon: Sparkles },
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
-  { label: 'Verification Queue', to: '/admin/verification-queue', icon: BadgeCheck },
+  { label: 'Vendor Approvals', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
   { label: 'Bulk Upload', to: '/admin/bulk-vendors', icon: Upload },
   { label: 'Waitlist', to: '/admin/waitlist', icon: Clock },
