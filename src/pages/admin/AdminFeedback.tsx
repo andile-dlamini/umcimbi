@@ -175,7 +175,7 @@ export default function AdminFeedback() {
                       <TableRow
                         key={r.id}
                         className="cursor-pointer"
-                        onClick={() => setSelected(r)}
+                        onClick={() => handleSelect(r)}
                       >
                         <TableCell>
                           <Badge variant="outline" className={`${meta.className} gap-1`}>
@@ -208,7 +208,7 @@ export default function AdminFeedback() {
         </CardContent>
       </Card>
 
-      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+      <Sheet open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); setSelectedPhone(null); } }}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           {selected && (
             <>
