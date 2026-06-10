@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Bug, Lightbulb, PartyPopper, MessageCircle } from 'lucide-react';
+import { MessageSquare, Bug, Lightbulb, PartyPopper, MessageCircle, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,25 @@ export default function AdminFeedback() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selected, setSelected] = useState<FeedbackRow | null>(null);
+  const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
+
+  const fetchPhone = async (userId: string | null) => {
+    if (!userId) {
+      setSelectedPhone(null);
+      return;
+    }
+    const { data } = await supabase
+      .from('profiles')
+      .select('phone_number')
+      .eq('id', userId)
+      .single();
+    setSelectedPhone(data?.phone_number || null);
+  };
+
+  const handleSelect = async (row: FeedbackRow) => {
+    setSelected(row);
+    await fetchPhone(row.user_id);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -156,7 +175,7 @@ export default function AdminFeedback() {
                       <TableRow
                         key={r.id}
                         className="cursor-pointer"
-                        onClick={() => setSelected(r)}
+                        onClick={() => handleSelect(r)}
                       >
                         <TableCell>
                           <Badge variant="outline" className={`${meta.className} gap-1`}>
@@ -189,7 +208,7 @@ export default function AdminFeedback() {
         </CardContent>
       </Card>
 
-      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+      <Sheet open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); setSelectedPhone(null); } }}>
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           {selected && (
             <>
@@ -249,6 +268,29 @@ export default function AdminFeedback() {
                     ))}
                   </div>
                 </div>
+
+                {selectedPhone && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Reply</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 text-emerald-700 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:text-emerald-800"
+                      onClick={() => {
+                        let num = selectedPhone.replace(/\D/g, '');
+                        if (num.startsWith('0')) num = '27' + num.slice(1);
+                        if (!num.startsWith('27')) num = '27' + num;
+                        const text = encodeURIComponent(
+                          `Hi, thanks for your feedback on UMCIMBI. We're following up on your ${selected.feedback_type === 'bug' ? 'bug report' : selected.feedback_type}.`
+                        );
+                        window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+                      }}
+                    >
+                      <Phone className="h-4 w-4" />
+                      Reply on WhatsApp
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}
