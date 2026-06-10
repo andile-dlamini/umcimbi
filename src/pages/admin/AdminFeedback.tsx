@@ -43,6 +43,25 @@ export default function AdminFeedback() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selected, setSelected] = useState<FeedbackRow | null>(null);
+  const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
+
+  const fetchPhone = async (userId: string | null) => {
+    if (!userId) {
+      setSelectedPhone(null);
+      return;
+    }
+    const { data } = await supabase
+      .from('profiles')
+      .select('phone_number')
+      .eq('id', userId)
+      .single();
+    setSelectedPhone(data?.phone_number || null);
+  };
+
+  const handleSelect = async (row: FeedbackRow) => {
+    setSelected(row);
+    await fetchPhone(row.user_id);
+  };
 
   const fetchData = async () => {
     setLoading(true);
