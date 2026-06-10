@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Bug, Lightbulb, PartyPopper, MessageCircle } from 'lucide-react';
+import { MessageSquare, Bug, Lightbulb, PartyPopper, MessageCircle, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
