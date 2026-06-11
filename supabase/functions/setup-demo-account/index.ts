@@ -104,7 +104,6 @@ Deno.serve(async (req) => {
         message: "Demo account ready",
         login: {
           phone: DEMO_PHONE_LOCAL,
-          password: DEMO_PASSWORD,
           otp_for_signup: "123456",
         },
         user_id: userId,
