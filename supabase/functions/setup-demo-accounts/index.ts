@@ -149,7 +149,6 @@ Deno.serve(async (req) => {
       JSON.stringify(
         {
           ok: true,
-          password: DEMO_PASSWORD,
           results,
         },
         null,
