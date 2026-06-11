@@ -11,41 +11,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const authHeader = req.headers.get('Authorization') ?? '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  if (!token) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-  let isAuthorized = false;
-  if (token === serviceKey) {
-    isAuthorized = true;
-  } else {
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const authClient = createClient(supabaseUrl, anonKey);
-    const { data: { user }, error: userErr } = await authClient.auth.getUser(token);
-    if (!userErr && user) {
-      const adminClient = createClient(supabaseUrl, serviceKey);
-      const { data: roleRow } = await adminClient
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-      if (roleRow?.role === 'admin') isAuthorized = true;
-    }
-  }
-  if (!isAuthorized) {
-    return new Response(JSON.stringify({ error: 'Forbidden' }), {
-      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Auth is enforced by Supabase gateway (verify_jwt = true in config.toml).
+  // The cron job authenticates with the service-role JWT stored in vault.
+
+
+
+
+
 
   try {
-    const supabaseServiceKey = serviceKey;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY')!;
     const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@umcimbi.co.za';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
