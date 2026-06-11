@@ -208,7 +208,7 @@ export default function OnboardingLanguage() {
               {[
                 'Find trusted vendors for any traditional ceremony near you',
                 'Compare quotes from vetted vendors across South Africa',
-                'Pay safely with protection\n'
+                'Pay safely online with protection\n'
               ].map((text) => (
                 <li key={text} className="flex gap-3 items-start text-[15px] sm:text-base text-white/85 leading-relaxed drop-shadow-md">
                   <CheckCircle2 className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
