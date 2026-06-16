@@ -5,6 +5,7 @@ export type VendorCategory =
   | 'attire_tailoring'
   | 'cakes_baking'
   | 'catering' 
+  | 'cleaning_services'
   | 'cold_room_hire'
   | 'decor'
   | 'dj_sound_audio'
@@ -29,6 +30,7 @@ export const VENDOR_CATEGORIES: VendorCategoryInfo[] = [
   { value: 'attire_tailoring', label: 'Attire & Tailoring' },
   { value: 'cakes_baking', label: 'Cakes & Baking' },
   { value: 'catering', label: 'Catering' },
+  { value: 'cleaning_services', label: 'Cleaning Services' },
   { value: 'cold_room_hire', label: 'Cold Room Hire' },
   { value: 'decor', label: 'Decor & Styling' },
   { value: 'dj_sound_audio', label: 'DJ / Sound & Audio' },
