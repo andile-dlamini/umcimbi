@@ -122,7 +122,7 @@ export default function VendorVerificationQueue() {
     const { data: vendorData, error } = await supabase
       .from('vendors')
       .select(VENDOR_SELECT)
-      .eq('is_active', false)
+      .or('is_active.eq.false,business_verification_status.eq.pending')
       .eq('is_demo', false)
       .eq('is_banned', false)
       .order('created_at', { ascending: true });
