@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can view all vendors" ON public.vendors FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
