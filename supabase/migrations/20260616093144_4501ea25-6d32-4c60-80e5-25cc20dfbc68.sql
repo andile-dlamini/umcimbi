@@ -1,0 +1,1 @@
+ALTER TYPE public.vendor_category ADD VALUE 'cleaning_services';
