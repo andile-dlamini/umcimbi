@@ -132,7 +132,7 @@ serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicApiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 700,
         system: `You are the operations intelligence layer for UMCIMBI, a South African digital marketplace for traditional Zulu ceremonies (Lobola, Umembeso, Umbondo, Umabo, Umemulo, Imbeleko, Ancestral Ritual). Every morning at 07:00 SAST you write a short operations brief for Andile, the solo founder.
 
