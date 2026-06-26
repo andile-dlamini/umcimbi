@@ -163,7 +163,7 @@ export default function VendorDetail() {
   }
 
   const allImages = vendor.image_urls ?? [];
-  const logoUrl = allImages[0] ?? null;
+  const logoUrl = vendor.logo_url ?? null;
   const images = allImages.slice(1);
   const totalImages = images.length;
   const v = vendor as any;
