@@ -251,28 +251,44 @@ const ChatThread = () => {
   };
 
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeBooking) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !activeBooking) return;
+
+    const currentCount = bookingProofs.reduce((n, p) => n + (p.photos?.length || 0), 0);
+    const remaining = Math.max(0, 3 - currentCount);
+    if (remaining === 0) {
+      toast.error('You can only upload up to 3 proof photos.');
+      if (proofFileInputRef.current) proofFileInputRef.current.value = '';
+      return;
+    }
+    const toUpload = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast.message(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed — uploading the first ${remaining}.`);
+    }
 
     setIsUploadingProof(true);
+    let successCount = 0;
     try {
-      const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('delivery-proofs')
-        .upload(path, file);
-      if (uploadError) throw uploadError;
+      for (const file of toUpload) {
+        const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('delivery-proofs')
+          .upload(path, file);
+        if (uploadError) throw uploadError;
 
-      const { data, error } = await supabase.functions.invoke(
-        'upload-delivery-proof',
-        { body: { booking_id: activeBooking.id, photo_path: path } }
-      );
-      if (error || data?.error) throw error || new Error(data.error);
-
-      toast.success('Proof uploaded! Payment will be released within 48 hours.');
-      refreshBooking();
+        const { data, error } = await supabase.functions.invoke(
+          'upload-delivery-proof',
+          { body: { booking_id: activeBooking.id, photo_path: path } }
+        );
+        if (error || data?.error) throw error || new Error(data.error);
+        successCount++;
+      }
+      toast.success(`${successCount} proof photo${successCount === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
+      await refreshBooking();
       refreshMessages();
     } catch (err: any) {
-      toast.error('Upload failed. Please try again.');
+      toast.error(successCount > 0 ? `Uploaded ${successCount}, but one failed.` : 'Upload failed. Please try again.');
+      await refreshBooking();
     } finally {
       setIsUploadingProof(false);
       if (proofFileInputRef.current) proofFileInputRef.current.value = '';
