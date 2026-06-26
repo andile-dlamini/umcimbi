@@ -251,28 +251,44 @@ const ChatThread = () => {
   };
 
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeBooking) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !activeBooking) return;
+
+    const currentCount = bookingProofs.reduce((n, p) => n + (p.photos?.length || 0), 0);
+    const remaining = Math.max(0, 3 - currentCount);
+    if (remaining === 0) {
+      toast.error('You can only upload up to 3 proof photos.');
+      if (proofFileInputRef.current) proofFileInputRef.current.value = '';
+      return;
+    }
+    const toUpload = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast.message(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed — uploading the first ${remaining}.`);
+    }
 
     setIsUploadingProof(true);
+    let successCount = 0;
     try {
-      const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('delivery-proofs')
-        .upload(path, file);
-      if (uploadError) throw uploadError;
+      for (const file of toUpload) {
+        const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('delivery-proofs')
+          .upload(path, file);
+        if (uploadError) throw uploadError;
 
-      const { data, error } = await supabase.functions.invoke(
-        'upload-delivery-proof',
-        { body: { booking_id: activeBooking.id, photo_path: path } }
-      );
-      if (error || data?.error) throw error || new Error(data.error);
-
-      toast.success('Proof uploaded! Payment will be released within 48 hours.');
-      refreshBooking();
+        const { data, error } = await supabase.functions.invoke(
+          'upload-delivery-proof',
+          { body: { booking_id: activeBooking.id, photo_path: path } }
+        );
+        if (error || data?.error) throw error || new Error(data.error);
+        successCount++;
+      }
+      toast.success(`${successCount} proof photo${successCount === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
+      await refreshBooking();
       refreshMessages();
     } catch (err: any) {
-      toast.error('Upload failed. Please try again.');
+      toast.error(successCount > 0 ? `Uploaded ${successCount}, but one failed.` : 'Upload failed. Please try again.');
+      await refreshBooking();
     } finally {
       setIsUploadingProof(false);
       if (proofFileInputRef.current) proofFileInputRef.current.value = '';
@@ -591,6 +607,7 @@ const ChatThread = () => {
         ref={proofFileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        multiple
         className="hidden"
         onChange={handleProofUpload}
       />
@@ -605,32 +622,39 @@ const ChatThread = () => {
           && !activeBooking.funds_released_at
           ? (
             <div className="mb-3 space-y-2">
-              {bookingProofs.length > 0 && (
-                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    ✅ Proof submitted — payment releases within 48 hours or when client confirms
-                  </p>
-                </div>
-              )}
-              {bookingProofs.length < 3 && (
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                  {bookingProofs.length === 0 && (
-                    <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
-                      💰 Payment secured — upload proof to release your funds
-                    </p>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => proofFileInputRef.current?.click()}
-                    disabled={isUploadingProof}
-                  >
-                    {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
-                    {isUploadingProof ? 'Uploading...' : `Upload Proof of Delivery (${bookingProofs.length}/3)`}
-                  </Button>
-                </div>
-              )}
+              {(() => {
+                const proofCount = bookingProofs.reduce((n, p) => n + (p.photos?.length || 0), 0);
+                return (
+                  <>
+                    {proofCount > 0 && (
+                      <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                        <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          ✅ Proof submitted — payment releases within 48 hours or when client confirms
+                        </p>
+                      </div>
+                    )}
+                    {proofCount < 3 && (
+                      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                        {proofCount === 0 && (
+                          <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                            💰 Payment secured — upload proof to release your funds
+                          </p>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => proofFileInputRef.current?.click()}
+                          disabled={isUploadingProof}
+                        >
+                          {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                          {isUploadingProof ? 'Uploading...' : `Upload Proof of Delivery (${proofCount}/3)`}
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )
           : !isVendorView
