@@ -304,6 +304,28 @@ export default function VendorOnboarding() {
 
     // Upload images to storage now that we have a vendor ID
     const uploadedUrls: string[] = [];
+    const uploadFailures: Array<{ kind: string; path: string; message: string }> = [];
+
+    const logUploadFailure = async (kind: string, path: string, message: string) => {
+      uploadFailures.push({ kind, path, message });
+      console.error(`[vendor-upload-failed] vendor=${result.id} kind=${kind} path=${path}`, message);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from('platform_events').insert({
+          event_type: 'vendor_upload_failed',
+          actor_type: 'vendor',
+          actor_id: user?.id ?? null,
+          metadata: {
+            vendor_id: result.id,
+            kind,
+            path,
+            error: message,
+          },
+        } as any);
+      } catch (logErr) {
+        console.error('Failed to log upload failure to platform_events:', logErr);
+      }
+    };
 
     try {
       // Upload logo as first image
@@ -313,7 +335,9 @@ export default function VendorOnboarding() {
         const { error: uploadErr } = await supabase.storage
           .from('vendor-images')
           .upload(path, logoFile, { upsert: true });
-        if (!uploadErr) {
+        if (uploadErr) {
+          await logUploadFailure('logo', path, uploadErr.message);
+        } else {
           const { data: urlData } = supabase.storage
             .from('vendor-images')
             .getPublicUrl(path);
@@ -329,7 +353,9 @@ export default function VendorOnboarding() {
         const { error: uploadErr } = await supabase.storage
           .from('vendor-images')
           .upload(path, file, { upsert: true });
-        if (!uploadErr) {
+        if (uploadErr) {
+          await logUploadFailure('showcase', path, uploadErr.message);
+        } else {
           const { data: urlData } = supabase.storage
             .from('vendor-images')
             .getPublicUrl(path);
@@ -346,29 +372,42 @@ export default function VendorOnboarding() {
           const { error: docUploadErr } = await supabase.storage
             .from('vendor-images')
             .upload(docPath, vf.file, { upsert: true });
-          if (!docUploadErr) {
+          if (docUploadErr) {
+            await logUploadFailure('verification_doc', docPath, docUploadErr.message);
+          } else {
             const { data: docUrlData } = supabase.storage
               .from('vendor-images')
               .getPublicUrl(docPath);
-            await supabase.from('vendor_verification_documents').insert({
+            const { error: insertErr } = await supabase.from('vendor_verification_documents').insert({
               vendor_id: result.id,
               doc_type: i === 0 ? 'cipc_registration' : 'proof_of_address',
               file_url: docUrlData.publicUrl,
               status: 'uploaded',
             } as any);
+            if (insertErr) {
+              await logUploadFailure('verification_doc_row', docPath, insertErr.message);
+            }
           }
         }
       }
 
       // Update vendor record with image URLs
       if (uploadedUrls.length > 0) {
-        await supabase
+        const { error: updateErr } = await supabase
           .from('vendors')
           .update({ image_urls: uploadedUrls })
           .eq('id', result.id);
+        if (updateErr) {
+          await logUploadFailure('vendor_image_urls_update', result.id, updateErr.message);
+        }
       }
-    } catch (err) {
+
+      if (uploadFailures.length > 0) {
+        toast.error(`Profile created but ${uploadFailures.length} file(s) failed to upload. You can add them later.`);
+      }
+    } catch (err: any) {
       console.error('Image upload error:', err);
+      await logUploadFailure('unexpected', result.id, err?.message ?? String(err));
       toast.error('Profile created but some images failed to upload. You can add them later.');
     }
 
