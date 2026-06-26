@@ -268,26 +268,43 @@ const ChatThread = () => {
 
     setIsUploadingProof(true);
     let successCount = 0;
+    let lastError: string | null = null;
     try {
-      for (const file of toUpload) {
-        const path = `${activeBooking.id}/${Date.now()}-${file.name}`;
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i];
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const safeExt = ext || 'jpg';
+        const path = `${activeBooking.id}/${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}.${safeExt}`;
         const { error: uploadError } = await supabase.storage
           .from('delivery-proofs')
-          .upload(path, file);
-        if (uploadError) throw uploadError;
+          .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+        if (uploadError) {
+          console.error('[proof-upload] storage error', uploadError);
+          lastError = uploadError.message;
+          continue;
+        }
 
         const { data, error } = await supabase.functions.invoke(
           'upload-delivery-proof',
           { body: { booking_id: activeBooking.id, photo_path: path } }
         );
-        if (error || data?.error) throw error || new Error(data.error);
+        if (error || data?.error) {
+          console.error('[proof-upload] function error', error, data);
+          lastError = (error as any)?.message || data?.error || 'Edge function failed';
+          continue;
+        }
         successCount++;
       }
-      toast.success(`${successCount} proof photo${successCount === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
+      if (successCount > 0) {
+        toast.success(`${successCount} proof photo${successCount === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
+      } else {
+        toast.error(lastError ? `Upload failed: ${lastError}` : 'Upload failed. Please try again.');
+      }
       await refreshBooking();
       refreshMessages();
     } catch (err: any) {
-      toast.error(successCount > 0 ? `Uploaded ${successCount}, but one failed.` : 'Upload failed. Please try again.');
+      console.error('[proof-upload] unexpected', err);
+      toast.error(err?.message || 'Upload failed. Please try again.');
       await refreshBooking();
     } finally {
       setIsUploadingProof(false);
