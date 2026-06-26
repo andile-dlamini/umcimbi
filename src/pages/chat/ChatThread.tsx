@@ -607,6 +607,7 @@ const ChatThread = () => {
         ref={proofFileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        multiple
         className="hidden"
         onChange={handleProofUpload}
       />
