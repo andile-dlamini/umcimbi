@@ -622,32 +622,39 @@ const ChatThread = () => {
           && !activeBooking.funds_released_at
           ? (
             <div className="mb-3 space-y-2">
-              {bookingProofs.length > 0 && (
-                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    ✅ Proof submitted — payment releases within 48 hours or when client confirms
-                  </p>
-                </div>
-              )}
-              {bookingProofs.length < 3 && (
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                  {bookingProofs.length === 0 && (
-                    <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
-                      💰 Payment secured — upload proof to release your funds
-                    </p>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => proofFileInputRef.current?.click()}
-                    disabled={isUploadingProof}
-                  >
-                    {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
-                    {isUploadingProof ? 'Uploading...' : `Upload Proof of Delivery (${bookingProofs.length}/3)`}
-                  </Button>
-                </div>
-              )}
+              {(() => {
+                const proofCount = bookingProofs.reduce((n, p) => n + (p.photos?.length || 0), 0);
+                return (
+                  <>
+                    {proofCount > 0 && (
+                      <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                        <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          ✅ Proof submitted — payment releases within 48 hours or when client confirms
+                        </p>
+                      </div>
+                    )}
+                    {proofCount < 3 && (
+                      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                        {proofCount === 0 && (
+                          <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                            💰 Payment secured — upload proof to release your funds
+                          </p>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => proofFileInputRef.current?.click()}
+                          disabled={isUploadingProof}
+                        >
+                          {isUploadingProof ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                          {isUploadingProof ? 'Uploading...' : `Upload Proof of Delivery (${proofCount}/3)`}
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )
           : !isVendorView
