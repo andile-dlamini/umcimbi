@@ -252,7 +252,7 @@ const ChatThread = () => {
 
   const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0 || !activeBooking) return;
+    if (files.length === 0 || !activeBooking || !user) return;
 
     const currentCount = bookingProofs.reduce((n, p) => n + (p.photos?.length || 0), 0);
     const remaining = Math.max(0, 3 - currentCount);
