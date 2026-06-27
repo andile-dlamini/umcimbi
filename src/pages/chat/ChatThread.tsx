@@ -298,6 +298,20 @@ const ChatThread = () => {
         if (error || data?.error) {
           console.error('[proof-upload] function error', error, data);
           lastError = (error as any)?.message || data?.error || 'Edge function failed';
+
+          const { error: proofInsertError } = await supabase.from('delivery_proofs').insert({
+            booking_id: activeBooking.id,
+            uploaded_by: user?.id,
+            photos: uploadedPaths,
+          });
+
+          if (proofInsertError) {
+            console.error('[proof-upload] fallback insert error', proofInsertError);
+            lastError = proofInsertError.message;
+          } else {
+            lastError = null;
+            toast.success(`${uploadedPaths.length} proof photo${uploadedPaths.length === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
+          }
         } else {
           toast.success(`${uploadedPaths.length} proof photo${uploadedPaths.length === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
         }
