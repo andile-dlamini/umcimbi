@@ -267,11 +267,15 @@ const ChatThread = () => {
     }
 
     setIsUploadingProof(true);
-    let successCount = 0;
+    const uploadedPaths: string[] = [];
     let lastError: string | null = null;
     try {
       for (let i = 0; i < toUpload.length; i++) {
         const file = toUpload[i];
+        if (!file.type.startsWith('image/')) {
+          lastError = 'Only image files can be uploaded as proof of delivery.';
+          continue;
+        }
         const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
         const safeExt = ext || 'jpg';
         const path = `${activeBooking.id}/${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}.${safeExt}`;
@@ -283,21 +287,22 @@ const ChatThread = () => {
           lastError = uploadError.message;
           continue;
         }
+        uploadedPaths.push(path);
+      }
 
+      if (uploadedPaths.length > 0) {
         const { data, error } = await supabase.functions.invoke(
           'upload-delivery-proof',
-          { body: { booking_id: activeBooking.id, photo_path: path } }
+          { body: { booking_id: activeBooking.id, photo_paths: uploadedPaths } }
         );
         if (error || data?.error) {
           console.error('[proof-upload] function error', error, data);
           lastError = (error as any)?.message || data?.error || 'Edge function failed';
-          continue;
+        } else {
+          toast.success(`${uploadedPaths.length} proof photo${uploadedPaths.length === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
         }
-        successCount++;
       }
-      if (successCount > 0) {
-        toast.success(`${successCount} proof photo${successCount === 1 ? '' : 's'} uploaded! Payment releases within 48 hours.`);
-      } else {
+      if (uploadedPaths.length === 0 || lastError) {
         toast.error(lastError ? `Upload failed: ${lastError}` : 'Upload failed. Please try again.');
       }
       await refreshBooking();
