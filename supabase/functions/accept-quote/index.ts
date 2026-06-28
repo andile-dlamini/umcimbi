@@ -129,15 +129,19 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Failed to create booking" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Generate Order Confirmation PDF (true fire-and-forget — do NOT await)
-    fetch(`${supabaseUrl}/functions/v1/generate-order-confirmation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({ booking_id: booking.id, order_number: orderNumber }),
-    }).catch((e) => console.error("Order PDF generation failed (non-blocking):", e));
+    // Generate Order Confirmation PDF as a background task — EdgeRuntime.waitUntil
+    // keeps the function alive until this fetch settles, so it can't be cut off
+    // by the runtime tearing down the context after the response is returned.
+    EdgeRuntime.waitUntil(
+      fetch(`${supabaseUrl}/functions/v1/generate-order-confirmation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({ booking_id: booking.id, order_number: orderNumber }),
+      }).catch((e) => console.error("Order PDF generation failed (non-blocking):", e))
+    );
 
     // Post system message to conversation
     const { data: conv } = await supabase
