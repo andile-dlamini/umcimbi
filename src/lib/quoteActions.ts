@@ -1,25 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-/** Open a blob URL in a new tab, with anchor-click fallback for iframe contexts */
-function openBlobUrl(blobUrl: string) {
-  const win = window.open(blobUrl, '_blank', 'noopener,noreferrer');
-  if (!win) {
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-}
-
 /**
  * Fetch a signed URL for the quote's final offer PDF and open it.
+ * Opens a blank tab SYNCHRONOUSLY (inside the user-gesture tap) before
+ * awaiting the edge function, so mobile Safari / in-app browsers don't
+ * silently block the popup.
  * Returns the URL on success, null on failure.
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   try {
     const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
       body: { quote_id: quoteId },
@@ -27,6 +17,7 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
 
     if (error) {
       console.error('[VIEW_PDF] invoke error', error);
+      if (win) win.close();
       toast.error('Failed to load PDF');
       return null;
     }
@@ -38,21 +29,21 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
 
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
       console.error('[VIEW_PDF] unexpected response shape', data);
+      if (win) win.close();
       toast.error(typeof data === 'object' && data?.error ? data.error : 'Could not load PDF');
       return null;
     }
 
-    // Open via anchor element — works on mobile without popup blocker issues
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    if (win) {
+      win.location.href = url;
+    } else {
+      // Blank popup was blocked — open in current tab so it still works.
+      window.location.href = url;
+    }
     return url;
   } catch (err: any) {
     console.error('[VIEW_PDF] exception:', err);
+    if (win) win.close();
     toast.error(err?.message || 'Failed to load PDF');
     return null;
   }
@@ -125,37 +116,37 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
 
 /**
  * Fetch a signed URL for the order confirmation PDF and open it.
+ * Opens a blank tab synchronously before awaiting the edge function to
+ * survive mobile popup blockers.
  */
 export async function viewOrderPdfAction(bookingId: string): Promise<string | null> {
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   try {
     const { data, error } = await supabase.functions.invoke('get-order-pdf-url', {
       body: { booking_id: bookingId },
     });
 
     if (error || data?.error) {
+      if (win) win.close();
       toast.error(data?.error || 'Failed to load Order PDF');
       return null;
     }
 
     const url = typeof data === 'string' ? data : data?.url;
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+      if (win) win.close();
       toast.error('Could not load Order PDF');
       return null;
     }
 
-    const fileRes = await fetch(url);
-    if (!fileRes.ok) {
-      toast.error('Failed to download document');
-      return null;
+    if (win) {
+      win.location.href = url;
+    } else {
+      window.location.href = url;
     }
-
-    const htmlContent = await fileRes.text();
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const blobUrl = URL.createObjectURL(blob);
-
-    openBlobUrl(blobUrl);
-    return blobUrl;
+    return url;
   } catch (err: any) {
+    if (win) win.close();
     toast.error(err?.message || 'Failed to load Order PDF');
     return null;
   }
