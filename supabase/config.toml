@@ -36,5 +36,3 @@ verify_jwt = false
 [functions.vendor-selfie-submission]
 verify_jwt = false
 
-[functions.admin-fetch-quote-pdf]
-verify_jwt = false
