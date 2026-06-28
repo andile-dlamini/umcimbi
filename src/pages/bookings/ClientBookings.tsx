@@ -101,7 +101,7 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
           <MessageCircle className="h-4 w-4 mr-2" />
           Open Chat
         </Button>
-        {booking.order_pdf_key && (
+        {(booking as any).order_pdf_key && (
           <Button
             variant="outline"
             size="sm"
