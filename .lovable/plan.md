@@ -1,16 +1,35 @@
-Two small admin UI updates to surface the manual vendor approval workflow.
 
-1. Rename sidebar item
-   File: `src/components/admin/AdminSidebar.tsx`
-   - Change the nav item label from "Verification Queue" to "Vendor Approvals". Route and icon (`BadgeCheck`) stay the same.
+## Goal
+Make "View PDF" (quote) and "Order PDF" (order) buttons work reliably on mobile Safari and in-app browsers (WhatsApp, etc.). Hide the Order PDF button when no PDF has been generated yet.
 
-2. Add "Pending vendors" card to Admin Overview
-   File: `src/pages/admin/AdminDashboard.tsx`
-   - Add `pendingVendors` state (number) and fetch it alongside the other metrics.
-   - Query: count vendors where `is_active = false`, `is_demo = false`, `is_banned = false` — matching the existing `VendorVerificationQueue` filter.
-   - Add a new card to the "Real account statistics" grid (right after the existing vendor/organiser cards, or in its own row) showing:
-     - Label: "Pending vendors"
-     - Count value
-     - Icon: `BadgeCheck`
-     - The card is clickable and navigates to `/admin/verification-queue`
-   - Follow the existing card styling (border-l-4, icon in colored circle, skeleton loading state).
+## Root cause
+In `src/lib/quoteActions.ts`, both `viewQuotePdfAction` and `viewOrderPdfAction` `await` the signed-URL edge function BEFORE opening a tab. By the time the URL resolves, the browser no longer considers `window.open()`/anchor click a trusted user-gesture result, so strict mobile browsers silently block it. Edge functions are correct and unchanged.
+
+## Changes
+
+### 1. `src/lib/quoteActions.ts` — `viewQuotePdfAction`
+- First line inside `try`: `const win = window.open('', '_blank', 'noopener,noreferrer');`
+- Then invoke `get-final-offer-url` as today.
+- On any failure path (invoke error, missing/invalid url, server `error` field): `if (win) win.close();` then existing `toast.error(...)`.
+- On success: if `win` exists, `win.location.href = url;` else fall back to `window.location.href = url;` (same-tab fallback when blank popup was blocked).
+- Remove the synthetic anchor-click code path.
+
+### 2. `src/lib/quoteActions.ts` — `viewOrderPdfAction`
+- Same synchronous-`window.open('')` first pattern.
+- Invoke `get-order-pdf-url`; on failure close `win` and toast the existing message (missing url, invoke error, access denied, not yet generated).
+- On success: `win.location.href = url;` (or `window.location.href = url;` fallback if `win` null).
+- Remove the secondary `fetch(url)` + `Blob` + `URL.createObjectURL` flow and its failure branch — order PDF is already served as `text/html` from the signed URL.
+- Remove the now-unused `openBlobUrl` helper (no other references in the file).
+
+### 3. `src/pages/bookings/ClientBookings.tsx`
+- Wrap the existing "Order PDF" `<Button>` in `CardFooter` with `{booking.order_pdf_key && ( ... )}`, mirroring the `quote.final_offer_pdf_key` guard in `VendorQuotations.tsx` and the `(booking as any).order_pdf_key` guard in `BookingDetail.tsx`. The "Open Chat" button stays unconditional.
+
+## Out of scope
+- No changes to `get-final-offer-url` or `get-order-pdf-url` edge functions.
+- No backend / RLS / data changes.
+- No changes to chat-thread PDF flows or other call sites.
+
+## Verification
+- Build passes.
+- Manually: tap View PDF on a quote card and Order PDF on an order card from mobile Safari / WhatsApp in-app browser → new tab opens and loads the document.
+- Orders without an `order_pdf_key` no longer show the Order PDF button.
