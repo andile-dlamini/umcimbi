@@ -154,16 +154,14 @@ function AppRoutes() {
         <Route path="/vendor-dashboard/orders" element={<VendorOrders />} />
         <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
           <Route index element={<AdminDashboard />} />
-          <Route path="insights" element={<AdminInsights />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="operations" element={<AdminOperations />} />
-          <Route path="bulk-vendors" element={<BulkVendorUpload />} />
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="vendor-trust" element={<VendorTrust />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="feedback" element={<AdminFeedback />} />
+
         </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />
         {/* Keep AuthPage mounted post-login so signup wizard (vendor business/showcase, success) can finish after auto sign-in */}
