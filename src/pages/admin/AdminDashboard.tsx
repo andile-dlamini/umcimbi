@@ -162,6 +162,7 @@ export default function AdminDashboard() {
       setNewCeremonies(await fetchCount('events', '*', start));
       setNewRequests(await fetchCount('service_requests', '*', start));
       setNewBookings(await fetchBookingCount(start));
+      setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
 
       if (period !== 'all' && prevStart && start) {
         // Previous period counts — between prevStart and start
