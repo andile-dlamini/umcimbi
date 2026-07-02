@@ -1883,6 +1883,18 @@ export type Database = {
           vendors_joined_this_month: number
         }[]
       }
+      get_ceremony_pipeline: {
+        Args: never
+        Returns: {
+          event_date: string
+          event_id: string
+          event_name: string
+          event_type: string
+          has_booking: boolean
+          quotes_received: number
+          requests_sent: number
+        }[]
+      }
       get_own_vendor_bank_details: {
         Args: { vendor_id: string }
         Returns: {
@@ -1892,6 +1904,21 @@ export type Database = {
           bank_branch_code: string
           bank_name: string
           payout_method: string
+        }[]
+      }
+      get_stalled_conversations: {
+        Args: { hours_threshold?: number }
+        Returns: {
+          conversation_id: string
+          event_name: string
+          event_type: string
+          hours_since_reply: number
+          last_message_at: string
+          last_message_preview: string
+          planner_name: string
+          vendor_id: string
+          vendor_name: string
+          vendor_phone: string
         }[]
       }
       has_role: {

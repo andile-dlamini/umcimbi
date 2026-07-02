@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Store, BarChart3, Users, Sparkles, BadgeCheck } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Store, Users, Sparkles, BadgeCheck, AlertCircle, Calendar } from 'lucide-react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { SmsBalanceCard } from '@/components/admin/SmsBalanceCard';
 
@@ -38,6 +39,49 @@ const eventTypeLabels: Record<string, string> = {
   umemulo: 'Umemulo', imbeleko: 'Imbeleko', ancestral_ritual: 'Ancestral Ritual',
 };
 
+type StalledConversation = {
+  conversation_id: string;
+  vendor_id: string;
+  vendor_name: string;
+  vendor_phone: string | null;
+  planner_name: string | null;
+  event_name: string | null;
+  event_type: string | null;
+  last_message_at: string;
+  hours_since_reply: number;
+  last_message_preview: string | null;
+};
+
+type CeremonyPipelineRow = {
+  event_id: string;
+  event_name: string;
+  event_type: string;
+  event_date: string | null;
+  requests_sent: number;
+  quotes_received: number;
+  has_booking: boolean;
+};
+
+function truncate(s: string | null | undefined, n = 80) {
+  if (!s) return '';
+  return s.length > n ? s.slice(0, n).trimEnd() + '…' : s;
+}
+
+function getPipelineStatus(row: CeremonyPipelineRow) {
+  if (row.has_booking) return { label: 'Booked', className: 'bg-green-100 text-green-800 border-green-200' };
+  if (Number(row.requests_sent) === 0) return { label: 'No requests sent', className: 'bg-muted text-muted-foreground border-border' };
+  if (Number(row.quotes_received) === 0) return { label: 'Awaiting vendor response', className: 'bg-amber-100 text-amber-800 border-amber-200' };
+  return { label: 'Quoted, not booked', className: 'bg-blue-100 text-blue-800 border-blue-200' };
+}
+
+function isApproaching(dateStr: string | null): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr).getTime();
+  const now = Date.now();
+  const in14 = now + 14 * 24 * 60 * 60 * 1000;
+  return d >= now - 24 * 60 * 60 * 1000 && d <= in14;
+}
+
 export default function AdminDashboard() {
   const [period, setPeriod] = useState<Period>('month');
   const [isLoading, setIsLoading] = useState(true);
@@ -60,6 +104,13 @@ export default function AdminDashboard() {
   const [pendingQuotes, setPendingQuotes] = useState(0);
   const [prevPendingQuotes, setPrevPendingQuotes] = useState(0);
 
+  // Stalled conversations
+  const [stalledConversations, setStalledConversations] = useState<StalledConversation[]>([]);
+  const [stalledCount, setStalledCount] = useState(0);
+
+  // Ceremony pipeline
+  const [ceremonyPipeline, setCeremonyPipeline] = useState<CeremonyPipelineRow[]>([]);
+
   // Funnel (always all-time)
   const [funnelRegistered, setFunnelRegistered] = useState(0);
   const [funnelCreated, setFunnelCreated] = useState(0);
@@ -67,9 +118,7 @@ export default function AdminDashboard() {
   const [funnelBooked, setFunnelBooked] = useState(0);
 
   // Distribution
-  const [eventsByType, setEventsByType] = useState<Record<string, number>>({});
   const [vendorsByCategory, setVendorsByCategory] = useState<Record<string, number>>({});
-  const [totalEvents, setTotalEvents] = useState(0);
 
   // Real account statistics
   const [totalVendors, setTotalVendors] = useState(0);
@@ -164,8 +213,16 @@ export default function AdminDashboard() {
       setNewBookings(await fetchBookingCount(start));
       setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
 
+      // Stalled conversations (2-hour threshold)
+      const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 2 });
+      setStalledConversations((stalled || []) as StalledConversation[]);
+      setStalledCount(stalled?.length || 0);
+
+      // Ceremony pipeline
+      const { data: pipeline } = await (supabase as any).rpc('get_ceremony_pipeline');
+      setCeremonyPipeline((pipeline || []) as CeremonyPipelineRow[]);
+
       if (period !== 'all' && prevStart && start) {
-        // Previous period counts — between prevStart and start
         const fetchPrevCount = async (table: string, col: string, filters?: Record<string, any>) => {
           let q = supabase.from(table as any).select(col, { count: 'exact', head: true })
             .gte('created_at', prevStart).lt('created_at', start);
@@ -204,13 +261,7 @@ export default function AdminDashboard() {
         .in('booking_status', ['confirmed', 'completed', 'disputed']);
       setFunnelBooked(new Set((bkClients || []).map(b => b.client_id)).size);
 
-      // Tier 4 — Distribution
-      const { data: events } = await supabase.from('events').select('type');
-      const ebt: Record<string, number> = {};
-      (events || []).forEach(e => { ebt[e.type] = (ebt[e.type] || 0) + 1; });
-      setEventsByType(ebt);
-      setTotalEvents(events?.length || 0);
-
+      // Tier 4 — Vendors by category
       const { data: vendors } = await supabase.from('vendors').select('category').eq('is_active', true);
       const vbc: Record<string, number> = {};
       (vendors || []).forEach(v => { vbc[v.category] = (vbc[v.category] || 0) + 1; });
@@ -237,11 +288,12 @@ export default function AdminDashboard() {
   ];
 
   const growthCards = [
-    { label: 'New organisers', current: newOrganisers, prev: prevOrganisers },
-    { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies },
-    { label: 'Requests sent', current: newRequests, prev: prevRequests },
-    { label: 'Bookings confirmed', current: newBookings, prev: prevBookings },
-    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes },
+    { label: 'New organisers', current: newOrganisers, prev: prevOrganisers, showPrev: true },
+    { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies, showPrev: true },
+    { label: 'Requests sent', current: newRequests, prev: prevRequests, showPrev: true },
+    { label: 'Bookings confirmed', current: newBookings, prev: prevBookings, showPrev: true },
+    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes, showPrev: true },
+    { label: 'Awaiting vendor reply', current: stalledCount, prev: 0, showPrev: false },
   ];
 
   const accountCards = [
@@ -402,7 +454,7 @@ export default function AdminDashboard() {
                 <>
                   <p className="text-xs text-muted-foreground">{gc.label}</p>
                   <p className="text-2xl font-bold mt-1">{gc.current}</p>
-                  {period !== 'all' && (
+                  {gc.showPrev && period !== 'all' && (
                     <p className="text-xs text-muted-foreground mt-1">prev. period: {gc.prev}</p>
                   )}
                 </>
@@ -411,6 +463,58 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Vendors to nudge */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-600" />
+            Vendors to nudge
+          </CardTitle>
+          <CardDescription>Planner sent the last message over 2 hours ago and vendor hasn't replied</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3 animate-pulse">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+            </div>
+          ) : stalledConversations.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No vendors are behind on replies right now.</p>
+          ) : (
+            <div className="divide-y">
+              {stalledConversations.map(c => (
+                <div key={c.conversation_id} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{c.vendor_name}</span>
+                        {c.vendor_phone && (
+                          <a href={`tel:${c.vendor_phone}`} className="text-xs text-primary hover:underline">
+                            {c.vendor_phone}
+                          </a>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Planner: {c.planner_name || '—'}
+                        {c.event_name && ` · ${c.event_name}`}
+                        {c.event_type && ` (${eventTypeLabels[c.event_type] || c.event_type})`}
+                      </p>
+                      {c.last_message_preview && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          "{truncate(c.last_message_preview, 80)}"
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 shrink-0">
+                      {c.hours_since_reply}h ago
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* SMS balance monitor */}
       <SmsBalanceCard />
@@ -457,86 +561,100 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
-      {/* Tier 4 — Distribution charts (preserved) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Ceremonies by Type
-            </CardTitle>
-            <CardDescription>Distribution of ceremony types</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3 animate-pulse">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="flex justify-between items-center">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-2 w-24" />
-                  </div>
-                ))}
-              </div>
-            ) : Object.keys(eventsByType).length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No ceremonies created yet</p>
-            ) : (
-              <div className="space-y-3">
-                {Object.entries(eventsByType)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([type, count]) => (
-                    <div key={type} className="flex justify-between items-center">
-                      <span className="text-sm">{eventTypeLabels[type] || type}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${totalEvents > 0 ? (count / totalEvents) * 100 : 0}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium w-8 text-right">{count}</span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Ceremony pipeline */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Ceremony pipeline
+          </CardTitle>
+          <CardDescription>Every ceremony, its date, and how far it's progressed</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : ceremonyPipeline.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No ceremonies created yet</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted-foreground border-b">
+                    <th className="py-2 pr-3 font-medium">Ceremony</th>
+                    <th className="py-2 pr-3 font-medium">Date</th>
+                    <th className="py-2 pr-3 font-medium text-right">Requests</th>
+                    <th className="py-2 pr-3 font-medium text-right">Quotes</th>
+                    <th className="py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ceremonyPipeline.map(row => {
+                    const status = getPipelineStatus(row);
+                    const approaching = isApproaching(row.event_date) && !row.has_booking;
+                    return (
+                      <tr
+                        key={row.event_id}
+                        className={`border-b last:border-0 ${approaching ? 'border-l-4 border-l-amber-500 bg-amber-50/30' : ''}`}
+                      >
+                        <td className="py-2 pr-3">
+                          <div className="font-medium">{row.event_name}</div>
+                          <div className="text-xs text-muted-foreground">{eventTypeLabels[row.event_type] || row.event_type}</div>
+                        </td>
+                        <td className="py-2 pr-3 whitespace-nowrap">
+                          {row.event_date ? format(new Date(row.event_date), 'd MMM yyyy') : <span className="text-muted-foreground">—</span>}
+                        </td>
+                        <td className="py-2 pr-3 text-right">{Number(row.requests_sent)}</td>
+                        <td className="py-2 pr-3 text-right">{Number(row.quotes_received)}</td>
+                        <td className="py-2">
+                          <Badge variant="outline" className={status.className}>{status.label}</Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Store className="h-5 w-5" />
-              Vendors by Category
-            </CardTitle>
-            <CardDescription>Distribution of service providers</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3 animate-pulse">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="flex justify-between items-center">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-6" />
+      {/* Vendors by Category (kept) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Store className="h-5 w-5" />
+            Vendors by Category
+          </CardTitle>
+          <CardDescription>Distribution of service providers</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3 animate-pulse">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex justify-between items-center">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-6" />
+                </div>
+              ))}
+            </div>
+          ) : Object.keys(vendorsByCategory).length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No vendors registered yet</p>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(vendorsByCategory)
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, count]) => (
+                  <div key={category} className="flex justify-between items-center py-1">
+                    <span className="text-sm">{categoryLabels[category] || category}</span>
+                    <span className="text-sm font-medium">{count}</span>
                   </div>
                 ))}
-              </div>
-            ) : Object.keys(vendorsByCategory).length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No vendors registered yet</p>
-            ) : (
-              <div className="space-y-2">
-                {Object.entries(vendorsByCategory)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([category, count]) => (
-                    <div key={category} className="flex justify-between items-center py-1">
-                      <span className="text-sm">{categoryLabels[category] || category}</span>
-                      <span className="text-sm font-medium">{count}</span>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
