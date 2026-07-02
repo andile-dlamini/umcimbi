@@ -243,7 +243,12 @@ export default function VendorVerificationQueue() {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ is_active: true })
+        .update({
+          is_active: true,
+          business_verification_status: 'verified',
+          verification_reviewed_at: new Date().toISOString(),
+          verification_reviewed_by: user?.id ?? null,
+        })
         .eq('id', vendor.id);
       if (error) throw error;
 
@@ -269,33 +274,6 @@ export default function VendorVerificationQueue() {
     }
   };
 
-  const handleVerifyBusiness = async (vendor: PendingVendor) => {
-    setVendorBusy(vendor.id, true);
-    try {
-      const { error } = await supabase
-        .from('vendors')
-        .update({
-          business_verification_status: 'verified',
-          verification_reviewed_at: new Date().toISOString(),
-          verification_reviewed_by: user?.id ?? null,
-        })
-        .eq('id', vendor.id);
-      if (error) throw error;
-      toast.success('Business verified');
-      setVendors((prev) =>
-        prev.map((v) =>
-          v.id === vendor.id
-            ? { ...v, business_verification_status: 'verified' }
-            : v
-        )
-      );
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to verify business');
-    } finally {
-      setVendorBusy(vendor.id, false);
-    }
-  };
 
   const handleRequestInfo = async (vendor: PendingVendor) => {
     const notes = (notesDraft[vendor.id] ?? '').trim();
