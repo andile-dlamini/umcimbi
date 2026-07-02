@@ -120,6 +120,11 @@ export default function AdminDashboard() {
   // Distribution
   const [vendorsByCategory, setVendorsByCategory] = useState<Record<string, number>>({});
 
+  // Search activity
+  const [zeroResultSearches, setZeroResultSearches] = useState<any[]>([]);
+  const [topSearchedCategories, setTopSearchedCategories] = useState<Record<string, number>>({});
+
+
   // Real account statistics
   const [totalVendors, setTotalVendors] = useState(0);
   const [vendorsJoinedThisMonth, setVendorsJoinedThisMonth] = useState(0);
