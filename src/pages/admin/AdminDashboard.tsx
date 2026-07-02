@@ -248,8 +248,8 @@ export default function AdminDashboard() {
       }
 
       // Tier 3 — Funnel (always all-time)
-      const { count: regCount } = await supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'user');
-      setFunnelRegistered(regCount || 0);
+      setFunnelRegistered(Number(stats?.total_organisers || 0));
+
 
       const { count: evtCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
       setFunnelCreated(evtCount || 0);
