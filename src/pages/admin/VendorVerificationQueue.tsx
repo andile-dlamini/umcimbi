@@ -675,15 +675,8 @@ export default function VendorVerificationQueue() {
                     >
                       <CheckCircle2 className="h-4 w-4 mr-1" /> Approve & Activate
                     </Button>
-                    {!isVerified && (
-                      <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() => handleVerifyBusiness(vendor)}
-                        disabled={isBusy}
-                      >
-                        <BadgeCheck className="h-4 w-4 mr-1" /> Verify Business
-                      </Button>
-                    )}
+
+
                     <Button
                       className="bg-amber-500 hover:bg-amber-600 text-white"
                       onClick={() => handleRequestInfo(vendor)}
