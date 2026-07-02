@@ -681,6 +681,77 @@ export default function AdminDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Search activity */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Search activity
+          </CardTitle>
+          <CardDescription>What planners are searching for on the vendors page</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Searches that found nothing</h4>
+            {isLoading ? (
+              <div className="space-y-2 animate-pulse">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+              </div>
+            ) : zeroResultSearches.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No zero-result searches — good sign.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-muted-foreground border-b">
+                      <th className="py-2 pr-3 font-medium">Query</th>
+                      <th className="py-2 pr-3 font-medium">Category</th>
+                      <th className="py-2 pr-3 font-medium">Location</th>
+                      <th className="py-2 font-medium">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {zeroResultSearches.map((row: any, i: number) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="py-2 pr-3">{row.metadata?.query || <span className="text-muted-foreground">—</span>}</td>
+                        <td className="py-2 pr-3">{row.metadata?.category ? (categoryLabels[row.metadata.category] || row.metadata.category) : 'Any'}</td>
+                        <td className="py-2 pr-3">{row.metadata?.location || 'Any'}</td>
+                        <td className="py-2 text-muted-foreground whitespace-nowrap">
+                          {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Most searched categories</h4>
+            {isLoading ? (
+              <div className="space-y-2 animate-pulse">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-4 w-full" />)}
+              </div>
+            ) : Object.keys(topSearchedCategories).length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No searches recorded yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {Object.entries(topSearchedCategories)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([category, count]) => (
+                    <div key={category} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{categoryLabels[category] || category}</span>
+                      <span className="text-sm font-medium">{count}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
+
   );
 }
