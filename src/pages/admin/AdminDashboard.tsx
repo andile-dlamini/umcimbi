@@ -272,10 +272,31 @@ export default function AdminDashboard() {
       (vendors || []).forEach(v => { vbc[v.category] = (vbc[v.category] || 0) + 1; });
       setVendorsByCategory(vbc);
 
+      // Search activity
+      const { data: zeroResults } = await supabase
+        .from('platform_events')
+        .select('metadata, created_at')
+        .eq('event_type', 'search_zero_results')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setZeroResultSearches(zeroResults || []);
+
+      const { data: allSearches } = await supabase
+        .from('platform_events')
+        .select('metadata')
+        .in('event_type', ['search_performed', 'search_zero_results']);
+      const catCounts: Record<string, number> = {};
+      (allSearches || []).forEach((row: any) => {
+        const cat = row.metadata?.category;
+        if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+      });
+      setTopSearchedCategories(catCounts);
+
       setIsLoading(false);
     };
     fetchAll();
   }, [period]);
+
 
   const funnelSteps = [
     { label: 'Registered', count: funnelRegistered },
