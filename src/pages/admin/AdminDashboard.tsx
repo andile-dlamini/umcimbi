@@ -57,6 +57,8 @@ export default function AdminDashboard() {
   const [prevRequests, setPrevRequests] = useState(0);
   const [newBookings, setNewBookings] = useState(0);
   const [prevBookings, setPrevBookings] = useState(0);
+  const [pendingQuotes, setPendingQuotes] = useState(0);
+  const [prevPendingQuotes, setPrevPendingQuotes] = useState(0);
 
   // Funnel (always all-time)
   const [funnelRegistered, setFunnelRegistered] = useState(0);
