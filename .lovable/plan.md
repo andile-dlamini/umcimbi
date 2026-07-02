@@ -1,48 +1,48 @@
-# Fix Admin Dashboard undercounts + add Quotes pending card
+## Admin Dashboard — Vendor Responsiveness KPI + Ceremony Pipeline
 
-## Bug 1 — Missing admin RLS SELECT policies
+### 1. Migration (new file under `supabase/migrations/`)
 
-New migration adding admin-scoped SELECT policies mirroring the existing `bookings` pattern:
+Create two admin-gated SECURITY DEFINER RPCs exactly as specified:
 
-```sql
-CREATE POLICY "Admins can view all events" ON public.events
-FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
+- **`public.get_stalled_conversations(hours_threshold int DEFAULT 2)`** — returns conversations where the last message is from the planner (`sender_type = 'user'`) and `last_message_at` is older than the threshold. Joins vendors, profiles, events. Admin gate via `has_role(auth.uid(), 'admin')` inside the WHERE. `GRANT EXECUTE ... TO authenticated`.
+- **`public.get_ceremony_pipeline()`** — returns per-event counts of `service_requests`, `quotes` (via `quotes.request_id = sr.id`), and a `has_booking` boolean for `booking_status IN ('confirmed','completed','disputed')`. Admin-gated the same way. `GRANT EXECUTE ... TO authenticated`.
 
-CREATE POLICY "Admins can view all service requests" ON public.service_requests
-FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
+No changes to RLS on `messages`, `conversations`, `events`, `quotes`, `bookings`, or `service_requests` — the RPCs are the only new access path.
 
-CREATE POLICY "Admins can view all quotes" ON public.quotes
-FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
-```
+### 2. `src/pages/admin/AdminDashboard.tsx`
 
-Fixes silent undercounts on "New ceremonies", "Requests sent", and the new "Quotes pending" card caused by owner-scoped RLS filtering out rows the logged-in admin doesn't own.
+**State additions**
+- `stalledConversations`, `stalledCount`
+- `ceremonyPipeline`
+- Remove `eventsByType`, `totalEvents` and their `setState` calls.
 
-No changes to existing policies, grants, or other tables.
+**`fetchAll` additions**
+- Call `rpc('get_stalled_conversations', { hours_threshold: 2 })` → populate stalled state.
+- Call `rpc('get_ceremony_pipeline')` → populate pipeline state.
+- Remove the existing `events` fetch that built `eventsByType`.
 
-## Bug 2 — Add "Quotes pending" growth card
+**Growth cards strip**
+- Append a 6th card: **"Awaiting vendor reply"** using `stalledCount`. No prev-period row (conditionally hide the "prev. period" line for this card only).
 
-Edit `src/pages/admin/AdminDashboard.tsx` only:
+**New "Vendors to nudge" Card** (below the growth grid, above SMS balance)
+- Empty state: "No vendors are behind on replies right now."
+- List rows: vendor name + phone, planner name, ceremony name + type label, hours since last message, truncated (~80 char) preview of the planner's last message.
+- Order preserved from RPC (soonest-stalled first).
 
-1. Add state:
-   - `pendingQuotes` / `setPendingQuotes`
-   - `prevPendingQuotes` / `setPrevPendingQuotes`
+**Replace "Ceremonies by Type" Card with "Ceremony pipeline" Card**
+- Remove the existing "Ceremonies by Type" Card entirely; keep "Vendors by Category" untouched. The two-column `grid lg:grid-cols-2` becomes a stacked layout: pipeline Card full-width on top, "Vendors by Category" below (or restructure so pipeline sits where "by Type" was — using single-column since the pipeline is a wide table).
+- Table columns: Ceremony (name + `eventTypeLabels[type]`), Date (formatted, or "—"), Requests sent, Quotes received, Status.
+- Status badge logic:
+  - `has_booking` → "Booked" (green)
+  - `requests_sent = 0` → "No requests sent" (grey)
+  - `requests_sent > 0` and `quotes_received = 0` → "Awaiting vendor response" (amber)
+  - `quotes_received > 0` and not booked → "Quoted, not booked" (blue)
+- Urgency flag: if `event_date` is set, within next 14 days, and status ≠ "Booked" → left border accent (e.g. `border-l-4 border-l-amber-500`) on that row.
+- Sort order preserved from RPC (soonest first, undated last).
 
-2. In `fetchAll`, alongside the existing growth `fetchCount` calls:
-   ```ts
-   setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
-   ```
+### 3. Explicitly untouched
+Revenue strip, Bookings confirmed, Quotes pending, existing growth cards, Vendors by Category chart, funnel, SMS balance card, AI daily brief, all other files/functions/policies.
 
-3. In the previous-period block (`period !== 'all'`), add the matching `fetchPrevCount` call with `{ status: 'pending_client' }` and call `setPrevPendingQuotes(...)`. In the else branch, reset it to 0 alongside the other prev counters.
-
-4. Append to `growthCards`:
-   ```ts
-   { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes }
-   ```
-
-Existing grid `grid-cols-2 lg:grid-cols-4` reflows naturally for the 5th card — no layout class change.
-
-## Explicitly untouched
-- Tier 1 revenue strip (GMV, platform revenue, escrow, avg booking)
-- Bookings confirmed card
-- Funnel, distribution charts, SMS balance, AI daily brief
-- All other files and edge functions
+### Notes
+- Migration runs first (RPCs must exist before the client calls them).
+- Types file will regenerate post-migration; RPC calls use `(supabase as any).rpc(...)` per existing pattern in the file.
