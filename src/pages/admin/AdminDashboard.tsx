@@ -241,6 +241,7 @@ export default function AdminDashboard() {
     { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies },
     { label: 'Requests sent', current: newRequests, prev: prevRequests },
     { label: 'Bookings confirmed', current: newBookings, prev: prevBookings },
+    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes },
   ];
 
   const accountCards = [
