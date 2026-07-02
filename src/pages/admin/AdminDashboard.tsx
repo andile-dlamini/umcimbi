@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Store, Users, Sparkles, BadgeCheck, AlertCircle, Calendar } from 'lucide-react';
+import { Store, Users, Sparkles, BadgeCheck, AlertCircle, Calendar, Search } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
