@@ -2,13 +2,10 @@ import { useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   DollarSign,
-  Sparkles,
   ClipboardList,
   Settings,
   BadgeCheck,
-  Upload,
   ShieldCheck,
-  Clock,
   MessageSquare,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
@@ -27,15 +24,13 @@ import {
 const navItems = [
   { label: 'Overview', to: '/admin', icon: LayoutDashboard, end: true },
   { label: 'Revenue', to: '/admin/revenue', icon: DollarSign },
-  { label: 'AI Insights', to: '/admin/insights', icon: Sparkles },
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
   { label: 'Vendor Approvals', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
-  { label: 'Bulk Upload', to: '/admin/bulk-vendors', icon: Upload },
-  { label: 'Waitlist', to: '/admin/waitlist', icon: Clock },
   { label: 'Feedback', to: '/admin/feedback', icon: MessageSquare },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];
+
 
 export function AdminSidebar() {
   const { state } = useSidebar();
