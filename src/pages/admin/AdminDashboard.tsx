@@ -57,6 +57,8 @@ export default function AdminDashboard() {
   const [prevRequests, setPrevRequests] = useState(0);
   const [newBookings, setNewBookings] = useState(0);
   const [prevBookings, setPrevBookings] = useState(0);
+  const [pendingQuotes, setPendingQuotes] = useState(0);
+  const [prevPendingQuotes, setPrevPendingQuotes] = useState(0);
 
   // Funnel (always all-time)
   const [funnelRegistered, setFunnelRegistered] = useState(0);
@@ -160,6 +162,7 @@ export default function AdminDashboard() {
       setNewCeremonies(await fetchCount('events', '*', start));
       setNewRequests(await fetchCount('service_requests', '*', start));
       setNewBookings(await fetchBookingCount(start));
+      setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
 
       if (period !== 'all' && prevStart && start) {
         // Previous period counts — between prevStart and start
@@ -182,8 +185,9 @@ export default function AdminDashboard() {
         setPrevCeremonies(await fetchPrevCount('events', '*'));
         setPrevRequests(await fetchPrevCount('service_requests', '*'));
         setPrevBookings(await fetchPrevBookingCount());
+        setPrevPendingQuotes(await fetchPrevCount('quotes', '*', { status: 'pending_client' }));
       } else {
-        setPrevOrganisers(0); setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0);
+        setPrevOrganisers(0); setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0); setPrevPendingQuotes(0);
       }
 
       // Tier 3 — Funnel (always all-time)
@@ -237,6 +241,7 @@ export default function AdminDashboard() {
     { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies },
     { label: 'Requests sent', current: newRequests, prev: prevRequests },
     { label: 'Bookings confirmed', current: newBookings, prev: prevBookings },
+    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes },
   ];
 
   const accountCards = [
