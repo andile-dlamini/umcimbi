@@ -44,16 +44,14 @@ import Learn from "@/pages/Learn";
 import ArticlePage from "@/pages/learn/ArticlePage";
 import SettingsPage from "@/pages/Settings";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
-import BulkVendorUpload from "@/pages/admin/BulkVendorUpload";
 import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
 import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import VendorTrust from "@/pages/admin/VendorTrust";
-import AdminInsights from "@/pages/admin/AdminInsights";
 import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
-import AdminWaitlist from "@/pages/admin/AdminWaitlist";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
+
 import AdminLayout from "@/components/admin/AdminLayout";
 import ChatsList from "@/pages/chat/ChatsList";
 import ChatThread from "@/pages/chat/ChatThread";
