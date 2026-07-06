@@ -5,17 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
 import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
 import { getArticleByEventType } from '@/data/learnArticles';
+import { SA_PROVINCES } from '@/components/shared/AddressFields';
+import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
 const eventSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
   location: z.string().max(200, 'Location must be less than 200 characters').optional(),
+  state_province: z.string().trim().min(1, 'Please select a province'),
 });
 
 // Get today's date in YYYY-MM-DD format for date validation
