@@ -441,6 +441,29 @@ export default function VendorOnboarding() {
   };
 
   // ============================================================
+  // WAITLIST — shown when province is not yet live
+  // ============================================================
+  if (showWaitlist) {
+    return (
+      <div className="min-h-screen pb-safe bg-background">
+        <PageHeader title="Become a Vendor" showBack />
+        <div className="px-4 py-6 max-w-lg mx-auto">
+          <ProvinceWaitlist
+            role="vendor"
+            defaults={{
+              full_name: profile?.full_name || '',
+              phone_number: profile?.phone_number || '',
+              province: address.state_province.trim(),
+              city: address.city.trim(),
+              business_name: formData.name.trim(),
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
   // QUICK MODE — original single-card form (phone retained, email/website removed)
   // ============================================================
   if (isQuickMode) {
