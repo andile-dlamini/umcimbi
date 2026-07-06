@@ -255,6 +255,22 @@ export default function VendorOnboarding() {
       quickE164 = toE164(quickPhone, quickPhoneCountry);
     }
 
+    // Province gate — only allow vendor creation in live provinces (full flow only;
+    // quick mode collects just a city and no province, so it stays under the RLS default until admin approval).
+    if (!isQuickMode) {
+      const provinceToCheck = address.state_province.trim();
+      const { data: liveRow } = await supabase
+        .from('live_provinces')
+        .select('province')
+        .eq('province', provinceToCheck)
+        .maybeSingle();
+      if (!liveRow) {
+        setShowWaitlist(true);
+        window.scrollTo(0, 0);
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     // Compose location from city + state for backward compatibility
