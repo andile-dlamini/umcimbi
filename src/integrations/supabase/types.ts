@@ -488,6 +488,7 @@ export type Database = {
           notes: string | null
           owner_user_id: string
           size: string | null
+          state_province: string | null
           type: Database["public"]["Enums"]["event_type"]
           updated_at: string | null
         }
@@ -504,6 +505,7 @@ export type Database = {
           notes?: string | null
           owner_user_id: string
           size?: string | null
+          state_province?: string | null
           type: Database["public"]["Enums"]["event_type"]
           updated_at?: string | null
         }
@@ -520,6 +522,7 @@ export type Database = {
           notes?: string | null
           owner_user_id?: string
           size?: string | null
+          state_province?: string | null
           type?: Database["public"]["Enums"]["event_type"]
           updated_at?: string | null
         }
@@ -604,6 +607,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      live_provinces: {
+        Row: {
+          launched_at: string
+          province: string
+        }
+        Insert: {
+          launched_at?: string
+          province: string
+        }
+        Update: {
+          launched_at?: string
+          province?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -1687,37 +1705,46 @@ export type Database = {
       waitlist_signups: {
         Row: {
           business_name: string | null
+          city: string | null
           created_at: string | null
           email: string | null
+          event_type: string | null
           full_name: string
           id: string
           launch_email_sent_at: string | null
           launch_sms_sent_at: string | null
           phone_number: string | null
+          province: string | null
           role: string | null
           source: string | null
         }
         Insert: {
           business_name?: string | null
+          city?: string | null
           created_at?: string | null
           email?: string | null
+          event_type?: string | null
           full_name: string
           id?: string
           launch_email_sent_at?: string | null
           launch_sms_sent_at?: string | null
           phone_number?: string | null
+          province?: string | null
           role?: string | null
           source?: string | null
         }
         Update: {
           business_name?: string | null
+          city?: string | null
           created_at?: string | null
           email?: string | null
+          event_type?: string | null
           full_name?: string
           id?: string
           launch_email_sent_at?: string | null
           launch_sms_sent_at?: string | null
           phone_number?: string | null
+          province?: string | null
           role?: string | null
           source?: string | null
         }
@@ -1932,6 +1959,7 @@ export type Database = {
         Args: { vendor_id_input: string }
         Returns: undefined
       }
+      is_province_live: { Args: { p: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
