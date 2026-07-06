@@ -52,8 +52,11 @@ export default function AuthCallback() {
           const roleParam = role || 'user';
           navigate(`/auth?step=complete-profile&role=${roleParam}`, { replace: true });
         } else {
-          navigate('/', { replace: true });
+          const next = new URLSearchParams(window.location.search).get('next');
+          const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
+          navigate(safe, { replace: true });
         }
+
       } catch (err) {
         console.error('OAuth callback error:', err);
         setError('Something went wrong. Please try again.');
