@@ -196,12 +196,12 @@ export default function OnboardingLanguage() {
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-24 pb-16 grid md:grid-cols-2 gap-12 md:gap-20 items-center w-full">
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white/70 backdrop-blur-sm mx-auto md:mx-0 w-fit">
-              <span className="relative flex h-1.5 w-1.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-sm font-medium text-white/70 backdrop-blur-sm mx-auto md:mx-0 w-fit">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
-              Now live in KwaZulu-Natal · expanding across South Africa
+              Now live only in KwaZulu-Natal
             </div>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
