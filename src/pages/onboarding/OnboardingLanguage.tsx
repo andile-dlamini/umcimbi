@@ -844,7 +844,7 @@ export default function OnboardingLanguage() {
             </a>
             <a href="https://tiktok.com/@umcimbi.official" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
               <Music2 size={18} />
-            </a private >
+            </a>
           </div>
           <p className="text-xs text-white/30">
             © {new Date().getFullYear()} UMCIMBI · <Link to="/privacy" className="hover:text-white/60 transition-colors">Privacy</Link> · <Link to="/terms" className="hover:text-white/60 transition-colors">Terms</Link> · <Link to="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
