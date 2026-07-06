@@ -87,6 +87,7 @@ export default function CreateEvent() {
     const result = eventSchema.safeParse({
       name: name.trim(),
       location: location.trim() || undefined,
+      state_province: stateProvince,
     });
 
     if (!result.success) {
@@ -112,6 +113,25 @@ export default function CreateEvent() {
 
     setValidationErrors({});
     setIsCreating(true);
+
+    // Province gate — only allow event creation in live provinces
+    const { data: liveRow, error: liveErr } = await supabase
+      .from('live_provinces')
+      .select('province')
+      .eq('province', stateProvince)
+      .maybeSingle();
+
+    if (liveErr) {
+      console.error('Error checking live province:', liveErr);
+    }
+
+    if (!liveRow) {
+      setIsCreating(false);
+      setShowWaitlist(true);
+      window.scrollTo(0, 0);
+      return;
+    }
+
     const typeInfo = getEventTypeInfo(eventType);
     const parsedCount = parseInt(guestCount) || 50;
     const sizeLabel = parsedCount <= 80 ? 'small' : parsedCount <= 200 ? 'medium' : 'large';
@@ -121,10 +141,11 @@ export default function CreateEvent() {
       type: eventType,
       date: date || null,
       location: result.data?.location || location.trim() || null,
+      state_province: stateProvince,
       estimated_guest_count: parsedCount,
       size: sizeLabel,
       notes: null,
-    });
+    } as any);
 
     setIsCreating(false);
     
