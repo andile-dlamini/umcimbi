@@ -46,7 +46,7 @@ const vendorSchema = z.object({
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
-  state_province: z.string().trim().max(100).optional().or(z.literal('')),
+  state_province: z.string().trim().min(1, 'Please select your province').max(100),
   country: z.string().trim().min(1, 'Country is required'),
   postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
   instagram_url: z.string().trim().max(500).optional().or(z.literal('')),
