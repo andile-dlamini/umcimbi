@@ -57,6 +57,7 @@ export default function CreateEvent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { createEvent } = useEvents();
+  const { profile } = useAuth();
   
   const preselectedType = searchParams.get('type') as EventType | null;
   
@@ -66,9 +67,11 @@ export default function CreateEvent() {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
   const [guestCount, setGuestCount] = useState('50');
   const [isCreating, setIsCreating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   const handleTypeSelect = (type: EventType) => {
     setEventType(type);
