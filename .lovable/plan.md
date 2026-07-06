@@ -1,46 +1,53 @@
-## 1. Remove AI Insights, Bulk Upload, Waitlist
+## Province-based launch restriction (KwaZulu-Natal only)
 
-**`src/components/admin/AdminSidebar.tsx`** — delete the three nav items (AI Insights, Bulk Upload, Waitlist) and their now-unused lucide icon imports (`Sparkles`, `Upload`, `Clock`).
+Users can still sign up freely; only marketplace actions (browse vendors, request quotes, book, pay) are gated. Enforcement = RLS + a gate at event creation and vendor onboarding. **No changes to Ozow, accept-quote, release-escrow, or confirm-delivery edge functions.**
 
-**`src/App.tsx`** — remove imports for `AdminInsights`, `BulkVendorUpload`, `AdminWaitlist`, and the three `<Route>` entries (`insights`, `bulk-vendors`, `waitlist`).
+---
 
-**Delete files:**
-- `src/pages/admin/AdminInsights.tsx`
-- `src/pages/admin/BulkVendorUpload.tsx`
-- `src/pages/admin/AdminWaitlist.tsx`
+### 1. Database migration (single call)
 
-**Flag (not auto-deleting):** `supabase/functions/send-waitlist-launch-emails/` is only invoked from `AdminWaitlist.tsx`. Leaving it deployed so no live infra is torn down accidentally — flagging so you can decide later. No other page/function depends on it. DB tables (`waitlist_signups`, etc.) untouched.
+- Create `public.live_provinces` (province PK, launched_at). Seed `'KwaZulu-Natal'`. Enable RLS + public SELECT policy. GRANT SELECT to anon + authenticated, ALL to service_role.
+- Create `public.is_province_live(text) returns boolean` — STABLE SECURITY DEFINER, `search_path = public`.
+- `ALTER TABLE public.events ADD COLUMN state_province text;` then backfill existing rows to `'KwaZulu-Natal'`.
+- Backfill `public.vendors.state_province` to `'KwaZulu-Natal'` where null/blank.
+- Replace vendor SELECT policy → require `is_active AND is_province_live(state_province)`.
+- Replace `service_requests` INSERT policy → require the linked event's province is live.
+- Replace `quotes` INSERT policy (vendor-created) → require the linked event's province is live.
+- Replace `messages` INSERT policy → allow when conversation has no event, or event's province is live.
 
-## 2. Merge vendor approve + business verification
+All SQL exactly as specified in the request.
 
-**`src/pages/admin/VendorVerificationQueue.tsx`:**
-- Update `handleApprove` to set `is_active: true`, `business_verification_status: 'verified'`, `verification_reviewed_at: now()`, `verification_reviewed_by: user?.id ?? null` in a single update.
-- Delete `handleVerifyBusiness` and its "Verify business" button.
-- Leave `isVerified` badge, reject flow, and request-info flow untouched.
+### 2. Frontend
 
-## 3. Fix funnel "Registered" undercount
+**a. Export `SA_PROVINCES` from `src/components/shared/AddressFields.tsx`** (currently a private const) so both screens reuse the same list.
 
-**`src/pages/admin/AdminDashboard.tsx`** — in `fetchAll`, replace the `user_roles` count query with:
+**b. `src/pages/events/CreateEvent.tsx`**
+- Add required `state_province` `<Select>` (uses `SA_PROVINCES`) alongside the existing free-text location field. Add to zod schema + validation.
+- On submit: query `public.live_provinces` for the chosen province.
+  - If live → include `state_province` in the insert and proceed as today.
+  - If not live → do NOT create event; render a waitlist screen with the exact copy:
+    > "UMCIMBI is currently live in KwaZulu-Natal only. We are expanding province by province to make sure every vendor is properly verified and every booking is supported. Join the waitlist and we'll notify you when we launch in your area."
+  - Waitlist form captures name, phone, province (pre-filled), city/town, event type; insert into `waitlist_signups` with `role = 'organiser'`.
 
-```ts
-setFunnelRegistered(Number(stats?.total_organisers || 0));
-```
+**c. `src/pages/vendors/VendorOnboarding.tsx`**
+- Make `state_province` required in the zod schema (drop `.optional()`).
+- After the business address step, check `is_province_live` for the chosen province.
+  - If live → continue existing flow (vendor still starts `is_active: false` pending admin approval — unchanged).
+  - If not live → do NOT create vendor; show the waitlist screen (vendor-adapted copy, same core message) capturing name, phone, province, city/town; insert into `waitlist_signups` with `role = 'vendor'`.
 
-using the existing `stats` from the `get_admin_user_registration_stats` RPC. No new RLS.
+**d. `src/hooks/useVendors.ts`**
+- Add explicit `.eq('state_province', 'KwaZulu-Natal')` to the vendor query so UI matches what RLS would return.
 
-## 4. Add "Search activity" section to Admin Dashboard
+**e. `waitlist_signups`**
+- Migration adds `province`, `city`, `event_type` columns (all nullable text). Both waitlist submissions use them; `event_type` left null for the vendor path.
 
-**`src/pages/admin/AdminDashboard.tsx`:**
+### 3. Verification
 
-- Add state: `zeroResultSearches` (array) and `topSearchedCategories` (Record<string, number>).
-- In `fetchAll`:
-  - Fetch latest 20 `platform_events` where `event_type = 'search_zero_results'` (ordered by `created_at` desc) → `setZeroResultSearches`.
-  - Fetch all `platform_events` where `event_type IN ('search_performed', 'search_zero_results')`, aggregate `metadata.category` counts client-side → `setTopSearchedCategories`.
-- Add a new "Search activity" Card below the ceremony pipeline with:
-  - **Searches that found nothing** — table with columns Query (`metadata.query` or "—"), Category (`categoryLabels[metadata.category]` or "Any"), Location (`metadata.location` or "Any"), When (`formatDistanceToNow`). Empty state: "No zero-result searches — good sign."
-  - **Most searched categories** — horizontal bar list reusing the same style as "Vendors by Category", sorted descending.
+- After migration approval + regenerated types: `bun tsgo` (typecheck).
+- Manual sanity check: `useVendors` still returns rows; creating an event in a non-live province shows waitlist screen; creating one in KZN succeeds.
 
-**Limitation flagged:** This section does not show who searched (no planner name/contact). Surfacing that would require joining `platform_events.actor_id` to `profiles`, which has no admin RLS policy — a separate change if wanted, not included here.
+### Explicitly out of scope
 
-## Explicitly untouched
-Other admin pages/routes, Revenue, Vendor Trust, Feedback, Settings, "Awaiting vendor reply", "Ceremony pipeline", AI Daily Brief card, Vendors by Category chart, all RLS policies, all edge functions except the flagged waitlist one.
+- No changes to Ozow edge functions, `accept-quote`, `release-escrow`, `confirm-delivery`.
+- No province checks inside any edge function.
+- No changes to the existing pre-launch waitlist gate or admin approval flow for vendors.
