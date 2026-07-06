@@ -154,7 +154,7 @@ export default function CreateEvent() {
     }
   };
 
-  const isValid = eventType && name.length >= 2;
+  const isValid = eventType && name.length >= 2 && stateProvince.length > 0;
 
   const selectedTypeInfo = eventType ? getEventTypeInfo(eventType) : null;
 
@@ -163,6 +163,19 @@ export default function CreateEvent() {
       <PageHeader title="Create Ceremony" showBack />
 
       <div className="px-4 py-6 max-w-lg mx-auto">
+        {showWaitlist ? (
+          <ProvinceWaitlist
+            role="organiser"
+            defaults={{
+              full_name: profile?.full_name || '',
+              phone_number: profile?.phone_number || '',
+              province: stateProvince,
+              event_type: eventType || '',
+            }}
+          />
+        ) : (
+        <>
+
         {step === 1 && (
           <div className="space-y-6 animate-fade-in">
             <div>
