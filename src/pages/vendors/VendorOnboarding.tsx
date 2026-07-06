@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
+import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { useAuth } from '@/context/AuthContext';
 import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
