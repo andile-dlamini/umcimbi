@@ -331,6 +331,25 @@ export default function CreateEvent() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="state_province">Province *</Label>
+                <Select value={stateProvince} onValueChange={setStateProvince}>
+                  <SelectTrigger className={cn('h-12', validationErrors.state_province && 'border-destructive')}>
+                    <SelectValue placeholder="Select province" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SA_PROVINCES.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {validationErrors.state_province && (
+                  <p className="text-xs text-destructive">{validationErrors.state_province}</p>
+                )}
+              </div>
+
+
+
+              <div className="space-y-2">
                 <Label htmlFor="guestCount">Estimated number of guests</Label>
                 <Input
                   id="guestCount"
