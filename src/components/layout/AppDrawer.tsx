@@ -148,6 +148,12 @@ export function AppDrawer({ open, onOpenChange, unreadCount = 0 }: AppDrawerProp
             <span className="flex-1 text-left">Log out</span>
           </button>
         </div>
+
+        <div className="px-5 py-3 text-center">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            UMCIMBI is currently live in KwaZulu-Natal only.
+          </p>
+        </div>
       </SheetContent>
     </Sheet>
   );

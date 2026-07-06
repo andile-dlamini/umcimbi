@@ -196,6 +196,14 @@ export default function OnboardingLanguage() {
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pt-24 pb-16 grid md:grid-cols-2 gap-12 md:gap-20 items-center w-full">
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white/70 backdrop-blur-sm mx-auto md:mx-0 w-fit">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+              </span>
+              Now live in KwaZulu-Natal · expanding across South Africa
+            </div>
+
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
               Plan Your Traditional Ceremony - <span className="text-secondary">Find Trusted Vendors in KwaZulu-Natal</span>
             </h1>
@@ -836,10 +844,15 @@ export default function OnboardingLanguage() {
             </a>
             <a href="https://tiktok.com/@umcimbi.official" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
               <Music2 size={18} />
-            </a>
+            </a private >
           </div>
           <p className="text-xs text-white/30">
             © {new Date().getFullYear()} UMCIMBI · <Link to="/privacy" className="hover:text-white/60 transition-colors">Privacy</Link> · <Link to="/terms" className="hover:text-white/60 transition-colors">Terms</Link> · <Link to="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
+          </p>
+        </div>
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 pb-6 text-center sm:text-right">
+          <p className="text-[11px] text-white/30">
+            Currently live in KwaZulu-Natal · expanding province by province.
           </p>
         </div>
       </footer>
