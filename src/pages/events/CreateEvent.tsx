@@ -5,17 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useEvents } from '@/hooks/useEvents';
 import { EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
 import { getArticleByEventType } from '@/data/learnArticles';
+import { SA_PROVINCES } from '@/components/shared/AddressFields';
+import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
 const eventSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
   location: z.string().max(200, 'Location must be less than 200 characters').optional(),
+  state_province: z.string().trim().min(1, 'Please select a province'),
 });
 
 // Get today's date in YYYY-MM-DD format for date validation
@@ -51,6 +57,7 @@ export default function CreateEvent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { createEvent } = useEvents();
+  const { profile } = useAuth();
   
   const preselectedType = searchParams.get('type') as EventType | null;
   
@@ -60,9 +67,11 @@ export default function CreateEvent() {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
   const [guestCount, setGuestCount] = useState('50');
   const [isCreating, setIsCreating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   const handleTypeSelect = (type: EventType) => {
     setEventType(type);
@@ -78,6 +87,7 @@ export default function CreateEvent() {
     const result = eventSchema.safeParse({
       name: name.trim(),
       location: location.trim() || undefined,
+      state_province: stateProvince,
     });
 
     if (!result.success) {
@@ -103,6 +113,25 @@ export default function CreateEvent() {
 
     setValidationErrors({});
     setIsCreating(true);
+
+    // Province gate — only allow event creation in live provinces
+    const { data: liveRow, error: liveErr } = await supabase
+      .from('live_provinces')
+      .select('province')
+      .eq('province', stateProvince)
+      .maybeSingle();
+
+    if (liveErr) {
+      console.error('Error checking live province:', liveErr);
+    }
+
+    if (!liveRow) {
+      setIsCreating(false);
+      setShowWaitlist(true);
+      window.scrollTo(0, 0);
+      return;
+    }
+
     const typeInfo = getEventTypeInfo(eventType);
     const parsedCount = parseInt(guestCount) || 50;
     const sizeLabel = parsedCount <= 80 ? 'small' : parsedCount <= 200 ? 'medium' : 'large';
@@ -112,10 +141,11 @@ export default function CreateEvent() {
       type: eventType,
       date: date || null,
       location: result.data?.location || location.trim() || null,
+      state_province: stateProvince,
       estimated_guest_count: parsedCount,
       size: sizeLabel,
       notes: null,
-    });
+    } as any);
 
     setIsCreating(false);
     
@@ -124,7 +154,7 @@ export default function CreateEvent() {
     }
   };
 
-  const isValid = eventType && name.length >= 2;
+  const isValid = eventType && name.length >= 2 && stateProvince.length > 0;
 
   const selectedTypeInfo = eventType ? getEventTypeInfo(eventType) : null;
 
@@ -133,6 +163,19 @@ export default function CreateEvent() {
       <PageHeader title="Create Ceremony" showBack />
 
       <div className="px-4 py-6 max-w-lg mx-auto">
+        {showWaitlist ? (
+          <ProvinceWaitlist
+            role="organiser"
+            defaults={{
+              full_name: profile?.full_name || '',
+              phone_number: profile?.phone_number || '',
+              province: stateProvince,
+              event_type: eventType || '',
+            }}
+          />
+        ) : (
+        <>
+
         {step === 1 && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -288,6 +331,25 @@ export default function CreateEvent() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="state_province">Province *</Label>
+                <Select value={stateProvince} onValueChange={setStateProvince}>
+                  <SelectTrigger className={cn('h-12', validationErrors.state_province && 'border-destructive')}>
+                    <SelectValue placeholder="Select province" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SA_PROVINCES.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {validationErrors.state_province && (
+                  <p className="text-xs text-destructive">{validationErrors.state_province}</p>
+                )}
+              </div>
+
+
+
+              <div className="space-y-2">
                 <Label htmlFor="guestCount">Estimated number of guests</Label>
                 <Input
                   id="guestCount"
@@ -322,7 +384,10 @@ export default function CreateEvent() {
             </div>
           </div>
         )}
+        </>
+        )}
       </div>
     </div>
+
   );
 }

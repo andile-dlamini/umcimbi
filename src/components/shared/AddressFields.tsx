@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const SA_PROVINCES = [
+export const SA_PROVINCES = [
   'Eastern Cape',
   'Free State',
   'Gauteng',

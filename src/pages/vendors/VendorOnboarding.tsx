@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
+import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { useAuth } from '@/context/AuthContext';
 import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
@@ -46,7 +47,7 @@ const vendorSchema = z.object({
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
-  state_province: z.string().trim().max(100).optional().or(z.literal('')),
+  state_province: z.string().trim().min(1, 'Please select your province').max(100),
   country: z.string().trim().min(1, 'Country is required'),
   postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
   instagram_url: z.string().trim().max(500).optional().or(z.literal('')),
@@ -107,6 +108,7 @@ export default function VendorOnboarding() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [onboardingStep, setOnboardingStep] = useState<4 | 5>(4);
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -251,6 +253,22 @@ export default function VendorOnboarding() {
         return;
       }
       quickE164 = toE164(quickPhone, quickPhoneCountry);
+    }
+
+    // Province gate — only allow vendor creation in live provinces (full flow only;
+    // quick mode collects just a city and no province, so it stays under the RLS default until admin approval).
+    if (!isQuickMode) {
+      const provinceToCheck = address.state_province.trim();
+      const { data: liveRow } = await supabase
+        .from('live_provinces')
+        .select('province')
+        .eq('province', provinceToCheck)
+        .maybeSingle();
+      if (!liveRow) {
+        setShowWaitlist(true);
+        window.scrollTo(0, 0);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -421,6 +439,29 @@ export default function VendorOnboarding() {
 
     navigate(isQuickMode ? '/vendor-dashboard' : '/profile/vendor');
   };
+
+  // ============================================================
+  // WAITLIST — shown when province is not yet live
+  // ============================================================
+  if (showWaitlist) {
+    return (
+      <div className="min-h-screen pb-safe bg-background">
+        <PageHeader title="Become a Vendor" showBack />
+        <div className="px-4 py-6 max-w-lg mx-auto">
+          <ProvinceWaitlist
+            role="vendor"
+            defaults={{
+              full_name: profile?.full_name || '',
+              phone_number: profile?.phone_number || '',
+              province: address.state_province.trim(),
+              city: address.city.trim(),
+              business_name: formData.name.trim(),
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   // ============================================================
   // QUICK MODE — original single-card form (phone retained, email/website removed)
