@@ -197,7 +197,7 @@ export default function OnboardingLanguage() {
           <div className="space-y-8 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
 
             <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Plan Your Traditional Ceremony - <span className="text-secondary">Find Trusted Vendors Across South Africa</span>
+              Plan Your Traditional Ceremony - <span className="text-secondary">Find Trusted Vendors in KwaZulu-Natal</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
@@ -207,7 +207,7 @@ export default function OnboardingLanguage() {
             <ul className="space-y-3 max-w-lg mx-auto md:mx-0 text-left">
               {[
                 'Find trusted vendors for any traditional ceremony near you',
-                'Compare quotes from vetted vendors across South Africa',
+                'Compare quotes from vetted vendors across KwaZulu-Natal',
                 'Pay safely online with protection\n'
               ].map((text) => (
                 <li key={text} className="flex gap-3 items-start text-[15px] sm:text-base text-white/85 leading-relaxed drop-shadow-md">
