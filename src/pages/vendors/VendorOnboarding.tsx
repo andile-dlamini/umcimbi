@@ -108,6 +108,7 @@ export default function VendorOnboarding() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [onboardingStep, setOnboardingStep] = useState<4 | 5>(4);
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
