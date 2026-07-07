@@ -829,10 +829,8 @@ export default function AuthPage() {
                 onClick={async () => {
                   setIsLoading(true);
                   try {
-                    const nextParam = new URLSearchParams(window.location.search).get('next');
-                    const safeNext = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : null;
                     const result = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin + '/auth/callback' + (safeNext ? `?next=${encodeURIComponent(safeNext)}` : ''),
+                      redirect_uri: window.location.origin + '/auth/callback',
                     });
 
                     if (result?.error) {
