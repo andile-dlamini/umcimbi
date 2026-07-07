@@ -51,7 +51,7 @@ import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
-import OAuthConsent from "@/pages/OAuthConsent";
+
 
 
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -109,7 +109,6 @@ function AppRoutes() {
         <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
         <Route path="/feedback/vendor" element={<FeedbackVendor />} />
         <Route path="/verify/selfie" element={<SelfieSubmission />} />
-        <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
 
       </Routes>
@@ -123,7 +122,7 @@ function AppRoutes() {
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
       <Route path="/feedback/vendor" element={<FeedbackVendor />} />
       <Route path="/verify/selfie" element={<SelfieSubmission />} />
-      <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+      
       <Route path="*" element={
 
         <AppShell>

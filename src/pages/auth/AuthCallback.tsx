@@ -52,9 +52,7 @@ export default function AuthCallback() {
           const roleParam = role || 'user';
           navigate(`/auth?step=complete-profile&role=${roleParam}`, { replace: true });
         } else {
-          const next = new URLSearchParams(window.location.search).get('next');
-          const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
-          navigate(safe, { replace: true });
+          navigate('/', { replace: true });
         }
 
       } catch (err) {
