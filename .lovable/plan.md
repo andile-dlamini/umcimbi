@@ -1,53 +1,37 @@
-## Province-based launch restriction (KwaZulu-Natal only)
+# Remove MCP Agent Integration
 
-Users can still sign up freely; only marketplace actions (browse vendors, request quotes, book, pay) are gated. Enforcement = RLS + a gate at event creation and vendor onboarding. **No changes to Ozow, accept-quote, release-escrow, or confirm-delivery edge functions.**
+Tool implementations are already empty. This tears out the remaining plumbing and reverts the `next`-param auth redirects added for the OAuth consent flow.
 
----
+## Changes
 
-### 1. Database migration (single call)
+### 1. `vite.config.ts`
+- Remove `import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";`
+- Remove `mcpPlugin(),` from the plugins array.
 
-- Create `public.live_provinces` (province PK, launched_at). Seed `'KwaZulu-Natal'`. Enable RLS + public SELECT policy. GRANT SELECT to anon + authenticated, ALL to service_role.
-- Create `public.is_province_live(text) returns boolean` — STABLE SECURITY DEFINER, `search_path = public`.
-- `ALTER TABLE public.events ADD COLUMN state_province text;` then backfill existing rows to `'KwaZulu-Natal'`.
-- Backfill `public.vendors.state_province` to `'KwaZulu-Natal'` where null/blank.
-- Replace vendor SELECT policy → require `is_active AND is_province_live(state_province)`.
-- Replace `service_requests` INSERT policy → require the linked event's province is live.
-- Replace `quotes` INSERT policy (vendor-created) → require the linked event's province is live.
-- Replace `messages` INSERT policy → allow when conversation has no event, or event's province is live.
+### 2. `src/App.tsx`
+- Remove `import OAuthConsent from "@/pages/OAuthConsent";`
+- Remove both `<Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />` entries (logged-out + logged-in route trees).
 
-All SQL exactly as specified in the request.
+### 3. `src/pages/auth/AuthPage.tsx`
+- Revert post-login `navigate(safe)` (where `safe` derives from a `next` search param) back to `navigate('/')`.
+- Revert Google `signInWithOAuth` `redirect_uri` back to `window.location.origin + '/auth/callback'` (no `?next=...`).
 
-### 2. Frontend
+### 4. `src/pages/auth/AuthCallback.tsx`
+- Revert the `next`-param branch to `navigate('/', { replace: true })`.
 
-**a. Export `SA_PROVINCES` from `src/components/shared/AddressFields.tsx`** (currently a private const) so both screens reuse the same list.
+### 5. File deletions
+- `src/pages/OAuthConsent.tsx`
+- `supabase/functions/mcp/index.ts`
+- `src/lib/mcp/` (entire directory: `index.ts` and `tools/`)
+- `.lovable/mcp/manifest.json`
 
-**b. `src/pages/events/CreateEvent.tsx`**
-- Add required `state_province` `<Select>` (uses `SA_PROVINCES`) alongside the existing free-text location field. Add to zod schema + validation.
-- On submit: query `public.live_provinces` for the chosen province.
-  - If live → include `state_province` in the insert and proceed as today.
-  - If not live → do NOT create event; render a waitlist screen with the exact copy:
-    > "UMCIMBI is currently live in KwaZulu-Natal only. We are expanding province by province to make sure every vendor is properly verified and every booking is supported. Join the waitlist and we'll notify you when we launch in your area."
-  - Waitlist form captures name, phone, province (pre-filled), city/town, event type; insert into `waitlist_signups` with `role = 'organiser'`.
+### 6. Dependency
+- Remove `@lovable.dev/mcp-js` from `package.json` and refresh `bun.lock` (`bun remove @lovable.dev/mcp-js`).
 
-**c. `src/pages/vendors/VendorOnboarding.tsx`**
-- Make `state_province` required in the zod schema (drop `.optional()`).
-- After the business address step, check `is_province_live` for the chosen province.
-  - If live → continue existing flow (vendor still starts `is_active: false` pending admin approval — unchanged).
-  - If not live → do NOT create vendor; show the waitlist screen (vendor-adapted copy, same core message) capturing name, phone, province, city/town; insert into `waitlist_signups` with `role = 'vendor'`.
+## Out of scope
+No other routes, auth logic, RLS, or unrelated files touched. No edge function redeploy needed beyond removing the `mcp` function source (it will simply stop being regenerated).
 
-**d. `src/hooks/useVendors.ts`**
-- Add explicit `.eq('state_province', 'KwaZulu-Natal')` to the vendor query so UI matches what RLS would return.
-
-**e. `waitlist_signups`**
-- Migration adds `province`, `city`, `event_type` columns (all nullable text). Both waitlist submissions use them; `event_type` left null for the vendor path.
-
-### 3. Verification
-
-- After migration approval + regenerated types: `bun tsgo` (typecheck).
-- Manual sanity check: `useVendors` still returns rows; creating an event in a non-live province shows waitlist screen; creating one in KZN succeeds.
-
-### Explicitly out of scope
-
-- No changes to Ozow edge functions, `accept-quote`, `release-escrow`, `confirm-delivery`.
-- No province checks inside any edge function.
-- No changes to the existing pre-launch waitlist gate or admin approval flow for vendors.
+## Verification
+- `bun tsgo` clean.
+- App builds with Vite (no missing plugin import).
+- `/auth` login lands on `/`; Google OAuth callback lands on `/`.
