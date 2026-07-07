@@ -51,7 +51,7 @@ import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
-import OAuthConsent from "@/pages/OAuthConsent";
+
 
 
 import AdminLayout from "@/components/admin/AdminLayout";
