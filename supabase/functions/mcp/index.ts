@@ -4,117 +4,6 @@
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
 import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
-
-// src/lib/mcp/tools/whoami.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
-var whoami_default = defineTool({
-  name: "whoami",
-  title: "Who am I",
-  description: "Return the authenticated Umcimbi user's id and email.",
-  inputSchema: {},
-  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: (_input, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
-    }
-    const payload = { user_id: ctx.getUserId(), email: ctx.getUserEmail() };
-    return {
-      content: [{ type: "text", text: JSON.stringify(payload) }],
-      structuredContent: payload
-    };
-  }
-});
-
-// src/lib/mcp/tools/list-my-events.ts
-import { createClient } from "npm:@supabase/supabase-js@^2.87.1";
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
-function supabaseForUser(ctx) {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
-var list_my_events_default = defineTool2({
-  name: "list_my_events",
-  title: "List my ceremonies",
-  description: "List ceremonies (events) the signed-in Umcimbi planner has created, most recent first.",
-  inputSchema: {},
-  annotations: { readOnlyHint: true, openWorldHint: false },
-  handler: async (_input, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
-    }
-    const { data, error } = await supabaseForUser(ctx).from("events").select("id, title, ceremony_type, event_date, location_city, location_province, status, budget_zar").order("event_date", { ascending: true, nullsFirst: false }).limit(50);
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data ?? []) }],
-      structuredContent: { events: data ?? [] }
-    };
-  }
-});
-
-// src/lib/mcp/tools/list-my-bookings.ts
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.87.1";
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
-function supabaseForUser2(ctx) {
-  return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
-var list_my_bookings_default = defineTool3({
-  name: "list_my_bookings",
-  title: "List my bookings",
-  description: "List vendor bookings visible to the signed-in Umcimbi user (as planner or vendor owner).",
-  inputSchema: {},
-  annotations: { readOnlyHint: true, openWorldHint: false },
-  handler: async (_input, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
-    }
-    const { data, error } = await supabaseForUser2(ctx).from("bookings").select("id, booking_reference, booking_status, total_amount_zar, deposit_paid_at, balance_paid_at, created_at, event_id, vendor_id").order("created_at", { ascending: false }).limit(50);
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data ?? []) }],
-      structuredContent: { bookings: data ?? [] }
-    };
-  }
-});
-
-// src/lib/mcp/tools/search-vendors.ts
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.87.1";
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
-import { z } from "npm:zod@^3.25.76";
-function supabaseForUser3(ctx) {
-  return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: ctx.isAuthenticated() ? { headers: { Authorization: `Bearer ${ctx.getToken()}` } } : void 0,
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
-var search_vendors_default = defineTool4({
-  name: "search_vendors",
-  title: "Search vendors",
-  description: "Search active Umcimbi vendors by category and/or free-text query. Returns public vendor info only.",
-  inputSchema: {
-    category: z.string().optional().describe("Vendor category slug, e.g. 'catering', 'photography'."),
-    query: z.string().optional().describe("Free-text match against business name or description."),
-    limit: z.number().int().min(1).max(50).optional().describe("Max results (default 20).")
-  },
-  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ category, query, limit }, ctx) => {
-    let q = supabaseForUser3(ctx).from("vendors_public").select("id, business_name, category, description, city, province, rating, review_count, is_verified").limit(limit ?? 20);
-    if (category) q = q.eq("category", category);
-    if (query) q = q.or(`business_name.ilike.%${query}%,description.ilike.%${query}%`);
-    const { data, error } = await q;
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data ?? []) }],
-      structuredContent: { vendors: data ?? [] }
-    };
-  }
-});
-
-// src/lib/mcp/index.ts
 var projectRef = "pnnckeqrzjglcwkyzzxg";
 var mcp_default = defineMcp({
   name: "umcimbi-mcp",
@@ -125,7 +14,7 @@ var mcp_default = defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [whoami_default, list_my_events_default, list_my_bookings_default, search_vendors_default]
+  tools: []
 });
 
 // lovable-mcp-supabase-entry.ts

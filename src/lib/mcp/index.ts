@@ -1,8 +1,4 @@
 import { auth, defineMcp } from "@lovable.dev/mcp-js";
-import whoamiTool from "./tools/whoami";
-import listMyEventsTool from "./tools/list-my-events";
-import listMyBookingsTool from "./tools/list-my-bookings";
-import searchVendorsTool from "./tools/search-vendors";
 
 // Build the Supabase Auth issuer from the project ref (Vite inlines this literal
 // at build time, so the entry stays import-safe with no runtime env reads).
@@ -21,5 +17,5 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [whoamiTool, listMyEventsTool, listMyBookingsTool, searchVendorsTool],
+  tools: [],
 });
