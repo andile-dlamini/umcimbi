@@ -59,6 +59,7 @@ export default function VendorDetail() {
   const [selectedEventId, setSelectedEventId] = useState(eventId || '');
   const [isSaved, setIsSaved] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
     if (!user || !id) return;
