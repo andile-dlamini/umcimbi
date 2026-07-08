@@ -162,7 +162,11 @@ export default function VendorDetail() {
     );
   }
 
-  const allImages = vendor.image_urls ?? [];
+  const galleryImages = vendor.image_urls ?? [];
+  const allImages =
+    vendor.logo_url && !galleryImages.includes(vendor.logo_url)
+      ? [vendor.logo_url, ...galleryImages]
+      : galleryImages;
   const logoUrl = vendor.logo_url ?? allImages[0] ?? null;
   const images = allImages;
   const totalImages = images.length;
