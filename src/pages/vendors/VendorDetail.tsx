@@ -9,6 +9,8 @@ import {
   Briefcase,
   Camera,
   X,
+  ChevronLeft,
+  ChevronRight,
   Instagram,
   Facebook,
 } from 'lucide-react';
@@ -57,6 +59,7 @@ export default function VendorDetail() {
   const [selectedEventId, setSelectedEventId] = useState(eventId || '');
   const [isSaved, setIsSaved] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -74,6 +77,10 @@ export default function VendorDetail() {
       cancelled = true;
     };
   }, [user, id]);
+
+  useEffect(() => {
+    if (galleryOpen) setGalleryIndex(0);
+  }, [galleryOpen]);
 
   const handleChatWithVendor = async () => {
     if (!user) {
@@ -423,24 +430,65 @@ export default function VendorDetail() {
 
       {/* Full-screen gallery overlay */}
       {galleryOpen && (
-        <div className="fixed inset-0 z-[100] bg-background overflow-y-auto">
-          <button
-            type="button"
-            aria-label="Close gallery"
-            onClick={() => setGalleryOpen(false)}
-            className="fixed top-4 right-4 z-10 inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/95 shadow-md backdrop-blur-sm hover:bg-background transition-colors"
-          >
-            <X className="h-5 w-5 text-foreground" />
-          </button>
-          <div className="flex flex-col gap-2 pb-12 pt-16">
-            {images.map((url, i) => (
+        <div className="fixed inset-0 z-[100] bg-background flex flex-col">
+          {/* Top bar */}
+          <div className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3">
+            <div className="text-sm font-medium text-foreground">
+              {galleryIndex + 1} / {images.length}
+            </div>
+            <button
+              type="button"
+              aria-label="Close gallery"
+              onClick={() => setGalleryOpen(false)}
+              className={circleBtn}
+            >
+              <X className="h-5 w-5 text-foreground" />
+            </button>
+          </div>
+
+          {/* Main image area */}
+          <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
+            {images.length > 1 && (
+              <button
+                type="button"
+                aria-label="Previous photo"
+                onClick={() =>
+                  setGalleryIndex((prev) => (prev - 1 + images.length) % images.length)
+                }
+                className={cn(circleBtn, 'absolute left-4 md:left-8 top-1/2 -translate-y-1/2')}
+              >
+                <ChevronLeft className="h-5 w-5 text-foreground" />
+              </button>
+            )}
+
+            <div className="max-h-[70vh] max-w-full rounded-xl overflow-hidden">
               <img
-                key={i}
-                src={url}
-                alt={`${vendor.name} photo ${i + 1}`}
-                className="w-full h-auto object-contain"
+                src={images[galleryIndex]}
+                alt={`${vendor.name} photo ${galleryIndex + 1}`}
+                className="max-h-[70vh] max-w-full object-contain"
+                onClick={() =>
+                  setGalleryIndex((prev) => (prev + 1) % images.length)
+                }
               />
-            ))}
+            </div>
+
+            {images.length > 1 && (
+              <button
+                type="button"
+                aria-label="Next photo"
+                onClick={() =>
+                  setGalleryIndex((prev) => (prev + 1) % images.length)
+                }
+                className={cn(circleBtn, 'absolute right-4 md:right-8 top-1/2 -translate-y-1/2')}
+              >
+                <ChevronRight className="h-5 w-5 text-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Caption */}
+          <div className="px-4 py-4 text-center text-sm text-muted-foreground">
+            {vendor.name} photo {galleryIndex + 1}
           </div>
         </div>
       )}
