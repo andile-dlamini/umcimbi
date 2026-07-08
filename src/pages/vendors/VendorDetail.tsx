@@ -163,8 +163,8 @@ export default function VendorDetail() {
   }
 
   const allImages = vendor.image_urls ?? [];
-  const logoUrl = vendor.logo_url ?? null;
-  const images = allImages.slice(1);
+  const logoUrl = vendor.logo_url ?? allImages[0] ?? null;
+  const images = allImages;
   const totalImages = images.length;
   const v = vendor as any;
   const instagramUrl: string | null = v.instagram_url ?? null;
