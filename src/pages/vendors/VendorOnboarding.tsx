@@ -18,7 +18,7 @@ import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { useAuth } from '@/context/AuthContext';
-import { LIVE_VENDOR_CATEGORIES, LIVE_LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

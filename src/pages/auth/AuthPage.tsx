@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
-import { LIVE_VENDOR_CATEGORIES, LIVE_LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
