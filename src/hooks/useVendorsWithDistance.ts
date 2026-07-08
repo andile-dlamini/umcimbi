@@ -44,7 +44,9 @@ export function useVendorsWithDistance(
       let query = supabase
         .from('vendors')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('state_province', 'KwaZulu-Natal')
+        .not('category', 'in', `(${HIDDEN_VENDOR_CATEGORIES.join(',')})`);
 
       if (filters?.category && filters.category !== 'all') {
         query = query.eq('category', filters.category);
