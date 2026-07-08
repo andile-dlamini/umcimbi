@@ -10,6 +10,7 @@ export type VendorCategory =
   | 'decor'
   | 'dj_sound_audio'
   | 'drinks_ice_delivery'
+  | 'event_planning'
   | 'florist'
   | 'invitations_stationery'
   | 'livestock' 
@@ -35,6 +36,7 @@ export const VENDOR_CATEGORIES: VendorCategoryInfo[] = [
   { value: 'decor', label: 'Decor & Styling' },
   { value: 'dj_sound_audio', label: 'DJ / Sound & Audio' },
   { value: 'drinks_ice_delivery', label: 'Drinks & Ice Delivery' },
+  { value: 'event_planning', label: 'Event Planning' },
   { value: 'florist', label: 'Florist' },
   { value: 'invitations_stationery', label: 'Invitations, Stationery & Printing' },
   { value: 'livestock', label: 'Livestock / Abattoir' },
@@ -66,3 +68,28 @@ export const VENDOR_CATEGORY_FILTER_OPTIONS: { value: VendorCategory | 'all'; la
 
 // Zod-compatible enum values for validation
 export const VENDOR_CATEGORY_VALUES = VENDOR_CATEGORIES.map(c => c.value) as [VendorCategory, ...VendorCategory[]];
+
+// Categories hidden from discovery, browse, search, and new signup pickers.
+// Existing vendors in these categories keep their data and stay bookable via
+// existing chats/bookings — they just don't appear as choices anywhere new.
+export const HIDDEN_VENDOR_CATEGORIES: VendorCategory[] = [
+  'cakes_baking',
+  'cleaning_services',
+  'drinks_ice_delivery',
+  'florist',
+  'invitations_stationery',
+  'livestock',
+  'makeup_beauty',
+  'transport',
+];
+
+export const LIVE_VENDOR_CATEGORIES = VENDOR_CATEGORIES.filter(
+  c => !HIDDEN_VENDOR_CATEGORIES.includes(c.value)
+);
+
+export const LIVE_VENDOR_CATEGORY_VALUES = LIVE_VENDOR_CATEGORIES.map(c => c.value) as [VendorCategory, ...VendorCategory[]];
+
+export const LIVE_VENDOR_CATEGORY_FILTER_OPTIONS: { value: VendorCategory | 'all'; label: string }[] = [
+  { value: 'all', label: 'All Categories' },
+  ...LIVE_VENDOR_CATEGORIES,
+];
