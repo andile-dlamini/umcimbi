@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
-import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES, LIVE_LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,7 +87,7 @@ const passwordSchema = z.object({
 
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
-  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
@@ -1327,7 +1327,7 @@ export default function AuthPage() {
                     <Label>Category *</Label>
                     <Select value={vendorForm.category} onValueChange={v => setVendorForm({ ...vendorForm, category: v as VendorCategory })}>
                       <SelectTrigger className={`h-12 ${errors.category ? 'border-destructive' : ''}`}><SelectValue placeholder="Select your service category" /></SelectTrigger>
-                      <SelectContent>{VENDOR_CATEGORIES.map(cat => <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>)}</SelectContent>
+                      <SelectContent>{LIVE_VENDOR_CATEGORIES.map(cat => <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>)}</SelectContent>
                     </Select>
                     {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
                   </div>

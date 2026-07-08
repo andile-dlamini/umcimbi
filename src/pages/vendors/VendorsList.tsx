@@ -11,7 +11,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { VendorCard } from '@/components/shared/VendorCard';
 import { useVendorsWithDistance, SortOption } from '@/hooks/useVendorsWithDistance';
 import { useEvents } from '@/hooks/useEvents';
-import { VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
@@ -103,7 +103,7 @@ export default function VendorsList() {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              {VENDOR_CATEGORY_FILTER_OPTIONS.map((cat) => (
+              {LIVE_VENDOR_CATEGORY_FILTER_OPTIONS.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value}>
                   {cat.label}
                 </SelectItem>

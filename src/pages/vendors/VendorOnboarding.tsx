@@ -18,7 +18,7 @@ import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { ProvinceWaitlist } from '@/components/shared/ProvinceWaitlist';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { useAuth } from '@/context/AuthContext';
-import { VENDOR_CATEGORIES, VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES, LIVE_LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -41,7 +41,7 @@ const toE164 = (phone: string, countryCode: string) => {
 
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
-  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
   about: z.string().trim().min(10, 'Please describe your business (at least 10 characters)').max(2000),
   price_range_text: z.string().trim().min(1, 'Please add your pricing'),
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
@@ -57,7 +57,7 @@ const vendorSchema = z.object({
 
 const quickVendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
-  category: z.enum(VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
 });
 
@@ -523,7 +523,7 @@ export default function VendorOnboarding() {
                       <SelectValue placeholder="Select your service category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {VENDOR_CATEGORIES.map((cat) => (
+                      {LIVE_VENDOR_CATEGORIES.map((cat) => (
                         <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                       ))}
                     </SelectContent>
@@ -704,7 +704,7 @@ export default function VendorOnboarding() {
                     <SelectValue placeholder="Select your service category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {VENDOR_CATEGORIES.map((cat) => (
+                    {LIVE_VENDOR_CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
                   </SelectContent>
