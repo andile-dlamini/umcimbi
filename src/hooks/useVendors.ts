@@ -20,6 +20,7 @@ export function useVendors(filters?: {
       .select('*')
       .eq('is_active', true)
       .eq('state_province', 'KwaZulu-Natal')
+      .not('category', 'in', `(${HIDDEN_VENDOR_CATEGORIES.join(',')})`)
       .order('rating', { ascending: false });
 
     if (filters?.category && filters.category !== 'all') {
