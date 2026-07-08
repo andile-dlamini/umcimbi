@@ -78,6 +78,10 @@ export default function VendorDetail() {
     };
   }, [user, id]);
 
+  useEffect(() => {
+    if (galleryOpen) setGalleryIndex(0);
+  }, [galleryOpen]);
+
   const handleChatWithVendor = async () => {
     if (!user) {
       toast.error('Please log in to chat with vendors');
