@@ -9,6 +9,8 @@ import {
   Briefcase,
   Camera,
   X,
+  ChevronLeft,
+  ChevronRight,
   Instagram,
   Facebook,
 } from 'lucide-react';
