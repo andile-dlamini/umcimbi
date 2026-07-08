@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Vendor, Event } from '@/types/database';
 import { getDistanceInKm } from '@/lib/distanceUtils';
-import { VendorCategory } from '@/lib/vendorCategories';
+import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 
 export interface VendorWithDistance extends Vendor {
   distanceKm: number | null;
@@ -44,7 +44,9 @@ export function useVendorsWithDistance(
       let query = supabase
         .from('vendors')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('state_province', 'KwaZulu-Natal')
+        .not('category', 'in', `(${HIDDEN_VENDOR_CATEGORIES.join(',')})`);
 
       if (filters?.category && filters.category !== 'all') {
         query = query.eq('category', filters.category);

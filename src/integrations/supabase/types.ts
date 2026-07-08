@@ -2063,6 +2063,7 @@ export type Database = {
         | "dj_sound_audio"
         | "florist"
         | "cleaning_services"
+        | "event_planning"
       verification_doc_status: "uploaded" | "approved" | "rejected"
       verification_doc_type:
         | "cipc_registration"
@@ -2287,6 +2288,7 @@ export const Constants = {
         "dj_sound_audio",
         "florist",
         "cleaning_services",
+        "event_planning",
       ],
       verification_doc_status: ["uploaded", "approved", "rejected"],
       verification_doc_type: [
