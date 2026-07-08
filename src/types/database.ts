@@ -2,7 +2,7 @@
 export type AppRole = 'user' | 'vendor' | 'admin';
 export type PreferredLanguage = 'zulu' | 'english';
 export type EventType = 'lobola' | 'umembeso' | 'umbondo' | 'umabo' | 'umemulo' | 'imbeleko' | 'ancestral_ritual';
-export type VendorCategory = 'attire' | 'attire_tailoring' | 'cakes_baking' | 'catering' | 'cleaning_services' | 'cold_room_hire' | 'decor' | 'dj_sound_audio' | 'drinks_ice_delivery' | 'florist' | 'invitations_stationery' | 'livestock' | 'makeup_beauty' | 'mobile_toilets' | 'other' | 'photographer' | 'tents' | 'transport';
+export type VendorCategory = 'attire' | 'attire_tailoring' | 'cakes_baking' | 'catering' | 'cleaning_services' | 'cold_room_hire' | 'decor' | 'dj_sound_audio' | 'drinks_ice_delivery' | 'event_planning' | 'florist' | 'invitations_stationery' | 'livestock' | 'makeup_beauty' | 'mobile_toilets' | 'other' | 'photographer' | 'tents' | 'transport';
 export type TaskCategory = 'gifts' | 'decor' | 'livestock' | 'transport' | 'catering' | 'attire' | 'finance' | 'venue' | 'other';
 export type BudgetCategory = 'gifts' | 'decor' | 'catering' | 'livestock' | 'transport' | 'attire' | 'venue' | 'funeral_services' | 'healer_services' | 'music' | 'other';
 export type RsvpStatus = 'invited' | 'yes' | 'no' | 'unknown';
