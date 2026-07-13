@@ -130,6 +130,15 @@ Deno.serve(async (req) => {
 
       if (updateError) {
         console.error("Failed to update booking:", updateError);
+      } else {
+        try {
+          const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+          if (payment_type === "deposit") {
+            fireNotifyVendorEvent({ event_type: "deposit_paid", booking_id });
+          } else if (payment_type === "balance") {
+            fireNotifyVendorEvent({ event_type: "balance_paid", booking_id });
+          }
+        } catch (_e) { /* ignore */ }
       }
 
       if (payment_type === "deposit" && bookingForDate?.deposit_amount) {

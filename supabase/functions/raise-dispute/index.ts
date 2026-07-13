@@ -226,6 +226,11 @@ View booking: https://www.umcimbi.co.za/admin/bookings/${booking_id}`;
       console.error("Admin dispute email failed:", emailErr);
     }
 
+    try {
+      const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+      fireNotifyVendorEvent({ event_type: "dispute_raised", booking_id });
+    } catch (_e) { /* ignore */ }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -80,6 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
+          // Reset vendor dormancy on sign-in / token refresh (fire-and-forget).
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            setTimeout(() => {
+              // @ts-ignore - RPC name added in latest migration; types regen after approval
+              supabase.rpc('reset_own_vendor_dormancy').then(() => {}, () => {});
+            }, 0);
+          }
         } else {
           setProfile(null);
           setVendorProfile(null);

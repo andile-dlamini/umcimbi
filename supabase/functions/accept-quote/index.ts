@@ -173,6 +173,12 @@ serve(async (req) => {
       await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", conv.id);
     }
 
+    // Notify vendor (fire-and-forget)
+    try {
+      const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+      fireNotifyVendorEvent({ event_type: "quote_accepted", booking_id: booking.id });
+    } catch (_e) { /* ignore */ }
+
     return new Response(
       JSON.stringify({ booking_id: booking.id, quote_status: "client_accepted", order_number: orderNumber }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

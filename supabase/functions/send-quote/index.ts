@@ -492,6 +492,12 @@ serve(async (req) => {
       responded_at: new Date().toISOString(),
     }).eq("id", serviceRequestId);
 
+    // Fire SMS to planner (fire-and-forget)
+    try {
+      const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+      fireNotifyVendorEvent({ event_type: "quote_sent", quote_id: quoteId });
+    } catch (_e) { /* ignore */ }
+
     return new Response(
       JSON.stringify({ quote_id: quoteId, offer_number: offerNumber, conversation_id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

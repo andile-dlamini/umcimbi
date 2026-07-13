@@ -52,6 +52,43 @@ export default function SettingsPage() {
     is_super_vendor: boolean;
   } | null>(null);
 
+  // SMS notification preference (separate from in-app notifications toggle)
+  const [smsEnabled, setSmsEnabled] = useState(true);
+  const [smsLoading, setSmsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setSmsLoading(true);
+    supabase
+      .from('notification_preferences')
+      .select('sms_enabled')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setSmsEnabled(data?.sms_enabled ?? true);
+        setSmsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const toggleSms = async (next: boolean) => {
+    if (!user) return;
+    setSmsLoading(true);
+    setSmsEnabled(next);
+    const { error } = await supabase
+      .from('notification_preferences')
+      .upsert({ user_id: user.id, sms_enabled: next }, { onConflict: 'user_id' });
+    setSmsLoading(false);
+    if (error) {
+      setSmsEnabled(!next);
+      toast.error('Could not update SMS preference');
+    } else {
+      toast.success(next ? 'SMS notifications on' : 'SMS notifications off');
+    }
+  };
+
   useEffect(() => {
     if (!user || !isVendor) { setVendorStats(null); return; }
     supabase
@@ -267,6 +304,19 @@ export default function SettingsPage() {
                 <Label className="text-sm">Notifications</Label>
               </div>
               <Switch checked={settings.notifications_enabled} onCheckedChange={updateNotifications} disabled={settingsLoading} />
+            </div>
+            <Separator />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Bell className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div>
+                  <Label className="text-sm">SMS notifications</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Alerts for new requests, quotes, bookings, payments, and disputes.
+                  </p>
+                </div>
+              </div>
+              <Switch checked={smsEnabled} onCheckedChange={toggleSms} disabled={smsLoading} />
             </div>
           </CardContent>
         </Card>
