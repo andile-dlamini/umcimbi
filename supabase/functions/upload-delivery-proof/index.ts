@@ -161,6 +161,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    try {
+      const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+      fireNotifyVendorEvent({ event_type: "delivery_uploaded", booking_id });
+    } catch (_e) { /* ignore */ }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

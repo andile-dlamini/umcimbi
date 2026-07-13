@@ -670,6 +670,27 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          sms_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          sms_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       otp_requests: {
         Row: {
           attempt_count: number
@@ -857,6 +878,7 @@ export type Database = {
           id: string
           is_demo: boolean
           is_profile_complete: boolean | null
+          last_notified_at: string | null
           notifications_enabled: boolean | null
           phone_number: string | null
           phone_verified: boolean
@@ -883,6 +905,7 @@ export type Database = {
           id?: string
           is_demo?: boolean
           is_profile_complete?: boolean | null
+          last_notified_at?: string | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean
@@ -909,6 +932,7 @@ export type Database = {
           id?: string
           is_demo?: boolean
           is_profile_complete?: boolean | null
+          last_notified_at?: string | null
           notifications_enabled?: boolean | null
           phone_number?: string | null
           phone_verified?: boolean
@@ -1182,6 +1206,45 @@ export type Database = {
           id?: string
           raw_response?: Json | null
           status?: string
+        }
+        Relationships: []
+      }
+      sms_notification_log: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          phone_number: string | null
+          provider_response: string | null
+          related_id: string | null
+          sent_at: string
+          tier: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          phone_number?: string | null
+          provider_response?: string | null
+          related_id?: string | null
+          sent_at?: string
+          tier: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          phone_number?: string | null
+          provider_response?: string | null
+          related_id?: string | null
+          sent_at?: string
+          tier?: string
+          user_id?: string
+          user_type?: string
         }
         Relationships: []
       }
@@ -1516,6 +1579,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string | null
+          dormant_nudge_count: number
           email: string | null
           facebook_url: string | null
           id: string
@@ -1527,6 +1591,8 @@ export type Database = {
           is_super_vendor: boolean
           jobs_completed: number
           languages: string[] | null
+          last_notified_at: string | null
+          last_nudge_sent_at: string | null
           latitude: number | null
           letterhead_enabled: boolean
           location: string | null
@@ -1583,6 +1649,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
+          dormant_nudge_count?: number
           email?: string | null
           facebook_url?: string | null
           id?: string
@@ -1594,6 +1661,8 @@ export type Database = {
           is_super_vendor?: boolean
           jobs_completed?: number
           languages?: string[] | null
+          last_notified_at?: string | null
+          last_nudge_sent_at?: string | null
           latitude?: number | null
           letterhead_enabled?: boolean
           location?: string | null
@@ -1650,6 +1719,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
+          dormant_nudge_count?: number
           email?: string | null
           facebook_url?: string | null
           id?: string
@@ -1661,6 +1731,8 @@ export type Database = {
           is_super_vendor?: boolean
           jobs_completed?: number
           languages?: string[] | null
+          last_notified_at?: string | null
+          last_nudge_sent_at?: string | null
           latitude?: number | null
           letterhead_enabled?: boolean
           location?: string | null
@@ -1948,6 +2020,7 @@ export type Database = {
           vendor_phone: string
         }[]
       }
+      get_vendor_last_sign_in: { Args: { _vendor_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1978,6 +2051,7 @@ export type Database = {
         }[]
       }
       recalculate_all_trust_scores: { Args: never; Returns: undefined }
+      reset_own_vendor_dormancy: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "user" | "vendor" | "admin"

@@ -130,6 +130,14 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabase.from("vendor_payouts").update(updatePayload).eq("id", payout.id);
     if (updateError) return jsonResponse({ error: "Failed to update payout" }, 500);
 
+    // Fire payout_released SMS ONLY on normalized "paid" — never on submitted/pending/failed/rejected.
+    if (normalizedStatus === "paid") {
+      try {
+        const { fireNotifyVendorEvent } = await import("../_shared/notifyVendorEvent.ts");
+        fireNotifyVendorEvent({ event_type: "payout_released", vendor_payout_id: payout.id });
+      } catch (_e) { /* ignore */ }
+    }
+
     return jsonResponse({ success: true, status: normalizedStatus, vendor_payout_id: payout.id });
   } catch (err) {
     console.error("ozow-payout-notification error:", err);
