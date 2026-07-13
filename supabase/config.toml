@@ -36,3 +36,15 @@ verify_jwt = false
 [functions.vendor-selfie-submission]
 verify_jwt = false
 
+[functions.notify-vendor-event]
+verify_jwt = false
+
+[functions.notify-first-message]
+verify_jwt = false
+
+[functions.vendor-response-nudge]
+verify_jwt = false
+
+[functions.notification-digest]
+verify_jwt = false
+
