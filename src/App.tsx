@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-r
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { RoleProvider } from "@/context/RoleContext";
 import { AppShell } from "@/components/layout/AppShell";
+import { UpdateBanner } from "@/components/layout/UpdateBanner";
+import { usePwaUpdate } from "@/hooks/usePwaUpdate";
 
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
