@@ -82,7 +82,7 @@ const PlannerJoinRedirect = () => {
   return <Navigate to={to} replace />;
 };
 
-function AppRoutes() {
+function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
   const { user, isLoading, isProfileComplete } = useAuth();
 
   if (isLoading) {
@@ -127,7 +127,7 @@ function AppRoutes() {
       
       <Route path="*" element={
 
-        <AppShell>
+        <AppShell updateAvailable={updateAvailable}>
           <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<EventsList />} />
@@ -182,20 +182,24 @@ function AppRoutes() {
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <RoleProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
-      </RoleProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const { needRefresh, refresh } = usePwaUpdate();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RoleProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppRoutes updateAvailable={needRefresh} />
+            </BrowserRouter>
+            <UpdateBanner needRefresh={needRefresh} onRefresh={refresh} />
+          </TooltipProvider>
+        </RoleProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
