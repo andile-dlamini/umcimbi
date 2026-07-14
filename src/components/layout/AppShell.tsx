@@ -13,6 +13,7 @@ import { VENDOR_TOUR_STEPS } from '@/config/vendorTourSteps';
 
 interface AppShellProps {
   children: ReactNode;
+  updateAvailable?: boolean;
 }
 
 /** Pages that should NOT show the sidebar */
@@ -35,7 +36,7 @@ function TourController() {
   return null;
 }
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, updateAvailable = false }: AppShellProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
 
@@ -43,10 +44,13 @@ export function AppShell({ children }: AppShellProps) {
     location.pathname === r || location.pathname.startsWith(r)
   );
 
-  if (hideNav) return <>{children}</>;
+  // Reserve space at the bottom so the update banner doesn't cover tap targets.
+  const bannerPad = updateAvailable ? 'pb-20' : '';
+
+  if (hideNav) return <div className={bannerPad}>{children}</div>;
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className={`flex min-h-screen w-full ${bannerPad}`}>
       <AppSidebar />
       <main className={`flex-1 min-w-0 ${isMobile ? 'ml-14' : ''}`}>
         {children}
