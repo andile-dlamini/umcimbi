@@ -1,6 +1,3 @@
-// One-shot admin utility: writes the runtime SUPABASE_SERVICE_ROLE_KEY into
-// vault.secrets under the name expected by DB triggers (email_queue_service_role_key).
-// Auth: caller must present the same service-role key as Bearer.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
@@ -13,46 +10,15 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  // No external auth — this function will be deleted immediately after one invocation.
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
-  // Look up existing secret by name via SQL RPC-style call using a temp function is overkill;
-  // instead try update; if 0 rows, insert.
-  const { data: existing, error: selErr } = await sb
-    .schema("vault" as any)
-    .from("secrets")
-    .select("id")
-    .eq("name", "email_queue_service_role_key")
-    .maybeSingle();
-
-  if (selErr) {
-    return new Response(JSON.stringify({ error: "select_failed", detail: selErr.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  if (existing?.id) {
-    // Use the vault.update_secret function via rpc
-    const { error } = await sb.rpc("vault_update_email_queue_key" as any, { new_secret: SERVICE_ROLE });
-    if (error) {
-      return new Response(JSON.stringify({ error: "update_failed", detail: error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    return new Response(JSON.stringify({ ok: true, action: "updated" }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const { error } = await sb.rpc("vault_create_email_queue_key" as any, { new_secret: SERVICE_ROLE });
+  const { error } = await sb.rpc("vault_update_email_queue_key", { new_secret: SERVICE_ROLE });
   if (error) {
-    return new Response(JSON.stringify({ error: "create_failed", detail: error.message }), {
+    return new Response(JSON.stringify({ error: "rpc_failed", detail: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  return new Response(JSON.stringify({ ok: true, action: "created" }), {
+  return new Response(JSON.stringify({ ok: true }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
