@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         await sb.from("sms_notification_log").insert({
           user_id: ownerId, user_type: "vendor",
           event_type: "first_message_to_vendor__suppressed_dormant",
-          tier: "suppressed", related_id: conversation_id, phone,
+          tier: "suppressed", related_id: conversation_id, phone_number: phone,
         });
         return json({ skipped: "dormant" });
       }
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       const { error: dupErr } = await sb.from("sms_notification_log").insert({
         user_id: ownerId, user_type: "vendor",
         event_type: "first_message_to_vendor",
-        tier: "tier1", related_id: conversation_id, phone,
+        tier: "tier1", related_id: conversation_id, phone_number: phone,
       });
       if (dupErr && String(dupErr.code) === "23505") return json({ skipped: "duplicate" });
 
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       const { error: dupErr } = await sb.from("sms_notification_log").insert({
         user_id: plannerId, user_type: "planner",
         event_type: "first_message_to_planner",
-        tier: "tier1", related_id: conversation_id, phone,
+        tier: "tier1", related_id: conversation_id, phone_number: phone,
       });
       if (dupErr && String(dupErr.code) === "23505") return json({ skipped: "duplicate" });
 
