@@ -1,40 +1,75 @@
-## Corrections acknowledged
+# Reconcile Tier 2 cron drift into git
 
-- **Shweshwe palette**: dropped from the plan. The banner will use existing semantic Tailwind tokens (`bg-background`, `text-foreground`, `border-border`, `bg-primary`, etc.) already defined in `index.css`. No hardcoded colors.
-- **Lovable-preview guard**: you're right, I couldn't find one either — I confirmed with `grep -rn "serviceWorker\|pwa-register\|registerSW\|lovableproject" src/ vite.config.ts` and got zero hits. Nothing in `src/` currently touches the SW registration surface. The plan now uses an explicit `'serviceWorker' in navigator` check inside the hook, and the hook returns inert values otherwise.
-- **Single hook call**: `usePwaUpdate()` is called exactly once in `App.tsx`. `needRefresh` and `refresh` are passed down as props to both `UpdateBanner` and `AppShell`.
+## Goal
+Close the gap between the live database and the repo for the two Tier 2 SMS cron jobs, and leave an in-repo record that the `email_queue_service_role_key` vault secret was rotated today. No function code, table, or RLS change.
 
-## Plan
+## What's currently live (confirmed via query)
 
-**1. `src/hooks/usePwaUpdate.ts` (new)**
+| Job | Schedule | Endpoint |
+|---|---|---|
+| `vendor-response-nudge` | `0 * * * *` | `functions/v1/vendor-response-nudge` |
+| `notification-digest` | `*/30 * * * *` | `functions/v1/notification-digest` |
 
-- Guard: if `typeof navigator === 'undefined' || !('serviceWorker' in navigator)`, return `{ needRefresh: false, refresh: () => {} }` without importing/using `useRegisterSW`.
-- Otherwise: use `useRegisterSW` from `virtual:pwa-register/react` and expose:
-  - `needRefresh: boolean`
-  - `refresh(): void` — calls `updateServiceWorker(true)`.
-- No dismiss / no `setNeedRefresh(false)` export.
+Both call `net.http_post` with `body := '{}'::jsonb` and an `Authorization: Bearer <service-role>` header. The live commands currently have the rotated service-role key **inlined as a literal** in the cron command text.
 
-**2. `src/components/layout/UpdateBanner.tsx` (new)**
+## Decision point on the Authorization header
 
-- Props: `{ needRefresh: boolean; onRefresh: () => void }`.
-- Returns `null` when `!needRefresh`.
-- Fixed banner pinned to the bottom, full width, using semantic tokens only (`bg-background`, `border-t border-border`, `text-foreground`, shadcn `Button` with default `primary` variant). Respects `env(safe-area-inset-bottom)`. Z-index above the mobile bottom nav.
-- Copy: "A new version of UMCIMBI is available." + "Refresh now" button wired to `onRefresh`.
+Committing the live command verbatim would put the rotated service-role JWT into git — exactly what you asked to avoid. Two options; both keep the schedule/endpoint/body identical:
 
-**3. `src/App.tsx`**
+- **A. Vault lookup at execution time (recommended).** Change the header to `'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'email_queue_service_role_key')`, matching the pattern already used by `email_queue_dispatch`, `notify_new_service_request`, and `notify_first_message`. Migration text carries no secret, and future vault rotations are picked up automatically without another cron rewrite.
+- **B. Literal token, kept out of git.** Keep the raw JWT in the live cron command and commit a migration that intentionally omits the header. This drifts again the moment the file is applied to a fresh clone.
 
-- Call `usePwaUpdate()` once inside the `App` component.
-- Render `<UpdateBanner needRefresh={needRefresh} onRefresh={refresh} />` at the top level, outside `<BrowserRouter>`.
-- Pass `needRefresh` into `<AppRoutes />` → down to `<AppShell />` (added prop) so `AppShell` can add conditional bottom padding to `<main>` matching the banner height, keeping the bottom nav's tap targets reachable on mobile.
+Plan below assumes **Option A**. If you'd rather I preserve the literal-token form, say so and I'll adjust.
 
-**4. Not touched**
+## New migration
 
-- `vite.config.ts` / Workbox config.
-- Existing Sonner/toast wiring.
-- Anything outside the three files above.
+Create `supabase/migrations/<timestamp>_reconcile_tier2_cron.sql` with this structure for **each** job:
 
-## Technical notes
+```sql
+DO $$
+BEGIN
+  PERFORM cron.unschedule('vendor-response-nudge');
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
-- No new dependencies; `vite-plugin-pwa` is already installed.
-- The `virtual:pwa-register/react` import lives only in the branch that runs after the `'serviceWorker' in navigator` check, so environments without SW support don't hit the module.
-- Banner uses shadcn `Button` for consistency; no ad-hoc color classes.
+SELECT cron.schedule(
+  'vendor-response-nudge',
+  '0 * * * *',
+  $cron$
+    SELECT net.http_post(
+      url := 'https://pnnckeqrzjglcwkyzzxg.supabase.co/functions/v1/vendor-response-nudge',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || (
+          SELECT decrypted_secret FROM vault.decrypted_secrets
+          WHERE name = 'email_queue_service_role_key'
+        )
+      ),
+      body := '{}'::jsonb
+    );
+  $cron$
+);
+```
+
+Repeat the same block for `notification-digest` with schedule `*/30 * * * *` and its URL. A leading comment documents the vault-rotation note (name only, no value).
+
+Migration is re-run safe: the `DO ... EXCEPTION WHEN OTHERS THEN NULL` wraps `cron.unschedule` so it's a no-op when the job is absent, then `cron.schedule` reinstalls it.
+
+## Applying to the live DB
+
+Run the same migration against the live database in the same call so the live cron commands switch from the inlined literal JWT to the vault-lookup form. After that, git and live match, and the rotated secret exists only in vault.
+
+## Vault rotation record (not committed as a value)
+
+- **Secret name:** `email_queue_service_role_key`
+- **Rotated:** 2026-07-15, to match the current `SUPABASE_SERVICE_ROLE_KEY`
+- **Value:** intentionally not stored in git; readable at runtime via `vault.decrypted_secrets`
+
+I'll include this as a comment header inside the migration so a fresh clone sees the note.
+
+## Going-forward rule (acknowledged)
+
+For any future fix that schedules/reschedules a cron job, rotates a secret, or otherwise mutates DB state not captured by a source file, I will write the equivalent SQL into a migration in the same turn — with vault values referenced by name, never inlined — even when the change is also applied directly to keep the incident moving.
+
+## Out of scope
+No edits to `notify-first-message`, `notify-vendor-event`, `vendor-response-nudge`, `notification-digest`, `process-email-queue`, `smsTemplates.ts`, tables, or RLS.
