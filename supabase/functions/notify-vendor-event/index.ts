@@ -82,7 +82,7 @@ async function sendAndBump(
       await logSms(sb, {
         user_id: recipient.user_id, user_type: "vendor",
         event_type: `${eventType}__suppressed_dormant`,
-        tier: "suppressed", related_id: relatedId, phone: recipient.phone,
+        tier: "suppressed", related_id: relatedId, phone_number: recipient.phone,
       });
       return json({ skipped: "dormant" });
     }
@@ -91,7 +91,7 @@ async function sendAndBump(
   // Idempotent log-first
   const logRes = await logSms(sb, {
     user_id: recipient.user_id, user_type: recipient.user_type,
-    event_type: eventType, tier: "tier1", related_id: relatedId, phone: recipient.phone,
+    event_type: eventType, tier: "tier1", related_id: relatedId, phone_number: recipient.phone,
   });
   if (logRes.duplicate) return json({ skipped: "duplicate" });
 
