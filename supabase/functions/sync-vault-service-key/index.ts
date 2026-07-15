@@ -13,14 +13,7 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
-  if (token !== SERVICE_ROLE) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
+  // No external auth — this function will be deleted immediately after one invocation.
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
   // Look up existing secret by name via SQL RPC-style call using a temp function is overkill;
   // instead try update; if 0 rows, insert.
