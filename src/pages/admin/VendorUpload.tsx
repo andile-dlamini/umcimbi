@@ -40,7 +40,15 @@ export default function VendorUpload() {
     setCreating(false);
     if (error) {
       const anyErr = error as any;
-      const msg = anyErr?.context?.body ? String(anyErr.context.body) : (error.message || 'Failed to create account');
+      let msg = error.message || 'Failed to create account';
+      if (anyErr?.context && typeof anyErr.context.json === 'function') {
+        try {
+          const body = await anyErr.context.json();
+          if (body?.error) msg = body.error;
+        } catch {
+          // context wasn't JSON, fall back to error.message
+        }
+      }
       if (msg.includes('phone_already_registered')) {
         toast.error('This phone number is already registered');
       } else {

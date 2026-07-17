@@ -98,7 +98,11 @@ Deno.serve(async (req) => {
         .from("profiles")
         .update({ phone_number: normalized, full_name: name, phone_verified: true })
         .eq("user_id", userId);
-      if (profErr) console.error("profile update failed", profErr);
+      if (profErr) {
+        // Roll back the auth user so a retry with the same phone number is clean
+        await admin.auth.admin.deleteUser(userId).catch(() => {});
+        return json({ error: `profile_update_failed: ${profErr.message}` }, 500);
+      }
 
       return json({ user_id: userId });
     }
