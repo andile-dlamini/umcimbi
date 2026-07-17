@@ -1,77 +1,56 @@
-# Bulk Vendor Import (Admin)
+# Two-stage vendor release for bulk import
 
-Full field parity with `VendorOnboarding.tsx`, plus a post-creation media/documents attachment step. Reuses existing patterns; no new deps, no changes to self-signup or approval queue.
+Split "release to vendor" (SMS) from "release to public" (visibility). Vendors start inactive; admin releases each stage independently. Login-status is informational, never blocking.
 
-## 1. SMS template
-Edit `supabase/functions/_shared/smsTemplates.ts`:
-- Add `"vendor_bulk_registered"` to the `SmsEvent` union.
-- Add the `T` entry:
-  ```
-  vendor_bulk_registered: ({ name }) =>
-    `Hi ${name}, you've been registered on UMCIMBI! Open the app, tap "Forgot password", and enter this number to set your own password and get started: umcimbi.co.za`
-  ```
+## 1. Edge function — `supabase/functions/bulk-vendor-import/index.ts`
 
-## 2. Edge function `supabase/functions/bulk-vendor-import/index.ts`
+**`create_vendors`**
+- Change the vendor insert: `is_active: false` (was `true`). No other logic changes — normalization, dedup, profile/auth creation, `is_registered_business` conditional block all stay.
 
-Shared setup:
-- CORS via `npm:@supabase/supabase-js@2/cors`.
-- Two clients: anon-key client (for `getClaims`) + service-role client (all writes).
-- Admin gate on both actions (mirrors `check-sms-balance` / `get-final-offer-url`): read `Authorization: Bearer`, `anon.auth.getClaims(token)`, then `service.rpc('has_role', { _user_id, _role: 'admin' })` — 403 if false.
-- Dispatch on `body.action`.
+**`send_registration_sms`** — unchanged (this is "Release to Vendor").
 
-### `action: "create_vendors"`
-Per row, in order, wrapped in try/catch so one failure never stops the batch:
-1. Normalize phone the way `reset-password/index.ts` does (strip spaces; leading `0` → `+27`; ensure `+` prefix).
-2. `profiles.select('user_id').eq('phone_number', normalized).maybeSingle()`. If found → push `{ row, status: "skipped", reason: "phone_already_registered" }` and continue.
-3. Create auth user: `admin.createUser({ email: `${normalized.replace('+','')}@phone.isiko.app`, password: crypto.randomUUID(), phone: normalized, phone_confirm: true, email_confirm: true, user_metadata: { full_name: name } })`. Password never logged/returned.
-4. Insert `profiles { user_id, phone_number: normalized, full_name: name }`.
-5. Insert `vendors` with all provided fields; `languages` defaults to `['English']`; `is_active: true`; `signup_source: 'admin_bulk_import'`; and the exact `is_registered_business` conditional block from `VendorOnboarding.tsx` (vendor_business_type / business_verification_status / registered_business_name / registration_number / vat_number).
-6. Fire-and-log `sendConnectMobileSms(normalizeSaPhone(normalized), renderSms('vendor_bulk_registered', { name }), <msgId>)` — same imports as `notify-vendor-event`.
-7. Push `{ row, status: "created", vendor_id, user_id, is_registered_business }` (or `"failed"` with `reason`).
+**New action: `release_to_public`**
+- Input: `{ action: "release_to_public", vendor_ids: string[] }`.
+- Admin-gated via existing `requireAdmin` helper.
+- For each id: `admin.from("vendors").update({ is_active: true }).eq("id", id)`. Push `{ vendor_id, status: "released" }` or `{ vendor_id, status: "failed", reason }`. Try/catch per row so one failure never stops the batch.
+- Returns `{ results: [...] }`.
 
-Returns `{ results: [...] }`.
+**New action: `get_login_status`**
+- Input: `{ action: "get_login_status", vendor_ids: string[] }`.
+- For each id: `admin.rpc("get_vendor_last_sign_in", { _vendor_id: id })`. Push `{ vendor_id, has_logged_in: <returned value is not null> }`. On RPC error, push `has_logged_in: false` and log — don't fail the batch.
+- Returns `{ results: [...] }`. Uses the existing SECURITY DEFINER function; no new SQL.
 
-### `action: "attach_media"`
-Per entry, non-blocking:
-- If `logo_url` or `image_urls`: fetch current `vendors.image_urls`, append (dedup), update `{ logo_url?, image_urls? }`.
-- If `verification_documents`: bulk-insert into `vendor_verification_documents` with `{ vendor_id, doc_type, file_url, status: 'uploaded' }` — same shape as `VendorOnboarding.tsx`.
-- Push `{ vendor_id, status: "updated" | "failed", reason? }`.
+## 2. Admin UI — `src/pages/admin/VendorBulkImport.tsx`
 
-## 3. Admin page `src/pages/admin/VendorBulkImport.tsx`
-Route: `/admin/vendor-import` inside the existing `<AdminGuard><AdminLayout /></AdminGuard>` block in `App.tsx`. Add nav entry to `src/components/admin/AdminSidebar.tsx` (`Bulk Import`, `Upload` icon).
+**State additions** (per created vendor, keyed by `vendor_id`)
+- `publicStatus: "idle" | "releasing" | "public" | "failed"` + optional `reason`.
+- `loginStatus: { has_logged_in: boolean } | undefined`.
+- Existing `smsStatus` and `mediaStatus` stay untouched.
 
-State machine: `upload → preview → importing → results → attaching → done`.
+**Results table columns** (after `create_vendors` returns)
+1. Vendor (name + phone)
+2. Created status (existing badge: Created / Skipped / Failed)
+3. Media attached (existing)
+4. **Release to Vendor** — existing Send SMS button + Not sent / Sent / Failed badge.
+5. **Release to Public** — new button. States: `Not released` (default), `Releasing…`, `Public` (green), `Failed` (red, with reason + Retry). Beside the button, if `loginStatus?.has_logged_in === false`, show a small amber inline badge: "Vendor hasn't logged in yet". Button is NEVER disabled by this — purely informational.
 
-**Step 1 — CSV upload & preview**
-- `<Input type="file" accept=".csv">`. Hint card lists the exact expected columns.
-- Inline CSV parser: line split respecting `"…"` quotes and `""` escapes; first row is header; map into typed row objects.
-- Preview `<Table>`:
-  - `category` = shadcn `<Select>` from `VENDOR_CATEGORIES` (`src/lib/vendorCategories.ts`).
-  - `is_registered_business` = `<Checkbox>` per row; when off, gray out (`opacity-50 pointer-events-none`) the three registered-business fields visually but keep the CSV values in state.
-  - Missing `name` / `category` / `phone_number` → red badge on the row; row is excluded from submission but batch continues.
-- "Confirm Import" → `supabase.functions.invoke('bulk-vendor-import', { body: { action: 'create_vendors', rows } })`.
+**Login-status fetch**
+- Right after `create_vendors` returns, collect all `vendor_id`s with `status === "created"` and call `get_login_status` in one invoke. Populate `loginStatus` map.
+- Small "Refresh login status" icon-button (RefreshCw icon) above the table re-runs the same invoke on demand.
 
-**Step 2 — attach media & documents**
-- Results `<Table>` with `<Badge>` (green Created / amber Skipped / red Failed) styled like `VendorVerificationQueue.tsx`; show reason.
-- For each `Created` row:
-  - Logo file picker (single image).
-  - Gallery file picker (multi, capped at 6, live count shown).
-  - If `is_registered_business` was true: verification-docs picker (multi) with per-file `<Select>` for `doc_type` (`cipc_registration | proof_of_address | bank_confirmation | vat_certificate | other`).
-- "Upload & Finish": for each vendor with selections, upload to `vendor-images` bucket using the exact path conventions from `VendorOnboarding.tsx`:
-  - `${vendor_id}/logo.${ext}`
-  - `${vendor_id}/showcase-${i}.${ext}`
-  - `${vendor_id}/docs/doc-${i}.${ext}`
-  Collect `getPublicUrl()` URLs, then a single `attach_media` invoke.
-- Show per-vendor final status with a "Retry" button that re-runs upload + attach for just that vendor.
+**Bulk actions above the table**
+- Existing "Release All to Vendor" (sends SMS to every created vendor whose `smsStatus !== "sent"`) — unchanged.
+- New "Release All to Public" — sends every created vendor's id (regardless of login status or current `publicStatus`, except those already `public`) in one `release_to_public` invoke; updates each row's `publicStatus` from the returned `results` array.
 
-Uses existing shadcn primitives (`Table`, `Card`, `Badge`, `Button`, `Input`, `Select`, `Checkbox`) — visual style matches `VendorVerificationQueue.tsx` / `SuperVendorManagement.tsx`. Uses `PageHeader` per project convention.
+**Per-vendor operability**
+- The four statuses (Created, Media, Vendor SMS, Public) are independent — no ordering enforced, no cross-disabling. Retry on Release to Public re-invokes with just that one id.
+
+**Styling**
+- Reuse existing `Badge` variants (green = success, amber = warning/inline notice, red = failed, muted = idle) matching `VendorVerificationQueue.tsx` conventions already in the page. No new shadcn primitives.
 
 ## Files touched
-- Edit: `supabase/functions/_shared/smsTemplates.ts`
-- New: `supabase/functions/bulk-vendor-import/index.ts`
-- New: `src/pages/admin/VendorBulkImport.tsx`
-- Edit: `src/App.tsx` (route)
-- Edit: `src/components/admin/AdminSidebar.tsx` (nav entry)
+- Edit: `supabase/functions/bulk-vendor-import/index.ts` (flip `is_active`, add two actions).
+- Edit: `src/pages/admin/VendorBulkImport.tsx` (new column, bulk button, login-status map + refresh).
 
 ## Out of scope
-No changes to self-signup, `vendor-selfie-submission`, approval queue, `reset-password`, `seed-demo-users`, or vendor RLS policies. No new npm dependencies.
+Media attachment logic, phone normalization, dedup, `is_registered_business` handling, `send_registration_sms`, RLS, `get_vendor_last_sign_in` function itself — all untouched.
