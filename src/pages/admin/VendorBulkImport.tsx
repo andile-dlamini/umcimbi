@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X, RefreshCw, MessageSquare, Globe } from 'lucide-react';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
