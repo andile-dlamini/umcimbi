@@ -20,7 +20,7 @@ const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
   category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
   about: z.string().trim().min(10, 'Please describe your business (at least 10 characters)').max(2000),
-  price_range_text: z.string().trim().min(1, 'Please add your pricing'),
+  price_range_text: z.string().trim().optional().default(''),
   address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
   address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City / Suburb is required').max(100),
