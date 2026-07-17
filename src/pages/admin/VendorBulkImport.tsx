@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X, RefreshCw, MessageSquare, Globe } from 'lucide-react';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -272,6 +273,16 @@ export default function VendorBulkImport() {
   const [media, setMedia] = useState<Record<string, MediaState>>({});
   const [attaching, setAttaching] = useState<Record<string, boolean>>({});
   const [attachStatus, setAttachStatus] = useState<Record<string, AttachResult | undefined>>({});
+  // Per-vendor SMS status: 'idle' | 'sending' | 'sent' | 'failed'
+  const [smsStatus, setSmsStatus] = useState<Record<string, { status: string; reason?: string }>>({});
+  // Per-vendor public release status: 'idle' | 'releasing' | 'public' | 'failed'
+  const [publicStatus, setPublicStatus] = useState<Record<string, { status: string; reason?: string }>>({});
+  // Login status per vendor
+  const [loginStatus, setLoginStatus] = useState<Record<string, { has_logged_in: boolean }>>({});
+  const [loginRefreshing, setLoginRefreshing] = useState(false);
+  const [bulkSmsRunning, setBulkSmsRunning] = useState(false);
+  const [bulkPublicRunning, setBulkPublicRunning] = useState(false);
+
 
   const validRows = useMemo(
     () =>
@@ -361,6 +372,12 @@ export default function VendorBulkImport() {
       const skipped = mapped.filter((r) => r.status === 'skipped').length;
       const failed = mapped.filter((r) => r.status === 'failed').length;
       toast.success(`Import complete: ${created} created, ${skipped} skipped, ${failed} failed`);
+
+      // Fetch login status for created vendors
+      const createdIds = mapped.filter((r) => r.status === 'created' && r.vendor_id).map((r) => r.vendor_id!);
+      if (createdIds.length > 0) {
+        fetchLoginStatus(createdIds);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message ?? 'Import failed');
@@ -368,6 +385,131 @@ export default function VendorBulkImport() {
       setImporting(false);
     }
   };
+
+  const fetchLoginStatus = useCallback(async (vendorIds: string[]) => {
+    if (vendorIds.length === 0) return;
+    setLoginRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-vendor-import', {
+        body: { action: 'get_login_status', vendor_ids: vendorIds },
+      });
+      if (error) throw error;
+      const map: Record<string, { has_logged_in: boolean }> = {};
+      for (const r of (data?.results ?? []) as { vendor_id: string; has_logged_in: boolean }[]) {
+        map[r.vendor_id] = { has_logged_in: !!r.has_logged_in };
+      }
+      setLoginStatus((cur) => ({ ...cur, ...map }));
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to refresh login status');
+    } finally {
+      setLoginRefreshing(false);
+    }
+  }, []);
+
+  const refreshLoginStatus = () => {
+    if (!results) return;
+    const ids = results.filter((r) => r.status === 'created' && r.vendor_id).map((r) => r.vendor_id!);
+    fetchLoginStatus(ids);
+  };
+
+  const sendSms = async (vendorIds: string[]) => {
+    if (vendorIds.length === 0) return;
+    setSmsStatus((cur) => {
+      const next = { ...cur };
+      for (const id of vendorIds) next[id] = { status: 'sending' };
+      return next;
+    });
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-vendor-import', {
+        body: { action: 'send_registration_sms', vendor_ids: vendorIds },
+      });
+      if (error) throw error;
+      const results = (data?.results ?? []) as { vendor_id: string; status: string; reason?: string }[];
+      setSmsStatus((cur) => {
+        const next = { ...cur };
+        for (const r of results) next[r.vendor_id] = { status: r.status, reason: r.reason };
+        return next;
+      });
+      const sent = results.filter((r) => r.status === 'sent').length;
+      const failed = results.filter((r) => r.status !== 'sent').length;
+      toast.success(`SMS: ${sent} sent, ${failed} failed`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message ?? 'Send SMS failed');
+      setSmsStatus((cur) => {
+        const next = { ...cur };
+        for (const id of vendorIds) next[id] = { status: 'failed', reason: err?.message ?? 'send_failed' };
+        return next;
+      });
+    }
+  };
+
+  const releaseToPublic = async (vendorIds: string[]) => {
+    if (vendorIds.length === 0) return;
+    setPublicStatus((cur) => {
+      const next = { ...cur };
+      for (const id of vendorIds) next[id] = { status: 'releasing' };
+      return next;
+    });
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-vendor-import', {
+        body: { action: 'release_to_public', vendor_ids: vendorIds },
+      });
+      if (error) throw error;
+      const results = (data?.results ?? []) as { vendor_id: string; status: string; reason?: string }[];
+      setPublicStatus((cur) => {
+        const next = { ...cur };
+        for (const r of results) {
+          next[r.vendor_id] = {
+            status: r.status === 'released' ? 'public' : 'failed',
+            reason: r.reason,
+          };
+        }
+        return next;
+      });
+      const released = results.filter((r) => r.status === 'released').length;
+      const failed = results.filter((r) => r.status !== 'released').length;
+      toast.success(`Public release: ${released} released, ${failed} failed`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.message ?? 'Release failed');
+      setPublicStatus((cur) => {
+        const next = { ...cur };
+        for (const id of vendorIds) next[id] = { status: 'failed', reason: err?.message ?? 'release_failed' };
+        return next;
+      });
+    }
+  };
+
+  const bulkSendSms = async () => {
+    if (!results) return;
+    const ids = results
+      .filter((r) => r.status === 'created' && r.vendor_id && smsStatus[r.vendor_id]?.status !== 'sent')
+      .map((r) => r.vendor_id!);
+    if (ids.length === 0) {
+      toast.info('No vendors to SMS');
+      return;
+    }
+    setBulkSmsRunning(true);
+    await sendSms(ids);
+    setBulkSmsRunning(false);
+  };
+
+  const bulkReleasePublic = async () => {
+    if (!results) return;
+    const ids = results
+      .filter((r) => r.status === 'created' && r.vendor_id && publicStatus[r.vendor_id]?.status !== 'public')
+      .map((r) => r.vendor_id!);
+    if (ids.length === 0) {
+      toast.info('No vendors to release');
+      return;
+    }
+    setBulkPublicRunning(true);
+    await releaseToPublic(ids);
+    setBulkPublicRunning(false);
+  };
+
 
   const setMediaFor = (vendorId: string, patch: Partial<MediaState>) => {
     setMedia((cur) => ({
@@ -615,28 +757,150 @@ export default function VendorBulkImport() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Row</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Reason / Detail</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((r) => (
-                    <TableRow key={`${r.row}-${r.vendor_id ?? 'x'}`}>
-                      <TableCell>{r.row + 2}</TableCell>
-                      <TableCell>{statusBadge(r.status)}</TableCell>
-                      <TableCell>{r.name ?? rows[r.row]?.name ?? '—'}</TableCell>
-                      <TableCell className="text-xs">
-                        {r.reason ?? (r.vendor_id ? `vendor_id: ${r.vendor_id.slice(0, 8)}…` : '—')}
-                      </TableCell>
+              {/* Bulk action bar */}
+              <div className="flex flex-wrap items-center gap-2 justify-between rounded-md border bg-muted/30 p-3">
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={refreshLoginStatus}
+                    disabled={loginRefreshing}
+                  >
+                    <RefreshCw className={`h-3 w-3 mr-1 ${loginRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh login status
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={bulkSendSms} disabled={bulkSmsRunning}>
+                    {bulkSmsRunning && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Release All to Vendor (SMS)
+                  </Button>
+                  <Button size="sm" onClick={bulkReleasePublic} disabled={bulkPublicRunning}>
+                    {bulkPublicRunning && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                    <Globe className="h-3 w-3 mr-1" />
+                    Release All to Public
+                  </Button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Media attached</TableHead>
+                      <TableHead>Release to Vendor</TableHead>
+                      <TableHead>Release to Public</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {results.map((r) => {
+                      const vid = r.vendor_id;
+                      const sms = vid ? smsStatus[vid] : undefined;
+                      const pub = vid ? publicStatus[vid] : undefined;
+                      const media = vid ? attachStatus[vid] : undefined;
+                      const login = vid ? loginStatus[vid] : undefined;
+                      const canAct = r.status === 'created' && !!vid;
+                      return (
+                        <TableRow key={`${r.row}-${vid ?? 'x'}`}>
+                          <TableCell>
+                            <div className="font-medium">{r.name ?? rows[r.row]?.name ?? '—'}</div>
+                            <div className="text-xs text-muted-foreground">
+                              Row {r.row + 2}
+                              {vid && ` · ${vid.slice(0, 8)}…`}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>{statusBadge(r.status)}</div>
+                            {r.reason && (
+                              <div className="text-xs text-red-600 mt-1">{r.reason}</div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {media ? (
+                              <>
+                                {statusBadge(media.status)}
+                                {media.reason && (
+                                  <div className="text-xs text-red-600 mt-1">{media.reason}</div>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not attached</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!canAct ? (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            ) : sms?.status === 'sent' ? (
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Sent
+                              </Badge>
+                            ) : (
+                              <div className="space-y-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={sms?.status === 'sending'}
+                                  onClick={() => sendSms([vid!])}
+                                >
+                                  {sms?.status === 'sending' && (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  )}
+                                  <MessageSquare className="h-3 w-3 mr-1" />
+                                  {sms?.status === 'failed' ? 'Retry SMS' : 'Send SMS'}
+                                </Button>
+                                {sms?.status === 'failed' && sms.reason && (
+                                  <div className="text-xs text-red-600">{sms.reason}</div>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!canAct ? (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            ) : pub?.status === 'public' ? (
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+                                <Globe className="h-3 w-3 mr-1" />
+                                Public
+                              </Badge>
+                            ) : (
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={pub?.status === 'releasing'}
+                                    onClick={() => releaseToPublic([vid!])}
+                                  >
+                                    {pub?.status === 'releasing' && (
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    )}
+                                    <Globe className="h-3 w-3 mr-1" />
+                                    {pub?.status === 'failed' ? 'Retry' : 'Release to Public'}
+                                  </Button>
+                                  {login && !login.has_logged_in && (
+                                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200 text-[10px]">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      Hasn't logged in yet
+                                    </Badge>
+                                  )}
+                                </div>
+                                {pub?.status === 'failed' && pub.reason && (
+                                  <div className="text-xs text-red-600">{pub.reason}</div>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
 
               {/* Media pickers per created row */}
               <div className="space-y-4">

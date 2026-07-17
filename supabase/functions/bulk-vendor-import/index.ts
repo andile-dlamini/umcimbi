@@ -157,7 +157,7 @@ async function handleCreateVendors(admin: ReturnType<typeof createClient>, rows:
         bank_account_number: row.bank_account_number ?? null,
         bank_branch_code: row.bank_branch_code ?? null,
         bank_account_type: row.bank_account_type ?? null,
-        is_active: true,
+        is_active: false,
         signup_source: "admin_bulk_import",
         vendor_business_type: isReg ? "registered_business" : "independent",
         business_verification_status: isReg ? "pending" : "not_applicable",
@@ -179,17 +179,6 @@ async function handleCreateVendors(admin: ReturnType<typeof createClient>, rows:
         continue;
       }
 
-      // Fire SMS (non-blocking for result reporting)
-      try {
-        const phoneForSms = normalizeSaPhone(normalized);
-        if (phoneForSms) {
-          const body = renderSms("vendor_bulk_registered", { name: row.name });
-          const msgId = `bulk-${vendor.id}-${Date.now()}`;
-          await sendConnectMobileSms(phoneForSms, body, msgId);
-        }
-      } catch (smsErr) {
-        console.error("bulk import SMS failed", smsErr);
-      }
 
       results.push({
         row: idx,
@@ -296,5 +285,80 @@ Deno.serve(async (req) => {
     return json({ results });
   }
 
+  if (action === "send_registration_sms") {
+    const vendorIds = Array.isArray(body?.vendor_ids) ? (body.vendor_ids as string[]) : null;
+    if (!vendorIds) return json({ error: "vendor_ids must be an array" }, 400);
+    const results: any[] = [];
+    for (const vendorId of vendorIds) {
+      try {
+        const { data: vendor, error: vErr } = await admin
+          .from("vendors")
+          .select("id, name, phone_number")
+          .eq("id", vendorId)
+          .maybeSingle();
+        if (vErr || !vendor) {
+          results.push({ vendor_id: vendorId, status: "failed", reason: vErr?.message ?? "vendor_not_found" });
+          continue;
+        }
+        const phoneForSms = normalizeSaPhone(String((vendor as any).phone_number ?? ""));
+        if (!phoneForSms) {
+          results.push({ vendor_id: vendorId, status: "failed", reason: "invalid_phone" });
+          continue;
+        }
+        const smsBody = renderSms("vendor_bulk_registered", { name: (vendor as any).name });
+        const msgId = `bulk-${vendorId}-${Date.now()}`;
+        await sendConnectMobileSms(phoneForSms, smsBody, msgId);
+        results.push({ vendor_id: vendorId, status: "sent" });
+      } catch (err) {
+        results.push({ vendor_id: vendorId, status: "failed", reason: (err as Error)?.message ?? "sms_failed" });
+      }
+    }
+    return json({ results });
+  }
+
+  if (action === "release_to_public") {
+    const vendorIds = Array.isArray(body?.vendor_ids) ? (body.vendor_ids as string[]) : null;
+    if (!vendorIds) return json({ error: "vendor_ids must be an array" }, 400);
+    const results: any[] = [];
+    for (const vendorId of vendorIds) {
+      try {
+        const { error: updErr } = await admin
+          .from("vendors")
+          .update({ is_active: true })
+          .eq("id", vendorId);
+        if (updErr) {
+          results.push({ vendor_id: vendorId, status: "failed", reason: updErr.message });
+          continue;
+        }
+        results.push({ vendor_id: vendorId, status: "released" });
+      } catch (err) {
+        results.push({ vendor_id: vendorId, status: "failed", reason: (err as Error)?.message ?? "release_failed" });
+      }
+    }
+    return json({ results });
+  }
+
+  if (action === "get_login_status") {
+    const vendorIds = Array.isArray(body?.vendor_ids) ? (body.vendor_ids as string[]) : null;
+    if (!vendorIds) return json({ error: "vendor_ids must be an array" }, 400);
+    const results: any[] = [];
+    for (const vendorId of vendorIds) {
+      try {
+        const { data, error } = await admin.rpc("get_vendor_last_sign_in", { _vendor_id: vendorId });
+        if (error) {
+          console.error("get_vendor_last_sign_in error", error);
+          results.push({ vendor_id: vendorId, has_logged_in: false });
+          continue;
+        }
+        results.push({ vendor_id: vendorId, has_logged_in: data != null });
+      } catch (err) {
+        console.error("get_login_status err", err);
+        results.push({ vendor_id: vendorId, has_logged_in: false });
+      }
+    }
+    return json({ results });
+  }
+
   return json({ error: "Unknown action" }, 400);
 });
+
