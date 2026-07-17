@@ -157,7 +157,7 @@ async function handleCreateVendors(admin: ReturnType<typeof createClient>, rows:
         bank_account_number: row.bank_account_number ?? null,
         bank_branch_code: row.bank_branch_code ?? null,
         bank_account_type: row.bank_account_type ?? null,
-        is_active: true,
+        is_active: false,
         signup_source: "admin_bulk_import",
         vendor_business_type: isReg ? "registered_business" : "independent",
         business_verification_status: isReg ? "pending" : "not_applicable",
@@ -179,17 +179,6 @@ async function handleCreateVendors(admin: ReturnType<typeof createClient>, rows:
         continue;
       }
 
-      // Fire SMS (non-blocking for result reporting)
-      try {
-        const phoneForSms = normalizeSaPhone(normalized);
-        if (phoneForSms) {
-          const body = renderSms("vendor_bulk_registered", { name: row.name });
-          const msgId = `bulk-${vendor.id}-${Date.now()}`;
-          await sendConnectMobileSms(phoneForSms, body, msgId);
-        }
-      } catch (smsErr) {
-        console.error("bulk import SMS failed", smsErr);
-      }
 
       results.push({
         row: idx,
