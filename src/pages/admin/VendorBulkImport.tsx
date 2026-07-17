@@ -273,6 +273,16 @@ export default function VendorBulkImport() {
   const [media, setMedia] = useState<Record<string, MediaState>>({});
   const [attaching, setAttaching] = useState<Record<string, boolean>>({});
   const [attachStatus, setAttachStatus] = useState<Record<string, AttachResult | undefined>>({});
+  // Per-vendor SMS status: 'idle' | 'sending' | 'sent' | 'failed'
+  const [smsStatus, setSmsStatus] = useState<Record<string, { status: string; reason?: string }>>({});
+  // Per-vendor public release status: 'idle' | 'releasing' | 'public' | 'failed'
+  const [publicStatus, setPublicStatus] = useState<Record<string, { status: string; reason?: string }>>({});
+  // Login status per vendor
+  const [loginStatus, setLoginStatus] = useState<Record<string, { has_logged_in: boolean }>>({});
+  const [loginRefreshing, setLoginRefreshing] = useState(false);
+  const [bulkSmsRunning, setBulkSmsRunning] = useState(false);
+  const [bulkPublicRunning, setBulkPublicRunning] = useState(false);
+
 
   const validRows = useMemo(
     () =>
