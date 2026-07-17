@@ -38,9 +38,9 @@ async function requireAdmin(req: Request): Promise<{ ok: true; userId: string } 
   const userClient = createClient(SUPABASE_URL, ANON_KEY, {
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
-  const { data: claims, error: claimsErr } = await userClient.auth.getClaims(token);
-  if (claimsErr || !claims?.claims?.sub) return json({ error: "Unauthorized" }, 401);
-  const userId = claims.claims.sub as string;
+  const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+  if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+  const userId = userData.user.id;
 
   const { data: isAdmin } = await userClient.rpc("has_role", { _user_id: userId, _role: "admin" });
   if (!isAdmin) return json({ error: "Forbidden" }, 403);
