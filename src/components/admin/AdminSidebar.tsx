@@ -28,7 +28,7 @@ const navItems = [
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
   { label: 'Vendor Approvals', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
-  { label: 'Bulk Import', to: '/admin/vendor-import', icon: Upload },
+  { label: 'Vendor Upload', to: '/admin/vendor-upload', icon: Upload },
   { label: 'Feedback', to: '/admin/feedback', icon: MessageSquare },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];

@@ -53,7 +53,7 @@ import AdminOperations from "@/pages/admin/AdminOperations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
-import VendorBulkImport from "@/pages/admin/VendorBulkImport";
+import VendorUpload from "@/pages/admin/VendorUpload";
 
 
 
@@ -167,7 +167,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="vendor-trust" element={<VendorTrust />} />
-          <Route path="vendor-import" element={<VendorBulkImport />} />
+          <Route path="vendor-upload" element={<VendorUpload />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="feedback" element={<AdminFeedback />} />
 

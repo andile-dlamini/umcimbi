@@ -1,0 +1,677 @@
+import { useState, useRef, useEffect } from 'react';
+import { ImagePlus, Camera, Upload, Info, AlertTriangle, ChevronRight } from 'lucide-react';
+import { PricingInput } from '@/components/vendors/PricingInput';
+import { supabase } from '@/integrations/supabase/client';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { AddressFields, AddressData } from '@/components/shared/AddressFields';
+import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { geocodeAddress } from '@/lib/geocodingService';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import type { Vendor } from '@/types/database';
+
+const vendorSchema = z.object({
+  name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
+  category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
+  about: z.string().trim().min(10, 'Please describe your business (at least 10 characters)').max(2000),
+  price_range_text: z.string().trim().min(1, 'Please add your pricing'),
+  address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
+  address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
+  city: z.string().trim().min(1, 'City / Suburb is required').max(100),
+  state_province: z.string().trim().min(1, 'Please select your province').max(100),
+  country: z.string().trim().min(1, 'Country is required'),
+  postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
+  instagram_url: z.string().trim().max(500).optional().or(z.literal('')),
+  tiktok_url: z.string().trim().max(500).optional().or(z.literal('')),
+  facebook_url: z.string().trim().max(500).optional().or(z.literal('')),
+});
+
+function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
+  const cleaned = handle.trim().replace(/^@/, '');
+  if (!cleaned) return null;
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
+  const bases = {
+    instagram: 'https://instagram.com/',
+    tiktok: 'https://tiktok.com/@',
+    facebook: 'https://facebook.com/',
+  };
+  return bases[platform] + cleaned;
+}
+
+const SOUTH_AFRICAN_BANKS = [
+  { name: 'ABSA', branchCode: '632005' },
+  { name: 'African Bank', branchCode: '430000' },
+  { name: 'Capitec Bank', branchCode: '470010' },
+  { name: 'Discovery Bank', branchCode: '679000' },
+  { name: 'FNB / First National Bank', branchCode: '250655' },
+  { name: 'Investec', branchCode: '580105' },
+  { name: 'Nedbank', branchCode: '198765' },
+  { name: 'Standard Bank', branchCode: '051001' },
+  { name: 'TymeBank', branchCode: '678910' },
+];
+
+const ACCOUNT_TYPES = ['Current / Cheque', 'Savings', 'Transmission'];
+
+export interface VendorProfileFormProps {
+  ownerUserId: string;
+  signupSource?: string;
+  mode?: 'create' | 'edit';
+  existingVendor?: Vendor | null;
+  /** Show two-step stepper (business → showcase) with intermediate "Next" button. Otherwise single-page. */
+  stepped?: boolean;
+  /** Called before submit; return false to abort (e.g. show a waitlist). */
+  onBeforeSubmit?: (address: AddressData, formData: FormDataShape) => Promise<boolean> | boolean;
+  /** Show the top stepper progress indicator (used when embedded in the multi-step signup wizard). */
+  showStepperProgress?: boolean;
+  /** Default phone number to attach to the vendor row when creating (used by quick-signup + admin). */
+  defaultPhoneNumber?: string | null;
+  onCreated: (vendorId: string) => void;
+  submitLabel?: string;
+}
+
+interface FormDataShape {
+  name: string;
+  category: VendorCategory | '';
+  about: string;
+  price_range_text: string;
+  instagram_url: string;
+  tiktok_url: string;
+  facebook_url: string;
+  languages: string[];
+  is_registered_business: boolean;
+  registered_business_name: string;
+  registration_number: string;
+  vat_number: string;
+  bank_name: string;
+  bank_branch_code: string;
+  bank_account_holder_name: string;
+  bank_account_number: string;
+  bank_account_type: string;
+}
+
+function extractSocialHandle(url: string | null | undefined): string {
+  if (!url) return '';
+  return url.replace(/^https?:\/\/(www\.)?(instagram\.com\/|tiktok\.com\/@?|facebook\.com\/)/, '');
+}
+
+export function VendorProfileForm({
+  ownerUserId,
+  signupSource = 'vendor_self_signup',
+  mode = 'create',
+  existingVendor = null,
+  stepped = true,
+  showStepperProgress = false,
+  defaultPhoneNumber = null,
+  onBeforeSubmit,
+  onCreated,
+  submitLabel,
+}: VendorProfileFormProps) {
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const showcaseInputRef = useRef<HTMLInputElement>(null);
+  const verificationInputRef = useRef<HTMLInputElement>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [onboardingStep, setOnboardingStep] = useState<4 | 5>(stepped ? 4 : 5);
+
+  const [formData, setFormData] = useState<FormDataShape>({
+    name: existingVendor?.name ?? '',
+    category: (existingVendor?.category as VendorCategory) ?? '',
+    about: existingVendor?.about ?? '',
+    price_range_text: existingVendor?.price_range_text ?? '',
+    instagram_url: extractSocialHandle((existingVendor as any)?.instagram_url),
+    tiktok_url: extractSocialHandle((existingVendor as any)?.tiktok_url),
+    facebook_url: extractSocialHandle((existingVendor as any)?.facebook_url),
+    languages: existingVendor?.languages ?? ['English'],
+    is_registered_business: existingVendor?.vendor_business_type === 'registered_business',
+    registered_business_name: existingVendor?.registered_business_name ?? '',
+    registration_number: existingVendor?.registration_number ?? '',
+    vat_number: existingVendor?.vat_number ?? '',
+    bank_name: (existingVendor as any)?.bank_name ?? '',
+    bank_branch_code: (existingVendor as any)?.bank_branch_code ?? '',
+    bank_account_holder_name: (existingVendor as any)?.bank_account_holder_name ?? '',
+    bank_account_number: (existingVendor as any)?.bank_account_number ?? '',
+    bank_account_type: (existingVendor as any)?.bank_account_type ?? '',
+  });
+
+  const [address, setAddress] = useState<AddressData>({
+    address_line_1: existingVendor?.address_line_1 ?? '',
+    address_line_2: existingVendor?.address_line_2 ?? '',
+    city: existingVendor?.city ?? '',
+    state_province: existingVendor?.state_province ?? '',
+    country: existingVendor?.country ?? 'ZA',
+    postal_code: existingVendor?.postal_code ?? '',
+  });
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(existingVendor?.logo_url ?? null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [showcaseFiles, setShowcaseFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string }[]>([]);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return toast.error('Please select an image file');
+    if (file.size > 5 * 1024 * 1024) return toast.error('Image must be less than 5MB');
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const handleShowcaseAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const remaining = 15 - showcaseFiles.length - (existingVendor?.image_urls?.length ?? 0);
+    if (remaining <= 0) { toast.error('Maximum 15 showcase images allowed'); return; }
+    const toAdd = Array.from(files).slice(0, remaining);
+    for (const file of toAdd) {
+      if (!file.type.startsWith('image/')) { toast.error('Please select only image files'); return; }
+      if (file.size > 5 * 1024 * 1024) { toast.error('Each image must be less than 5MB'); return; }
+    }
+    const newItems = toAdd.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
+    setShowcaseFiles(prev => [...prev, ...newItems]);
+    if (showcaseInputRef.current) showcaseInputRef.current.value = '';
+  };
+
+  const removeShowcase = (index: number) => {
+    setShowcaseFiles(prev => {
+      const copy = [...prev];
+      URL.revokeObjectURL(copy[index].preview);
+      copy.splice(index, 1);
+      return copy;
+    });
+  };
+
+  const handleNextStep = () => {
+    const step4Errors: Record<string, string> = {};
+    if (!formData.name.trim() || formData.name.trim().length < 2) step4Errors.name = 'Business name must be at least 2 characters';
+    if (!formData.category) step4Errors.category = 'Please select a category';
+    if (Object.keys(step4Errors).length > 0) { setErrors(step4Errors); toast.error('Please fill in the required fields'); return; }
+    setErrors({});
+    setOnboardingStep(5);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const validation = vendorSchema.safeParse({ ...formData, ...address });
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) fieldErrors[err.path[0].toString()] = err.message;
+      });
+      setErrors(fieldErrors);
+      const first = validation.error.errors[0]?.message;
+      if (first) toast.error(first);
+      return;
+    }
+
+    if (onBeforeSubmit) {
+      const proceed = await onBeforeSubmit(address, formData);
+      if (!proceed) return;
+    }
+
+    setIsLoading(true);
+
+    const locationParts = [address.city.trim(), address.state_province?.trim()].filter(Boolean);
+    const composedLocation = locationParts.join(', ') || null;
+    const vendorBusinessType = formData.is_registered_business ? 'registered_business' : 'independent';
+    const verificationStatus = formData.is_registered_business ? 'pending' : 'not_applicable';
+
+    let coordinates: { latitude: number; longitude: number } | null = null;
+    if (composedLocation) {
+      coordinates = await geocodeAddress(composedLocation);
+    }
+
+    const vendorPayload: Record<string, unknown> = {
+      name: formData.name.trim(),
+      category: formData.category,
+      location: composedLocation,
+      about: formData.about.trim() || null,
+      price_range_text: formData.price_range_text.trim() || null,
+      instagram_url: toSocialUrl('instagram', formData.instagram_url),
+      tiktok_url: toSocialUrl('tiktok', formData.tiktok_url),
+      facebook_url: toSocialUrl('facebook', formData.facebook_url),
+      languages: formData.languages,
+      address_line_1: address.address_line_1.trim(),
+      address_line_2: address.address_line_2.trim() || null,
+      city: address.city.trim(),
+      state_province: address.state_province.trim() || null,
+      country: address.country,
+      postal_code: address.postal_code.trim(),
+      vendor_business_type: vendorBusinessType,
+      business_verification_status: verificationStatus,
+      registered_business_name: formData.is_registered_business ? formData.registered_business_name.trim() || null : null,
+      registration_number: formData.is_registered_business ? formData.registration_number.trim() || null : null,
+      vat_number: formData.is_registered_business ? formData.vat_number.trim() || null : null,
+      bank_name: formData.bank_name.trim() || null,
+      bank_branch_code: formData.bank_branch_code.trim() || null,
+      bank_account_holder_name: formData.bank_account_holder_name.trim() || null,
+      bank_account_number: formData.bank_account_number.trim() || null,
+      bank_account_type: formData.bank_account_type.trim() || null,
+      latitude: coordinates?.latitude ?? null,
+      longitude: coordinates?.longitude ?? null,
+    };
+
+    let vendorId: string;
+
+    if (mode === 'edit' && existingVendor) {
+      const { error: updErr } = await supabase
+        .from('vendors')
+        .update(vendorPayload as any)
+        .eq('id', existingVendor.id);
+      if (updErr) {
+        console.error('Error updating vendor:', updErr);
+        toast.error('Failed to update vendor profile');
+        setIsLoading(false);
+        return;
+      }
+      vendorId = existingVendor.id;
+    } else {
+      const insertPayload = {
+        ...vendorPayload,
+        owner_user_id: ownerUserId,
+        is_active: false,
+        signup_source: signupSource,
+        phone_number: defaultPhoneNumber ?? null,
+      };
+      const { data: inserted, error: insertErr } = await supabase
+        .from('vendors')
+        .insert(insertPayload as any)
+        .select('id')
+        .single();
+      if (insertErr || !inserted) {
+        console.error('Error creating vendor:', insertErr);
+        toast.error('Failed to create vendor profile');
+        setIsLoading(false);
+        return;
+      }
+      vendorId = (inserted as any).id;
+
+      // Add vendor role for the owner (idempotent)
+      await supabase.from('user_roles').upsert({ user_id: ownerUserId, role: 'vendor' } as any, { onConflict: 'user_id,role' as any });
+    }
+
+    // Uploads
+    const uploadedUrls: string[] = [];
+    const uploadFailures: Array<{ kind: string; path: string; message: string }> = [];
+
+    const logUploadFailure = async (kind: string, path: string, message: string) => {
+      uploadFailures.push({ kind, path, message });
+      console.error(`[vendor-upload-failed] vendor=${vendorId} kind=${kind} path=${path}`, message);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from('platform_events').insert({
+          event_type: 'vendor_upload_failed',
+          actor_type: 'vendor',
+          actor_id: user?.id ?? null,
+          metadata: { vendor_id: vendorId, kind, path, error: message },
+        } as any);
+      } catch (logErr) {
+        console.error('Failed to log upload failure to platform_events:', logErr);
+      }
+    };
+
+    try {
+      if (logoFile) {
+        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const path = `${vendorId}/logo-${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, logoFile, { upsert: true });
+        if (uploadErr) {
+          await logUploadFailure('logo', path, uploadErr.message);
+        } else {
+          const { data: urlData } = supabase.storage.from('vendor-images').getPublicUrl(path);
+          uploadedUrls.push(urlData.publicUrl);
+        }
+      }
+
+      for (let i = 0; i < showcaseFiles.length; i++) {
+        const file = showcaseFiles[i].file;
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `${vendorId}/showcase-${Date.now()}-${i}.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, file, { upsert: true });
+        if (uploadErr) {
+          await logUploadFailure('showcase', path, uploadErr.message);
+        } else {
+          const { data: urlData } = supabase.storage.from('vendor-images').getPublicUrl(path);
+          uploadedUrls.push(urlData.publicUrl);
+        }
+      }
+
+      if (formData.is_registered_business && verificationFiles.length > 0) {
+        for (let i = 0; i < verificationFiles.length; i++) {
+          const vf = verificationFiles[i];
+          const ext = vf.file.name.split('.').pop() || 'pdf';
+          const docPath = `${vendorId}/docs/doc-${Date.now()}-${i}.${ext}`;
+          const { error: docUploadErr } = await supabase.storage.from('vendor-images').upload(docPath, vf.file, { upsert: true });
+          if (docUploadErr) {
+            await logUploadFailure('verification_doc', docPath, docUploadErr.message);
+          } else {
+            const { data: docUrlData } = supabase.storage.from('vendor-images').getPublicUrl(docPath);
+            const { error: insertErr } = await supabase.from('vendor_verification_documents').insert({
+              vendor_id: vendorId,
+              doc_type: i === 0 ? 'cipc_registration' : 'proof_of_address',
+              file_url: docUrlData.publicUrl,
+              status: 'uploaded',
+            } as any);
+            if (insertErr) await logUploadFailure('verification_doc_row', docPath, insertErr.message);
+          }
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        const existingImages = existingVendor?.image_urls ?? [];
+        const merged = mode === 'edit' ? [...existingImages, ...uploadedUrls] : uploadedUrls;
+        // Also set logo_url from first uploaded image when creating and a logo was picked
+        const patch: Record<string, unknown> = { image_urls: merged };
+        if (logoFile && (mode === 'create' || !existingVendor?.logo_url)) {
+          patch.logo_url = uploadedUrls[0];
+        }
+        const { error: updateErr } = await supabase.from('vendors').update(patch as any).eq('id', vendorId);
+        if (updateErr) await logUploadFailure('vendor_image_urls_update', vendorId, updateErr.message);
+      }
+
+      if (uploadFailures.length > 0) {
+        toast.error(`Profile saved but ${uploadFailures.length} file(s) failed to upload. You can add them later.`);
+      } else {
+        toast.success(mode === 'edit' ? 'Vendor profile updated' : 'Vendor profile created');
+      }
+    } catch (err: any) {
+      console.error('Image upload error:', err);
+      await logUploadFailure('unexpected', vendorId, err?.message ?? String(err));
+      toast.error('Profile saved but some images failed to upload. You can add them later.');
+    }
+
+    setIsLoading(false);
+    onCreated(vendorId);
+  };
+
+  const submitLabelResolved = submitLabel ?? (mode === 'edit' ? 'Save changes' : 'Submit for review');
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {showStepperProgress && stepped && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between relative">
+            {['Details', 'Verify', 'Password', 'Business', 'Showcase'].map((label, i) => {
+              const stepNum = i + 1;
+              const isDone = stepNum < 4 || (stepNum === 4 && onboardingStep === 5);
+              const isActive = (stepNum === 4 && onboardingStep === 4) || (stepNum === 5 && onboardingStep === 5);
+              return (
+                <div key={label} className="flex flex-col items-center gap-1 relative z-10 flex-1">
+                  <div className={cn(
+                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-colors',
+                    isDone && 'bg-primary text-primary-foreground border-primary',
+                    isActive && 'bg-background text-primary border-primary',
+                    !isDone && !isActive && 'bg-background text-muted-foreground border-border'
+                  )}>{isDone ? '✓' : stepNum}</div>
+                  <span className={cn('text-[10px] text-center', (isDone || isActive) ? 'text-foreground font-medium' : 'text-muted-foreground')}>{label}</span>
+                </div>
+              );
+            })}
+            <div className="absolute top-4 left-0 right-0 h-0.5 bg-border -z-0" style={{ marginLeft: '10%', marginRight: '10%' }}>
+              <div className="h-full bg-primary transition-all" style={{ width: onboardingStep === 5 ? '100%' : '75%' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(!stepped || onboardingStep === 4) && (
+        <div className="space-y-5">
+          {stepped && (
+            <div>
+              <h2 className="text-xl font-semibold">Business details</h2>
+              <p className="text-sm text-muted-foreground">Tell us about your business</p>
+            </div>
+          )}
+
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-20 h-20 rounded-xl bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center overflow-hidden" onClick={() => logoInputRef.current?.click()}>
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <Camera className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">Logo</span>
+                  </div>
+                )}
+              </div>
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+              <p className="text-[10px] text-muted-foreground text-center mt-1">Optional</p>
+            </div>
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="name">Business name *</Label>
+              <Input id="name" placeholder="e.g., Zulu Traditions Decor" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={`h-12 ${errors.name ? 'border-destructive' : ''}`} />
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Category *</Label>
+            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v as VendorCategory })}>
+              <SelectTrigger className={`h-12 ${errors.category ? 'border-destructive' : ''}`}>
+                <SelectValue placeholder="Select your service category" />
+              </SelectTrigger>
+              <SelectContent>
+                {LIVE_VENDOR_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Formally registered business?</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">e.g., CIPC / Company registration</p>
+              </div>
+              <Switch checked={formData.is_registered_business} onCheckedChange={(checked) => setFormData({ ...formData, is_registered_business: checked })} />
+            </div>
+
+            {formData.is_registered_business ? (
+              <div className="space-y-3 pl-1 border-l-2 border-primary/30 ml-1">
+                <div className="pl-3 space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="registered_business_name">Registered business name</Label>
+                    <Input id="registered_business_name" placeholder="e.g., Zulu Traditions (Pty) Ltd" value={formData.registered_business_name} onChange={(e) => setFormData({ ...formData, registered_business_name: e.target.value })} className="h-12" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="registration_number">Registration number</Label>
+                    <Input id="registration_number" placeholder="e.g., 2024/123456/07" value={formData.registration_number} onChange={(e) => setFormData({ ...formData, registration_number: e.target.value })} className="h-12" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vat_number">VAT number (optional)</Label>
+                    <Input id="vat_number" placeholder="e.g., 4123456789" value={formData.vat_number} onChange={(e) => setFormData({ ...formData, vat_number: e.target.value })} className="h-12" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Verification documents (optional)</Label>
+                    <p className="text-xs text-muted-foreground">Upload CIPC registration and proof of address.</p>
+                    <div className="space-y-2">
+                      {verificationFiles.map((item, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm bg-muted rounded-lg p-2">
+                          <Upload className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate flex-1">{item.file.name}</span>
+                          <button type="button" onClick={() => setVerificationFiles(prev => prev.filter((_, i) => i !== index))} className="text-destructive text-xs">Remove</button>
+                        </div>
+                      ))}
+                      <Button type="button" variant="outline" size="sm" onClick={() => verificationInputRef.current?.click()}>
+                        <Upload className="h-4 w-4 mr-1" />Add document
+                      </Button>
+                      <input
+                        ref={verificationInputRef}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 10 * 1024 * 1024) { toast.error('Document must be less than 10MB'); return; }
+                          setVerificationFiles(prev => [...prev, { file, docType: 'cipc_registration' }]);
+                          if (verificationInputRef.current) verificationInputRef.current.value = '';
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-primary/5 rounded-lg p-3">
+                    <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-muted-foreground">We'll review your documents. Once approved, you'll get a <strong>Verified Business</strong> badge on your profile.</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 bg-muted rounded-lg p-3">
+                <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">No worries! You can still build trust through great service and verified reviews on UMCIMBI.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-border">
+            <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">Your profile won't go live without banking details. You can add these now or from your profile settings.</p>
+            </div>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Bank</Label>
+                <Select value={formData.bank_name} onValueChange={(val) => {
+                  const bank = SOUTH_AFRICAN_BANKS.find(b => b.name === val);
+                  setFormData(prev => ({ ...prev, bank_name: val, bank_branch_code: bank?.branchCode || '' }));
+                }}>
+                  <SelectTrigger className="h-12"><SelectValue placeholder="Select your bank" /></SelectTrigger>
+                  <SelectContent>{SOUTH_AFRICAN_BANKS.map(bank => (<SelectItem key={bank.name} value={bank.name}>{bank.name}</SelectItem>))}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Account holder name</Label>
+                <Input placeholder="As it appears on your bank account" value={formData.bank_account_holder_name} onChange={(e) => setFormData(prev => ({ ...prev, bank_account_holder_name: e.target.value }))} className="h-12" />
+              </div>
+              <div className="space-y-2">
+                <Label>Account number</Label>
+                <Input placeholder="e.g., 1234567890" value={formData.bank_account_number} onChange={(e) => setFormData(prev => ({ ...prev, bank_account_number: e.target.value }))} className="h-12" inputMode="numeric" />
+              </div>
+              <div className="space-y-2">
+                <Label>Account type</Label>
+                <Select value={formData.bank_account_type} onValueChange={(val) => setFormData(prev => ({ ...prev, bank_account_type: val }))}>
+                  <SelectTrigger className="h-12"><SelectValue placeholder="Select account type" /></SelectTrigger>
+                  <SelectContent>{ACCOUNT_TYPES.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Branch code</Label>
+                <Input placeholder="Auto-filled from bank" value={formData.bank_branch_code} readOnly className="h-12 bg-muted" />
+              </div>
+            </div>
+          </div>
+
+          {stepped && (
+            <Button type="button" onClick={handleNextStep} className="w-full h-12 mt-4">
+              Next — Showcase your work <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {(!stepped || onboardingStep === 5) && (
+        <div className="space-y-5">
+          {stepped && (
+            <div className="space-y-2">
+              <button type="button" onClick={() => { setOnboardingStep(4); window.scrollTo(0, 0); }} className="text-sm text-muted-foreground hover:text-foreground">← Back</button>
+              <div>
+                <h2 className="text-xl font-semibold">Showcase your work</h2>
+                <p className="text-sm text-muted-foreground">Help families see why you're the right choice</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 bg-primary/5 rounded-lg p-3">
+            <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">A description and pricing are required before your profile goes live. You can complete photos and social links from your profile settings.</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="about">About your business *</Label>
+            <Textarea id="about" placeholder="Describe your services, experience, and what makes you special..." value={formData.about} onChange={(e) => setFormData({ ...formData, about: e.target.value })} rows={4} className={errors.about ? 'border-destructive' : ''} />
+            {errors.about && <p className="text-sm text-destructive">{errors.about}</p>}
+          </div>
+
+          <div className="pt-2">
+            <h3 className="text-sm font-medium mb-3">Business Address</h3>
+            <AddressFields data={address} onChange={setAddress} errors={errors} />
+          </div>
+
+          <PricingInput
+            category={formData.category}
+            value={formData.price_range_text}
+            onChange={(formatted) => setFormData({ ...formData, price_range_text: formatted })}
+          />
+          {errors.price_range_text && <p className="text-sm text-destructive">{errors.price_range_text}</p>}
+
+          <div className="space-y-2">
+            <Label>Showcase your work (up to 15 images)</Label>
+            {existingVendor?.image_urls && existingVendor.image_urls.length > 0 && (
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {existingVendor.image_urls.map((url, i) => (
+                  <div key={`existing-${i}`} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                    <img src={url} alt={`Existing ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="grid grid-cols-5 gap-2">
+              {showcaseFiles.map((item, index) => (
+                <div key={index} className="relative aspect-square overflow-hidden rounded-lg bg-muted group">
+                  <img src={item.preview} alt={`Showcase ${index + 1}`} className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeShowcase(index)} className="absolute top-1 right-1 p-0.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="sr-only">Remove</span>
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+              {(showcaseFiles.length + (existingVendor?.image_urls?.length ?? 0)) < 15 && (
+                <div className="aspect-square rounded-lg bg-muted border-2 border-dashed border-border cursor-pointer hover:border-primary/50 transition-colors flex items-center justify-center" onClick={() => showcaseInputRef.current?.click()}>
+                  <ImagePlus className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+            <p className="text-xs text-muted-foreground">Add photos of your work to attract clients. You can also add these later.</p>
+          </div>
+
+          <div className="space-y-3 pt-2 border-t border-border">
+            <Label className="text-sm font-medium">Social links (optional)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="instagram" className="text-xs text-muted-foreground">Instagram username</Label>
+              <Input id="instagram" placeholder="e.g. maswazicatering" value={formData.instagram_url} onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })} className="h-12" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tiktok" className="text-xs text-muted-foreground">TikTok username</Label>
+              <Input id="tiktok" placeholder="e.g. maswazicatering" value={formData.tiktok_url} onChange={(e) => setFormData({ ...formData, tiktok_url: e.target.value })} className="h-12" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="facebook" className="text-xs text-muted-foreground">Facebook username or page name</Label>
+              <Input id="facebook" placeholder="e.g. maswazicatering" value={formData.facebook_url} onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })} className="h-12" />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full h-12 mt-4" disabled={isLoading}>
+            {isLoading ? 'Saving...' : submitLabelResolved}
+          </Button>
+          {mode === 'create' && (
+            <p className="text-xs text-center text-muted-foreground pb-8">We'll review your profile within 48 hours and notify you by SMS.</p>
+          )}
+        </div>
+      )}
+    </form>
+  );
+}
