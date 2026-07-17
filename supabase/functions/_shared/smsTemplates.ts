@@ -14,7 +14,8 @@ export type SmsEvent =
   | "dispute_raised_vendor"
   | "dispute_raised_planner"
   | "response_nudge"
-  | "digest";
+  | "digest"
+  | "vendor_bulk_registered";
 
 const T: Record<SmsEvent, (ctx: { name: string; count?: number }) => string> = {
   new_service_request: ({ name }) =>
@@ -45,6 +46,8 @@ const T: Record<SmsEvent, (ctx: { name: string; count?: number }) => string> = {
     `Hi ${name}, a request on UMCIMBI is still waiting on you. Please log into your UMCIMBI app for more details.`,
   digest: ({ name, count }) =>
     `Hi ${name}, you have ${count ?? 1} new update(s) on UMCIMBI. Please log into your UMCIMBI app for more details.`,
+  vendor_bulk_registered: ({ name }) =>
+    `Hi ${name}, you've been registered on UMCIMBI! Open the app, tap "Forgot password", and enter this number to set your own password and get started: umcimbi.co.za`,
 };
 
 export function renderSms(event: SmsEvent, ctx: { name?: string | null; count?: number }): string {

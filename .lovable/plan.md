@@ -1,75 +1,77 @@
-# Reconcile Tier 2 cron drift into git
+# Bulk Vendor Import (Admin)
 
-## Goal
-Close the gap between the live database and the repo for the two Tier 2 SMS cron jobs, and leave an in-repo record that the `email_queue_service_role_key` vault secret was rotated today. No function code, table, or RLS change.
+Full field parity with `VendorOnboarding.tsx`, plus a post-creation media/documents attachment step. Reuses existing patterns; no new deps, no changes to self-signup or approval queue.
 
-## What's currently live (confirmed via query)
+## 1. SMS template
+Edit `supabase/functions/_shared/smsTemplates.ts`:
+- Add `"vendor_bulk_registered"` to the `SmsEvent` union.
+- Add the `T` entry:
+  ```
+  vendor_bulk_registered: ({ name }) =>
+    `Hi ${name}, you've been registered on UMCIMBI! Open the app, tap "Forgot password", and enter this number to set your own password and get started: umcimbi.co.za`
+  ```
 
-| Job | Schedule | Endpoint |
-|---|---|---|
-| `vendor-response-nudge` | `0 * * * *` | `functions/v1/vendor-response-nudge` |
-| `notification-digest` | `*/30 * * * *` | `functions/v1/notification-digest` |
+## 2. Edge function `supabase/functions/bulk-vendor-import/index.ts`
 
-Both call `net.http_post` with `body := '{}'::jsonb` and an `Authorization: Bearer <service-role>` header. The live commands currently have the rotated service-role key **inlined as a literal** in the cron command text.
+Shared setup:
+- CORS via `npm:@supabase/supabase-js@2/cors`.
+- Two clients: anon-key client (for `getClaims`) + service-role client (all writes).
+- Admin gate on both actions (mirrors `check-sms-balance` / `get-final-offer-url`): read `Authorization: Bearer`, `anon.auth.getClaims(token)`, then `service.rpc('has_role', { _user_id, _role: 'admin' })` — 403 if false.
+- Dispatch on `body.action`.
 
-## Decision point on the Authorization header
+### `action: "create_vendors"`
+Per row, in order, wrapped in try/catch so one failure never stops the batch:
+1. Normalize phone the way `reset-password/index.ts` does (strip spaces; leading `0` → `+27`; ensure `+` prefix).
+2. `profiles.select('user_id').eq('phone_number', normalized).maybeSingle()`. If found → push `{ row, status: "skipped", reason: "phone_already_registered" }` and continue.
+3. Create auth user: `admin.createUser({ email: `${normalized.replace('+','')}@phone.isiko.app`, password: crypto.randomUUID(), phone: normalized, phone_confirm: true, email_confirm: true, user_metadata: { full_name: name } })`. Password never logged/returned.
+4. Insert `profiles { user_id, phone_number: normalized, full_name: name }`.
+5. Insert `vendors` with all provided fields; `languages` defaults to `['English']`; `is_active: true`; `signup_source: 'admin_bulk_import'`; and the exact `is_registered_business` conditional block from `VendorOnboarding.tsx` (vendor_business_type / business_verification_status / registered_business_name / registration_number / vat_number).
+6. Fire-and-log `sendConnectMobileSms(normalizeSaPhone(normalized), renderSms('vendor_bulk_registered', { name }), <msgId>)` — same imports as `notify-vendor-event`.
+7. Push `{ row, status: "created", vendor_id, user_id, is_registered_business }` (or `"failed"` with `reason`).
 
-Committing the live command verbatim would put the rotated service-role JWT into git — exactly what you asked to avoid. Two options; both keep the schedule/endpoint/body identical:
+Returns `{ results: [...] }`.
 
-- **A. Vault lookup at execution time (recommended).** Change the header to `'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'email_queue_service_role_key')`, matching the pattern already used by `email_queue_dispatch`, `notify_new_service_request`, and `notify_first_message`. Migration text carries no secret, and future vault rotations are picked up automatically without another cron rewrite.
-- **B. Literal token, kept out of git.** Keep the raw JWT in the live cron command and commit a migration that intentionally omits the header. This drifts again the moment the file is applied to a fresh clone.
+### `action: "attach_media"`
+Per entry, non-blocking:
+- If `logo_url` or `image_urls`: fetch current `vendors.image_urls`, append (dedup), update `{ logo_url?, image_urls? }`.
+- If `verification_documents`: bulk-insert into `vendor_verification_documents` with `{ vendor_id, doc_type, file_url, status: 'uploaded' }` — same shape as `VendorOnboarding.tsx`.
+- Push `{ vendor_id, status: "updated" | "failed", reason? }`.
 
-Plan below assumes **Option A**. If you'd rather I preserve the literal-token form, say so and I'll adjust.
+## 3. Admin page `src/pages/admin/VendorBulkImport.tsx`
+Route: `/admin/vendor-import` inside the existing `<AdminGuard><AdminLayout /></AdminGuard>` block in `App.tsx`. Add nav entry to `src/components/admin/AdminSidebar.tsx` (`Bulk Import`, `Upload` icon).
 
-## New migration
+State machine: `upload → preview → importing → results → attaching → done`.
 
-Create `supabase/migrations/<timestamp>_reconcile_tier2_cron.sql` with this structure for **each** job:
+**Step 1 — CSV upload & preview**
+- `<Input type="file" accept=".csv">`. Hint card lists the exact expected columns.
+- Inline CSV parser: line split respecting `"…"` quotes and `""` escapes; first row is header; map into typed row objects.
+- Preview `<Table>`:
+  - `category` = shadcn `<Select>` from `VENDOR_CATEGORIES` (`src/lib/vendorCategories.ts`).
+  - `is_registered_business` = `<Checkbox>` per row; when off, gray out (`opacity-50 pointer-events-none`) the three registered-business fields visually but keep the CSV values in state.
+  - Missing `name` / `category` / `phone_number` → red badge on the row; row is excluded from submission but batch continues.
+- "Confirm Import" → `supabase.functions.invoke('bulk-vendor-import', { body: { action: 'create_vendors', rows } })`.
 
-```sql
-DO $$
-BEGIN
-  PERFORM cron.unschedule('vendor-response-nudge');
-EXCEPTION WHEN OTHERS THEN NULL;
-END $$;
+**Step 2 — attach media & documents**
+- Results `<Table>` with `<Badge>` (green Created / amber Skipped / red Failed) styled like `VendorVerificationQueue.tsx`; show reason.
+- For each `Created` row:
+  - Logo file picker (single image).
+  - Gallery file picker (multi, capped at 6, live count shown).
+  - If `is_registered_business` was true: verification-docs picker (multi) with per-file `<Select>` for `doc_type` (`cipc_registration | proof_of_address | bank_confirmation | vat_certificate | other`).
+- "Upload & Finish": for each vendor with selections, upload to `vendor-images` bucket using the exact path conventions from `VendorOnboarding.tsx`:
+  - `${vendor_id}/logo.${ext}`
+  - `${vendor_id}/showcase-${i}.${ext}`
+  - `${vendor_id}/docs/doc-${i}.${ext}`
+  Collect `getPublicUrl()` URLs, then a single `attach_media` invoke.
+- Show per-vendor final status with a "Retry" button that re-runs upload + attach for just that vendor.
 
-SELECT cron.schedule(
-  'vendor-response-nudge',
-  '0 * * * *',
-  $cron$
-    SELECT net.http_post(
-      url := 'https://pnnckeqrzjglcwkyzzxg.supabase.co/functions/v1/vendor-response-nudge',
-      headers := jsonb_build_object(
-        'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || (
-          SELECT decrypted_secret FROM vault.decrypted_secrets
-          WHERE name = 'email_queue_service_role_key'
-        )
-      ),
-      body := '{}'::jsonb
-    );
-  $cron$
-);
-```
+Uses existing shadcn primitives (`Table`, `Card`, `Badge`, `Button`, `Input`, `Select`, `Checkbox`) — visual style matches `VendorVerificationQueue.tsx` / `SuperVendorManagement.tsx`. Uses `PageHeader` per project convention.
 
-Repeat the same block for `notification-digest` with schedule `*/30 * * * *` and its URL. A leading comment documents the vault-rotation note (name only, no value).
-
-Migration is re-run safe: the `DO ... EXCEPTION WHEN OTHERS THEN NULL` wraps `cron.unschedule` so it's a no-op when the job is absent, then `cron.schedule` reinstalls it.
-
-## Applying to the live DB
-
-Run the same migration against the live database in the same call so the live cron commands switch from the inlined literal JWT to the vault-lookup form. After that, git and live match, and the rotated secret exists only in vault.
-
-## Vault rotation record (not committed as a value)
-
-- **Secret name:** `email_queue_service_role_key`
-- **Rotated:** 2026-07-15, to match the current `SUPABASE_SERVICE_ROLE_KEY`
-- **Value:** intentionally not stored in git; readable at runtime via `vault.decrypted_secrets`
-
-I'll include this as a comment header inside the migration so a fresh clone sees the note.
-
-## Going-forward rule (acknowledged)
-
-For any future fix that schedules/reschedules a cron job, rotates a secret, or otherwise mutates DB state not captured by a source file, I will write the equivalent SQL into a migration in the same turn — with vault values referenced by name, never inlined — even when the change is also applied directly to keep the incident moving.
+## Files touched
+- Edit: `supabase/functions/_shared/smsTemplates.ts`
+- New: `supabase/functions/bulk-vendor-import/index.ts`
+- New: `src/pages/admin/VendorBulkImport.tsx`
+- Edit: `src/App.tsx` (route)
+- Edit: `src/components/admin/AdminSidebar.tsx` (nav entry)
 
 ## Out of scope
-No edits to `notify-first-message`, `notify-vendor-event`, `vendor-response-nudge`, `notification-digest`, `process-email-queue`, `smsTemplates.ts`, tables, or RLS.
+No changes to self-signup, `vendor-selfie-submission`, approval queue, `reset-password`, `seed-demo-users`, or vendor RLS policies. No new npm dependencies.

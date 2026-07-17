@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   ShieldCheck,
   MessageSquare,
+  Upload,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -27,6 +28,7 @@ const navItems = [
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
   { label: 'Vendor Approvals', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
+  { label: 'Bulk Import', to: '/admin/vendor-import', icon: Upload },
   { label: 'Feedback', to: '/admin/feedback', icon: MessageSquare },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];
