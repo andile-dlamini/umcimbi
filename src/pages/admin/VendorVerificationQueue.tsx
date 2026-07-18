@@ -125,10 +125,11 @@ export default function VendorVerificationQueue() {
       .from('vendors')
       .select(VENDOR_SELECT)
       .eq('business_verification_status', 'pending')
-      .neq('signup_source', 'admin_manual')
+      .or('signup_source.is.null,signup_source.neq.admin_manual')
       .eq('is_demo', false)
       .eq('is_banned', false)
       .order('created_at', { ascending: true });
+
 
 
     if (error) {
