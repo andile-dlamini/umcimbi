@@ -132,28 +132,16 @@ export default function VendorProfile() {
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         {!vendor.is_active && (
           <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/20">
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-4">
               <div className="flex items-start gap-2">
                 <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Profile not yet published</p>
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Awaiting admin approval</p>
                   <p className="text-xs text-amber-800 dark:text-amber-300">
-                    Your profile is hidden from planners. Review your details, photos, and pricing, then publish to go live on the marketplace.
+                    Your profile is hidden from planners while our team reviews your details. You can keep editing your photos, pricing, and info in the meantime. We'll notify you once you're live.
                   </p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                className="w-full"
-                disabled={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  await updateVendorProfile({ is_active: true } as any);
-                  setIsSaving(false);
-                }}
-              >
-                Publish profile
-              </Button>
             </CardContent>
           </Card>
         )}
