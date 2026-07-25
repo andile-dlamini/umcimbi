@@ -121,14 +121,17 @@ export default function VendorVerificationQueue() {
     setIsLoading(true);
     // Admin-created vendors (signup_source = 'admin_manual') bypass this queue —
     // they're vetted by the admin at creation time.
+    // Include independent vendors (business_verification_status = 'not_applicable')
+    // that are still unpublished — they also need admin approval before going live.
     const { data: vendorData, error } = await supabase
       .from('vendors')
       .select(VENDOR_SELECT)
-      .eq('business_verification_status', 'pending')
+      .or('business_verification_status.eq.pending,and(business_verification_status.eq.not_applicable,is_active.eq.false)')
       .or('signup_source.is.null,signup_source.neq.admin_manual')
       .eq('is_demo', false)
       .eq('is_banned', false)
       .order('created_at', { ascending: true });
+
 
 
 
