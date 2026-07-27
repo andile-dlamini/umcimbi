@@ -29,6 +29,7 @@ import CreateEvent from "@/pages/events/CreateEvent";
 import EventDashboard from "@/pages/events/EventDashboard";
 import CeremonyMode from "@/pages/events/CeremonyMode";
 import VendorsList from "@/pages/vendors/VendorsList";
+import PublicVendorsList from "@/pages/vendors/PublicVendorsList";
 import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorProfile from "@/pages/profile/VendorProfile";
@@ -102,6 +103,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
+        <Route path="/vendors" element={<PublicVendorsList />} />
         <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/join/vendor" element={<VendorJoinRedirect />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
