@@ -1,52 +1,20 @@
 ## Goal
+On the landing page, give the Organisers and Vendors sections their own top CTA with reassurance copy, drop the generic subhead lines, and route both top and bottom CTAs into sign-up with the audience role pre-selected.
 
-1. Vendors land in-app after signup instead of being forced to `/vendors/onboarding`.
-2. Vendor dashboard empty state reworded for that new common state.
-3. New hourly job that SMSes vendor-role users who still have no business profile at 24h and 72h.
+## Changes (single file: `src/pages/onboarding/OnboardingLanguage.tsx`)
 
-## 1. `src/pages/auth/AuthPage.tsx`
+1. **Organisers header block** (around line 307): remove the "Plan your UMCIMBI with tools that actually help." subhead, add `mb-6` to the heading, insert a "Register to start planning" button linking to `/auth?mode=signup&role=planner`, followed by "Free to join. Takes less than a minute."
+2. **Organisers bottom CTA** (around line 327): change the link to `/auth?mode=signup&role=planner`; button text unchanged.
+3. **Vendors header block** (around line 348): remove the "Grow your ceremony business with qualified leads." subhead, heading gets `mb-6`, insert an "I'm a vendor — Register" button linking to `/auth?mode=signup&role=vendor`, followed by "Free to list your business. Approved within 48 hours."
+4. **Vendors bottom CTA** (around line 372): change the link to `/auth?mode=signup&role=vendor`.
 
-Replace the vendor branch after password creation (~line 558) so both roles do:
+## Technical notes
+`AuthPage.tsx` already reads a `role` query param and derives `initialRole`/`initialStep` from it (lines 314-321), so `role=planner` / `role=vendor` skips the "How will you use UMCIMBI?" step with no auth-side changes.
 
-```
-setStep('success');
-toast.success('Account created successfully!');
-```
-
-Business/Showcase steps and `/vendors/onboarding` stay untouched — just no longer forced.
-
-## 2. `src/pages/vendor-dashboard/VendorDashboard.tsx`
-
-In the `!vendorProfile` block:
-- Heading: "Let's finish setting up your business"
-- Body: "Add your business details so families can find and book you."
-- Button: "Complete your profile" (same `navigate('/vendors/onboarding')`)
-
-## 3. Reminder table (migration)
-
-`public.vendor_registration_reminders` — `user_id` (FK `auth.users`, cascade), `reminder_type` ('24h'|'72h' check), `sent_at`, unique `(user_id, reminder_type)`. RLS enabled, no policies (service-role only), plus `GRANT ALL ON public.vendor_registration_reminders TO service_role` so the edge function can reach it.
-
-## 4. Edge function `supabase/functions/vendor-registration-reminder/index.ts`
-
-Implemented exactly as your revised draft: shared `normalizeSaPhone` / `sendConnectMobileSms`, `profiles` keyed on `user_id`, `sms_enabled` opt-out check, and insert-first into `vendor_registration_reminders` as the duplicate lock (unique violation → skip).
-
-One correction found while checking the schema: `sms_notification_log.tier` has a CHECK constraint allowing only `tier1 | tier2 | suppressed`, so passing `'24h'`/`'72h'` would fail the insert. The log row will use `tier: 'tier1'` (with `'suppressed'` when a send is skipped/fails), and the 24h vs 72h distinction stays in `event_type` (`vendor_registration_reminder_24h` / `_72h`) as your draft already does.
-
-## 5. `supabase/config.toml`
-
-```
-[functions.vendor-registration-reminder]
-verify_jwt = false
-```
-
-## 6. Hourly cron
-
-Schedule `vendor-registration-reminder` at `0 * * * *`, unscheduling any prior job of the same name first, calling the function with the vault-stored service-role key. Because this SQL embeds the project URL and vault key, it runs as a data operation (insert tool), not a schema migration — same approach as the other cron jobs here.
-
-## Out of scope
-`VendorProfileForm.tsx`, `VendorOnboarding.tsx`, `send-vendor-status-sms`, approval queue, vendor RLS, all other edge functions.
+## Untouched
+Header and mobile-drawer Register buttons, the "How it works" CTA (all stay generic `/auth?mode=signup`), hero, `id="how"`, `id="faq"`, the value cards, and `AuthPage.tsx`.
 
 ## Verification
 - Typecheck.
-- New signup lands in-app with the new empty-state copy; `/vendors/onboarding` still works via the button.
-- No live cron trigger against real vendor numbers during testing.
+- Playwright screenshots of both sections showing top CTA + reassurance line and the retained bottom CTA.
+- Click-through from each section's CTA confirming `/auth` opens at the phone-entry step rather than the role-choice screen.
