@@ -305,8 +305,13 @@ export default function OnboardingLanguage() {
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center mb-14">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Use your time to plan UMCIMBI. Lose the stress.</h2>
-            <p className="text-lg text-white/60 mt-3">Plan your UMCIMBI with tools that actually help.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg mb-6">Use your time to plan UMCIMBI. Lose the stress.</h2>
+            <Link to="/auth?mode=signup&role=planner">
+              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
+                Register to start planning
+              </Button>
+            </Link>
+            <p className="text-sm text-white/50 mt-3">Free to join. Takes less than a minute.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
@@ -324,7 +329,7 @@ export default function OnboardingLanguage() {
             )}
           </div>
           <div className="text-center mt-10">
-            <Link to="/auth?mode=signup">
+            <Link to="/auth?mode=signup&role=planner">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                 Register to start planning
               </Button>
@@ -346,8 +351,13 @@ export default function OnboardingLanguage() {
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <div>
               <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">Win better. Work with less back-and-forth.</h2>
-              <p className="text-lg text-muted-foreground mb-10">Grow your ceremony business with qualified leads.</p>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-foreground">Win better. Work with less back-and-forth.</h2>
+              <Link to="/auth?mode=signup&role=vendor">
+                <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
+                  I'm a vendor — Register
+                </Button>
+              </Link>
+              <p className="text-sm text-muted-foreground/80 mt-3 mb-10">Free to list your business. Approved within 48 hours.</p>
               <div className="space-y-5">
                 {[
                 { icon: Users, title: 'Get discovered by families', body: 'Show up when families in your category and area are actively searching.' },
@@ -369,7 +379,7 @@ export default function OnboardingLanguage() {
                 )}
               </div>
               <div className="mt-10">
-                <Link to="/auth?mode=signup">
+                <Link to="/auth?mode=signup&role=vendor">
                   <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                     I'm a vendor — Register
                   </Button>
