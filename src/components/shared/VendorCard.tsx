@@ -13,12 +13,14 @@ interface VendorCardProps {
   eventId?: string;
   isSelected?: boolean;
   showDistance?: boolean;
+  onCardClick?: () => void;
 }
 
-export function VendorCard({ vendor, eventId, isSelected, showDistance = false }: VendorCardProps) {
+export function VendorCard({ vendor, eventId, isSelected, showDistance = false, onCardClick }: VendorCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
+    if (onCardClick) { onCardClick(); return; }
     const path = eventId 
       ? `/vendors/${vendor.id}?eventId=${eventId}`
       : `/vendors/${vendor.id}`;
