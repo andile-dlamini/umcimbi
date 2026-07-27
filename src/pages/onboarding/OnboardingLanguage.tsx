@@ -30,8 +30,15 @@ import {
   Play,
   Download,
   Instagram,
+
   Facebook,
-  Music2 } from
+
+  Music2,
+
+  PartyPopper,
+
+  Store } from
+
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import HowItWorks from '@/components/onboarding/HowItWorks';
