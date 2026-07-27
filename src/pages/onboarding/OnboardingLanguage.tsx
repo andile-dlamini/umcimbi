@@ -17,32 +17,23 @@ import {
 import {
   ShieldCheck,
   BarChart3,
-  Inbox,
   Lock as LockIcon,
   Users,
   Zap,
-  HandshakeIcon,
   Menu,
-  Star,
   ArrowRight,
   CheckCircle2,
   Sparkles,
   Play,
   Download,
   Instagram,
-
   Facebook,
-
   Music2,
-
   PartyPopper,
-
   Store } from
-
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import HowItWorks from '@/components/onboarding/HowItWorks';
-import CeremonyTile from '@/components/illustrations/CeremonyTile';
 import FeatureIcon from '@/components/illustrations/FeatureIcon';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 
@@ -288,147 +279,6 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ 3 PILLARS — Light cream band ═══ */}
-      <section className="relative py-28 bg-background">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-16">
-            <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">Why UMCIMBI</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Everything you need in one place</h2>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-            { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.', gradient: 'from-primary/[0.08] to-primary/[0.02]', iconBg: 'bg-primary/15 border border-primary/10 shadow-sm', iconColor: 'text-primary' },
-            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side i.e. scope, price, terms.', gradient: 'from-secondary/[0.08] to-secondary/[0.02]', iconBg: 'bg-secondary border border-secondary-foreground/10 shadow-sm', iconColor: 'text-secondary-foreground' },
-            { icon: LockIcon, title: 'Pay safely online', body: 'Your money is safely held until your ceremony is complete and you confirm delivery. No more cash risk.', gradient: 'from-accent/[0.08] to-accent/[0.02]', iconBg: 'bg-accent/15 border border-accent/10 shadow-sm', iconColor: 'text-accent' }].
-            map(({ icon: Icon, title, body, gradient, iconBg, iconColor }) =>
-            <div key={title} className={`group rounded-3xl bg-gradient-to-b ${gradient} border border-border/40 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
-                <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center mb-5`}>
-                  <Icon className={`h-7 w-7 ${iconColor}`} />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-foreground">{title}</h3>
-                <p className="text-[15px] text-muted-foreground leading-relaxed">{body}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ PROBLEM — Dark cinematic band with background image ═══ */}
-      <section className="relative py-28 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/problem-bg.jpg)' }} />
-
-        <div className="absolute inset-0 bg-[hsl(220_25%_6%/0.65)]" />
-
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-8 grid md:grid-cols-2 gap-16 items-center">
-          {/* Illustration — WhatsApp chaos vs Umcimbi organised */}
-          <div className="order-2 md:order-1 flex justify-center">
-            <div className="relative w-80 h-80">
-              {/* Before: WhatsApp-style chaos */}
-              <div
-                className="absolute top-2 left-0 w-[46%] h-[92%] rounded-2xl bg-[hsl(140_40%_12%)] border border-white/8 shadow-lg overflow-hidden"
-                style={{ transform: 'rotate(-3deg)' }}>
-
-                <div className="h-6 bg-[hsl(140_40%_20%)] flex items-center px-2 gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full bg-white/20" />
-                  <span className="text-[7px] font-semibold text-white/70">Family Group</span>
-                </div>
-                <div className="p-2 space-y-1.5">
-                  {/* Chat bubbles — messy planning */}
-                  <div className="ml-auto w-[80%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
-                    <span className="text-[6px] text-white/80">Does anyone have a tent guy? Need one urgently 😩</span>
-                  </div>
-                  <div className="w-[75%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
-                    <span className="text-[6px] text-white/60">My cousin knows someone but he's expensive</span>
-                  </div>
-                  <div className="ml-auto w-[70%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
-                    <span className="text-[6px] text-white/80">How much is the catering?? No one sent me the quote</span>
-                  </div>
-                  <div className="w-[65%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
-                    <span className="text-[6px] text-white/60">Check the other group</span>
-                  </div>
-                  <div className="ml-auto w-[85%] rounded-lg rounded-tr-sm bg-[hsl(140_50%_25%)] p-1.5">
-                    <span className="text-[6px] text-white/80">What's the budget again? I'm lost 😭</span>
-                  </div>
-                  <div className="w-[60%] rounded-lg rounded-tl-sm bg-white/10 p-1.5">
-                    <span className="text-[6px] text-white/60">Ask MaZulu she has the list</span>
-                  </div>
-                </div>
-                <div className="absolute bottom-2 left-2 right-2 text-center">
-                  <span className="text-[7px] font-semibold text-destructive/80 bg-destructive/10 px-2 py-0.5 rounded">Before</span>
-                </div>
-              </div>
-
-              {/* Arrow */}
-              <div className="absolute top-1/2 left-[46%] -translate-y-1/2 z-10">
-                <ArrowRight className="h-6 w-6 text-white/25" />
-              </div>
-
-              {/* After: Umcimbi organised view (LIGHT) */}
-              <div
-                className="absolute top-2 right-0 w-[46%] h-[92%] rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden"
-                style={{ transform: 'rotate(2deg)' }}>
-
-                <div className="h-6 bg-primary flex items-center px-2 gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
-                    <span className="text-[5px] font-bold text-primary-foreground">U</span>
-                  </div>
-                  <span className="text-[7px] font-semibold text-primary-foreground/80">Umembeso Plan</span>
-                </div>
-                <div className="p-2.5 space-y-2">
-                  <div className="text-[6px] text-gray-400 font-medium">Tasks</div>
-                  {[
-                  { done: true, label: 'Book catering vendor', tag: 'R 12,000' },
-                  { done: true, label: 'Confirm tent hire', tag: 'R 8,000' },
-                  { done: false, label: 'Send guest invites', tag: '86 guests' },
-                  { done: false, label: 'Finalise decor quotation', tag: 'Pending' }].
-                  map((task, i) =>
-                  <div key={i} className="flex items-center gap-1.5">
-                      <div className={`w-3 h-3 rounded border ${task.done ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center shrink-0`}>
-                        {task.done && <span className="text-[6px] text-primary-foreground">✓</span>}
-                      </div>
-                      <span className={`text-[6.5px] flex-1 ${task.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.label}</span>
-                      <span className={`text-[5.5px] px-1 py-0.5 rounded ${task.done ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>{task.tag}</span>
-                    </div>
-                  )}
-
-                  <div className="mt-1 pt-2 border-t border-gray-100">
-                    <div className="flex justify-between text-[6px] text-gray-400 mb-1">
-                      <span>Budget</span>
-                      <span className="text-primary font-semibold">R 28,500 / R 45,000</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-gray-100">
-                      <div className="h-1.5 rounded-full bg-primary w-[63%]" />
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute bottom-2 left-2 right-2 text-center">
-                  <span className="text-[7px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">After</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="order-1 md:order-2 space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold leading-snug text-white drop-shadow-lg">
-              Planning shouldn't become chaos.
-            </h2>
-            <ul className="space-y-5">
-              {[
-              'Finding reliable vendors takes time as personal recommendations can be inconsistent.',
-              'Quotes come in different formats, and comparing options is hard.',
-              'Coordinating deliveries, tasks, and family expectations gets stressful fast.'].
-              map((text) =>
-              <li key={text} className="flex gap-3.5 items-start text-[15px] text-white/65 leading-relaxed">
-                  <span className="mt-2 w-2 h-2 rounded-full bg-secondary shrink-0" />
-                  {text}
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </section>
 
       {/* ═══ HOW IT WORKS — Light band ═══ */}
       <section id="how" className="py-28 bg-background scroll-mt-20">
@@ -460,9 +310,9 @@ export default function OnboardingLanguage() {
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-            { icon: ShieldCheck, title: 'Trusted vendors you can rely on', body: 'Verified profiles, real reviews, and clearer accountability.' },
-            { icon: BarChart3, title: 'Quotes you can actually compare', body: 'Clear scope and pricing so you can choose what fits your budget.' },
-            { icon: Inbox, title: 'Everything organised in one place', body: 'Checklist, timelines, and messages — less chaos, more meaning.' }].
+            { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.' },
+            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side i.e. scope, price, terms.' },
+            { icon: LockIcon, title: 'Pay safely online', body: 'Your money is safely held until your ceremony is complete and you confirm delivery. No more cash risk.' }].
             map(({ icon: Icon, title, body }) =>
             <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
                 <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-5">
@@ -500,9 +350,10 @@ export default function OnboardingLanguage() {
               <p className="text-lg text-muted-foreground mb-10">Grow your ceremony business with qualified leads.</p>
               <div className="space-y-5">
                 {[
-                { icon: Users, title: 'More qualified leads', body: 'Requests tied to real ceremonies, dates, and locations.' },
-                { icon: Zap, title: 'Faster, more professional quoting', body: 'Send structured quotes, set terms, and track acceptance.' },
-                { icon: HandshakeIcon, title: 'Less dispute stress', body: 'Clear confirmation steps and delivery proof reduce misunderstandings.' }].
+                { icon: Users, title: 'Get discovered by families', body: 'Show up when families in your category and area are actively searching.' },
+                { icon: Zap, title: 'Send quotations easily', body: 'Structured quotes with scope, pricing and terms, sent from your phone in minutes.' },
+                { icon: ShieldCheck, title: 'Be verified and trusted', body: 'A verified badge and a real profile build the trust that wins bookings.' },
+                { icon: LockIcon, title: 'Stop chasing money', body: 'Escrow protection means you get paid once the ceremony is delivered, not once you\'ve chased an invoice.' }].
                 map(({ icon: Icon, title, body }) =>
                 <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
                     <div className="flex gap-5 items-start">
@@ -701,92 +552,6 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ CEREMONY TILES — Light band with subtle background ═══ */}
-      <section className="relative py-28 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/ceremony-bg.jpg)' }} />
-
-        <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.55)]" />
-
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Ceremonies we support</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">Ceremonies we support</h2>
-            <p className="text-lg text-white/60 mt-3">Supporting families across all South African cultures and provinces.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <CeremonyTile name="Lobola" description="Bride negotiations - practised across Zulu, Xhosa, Venda, Sotho and all South African cultures." categories={['Planning', 'Catering', 'Attire']} accentClass="bg-primary" icon="🤝" />
-            <CeremonyTile name="Umembeso" description="The gift-giving ceremony where the groom's family honours the bride's family." categories={['Catering', 'Tents', 'Decor']} accentClass="bg-primary" icon="🎁" />
-            <CeremonyTile name="Umemulo" description="A Zulu coming-of-age celebration honouring a young woman's transition to adulthood." categories={['Catering', 'Attire', 'Music']} accentClass="bg-primary" icon="🌸" />
-            <CeremonyTile name="Ulwaluko" description="The sacred Xhosa male initiation ceremony marking the transition to manhood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🌿" />
-            <CeremonyTile name="Domba" description="The Venda pre-marriage initiation ceremony for young women - the python dance." categories={['Attire', 'Music', 'Catering']} accentClass="bg-primary" icon="🐍" />
-            <CeremonyTile name="Lebollo" description="The Sotho initiation tradition that is marking the passage from youth to adulthood." categories={['Catering', 'Attire', 'Planning']} accentClass="bg-primary" icon="🔥" />
-          </div>
-
-          {/* Additional ceremony types */}
-          <div className="mt-8 text-center">
-            <p className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Also supporting</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-              { icon: '👰', name: 'Umabo' },
-              { icon: '🧺', name: 'Umbondo' },
-              { icon: '👶', name: 'Imbeleko' },
-              { icon: '🙏', name: 'Ancestral Ritual' },
-              { icon: '🌀', name: 'Tshikanda' },
-              { icon: '📿', name: 'Intonjane' }].
-              map((c) =>
-              <span key={c.name} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 border border-white/15 text-sm font-medium text-white shadow-sm">
-                  <span>{c.icon}</span> {c.name}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ SOCIAL PROOF — Dark cinematic band ═══ */}
-      <section className="relative py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-[hsl(220_25%_8%)]" />
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-          backgroundSize: '32px 32px'
-        }} />
-
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-12">
-            <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Testimonials</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Loved by families and vendors</h2>
-            <p className="text-xs text-white/40 mt-3">Pilot testimonials will appear here after launch.</p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-            { name: 'Nomsa M.', role: 'Organiser, KZN', quote: '"Made planning our Umembeso so much easier. Finally, one place for everything."' },
-            { name: 'Thabo K.', role: 'Catering vendor', quote: '"I get real ceremony requests with dates and details — no more guessing."' },
-            { name: 'Zanele D.', role: 'Organiser, Gauteng', quote: '"Comparing quotes side-by-side saved us time and money."' }].
-            map((t) =>
-            <div key={t.name} className="rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.08] transition-all duration-300">
-                <div className="flex gap-0.5 mb-5">
-                  {[1, 2, 3, 4, 5].map((s) =>
-                <Star key={s} className="h-4 w-4 fill-warning text-warning" />
-                )}
-                </div>
-                <p className="text-[15px] text-white/70 italic leading-relaxed mb-6">{t.quote}</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary">{t.name[0]}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{t.name}</p>
-                    <p className="text-xs text-white/40">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* ═══ FAQ — Light band ═══ */}
       <section id="faq" className="py-28 bg-background scroll-mt-20">
@@ -813,33 +578,6 @@ export default function OnboardingLanguage() {
         </div>
       </section>
 
-      {/* ═══ FINAL CTA — Cinematic background image band ═══ */}
-      <section className="relative py-28 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/cta-bg.jpg)' }} />
-
-        <div className="absolute inset-0 bg-[hsl(220_30%_6%/0.60)]" />
-
-        <div className="relative mx-auto max-w-3xl px-5 sm:px-8 text-center space-y-8">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">Start planning with confidence.</h2>
-          <p className="text-white/60 text-lg max-w-md mx-auto leading-relaxed">
-            Join families and vendors already using UMCIMBI to bring their ceremonies together.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/auth?mode=signup">
-              <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30">
-                Get started — it's free
-              </Button>
-            </Link>
-            <Link to="/auth?mode=login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/30 !text-white bg-white/10 hover:bg-white/15">
-                Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="bg-[hsl(220_25%_8%)] border-t border-white/5">
