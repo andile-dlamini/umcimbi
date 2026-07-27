@@ -211,38 +211,41 @@ export default function OnboardingLanguage() {
               Now live only in KwaZulu-Natal
             </div>
 
-            <h1 className="text-[2.75rem] sm:text-[3.25rem] lg:text-6xl font-extrabold tracking-tight leading-[1.06] text-white drop-shadow-lg">
-              Plan Your Traditional Ceremony - <span className="text-secondary">Find Trusted Vendors in KwaZulu-Natal</span>
+            <h1 className="text-[2.25rem] sm:text-[2.75rem] lg:text-5xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg">
+              What brings you to UMCIMBI?
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/75 leading-relaxed max-w-lg mx-auto md:mx-0 drop-shadow-md">
-              UMCIMBI connects South African families with vetted vendors for traditional ceremonies - from Zulu to Xhosa, Venda, Sotho and all cultural celebrations. Quotes, payments and reviews in one place.
-            </p>
+            <div className="flex flex-col gap-4 max-w-lg mx-auto md:mx-0 w-full" style={{ textShadow: 'none' }}>
+              <button
+                onClick={() => scrollTo('organisers')}
+                className="group flex items-center gap-4 w-full text-left px-6 py-5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm hover:bg-white/15 hover:border-white/30 transition-all"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                  <PartyPopper className="h-5 w-5 text-secondary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary mb-1">For families</p>
+                  <p className="text-lg font-semibold text-white">Are you organising a traditional ceremony?</p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+              </button>
 
-            <ul className="space-y-3 max-w-lg mx-auto md:mx-0 text-left">
-              {[
-                'Find trusted vendors for any traditional ceremony near you',
-                'Compare quotes from vetted vendors across KwaZulu-Natal',
-                'Pay safely online with protection\n'
-              ].map((text) => (
-                <li key={text} className="flex gap-3 items-start text-[15px] sm:text-base text-white/85 leading-relaxed drop-shadow-md">
-                  <CheckCircle2 className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
+              <button
+                onClick={() => scrollTo('vendors')}
+                className="group flex items-center gap-4 w-full text-left px-6 py-5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm hover:bg-white/15 hover:border-white/30 transition-all"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+                  <Store className="h-5 w-5 text-secondary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary mb-1">For businesses</p>
+                  <p className="text-lg font-semibold text-white">Are you providing vendor services?</p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+              </button>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start" style={{ textShadow: 'none' }}>
-              <Link to="/auth?mode=signup">
-                <Button size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 transition-all">
-                  Get started — it's free
-                </Button>
-              </Link>
-              <Link to="/auth?mode=login">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-base font-semibold px-10 rounded-full border-white/30 !text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                  Login
-                </Button>
-              </Link>
 
               {isInstallable && (
                 <Button
