@@ -553,12 +553,12 @@ export default function OnboardingLanguage() {
       </section>
 
 
-      {/* ═══ FAQ — Light band ═══ */}
-      <section id="faq" className="py-28 bg-background scroll-mt-20">
+      {/* ═══ FAQ — Dark band ═══ */}
+      <section id="faq" className="py-28 bg-[hsl(220_25%_8%)] scroll-mt-20">
         <div className="mx-auto max-w-2xl px-5 sm:px-8">
           <div className="text-center mb-12">
             <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">FAQ</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Frequently asked questions</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Frequently asked questions</h2>
           </div>
           <Accordion type="single" collapsible className="space-y-3">
             {[
@@ -569,9 +569,9 @@ export default function OnboardingLanguage() {
             { q: 'When will isiZulu be available?', a: 'We\'re actively working on full isiZulu language support. It\'s coming soon — you\'ll be able to switch languages in your settings.' },
             { q: 'Can organisers and vendors use the same account?', a: 'Yes! You can register as an organiser and later add a vendor profile to the same account.' }].
             map(({ q, a }, i) =>
-            <AccordionItem key={i} value={`faq-${i}`} className="border border-border/50 rounded-2xl px-6 bg-card">
-                <AccordionTrigger className="text-[15px] font-medium hover:no-underline py-5">{q}</AccordionTrigger>
-                <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed pb-5">{a}</AccordionContent>
+            <AccordionItem key={i} value={`faq-${i}`} className="border border-white/10 rounded-2xl px-6 bg-white/5">
+                <AccordionTrigger className="text-[15px] font-medium text-white hover:no-underline py-5">{q}</AccordionTrigger>
+                <AccordionContent className="text-[15px] text-white/70 leading-relaxed pb-5">{a}</AccordionContent>
               </AccordionItem>
             )}
           </Accordion>
