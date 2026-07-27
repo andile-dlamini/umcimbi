@@ -65,7 +65,7 @@ export default function VendorsList() {
 
   return (
     <div className="min-h-screen pb-safe">
-      <PageHeader title="Vendors" subtitle="Find trusted service providers" />
+      <PageHeader title="Vendors" subtitle="Find trusted vendors" />
 
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
         {/* Search */}

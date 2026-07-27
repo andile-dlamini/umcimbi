@@ -1043,7 +1043,7 @@ export default function AuthPage() {
                     <PartyPopper className="h-7 w-7 text-accent" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm planning a ceremony</h3>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm an Organiser</h3>
                     <p className="text-sm text-muted-foreground">
                       Organise traditional ceremonies, manage guests, budgets, and find trusted vendors.
                     </p>
@@ -1066,7 +1066,7 @@ export default function AuthPage() {
                     <Store className="h-7 w-7 text-[hsl(174,82%,29%)]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm a service provider</h3>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">I'm a Vendor</h3>
                     <p className="text-sm text-muted-foreground">
                       List your business, receive requests, send quotes, and grow your customer base.
                     </p>
@@ -1101,7 +1101,7 @@ export default function AuthPage() {
           <div className="w-full max-w-md space-y-6">
             <div className="text-center space-y-2">
               <span className="inline-block text-xs font-medium uppercase tracking-wide text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                Registering as: {selectedRole === 'vendor' ? 'Service Provider' : 'Ceremony Planner'}
+                Registering as: {selectedRole === 'vendor' ? 'Vendor' : 'Organiser'}
               </span>
               <h1 className="text-2xl font-bold text-foreground">Sign up</h1>
             </div>

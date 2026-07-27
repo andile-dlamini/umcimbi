@@ -172,8 +172,8 @@ export default function WaitlistPage() {
             <Label>I am… *</Label>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { value: 'organiser' as const, label: "I'm planning a ceremony" },
-                { value: 'vendor' as const, label: "I'm a service provider" },
+                { value: 'organiser' as const, label: "I'm an Organiser" },
+                { value: 'vendor' as const, label: "I'm a Vendor" },
               ]).map(({ value, label }) => (
                 <button key={value}
                   onClick={() => { setFormData(p => ({ ...p, role: value })); setErrors(p => { const n = { ...p }; delete n.role; return n; }); }}
