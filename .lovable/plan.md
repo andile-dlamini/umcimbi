@@ -1,18 +1,26 @@
-Replace the hero headline, subtext, checklist, and CTA buttons on the landing page (`src/pages/onboarding/OnboardingLanguage.tsx`) with a two-question entry gate that reuses the same icon pairing as the AuthPage role-choice screen.
+Content cleanup in `src/pages/onboarding/OnboardingLanguage.tsx` only. No routing, schema, or role changes; no other files touched.
 
-What will change:
-1. Import block (around line 32): add `PartyPopper` and `Store` to the existing `lucide-react` import.
-2. Lines 207–226: replace headline/subtext/checklist with the prompt "What brings you to UMCIMBI?" and two glassmorphism buttons:
-   - Organiser button: `PartyPopper` icon, eyebrow "For families", label "Are you organising a traditional ceremony?", scrolls to `#organisers`.
-   - Vendor button: `Store` icon, eyebrow "For businesses", label "Are you providing vendor services?", scrolls to `#vendors`.
-   Both use the existing `ArrowRight` icon and `scrollTo()` helper.
-3. Lines 229–239: remove the "Get started" and "Login" button links (login remains accessible via top nav).
+## Sections to delete
+- Lines 291–315: "Why UMCIMBI" 3-pillars band
+- Lines 316–432: "Planning shouldn't become chaos" problem band
+- Lines 704–747: "Ceremonies we support" tiles band
+- Lines 748–790: Testimonials / social proof band
+- Lines 816–843: Final CTA band (footer at line 844 stays)
 
-What will NOT change:
-- `scrollTo()`, PWA install logic, `HeroSereneIllustration`, right-hand illustration column.
-- Header nav, mobile menu, `#organisers`, `#vendors`, and all sections below the hero.
-- No routing, schema, or role system changes.
+Deletions happen bottom-up so earlier line numbers stay valid.
 
-Verification:
-- Typecheck (`tsgo` or `bunx tsc --noEmit`).
-- Visual check of the preview landing page, confirming both button labels and icons are clearly legible against the hero background.
+## Rewording
+- `id="organisers"` (around line 448): replace the 3 card entries with Trusted vendors (ShieldCheck), Comparable quotes (BarChart3), Pay safely online (LockIcon) — copy reused verbatim from the deleted pillars section.
+- `id="vendors"` (around line 488): replace the 3 card entries with 4 — Get discovered by families (Users), Send quotations easily (Zap), Be verified and trusted (ShieldCheck), Stop chasing money (LockIcon).
+
+## Imports
+- Remove `Inbox`, `HandshakeIcon`, `Star` from the lucide-react import block (all unused after the edits).
+- Remove `import CeremonyTile from '@/components/illustrations/CeremonyTile';` (line 45).
+- Leave `CheckCircle2`, `Sparkles`, `Play`, `FeatureIcon` untouched as instructed.
+
+## Untouched
+Hero, `id="how"`, `id="faq"`, header nav, mobile menu, `scrollTo()`, PWA install logic, footer.
+
+## Verification
+- Typecheck with `tsgo`.
+- Playwright screenshots of the full scroll: Hero → How it works → For Organisers (3 cards) → For Vendors (4 cards) → FAQ → Footer, checking for leftover gaps or broken band spacing where sections were removed.
