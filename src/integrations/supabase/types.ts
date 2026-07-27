@@ -1458,6 +1458,27 @@ export type Database = {
           },
         ]
       }
+      vendor_registration_reminders: {
+        Row: {
+          id: string
+          reminder_type: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          reminder_type: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vendor_reviews: {
         Row: {
           comment: string | null

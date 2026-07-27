@@ -50,9 +50,9 @@ export default function VendorDashboard() {
         <PageHeader title="Dashboard" showBack />
         <div className="px-4 py-12 text-center">
           <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">No vendor profile</h2>
-          <p className="text-muted-foreground mb-6">Register as a vendor to access this dashboard</p>
-          <Button onClick={() => navigate('/vendors/onboarding')}>Become a vendor</Button>
+          <h2 className="text-lg font-semibold mb-2">Let's finish setting up your business</h2>
+          <p className="text-muted-foreground mb-6">Add your business details so families can find and book you.</p>
+          <Button onClick={() => navigate('/vendors/onboarding')}>Complete your profile</Button>
         </div>
       </div>
     );

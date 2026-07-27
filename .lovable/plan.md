@@ -1,26 +1,52 @@
-Content cleanup in `src/pages/onboarding/OnboardingLanguage.tsx` only. No routing, schema, or role changes; no other files touched.
+## Goal
 
-## Sections to delete
-- Lines 291–315: "Why UMCIMBI" 3-pillars band
-- Lines 316–432: "Planning shouldn't become chaos" problem band
-- Lines 704–747: "Ceremonies we support" tiles band
-- Lines 748–790: Testimonials / social proof band
-- Lines 816–843: Final CTA band (footer at line 844 stays)
+1. Vendors land in-app after signup instead of being forced to `/vendors/onboarding`.
+2. Vendor dashboard empty state reworded for that new common state.
+3. New hourly job that SMSes vendor-role users who still have no business profile at 24h and 72h.
 
-Deletions happen bottom-up so earlier line numbers stay valid.
+## 1. `src/pages/auth/AuthPage.tsx`
 
-## Rewording
-- `id="organisers"` (around line 448): replace the 3 card entries with Trusted vendors (ShieldCheck), Comparable quotes (BarChart3), Pay safely online (LockIcon) — copy reused verbatim from the deleted pillars section.
-- `id="vendors"` (around line 488): replace the 3 card entries with 4 — Get discovered by families (Users), Send quotations easily (Zap), Be verified and trusted (ShieldCheck), Stop chasing money (LockIcon).
+Replace the vendor branch after password creation (~line 558) so both roles do:
 
-## Imports
-- Remove `Inbox`, `HandshakeIcon`, `Star` from the lucide-react import block (all unused after the edits).
-- Remove `import CeremonyTile from '@/components/illustrations/CeremonyTile';` (line 45).
-- Leave `CheckCircle2`, `Sparkles`, `Play`, `FeatureIcon` untouched as instructed.
+```
+setStep('success');
+toast.success('Account created successfully!');
+```
 
-## Untouched
-Hero, `id="how"`, `id="faq"`, header nav, mobile menu, `scrollTo()`, PWA install logic, footer.
+Business/Showcase steps and `/vendors/onboarding` stay untouched — just no longer forced.
+
+## 2. `src/pages/vendor-dashboard/VendorDashboard.tsx`
+
+In the `!vendorProfile` block:
+- Heading: "Let's finish setting up your business"
+- Body: "Add your business details so families can find and book you."
+- Button: "Complete your profile" (same `navigate('/vendors/onboarding')`)
+
+## 3. Reminder table (migration)
+
+`public.vendor_registration_reminders` — `user_id` (FK `auth.users`, cascade), `reminder_type` ('24h'|'72h' check), `sent_at`, unique `(user_id, reminder_type)`. RLS enabled, no policies (service-role only), plus `GRANT ALL ON public.vendor_registration_reminders TO service_role` so the edge function can reach it.
+
+## 4. Edge function `supabase/functions/vendor-registration-reminder/index.ts`
+
+Implemented exactly as your revised draft: shared `normalizeSaPhone` / `sendConnectMobileSms`, `profiles` keyed on `user_id`, `sms_enabled` opt-out check, and insert-first into `vendor_registration_reminders` as the duplicate lock (unique violation → skip).
+
+One correction found while checking the schema: `sms_notification_log.tier` has a CHECK constraint allowing only `tier1 | tier2 | suppressed`, so passing `'24h'`/`'72h'` would fail the insert. The log row will use `tier: 'tier1'` (with `'suppressed'` when a send is skipped/fails), and the 24h vs 72h distinction stays in `event_type` (`vendor_registration_reminder_24h` / `_72h`) as your draft already does.
+
+## 5. `supabase/config.toml`
+
+```
+[functions.vendor-registration-reminder]
+verify_jwt = false
+```
+
+## 6. Hourly cron
+
+Schedule `vendor-registration-reminder` at `0 * * * *`, unscheduling any prior job of the same name first, calling the function with the vault-stored service-role key. Because this SQL embeds the project URL and vault key, it runs as a data operation (insert tool), not a schema migration — same approach as the other cron jobs here.
+
+## Out of scope
+`VendorProfileForm.tsx`, `VendorOnboarding.tsx`, `send-vendor-status-sms`, approval queue, vendor RLS, all other edge functions.
 
 ## Verification
-- Typecheck with `tsgo`.
-- Playwright screenshots of the full scroll: Hero → How it works → For Organisers (3 cards) → For Vendors (4 cards) → FAQ → Footer, checking for leftover gaps or broken band spacing where sections were removed.
+- Typecheck.
+- New signup lands in-app with the new empty-state copy; `/vendors/onboarding` still works via the button.
+- No live cron trigger against real vendor numbers during testing.
