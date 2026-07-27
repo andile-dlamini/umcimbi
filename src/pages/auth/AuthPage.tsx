@@ -1142,7 +1142,7 @@ export default function AuthPage() {
                 }
               </p>
             </div>
-            <Button className="w-full h-12" onClick={() => navigate(isVendor ? '/vendor-dashboard' : (redirectParam || '/'))}>ackslash
+            <Button className="w-full h-12" onClick={() => navigate(isVendor ? '/vendor-dashboard' : (redirectParam || '/'))}>
               {isVendor ? 'Go to Dashboard' : 'Get Started'}
             </Button>
           </CardContent>
