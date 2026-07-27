@@ -181,6 +181,13 @@ export type Database = {
             foreignKeyName: "bookings_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
@@ -271,6 +278,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
             referencedColumns: ["id"]
           },
           {
@@ -463,6 +477,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
             referencedColumns: ["id"]
           },
           {
@@ -1062,6 +1083,13 @@ export type Database = {
             foreignKeyName: "quotes_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
@@ -1092,6 +1120,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
             referencedColumns: ["id"]
           },
           {
@@ -1171,6 +1206,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
             referencedColumns: ["id"]
           },
           {
@@ -1453,6 +1495,13 @@ export type Database = {
             foreignKeyName: "vendor_payouts_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payouts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
@@ -1529,6 +1578,13 @@ export type Database = {
             foreignKeyName: "vendor_reviews_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors_public"
             referencedColumns: ["id"]
           },
@@ -1571,6 +1627,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_verification_documents_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
             referencedColumns: ["id"]
           },
           {
@@ -1845,6 +1908,60 @@ export type Database = {
       }
     }
     Views: {
+      vendors_directory_public: {
+        Row: {
+          business_verification_status:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category: Database["public"]["Enums"]["vendor_category"] | null
+          city: string | null
+          id: string | null
+          image_urls: string[] | null
+          is_active: boolean | null
+          is_super_vendor: boolean | null
+          location: string | null
+          logo_url: string | null
+          name: string | null
+          rating: number | null
+          review_count: number | null
+          state_province: string | null
+        }
+        Insert: {
+          business_verification_status?:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category?: Database["public"]["Enums"]["vendor_category"] | null
+          city?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_super_vendor?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          state_province?: string | null
+        }
+        Update: {
+          business_verification_status?:
+            | Database["public"]["Enums"]["business_verification_status"]
+            | null
+          category?: Database["public"]["Enums"]["vendor_category"] | null
+          city?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_super_vendor?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          state_province?: string | null
+        }
+        Relationships: []
+      }
       vendors_public: {
         Row: {
           about: string | null
