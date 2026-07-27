@@ -312,6 +312,7 @@ export default function AuthPage() {
   const refSource = searchParams.get('ref');
   const methodParam = searchParams.get('method');
   const roleParam = searchParams.get('role');
+  const redirectParam = searchParams.get('redirect');
   const initialRole: UserRole | null = roleParam === 'vendor' ? 'vendor' : roleParam === 'planner' ? 'planner' : null;
   const initialStep: Step = searchParams.get('step') === 'business-setup' && searchParams.get('role') === 'vendor'
     ? 'business'
@@ -461,7 +462,7 @@ export default function AuthPage() {
         toast.error(error.message.includes('Invalid login credentials') ? 'Invalid phone number or password' : error.message);
       } else {
         toast.success('Welcome back!');
-        navigate('/');
+        navigate(redirectParam || '/');
       }
     } finally { setIsLoading(false); }
   };
@@ -1141,7 +1142,7 @@ export default function AuthPage() {
                 }
               </p>
             </div>
-            <Button className="w-full h-12" onClick={() => navigate(isVendor ? '/vendor-dashboard' : '/')}>
+            <Button className="w-full h-12" onClick={() => navigate(isVendor ? '/vendor-dashboard' : (redirectParam || '/'))}>ackslash
               {isVendor ? 'Go to Dashboard' : 'Get Started'}
             </Button>
           </CardContent>
