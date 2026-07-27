@@ -555,13 +555,8 @@ export default function AuthPage() {
 
       setCreatedUserId(data.user_id);
 
-      if (selectedRole === 'vendor') {
-        toast.success('Account created! Now set up your business.');
-        navigate('/vendors/onboarding?fromAuth=true', { replace: true });
-      } else {
-        setStep('success');
-        toast.success('Account created successfully!');
-      }
+      setStep('success');
+      toast.success('Account created successfully!');
     } catch { toast.error('Network error. Please try again.'); }
     finally { setIsLoading(false); }
   };
