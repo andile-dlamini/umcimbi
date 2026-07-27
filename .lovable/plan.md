@@ -1,20 +1,52 @@
-## Goal
-On the landing page, give the Organisers and Vendors sections their own top CTA with reassurance copy, drop the generic subhead lines, and route both top and bottom CTAs into sign-up with the audience role pre-selected.
+# Public vendor directory for logged-out visitors
 
-## Changes (single file: `src/pages/onboarding/OnboardingLanguage.tsx`)
+## 1. Database (run via the migration tool, not hand-written migration files)
 
-1. **Organisers header block** (around line 307): remove the "Plan your UMCIMBI with tools that actually help." subhead, add `mb-6` to the heading, insert a "Register to start planning" button linking to `/auth?mode=signup&role=planner`, followed by "Free to join. Takes less than a minute."
-2. **Organisers bottom CTA** (around line 327): change the link to `/auth?mode=signup&role=planner`; button text unchanged.
-3. **Vendors header block** (around line 348): remove the "Grow your ceremony business with qualified leads." subhead, heading gets `mb-6`, insert an "I'm a vendor — Register" button linking to `/auth?mode=signup&role=vendor`, followed by "Free to list your business. Approved within 48 hours."
-4. **Vendors bottom CTA** (around line 372): change the link to `/auth?mode=signup&role=vendor`.
+**Migration A — anonymous-safe directory view**
+
+```sql
+CREATE OR REPLACE VIEW public.vendors_directory_public
+WITH (security_invoker = off) AS
+SELECT id, name, category, location, city, state_province,
+       image_urls, logo_url, rating, review_count,
+       is_super_vendor, business_verification_status, is_active
+FROM public.vendors
+WHERE is_active = true AND public.is_province_live(state_province);
+
+GRANT SELECT ON public.vendors_directory_public TO anon, authenticated;
+```
+
+No contact, pricing, address, geo, financial or verification-internal columns are exposed. The base `vendors` table, its RLS, and the existing `vendors_public` view are untouched.
+
+**Migration B — reconcile the hourly reminder cron**
+
+Unschedule `vendor-registration-reminder` inside an exception-swallowing `DO` block, then re-`cron.schedule` it at `0 * * * *` posting to the `vendor-registration-reminder` function with the vault service-role key. Result: exactly one active job, no gap.
+
+## 2. Frontend
+
+**`src/components/shared/VendorCard.tsx`** — add optional `onCardClick?: () => void`; when present it short-circuits the default navigate. Every existing caller is unchanged.
+
+**`src/pages/vendors/PublicVendorsList.tsx` (new)** — standalone logged-out page:
+- Loads from `vendors_directory_public`, ordered by super-vendor then rating.
+- Client-side name search + category filter using `LIVE_VENDOR_CATEGORY_FILTER_OPTIONS`.
+- Header with a "Sign in" link; hero heading and "Sign in to request a quote" subcopy.
+- Card click → `/auth?mode=signup&role=planner&redirect=%2Fvendors%2F<id>`.
+- Loading and empty states.
+
+**`src/App.tsx`** — import `PublicVendorsList` and add `<Route path="/vendors" element={<PublicVendorsList />} />` to the **logged-out** route tree only.
+
+**`src/pages/auth/AuthPage.tsx`** — read a `redirect` search param and use it for post-login navigation (line 464) and the signup success button (line 1144, planner branch only; vendors still go to `/vendor-dashboard`).
 
 ## Technical notes
-`AuthPage.tsx` already reads a `role` query param and derives `initialRole`/`initialStep` from it (lines 314-321), so `role=planner` / `role=vendor` skips the "How will you use UMCIMBI?" step with no auth-side changes.
+- Supabase types regenerate after the migration, so `.from('vendors_directory_public')` types cleanly; if the type isn't present yet at build time I'll cast the query rather than edit generated files.
+- Vendors with a null/non-live `state_province` are excluded by `is_province_live`, matching the live-province gating used elsewhere.
 
-## Untouched
-Header and mobile-drawer Register buttons, the "How it works" CTA (all stay generic `/auth?mode=signup`), hero, `id="how"`, `id="faq"`, the value cards, and `AuthPage.tsx`.
+## Out of scope
+Authenticated `VendorsList`, `VendorDetail`, `useVendorsWithDistance`, `vendors_public`, base-table RLS, admin approval/verification flows. `/vendors/:id` stays authenticated-only.
 
 ## Verification
 - Typecheck.
-- Playwright screenshots of both sections showing top CTA + reassurance line and the retained bottom CTA.
-- Click-through from each section's CTA confirming `/auth` opens at the phone-entry step rather than the role-choice screen.
+- Headless logged-out visit to `/vendors`: cards render with name/category/area/photo/rating; no phone, email or price in DOM or network payloads.
+- Card click lands on `/auth?mode=signup&role=planner&redirect=...` with the role-choice screen skipped.
+- Logged-in `/vendors` still renders the existing authenticated list unchanged.
+- Query `cron.job` to confirm a single active `vendor-registration-reminder` entry.
