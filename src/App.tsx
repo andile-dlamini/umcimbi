@@ -87,6 +87,7 @@ const PlannerJoinRedirect = () => {
 
 function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
   const { user, isLoading, isProfileComplete } = useAuth();
+  useMetaPixelPageView();
 
   if (isLoading) {
     return (
