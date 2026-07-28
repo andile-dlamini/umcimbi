@@ -307,7 +307,7 @@ export default function OnboardingLanguage() {
           <div className="text-center mb-14">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg mb-6">Use your time to plan UMCIMBI. Lose the stress.</h2>
-            <Link to="/auth?mode=signup&role=planner">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup&role=planner">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                 Register to start planning
               </Button>
@@ -330,7 +330,7 @@ export default function OnboardingLanguage() {
             )}
           </div>
           <div className="text-center mt-10">
-            <Link to="/auth?mode=signup&role=planner">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup&role=planner">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                 Register to start planning
               </Button>
@@ -353,7 +353,7 @@ export default function OnboardingLanguage() {
             <div>
               <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
               <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-foreground">Win better. Work with less back-and-forth.</h2>
-              <Link to="/auth?mode=signup&role=vendor">
+              <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to="/auth?mode=signup&role=vendor">
                 <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                   I'm a vendor — Register
                 </Button>
@@ -380,7 +380,7 @@ export default function OnboardingLanguage() {
                 )}
               </div>
               <div className="mt-10">
-                <Link to="/auth?mode=signup&role=vendor">
+                <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to="/auth?mode=signup&role=vendor">
                   <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
                     I'm a vendor — Register
                   </Button>
