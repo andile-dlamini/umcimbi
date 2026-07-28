@@ -8,6 +8,7 @@ import { RoleProvider } from "@/context/RoleContext";
 import { AppShell } from "@/components/layout/AppShell";
 import { UpdateBanner } from "@/components/layout/UpdateBanner";
 import { usePwaUpdate } from "@/hooks/usePwaUpdate";
+import { useMetaPixelPageView } from "@/hooks/useMetaPixelPageView";
 
 // Pages
 import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
