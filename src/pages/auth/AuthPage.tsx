@@ -26,6 +26,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import { trackPixel } from '@/lib/metaPixel';
 
 // ─── CONSTANTS ───
 const SA_DIAL = '+27';
@@ -327,6 +328,25 @@ export default function AuthPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
 
+  // ─── META PIXEL FUNNEL TRACKING (no app logic) ───
+  const firedPixelEvents = useRef<Set<string>>(new Set());
+  const trackOnce = (key: string, fn: () => void) => {
+    if (firedPixelEvents.current.has(key)) return;
+    firedPixelEvents.current.add(key);
+    fn();
+  };
+  useEffect(() => {
+    if (initialStep === 'login') return;
+    trackOnce('signup_started', () => {
+      trackPixel('signup_started', initialRole ? { role: initialRole } : undefined);
+      trackPixel('Lead', initialRole ? { content_name: initialRole } : undefined, true);
+    });
+    if (initialRole) {
+      trackOnce('role_selected', () => trackPixel('role_selected', { role: initialRole }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // If user is already logged in AND not in the middle of the signup wizard, send them home.
   // Wizard steps (business/showcase/success) need to stay rendered after auto sign-in.
   // Exception: if URL has role=vendor and user has vendor role but no vendors row yet,
@@ -490,7 +510,11 @@ export default function AuthPage() {
       const data = await res.json();
       if (res.status === 429) { toast.error('Please wait before requesting a new code'); setCooldown(30); }
       else if (!res.ok) { toast.error(data.error || 'Failed to send verification code'); }
-      else { toast.success('Verification code sent!'); setStep('otp'); setCooldown(30); setOtpExpiry(300); setOtpValue(''); }
+      else {
+        trackPixel('details_submitted', selectedRole ? { role: selectedRole } : undefined);
+        trackPixel('phone_code_sent', selectedRole ? { role: selectedRole } : undefined);
+        toast.success('Verification code sent!'); setStep('otp'); setCooldown(30); setOtpExpiry(300); setOtpValue('');
+      }
     } catch { toast.error('Network error. Please try again.'); }
     finally { setIsLoading(false); }
   };
@@ -513,6 +537,7 @@ export default function AuthPage() {
 
   const handleVerifyOtp = () => {
     if (otpValue.length !== 6) { toast.error('Please enter the full 6-digit code'); return; }
+    trackPixel('phone_code_verified', selectedRole ? { role: selectedRole } : undefined);
     setStep('password');
   };
 
@@ -555,6 +580,10 @@ export default function AuthPage() {
       if (signInError) console.error('Auto sign-in failed:', signInError);
 
       setCreatedUserId(data.user_id);
+
+      trackPixel('password_set', selectedRole ? { role: selectedRole } : undefined);
+      trackPixel('registration_completed', selectedRole ? { role: selectedRole } : undefined);
+      trackPixel('CompleteRegistration', { content_name: selectedRole ?? 'planner' }, true);
 
       setStep('success');
       toast.success('Account created successfully!');
@@ -608,6 +637,7 @@ export default function AuthPage() {
       toast.error(`Please enter a valid ${selectedPhoneCountry.name} phone number`);
       return;
     }
+    trackPixel('business_step_completed', { role: 'vendor' });
     setStep('showcase');
   };
 
@@ -1027,7 +1057,7 @@ export default function AuthPage() {
             <div className="grid gap-4">
               {/* Planner Card */}
               <button
-                onClick={() => { setSelectedRole('planner'); setStep('auth_method'); }}
+                onClick={() => { trackOnce('role_selected', () => trackPixel('role_selected', { role: 'planner' })); setSelectedRole('planner'); setStep('auth_method'); }}
                 className={cn(
                   'relative p-6 rounded-2xl border-2 text-left transition-all group',
                   'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-accent',
@@ -1050,7 +1080,7 @@ export default function AuthPage() {
 
               {/* Vendor Card */}
               <button
-                onClick={() => { setSelectedRole('vendor'); setStep('auth_method'); }}
+                onClick={() => { trackOnce('role_selected', () => trackPixel('role_selected', { role: 'vendor' })); setSelectedRole('vendor'); setStep('auth_method'); }}
                 className={cn(
                   'relative p-6 rounded-2xl border-2 text-left transition-all group',
                   'bg-card/70 backdrop-blur-md hover:shadow-lg hover:border-[hsl(174,82%,29%)]',

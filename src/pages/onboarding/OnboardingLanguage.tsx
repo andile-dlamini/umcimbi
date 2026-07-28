@@ -36,6 +36,7 @@ import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustr
 import HowItWorks from '@/components/onboarding/HowItWorks';
 import FeatureIcon from '@/components/illustrations/FeatureIcon';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { trackPixel } from '@/lib/metaPixel';
 
 export default function OnboardingLanguage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -158,7 +159,7 @@ export default function OnboardingLanguage() {
             <Link to="/auth?mode=login">
               <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
-            <Link to="/auth?mode=signup" className="hidden sm:inline-flex">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup" className="hidden sm:inline-flex">
               <Button size="sm" className="text-[13px] font-semibold rounded-full px-5 shadow-md shadow-primary/15">Register</Button>
             </Link>
             <button className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -172,7 +173,7 @@ export default function OnboardingLanguage() {
             {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
           <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
           )}
-            <Link to="/auth?mode=signup" className="block pt-1">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
           </div>
@@ -285,7 +286,7 @@ export default function OnboardingLanguage() {
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <HowItWorks />
           <div className="text-center mt-12">
-            <Link to="/auth?mode=signup">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup">
               <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
                 Get started free
               </Button>
