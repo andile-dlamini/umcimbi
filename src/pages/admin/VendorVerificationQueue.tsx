@@ -117,6 +117,7 @@ export default function VendorVerificationQueue() {
   const [confirmReject, setConfirmReject] = useState<string | null>(null);
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [incomplete, setIncomplete] = useState<IncompleteSignup[]>([]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
