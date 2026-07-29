@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  UserPlus,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
