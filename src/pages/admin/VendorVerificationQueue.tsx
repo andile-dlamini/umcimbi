@@ -365,7 +365,38 @@ export default function VendorVerificationQueue() {
       />
 
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
+        {incomplete.length > 0 && (
+          <Card className="border-amber-500/40">
+            <CardHeader className="border-b">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-amber-600" />
+                <p className="font-medium">Vendor signups without a profile</p>
+                <Badge variant="secondary">{incomplete.length}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                These people registered as vendors but haven't completed their business profile yet,
+                so there is nothing to approve. Reminder SMS goes out at 24h and 72h.
+              </p>
+            </CardHeader>
+            <CardContent className="p-0 divide-y">
+              {incomplete.map((s) => (
+                <div key={s.user_id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{s.full_name || 'Unnamed'}</p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {s.phone_number || s.email || '—'}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDistanceToNow(new Date(s.signed_up_at), { addSuffix: true })}
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         {isLoading ? (
+
           <div className="flex items-center justify-center py-16 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading queue…
           </div>
