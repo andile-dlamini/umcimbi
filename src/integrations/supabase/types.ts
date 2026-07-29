@@ -2132,6 +2132,16 @@ export type Database = {
           requests_sent: number
         }[]
       }
+      get_incomplete_vendor_signups: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          phone_number: string
+          signed_up_at: string
+          user_id: string
+        }[]
+      }
       get_own_vendor_bank_details: {
         Args: { vendor_id: string }
         Returns: {
