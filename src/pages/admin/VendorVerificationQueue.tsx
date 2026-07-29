@@ -129,6 +129,12 @@ export default function VendorVerificationQueue() {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+
+    // Vendor-role users who never created a vendor profile — nothing to approve yet,
+    // but admins should still see them.
+    const { data: incompleteData } = await supabase.rpc('get_incomplete_vendor_signups');
+    setIncomplete((incompleteData ?? []) as unknown as IncompleteSignup[]);
+
     // Admin-created vendors (signup_source = 'admin_manual') bypass this queue —
     // they're vetted by the admin at creation time.
     // Include independent vendors (business_verification_status = 'not_applicable')
