@@ -66,6 +66,14 @@ interface PendingVendor {
   created_at: string;
 }
 
+interface IncompleteSignup {
+  user_id: string;
+  full_name: string | null;
+  phone_number: string | null;
+  email: string | null;
+  signed_up_at: string;
+}
+
 interface VerificationDoc {
   id: string;
   vendor_id: string;
