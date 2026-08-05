@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminTopBar } from './AdminTopBar';
+import { BackendStatusBanner } from './BackendStatusBanner';
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -18,7 +19,10 @@ export default function AdminLayout() {
             <AdminTopBar />
           </header>
 
+          <BackendStatusBanner />
+
           <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+
             <Outlet />
           </main>
         </div>
