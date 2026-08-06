@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Store, Users, Sparkles, BadgeCheck, AlertCircle, Calendar, Search } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
