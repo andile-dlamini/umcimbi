@@ -15,7 +15,7 @@ Scope: `src/pages/admin/AdminDashboard.tsx` only. No query logic changes from th
 
 3. **Section order** becomes: AI Daily Brief → Activation and conversion → Real account statistics → Growth signals → Demand with no supply → Revenue strip → all remaining sections in their current relative order.
 
-4. **Demand with no supply** — the zero-result searches list moves out of the "Search activity" card into its own card with that heading and the description "Searches that returned no vendors — your outreach priority list." Above the existing table, a compact summary lists the five most frequent category + location combinations with counts, derived from the already-loaded results; when no metadata is present the table renders unchanged with no summary. The "Most searched categories" block stays in the Search activity card in its current position.
+4. **Demand with no supply** — the zero-result searches list moves out of the "Search activity" card into its own card with that heading and the description "Searches that returned no vendors — your outreach priority list." Above the existing table, a compact summary lists the five most frequent searches with counts. Each search is labelled by category and/or location ("Catering in Umlazi", "Catering", or "Umlazi"); when both are missing the free-text query is used as the label, and rows with none of the three are skipped. The underlying query fetches up to 200 recent zero-result searches so the summary reflects a real outreach list, while the detailed table beneath still shows only the 20 most recent. When no metadata is available the table renders unchanged with no summary. The "Most searched categories" block stays in the Search activity card in its current position.
 
 5. **Revenue label** — "Platform revenue earned" becomes "Platform revenue (contracted)".
 
@@ -28,4 +28,6 @@ Untouched: period selector, existing styling, skeleton states, `PLATFORM_FEE_RAT
 ## Technical notes
 
 - `const [activation, setActivation] = useState<any>(null);` set via `setActivation(act ?? null);` immediately after the existing unwrap line.
-- Combination summary computed with a `useMemo` over `zeroResultSearches`, keyed on `metadata.category` + `metadata.location`, sorted desc, sliced to 5, using the existing `categoryLabels` map.
+- Summary computed with a `useMemo` over `zeroResultSearches`, keyed on a resolved label (category/location via the existing `categoryLabels` map, falling back to `metadata.query`, skipping rows where all three are null), sorted desc, sliced to 5.
+- The zero-result `platform_events` query limit goes from 20 to 200; the detail table renders `zeroResultSearches.slice(0, 20)` rather than issuing a second query.
+
