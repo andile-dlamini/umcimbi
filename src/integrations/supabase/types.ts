@@ -2111,6 +2111,23 @@ export type Database = {
       }
       generate_offer_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
+      get_admin_activation_stats: {
+        Args: never
+        Returns: {
+          ceremonies_with_request: number
+          median_hours_to_first_response: number
+          organisers_with_ceremony: number
+          organisers_with_request: number
+          quotes_awaiting_client: number
+          real_organisers: number
+          real_vendors: number
+          requests_awaiting_vendor: number
+          total_ceremonies: number
+          vendors_ever_quoted: number
+          vendors_ever_requested: number
+          vendors_ever_responded: number
+        }[]
+      }
       get_admin_user_registration_stats: {
         Args: never
         Returns: {
