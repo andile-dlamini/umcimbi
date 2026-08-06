@@ -169,13 +169,18 @@ export default function AdminDashboard() {
       setPlatformRevenue(revVal);
       setAvgBooking(revenueBookings?.length ? gmvVal / revenueBookings.length : 0);
 
-      // Escrow (always current, no period filter)
+      // Escrow — only money actually received and not yet released
       const { data: escrowBookings } = await supabase
         .from('bookings')
-        .select('agreed_price')
+        .select('deposit_amount, deposit_status, balance_amount, balance_status')
         .not('funds_held_since', 'is', null)
         .is('funds_released_at', null);
-      setEscrow((escrowBookings || []).reduce((s, b) => s + Number(b.agreed_price), 0));
+      setEscrow((escrowBookings || []).reduce((s, b) => {
+        const dep = b.deposit_status === 'paid' ? Number(b.deposit_amount || 0) : 0;
+        const bal = b.balance_status === 'paid' ? Number(b.balance_amount || 0) : 0;
+        return s + dep + bal;
+      }, 0));
+
 
       // Tier 2 — Growth signals (current period)
       const fetchCount = async (table: string, col: string, gte?: string | null, filters?: Record<string, any>) => {
