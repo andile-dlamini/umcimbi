@@ -28,4 +28,6 @@ Untouched: period selector, existing styling, skeleton states, `PLATFORM_FEE_RAT
 ## Technical notes
 
 - `const [activation, setActivation] = useState<any>(null);` set via `setActivation(act ?? null);` immediately after the existing unwrap line.
-- Combination summary computed with a `useMemo` over `zeroResultSearches`, keyed on `metadata.category` + `metadata.location`, sorted desc, sliced to 5, using the existing `categoryLabels` map.
+- Summary computed with a `useMemo` over `zeroResultSearches`, keyed on a resolved label (category/location via the existing `categoryLabels` map, falling back to `metadata.query`, skipping rows where all three are null), sorted desc, sliced to 5.
+- The zero-result `platform_events` query limit goes from 20 to 200; the detail table renders `zeroResultSearches.slice(0, 20)` rather than issuing a second query.
+
