@@ -510,34 +510,8 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      {/* Tier 1 — Revenue strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: 'Gross bookings value', value: formatRand(gmv) },
-          { label: 'Platform revenue earned', value: formatRand(platformRevenue) },
-          { label: 'Funds in escrow', value: formatRand(escrow) },
-          { label: 'Avg booking value', value: formatRand(avgBooking) },
-        ].map(card => (
-          <Card key={card.label} className="border-l-4 border-l-primary">
-            <CardContent className="p-4">
-              {isLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-7 w-20" />
-                </div>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground">{card.label}</p>
-                  <p className="text-xl font-bold mt-1">{card.value}</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Tier 2 — Growth signals */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {growthCards.map(gc => (
           <Card key={gc.label}>
             <CardContent className="p-4">
@@ -560,6 +534,92 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Demand with no supply */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Demand with no supply
+          </CardTitle>
+          <CardDescription>Searches that returned no vendors — your outreach priority list.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+            </div>
+          ) : zeroResultSearches.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No zero-result searches — good sign.</p>
+          ) : (
+            <>
+              {demandSummary.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">Most requested with no match</h4>
+                  {demandSummary.map(([label, count]) => (
+                    <div key={label} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{label}</span>
+                      <span className="text-sm font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-muted-foreground border-b">
+                      <th className="py-2 pr-3 font-medium">Query</th>
+                      <th className="py-2 pr-3 font-medium">Category</th>
+                      <th className="py-2 pr-3 font-medium">Location</th>
+                      <th className="py-2 font-medium">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {zeroResultSearches.slice(0, 20).map((row: any, i: number) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="py-2 pr-3">{row.metadata?.query || <span className="text-muted-foreground">—</span>}</td>
+                        <td className="py-2 pr-3">{row.metadata?.category ? (categoryLabels[row.metadata.category] || row.metadata.category) : 'Any'}</td>
+                        <td className="py-2 pr-3">{row.metadata?.location || 'Any'}</td>
+                        <td className="py-2 text-muted-foreground whitespace-nowrap">
+                          {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tier 1 — Revenue strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: 'Gross bookings value', value: formatRand(gmv) },
+          { label: 'Platform revenue (contracted)', value: formatRand(platformRevenue) },
+          { label: 'Funds in escrow', value: formatRand(escrow) },
+          { label: 'Avg booking value', value: formatRand(avgBooking) },
+        ].map(card => (
+          <Card key={card.label} className="border-l-4 border-l-primary">
+            <CardContent className="p-4">
+              {isLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-7 w-20" />
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">{card.label}</p>
+                  <p className="text-xl font-bold mt-1">{card.value}</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
       {/* Vendors to nudge */}
       <Card>
