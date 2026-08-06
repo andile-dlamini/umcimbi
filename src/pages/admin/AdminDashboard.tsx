@@ -102,10 +102,12 @@ export default function AdminDashboard() {
   const [pendingQuotes, setPendingQuotes] = useState(0);
   const [requestsAwaitingVendor, setRequestsAwaitingVendor] = useState(0);
 
+  // Activation and conversion
+  const [activation, setActivation] = useState<any>(null);
 
   // Stalled conversations
   const [stalledConversations, setStalledConversations] = useState<StalledConversation[]>([]);
-  const [stalledCount, setStalledCount] = useState(0);
+
 
   // Ceremony pipeline
   const [ceremonyPipeline, setCeremonyPipeline] = useState<CeremonyPipelineRow[]>([]);
