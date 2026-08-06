@@ -208,22 +208,27 @@ export default function AdminDashboard() {
       setTotalOrganisers(Number(stats?.total_organisers || 0));
       setOrganisersJoinedThisMonth(Number(stats?.organisers_joined_this_month || 0));
 
+      const { data: activationStats } = await (supabase as any).rpc('get_admin_activation_stats');
+      const act = Array.isArray(activationStats) ? activationStats[0] : activationStats;
+
       const { count: pendingCount } = await supabase
         .from('vendors')
         .select('*', { count: 'exact', head: true })
-        .eq('is_active', false)
+        .or('business_verification_status.eq.pending,and(business_verification_status.eq.not_applicable,is_active.eq.false)')
+        .or('signup_source.is.null,signup_source.neq.admin_manual')
         .eq('is_demo', false)
         .eq('is_banned', false);
       setPendingVendors(pendingCount || 0);
 
-      setNewOrganisers(await fetchCount('user_roles', '*', start, { role: 'user' }));
       setNewCeremonies(await fetchCount('events', '*', start));
       setNewRequests(await fetchCount('service_requests', '*', start));
       setNewBookings(await fetchBookingCount(start));
-      setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
+      setPendingQuotes(Number(act?.quotes_awaiting_client || 0));
+      setRequestsAwaitingVendor(Number(act?.requests_awaiting_vendor || 0));
 
-      // Stalled conversations (2-hour threshold)
-      const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 2 });
+      // Stalled conversations (24-hour threshold)
+      const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 24 });
+
       setStalledConversations((stalled || []) as StalledConversation[]);
       setStalledCount(stalled?.length || 0);
 
