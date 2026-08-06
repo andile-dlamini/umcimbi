@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Store, Users, Sparkles, BadgeCheck, AlertCircle, Calendar, Search } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -102,10 +102,12 @@ export default function AdminDashboard() {
   const [pendingQuotes, setPendingQuotes] = useState(0);
   const [requestsAwaitingVendor, setRequestsAwaitingVendor] = useState(0);
 
+  // Activation and conversion
+  const [activation, setActivation] = useState<any>(null);
 
   // Stalled conversations
   const [stalledConversations, setStalledConversations] = useState<StalledConversation[]>([]);
-  const [stalledCount, setStalledCount] = useState(0);
+
 
   // Ceremony pipeline
   const [ceremonyPipeline, setCeremonyPipeline] = useState<CeremonyPipelineRow[]>([]);
@@ -210,6 +212,8 @@ export default function AdminDashboard() {
 
       const { data: activationStats } = await (supabase as any).rpc('get_admin_activation_stats');
       const act = Array.isArray(activationStats) ? activationStats[0] : activationStats;
+      setActivation(act ?? null);
+
 
       const { count: pendingCount } = await supabase
         .from('vendors')
@@ -228,9 +232,8 @@ export default function AdminDashboard() {
 
       // Stalled conversations (24-hour threshold)
       const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 24 });
-
       setStalledConversations((stalled || []) as StalledConversation[]);
-      setStalledCount(stalled?.length || 0);
+
 
       // Ceremony pipeline
       const { data: pipeline } = await (supabase as any).rpc('get_ceremony_pipeline');
@@ -286,7 +289,7 @@ export default function AdminDashboard() {
         .select('metadata, created_at')
         .eq('event_type', 'search_zero_results')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(200);
       setZeroResultSearches(zeroResults || []);
 
       const { data: allSearches } = await supabase
@@ -334,6 +337,66 @@ export default function AdminDashboard() {
     { label: 'Total real vendors', value: totalVendors, joined: vendorsJoinedThisMonth, icon: Store },
     { label: 'Total organisers', value: totalOrganisers, joined: organisersJoinedThisMonth, icon: Users },
   ];
+
+  // Activation and conversion cards
+  const totalCeremonies = Number(activation?.total_ceremonies || 0);
+  const ceremoniesWithRequest = Number(activation?.ceremonies_with_request || 0);
+  const ceremonyPct = totalCeremonies > 0 ? Math.round((ceremoniesWithRequest / totalCeremonies) * 100) : 0;
+  const realVendors = Number(activation?.real_vendors || 0);
+  const vendorsEverQuoted = Number(activation?.vendors_ever_quoted || 0);
+  const vendorsEverResponded = Number(activation?.vendors_ever_responded || 0);
+  const realOrganisers = Number(activation?.real_organisers || 0);
+  const organisersWithCeremony = Number(activation?.organisers_with_ceremony || 0);
+  const organisersWithRequest = Number(activation?.organisers_with_request || 0);
+  const medianHours = activation?.median_hours_to_first_response;
+
+  const activationCards = [
+    {
+      label: 'Ceremonies with a request sent',
+      value: String(ceremoniesWithRequest),
+      secondary: `of ${totalCeremonies} ceremonies (${ceremonyPct}%)`,
+      warn: ceremonyPct < 25,
+    },
+    {
+      label: 'Vendors who have quoted',
+      value: String(vendorsEverQuoted),
+      secondary: `of ${realVendors} vendors — ${vendorsEverResponded} have ever responded`,
+      warn: vendorsEverQuoted < realVendors / 4,
+    },
+    {
+      label: 'Organisers who created a ceremony',
+      value: String(organisersWithCeremony),
+      secondary: `of ${realOrganisers} — ${organisersWithRequest} sent a request`,
+      warn: false,
+    },
+    {
+      label: 'Median time to first vendor reply',
+      value: medianHours === null || medianHours === undefined ? '—' : `${Math.round(Number(medianHours))}h`,
+      secondary: 'across all requests answered',
+      warn: false,
+    },
+  ];
+
+  // Demand with no supply — top 5 unmet search labels
+  const demandSummary = useMemo(() => {
+    const counts: Record<string, number> = {};
+    (zeroResultSearches || []).forEach((row: any) => {
+      const cat = row?.metadata?.category;
+      const loc = row?.metadata?.location;
+      const query = row?.metadata?.query;
+      let label: string | null = null;
+      if (cat || loc) {
+        const catLabel = cat ? (categoryLabels[cat] || cat) : null;
+        label = catLabel && loc ? `${catLabel} in ${loc}` : (catLabel || loc);
+      } else if (query) {
+        label = String(query);
+      }
+      if (!label) return;
+      counts[label] = (counts[label] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [zeroResultSearches]);
+
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -388,6 +451,34 @@ export default function AdminDashboard() {
           </>
         )}
       </Card>
+
+      {/* Activation and conversion */}
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-2">Activation and conversion</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {activationCards.map(card => (
+            <Card key={card.label} className={`border-l-4 ${card.warn ? 'border-l-amber-500' : 'border-l-primary'}`}>
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-7 w-20" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground">{card.label}</p>
+                    <p className="text-2xl font-bold mt-1">{card.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{card.secondary}</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+
 
       {/* Real account statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -447,34 +538,8 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      {/* Tier 1 — Revenue strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: 'Gross bookings value', value: formatRand(gmv) },
-          { label: 'Platform revenue earned', value: formatRand(platformRevenue) },
-          { label: 'Funds in escrow', value: formatRand(escrow) },
-          { label: 'Avg booking value', value: formatRand(avgBooking) },
-        ].map(card => (
-          <Card key={card.label} className="border-l-4 border-l-primary">
-            <CardContent className="p-4">
-              {isLoading ? (
-                <div className="space-y-2 animate-pulse">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-7 w-20" />
-                </div>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground">{card.label}</p>
-                  <p className="text-xl font-bold mt-1">{card.value}</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Tier 2 — Growth signals */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {growthCards.map(gc => (
           <Card key={gc.label}>
             <CardContent className="p-4">
@@ -497,6 +562,92 @@ export default function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Demand with no supply */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Demand with no supply
+          </CardTitle>
+          <CardDescription>Searches that returned no vendors — your outreach priority list.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+            </div>
+          ) : zeroResultSearches.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No zero-result searches — good sign.</p>
+          ) : (
+            <>
+              {demandSummary.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">Most requested with no match</h4>
+                  {demandSummary.map(([label, count]) => (
+                    <div key={label} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{label}</span>
+                      <span className="text-sm font-medium">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-muted-foreground border-b">
+                      <th className="py-2 pr-3 font-medium">Query</th>
+                      <th className="py-2 pr-3 font-medium">Category</th>
+                      <th className="py-2 pr-3 font-medium">Location</th>
+                      <th className="py-2 font-medium">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {zeroResultSearches.slice(0, 20).map((row: any, i: number) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="py-2 pr-3">{row.metadata?.query || <span className="text-muted-foreground">—</span>}</td>
+                        <td className="py-2 pr-3">{row.metadata?.category ? (categoryLabels[row.metadata.category] || row.metadata.category) : 'Any'}</td>
+                        <td className="py-2 pr-3">{row.metadata?.location || 'Any'}</td>
+                        <td className="py-2 text-muted-foreground whitespace-nowrap">
+                          {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tier 1 — Revenue strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: 'Gross bookings value', value: formatRand(gmv) },
+          { label: 'Platform revenue (contracted)', value: formatRand(platformRevenue) },
+          { label: 'Funds in escrow', value: formatRand(escrow) },
+          { label: 'Avg booking value', value: formatRand(avgBooking) },
+        ].map(card => (
+          <Card key={card.label} className="border-l-4 border-l-primary">
+            <CardContent className="p-4">
+              {isLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-7 w-20" />
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">{card.label}</p>
+                  <p className="text-xl font-bold mt-1">{card.value}</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
       {/* Vendors to nudge */}
       <Card>
@@ -701,41 +852,7 @@ export default function AdminDashboard() {
           <CardDescription>What planners are searching for on the vendors page</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Searches that found nothing</h4>
-            {isLoading ? (
-              <div className="space-y-2 animate-pulse">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
-              </div>
-            ) : zeroResultSearches.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No zero-result searches — good sign.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-xs text-muted-foreground border-b">
-                      <th className="py-2 pr-3 font-medium">Query</th>
-                      <th className="py-2 pr-3 font-medium">Category</th>
-                      <th className="py-2 pr-3 font-medium">Location</th>
-                      <th className="py-2 font-medium">When</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {zeroResultSearches.map((row: any, i: number) => (
-                      <tr key={i} className="border-b last:border-0">
-                        <td className="py-2 pr-3">{row.metadata?.query || <span className="text-muted-foreground">—</span>}</td>
-                        <td className="py-2 pr-3">{row.metadata?.category ? (categoryLabels[row.metadata.category] || row.metadata.category) : 'Any'}</td>
-                        <td className="py-2 pr-3">{row.metadata?.location || 'Any'}</td>
-                        <td className="py-2 text-muted-foreground whitespace-nowrap">
-                          {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+
 
           <div>
             <h4 className="text-sm font-semibold mb-2">Most searched categories</h4>
