@@ -93,8 +93,6 @@ export default function AdminDashboard() {
   const [avgBooking, setAvgBooking] = useState(0);
 
   // Growth signals
-  const [newOrganisers, setNewOrganisers] = useState(0);
-  const [prevOrganisers, setPrevOrganisers] = useState(0);
   const [newCeremonies, setNewCeremonies] = useState(0);
   const [prevCeremonies, setPrevCeremonies] = useState(0);
   const [newRequests, setNewRequests] = useState(0);
@@ -102,7 +100,8 @@ export default function AdminDashboard() {
   const [newBookings, setNewBookings] = useState(0);
   const [prevBookings, setPrevBookings] = useState(0);
   const [pendingQuotes, setPendingQuotes] = useState(0);
-  const [prevPendingQuotes, setPrevPendingQuotes] = useState(0);
+  const [requestsAwaitingVendor, setRequestsAwaitingVendor] = useState(0);
+
 
   // Stalled conversations
   const [stalledConversations, setStalledConversations] = useState<StalledConversation[]>([]);
@@ -170,13 +169,18 @@ export default function AdminDashboard() {
       setPlatformRevenue(revVal);
       setAvgBooking(revenueBookings?.length ? gmvVal / revenueBookings.length : 0);
 
-      // Escrow (always current, no period filter)
+      // Escrow — only money actually received and not yet released
       const { data: escrowBookings } = await supabase
         .from('bookings')
-        .select('agreed_price')
+        .select('deposit_amount, deposit_status, balance_amount, balance_status')
         .not('funds_held_since', 'is', null)
         .is('funds_released_at', null);
-      setEscrow((escrowBookings || []).reduce((s, b) => s + Number(b.agreed_price), 0));
+      setEscrow((escrowBookings || []).reduce((s, b) => {
+        const dep = b.deposit_status === 'paid' ? Number(b.deposit_amount || 0) : 0;
+        const bal = b.balance_status === 'paid' ? Number(b.balance_amount || 0) : 0;
+        return s + dep + bal;
+      }, 0));
+
 
       // Tier 2 — Growth signals (current period)
       const fetchCount = async (table: string, col: string, gte?: string | null, filters?: Record<string, any>) => {
@@ -204,22 +208,27 @@ export default function AdminDashboard() {
       setTotalOrganisers(Number(stats?.total_organisers || 0));
       setOrganisersJoinedThisMonth(Number(stats?.organisers_joined_this_month || 0));
 
+      const { data: activationStats } = await (supabase as any).rpc('get_admin_activation_stats');
+      const act = Array.isArray(activationStats) ? activationStats[0] : activationStats;
+
       const { count: pendingCount } = await supabase
         .from('vendors')
         .select('*', { count: 'exact', head: true })
-        .eq('is_active', false)
+        .or('business_verification_status.eq.pending,and(business_verification_status.eq.not_applicable,is_active.eq.false)')
+        .or('signup_source.is.null,signup_source.neq.admin_manual')
         .eq('is_demo', false)
         .eq('is_banned', false);
       setPendingVendors(pendingCount || 0);
 
-      setNewOrganisers(await fetchCount('user_roles', '*', start, { role: 'user' }));
       setNewCeremonies(await fetchCount('events', '*', start));
       setNewRequests(await fetchCount('service_requests', '*', start));
       setNewBookings(await fetchBookingCount(start));
-      setPendingQuotes(await fetchCount('quotes', '*', start, { status: 'pending_client' }));
+      setPendingQuotes(Number(act?.quotes_awaiting_client || 0));
+      setRequestsAwaitingVendor(Number(act?.requests_awaiting_vendor || 0));
 
-      // Stalled conversations (2-hour threshold)
-      const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 2 });
+      // Stalled conversations (24-hour threshold)
+      const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 24 });
+
       setStalledConversations((stalled || []) as StalledConversation[]);
       setStalledCount(stalled?.length || 0);
 
@@ -243,14 +252,13 @@ export default function AdminDashboard() {
             .gte('created_at', prevStart).lt('created_at', start);
           return count || 0;
         };
-        setPrevOrganisers(await fetchPrevCount('user_roles', '*', { role: 'user' }));
         setPrevCeremonies(await fetchPrevCount('events', '*'));
         setPrevRequests(await fetchPrevCount('service_requests', '*'));
         setPrevBookings(await fetchPrevBookingCount());
-        setPrevPendingQuotes(await fetchPrevCount('quotes', '*', { status: 'pending_client' }));
       } else {
-        setPrevOrganisers(0); setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0); setPrevPendingQuotes(0);
+        setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0);
       }
+
 
       // Tier 3 — Funnel (always all-time)
       setFunnelRegistered(Number(stats?.total_organisers || 0));
@@ -314,12 +322,12 @@ export default function AdminDashboard() {
   ];
 
   const growthCards = [
-    { label: 'New organisers', current: newOrganisers, prev: prevOrganisers, showPrev: true },
     { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies, showPrev: true },
     { label: 'Requests sent', current: newRequests, prev: prevRequests, showPrev: true },
     { label: 'Bookings confirmed', current: newBookings, prev: prevBookings, showPrev: true },
-    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes, showPrev: true },
-    { label: 'Awaiting vendor reply', current: stalledCount, prev: 0, showPrev: false },
+    { label: 'Quotes awaiting client', current: pendingQuotes, prev: 0, showPrev: false },
+    { label: 'Requests awaiting vendor', current: requestsAwaitingVendor, prev: 0, showPrev: false },
+
   ];
 
   const accountCards = [
@@ -495,9 +503,10 @@ export default function AdminDashboard() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-amber-600" />
-            Vendors to nudge
+            Vendor chats unanswered over 24h
           </CardTitle>
-          <CardDescription>Planner sent the last message over 2 hours ago and vendor hasn't replied</CardDescription>
+          <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
+
         </CardHeader>
         <CardContent>
           {isLoading ? (
