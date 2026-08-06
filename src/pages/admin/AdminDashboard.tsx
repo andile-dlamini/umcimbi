@@ -452,6 +452,34 @@ export default function AdminDashboard() {
         )}
       </Card>
 
+      {/* Activation and conversion */}
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-2">Activation and conversion</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {activationCards.map(card => (
+            <Card key={card.label} className={`border-l-4 ${card.warn ? 'border-l-amber-500' : 'border-l-primary'}`}>
+              <CardContent className="p-4">
+                {isLoading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-7 w-20" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground">{card.label}</p>
+                    <p className="text-2xl font-bold mt-1">{card.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{card.secondary}</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+
+
       {/* Real account statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {accountCards.map(card => {
