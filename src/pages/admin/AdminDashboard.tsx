@@ -503,9 +503,10 @@ export default function AdminDashboard() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-amber-600" />
-            Vendors to nudge
+            Vendor chats unanswered over 24h
           </CardTitle>
-          <CardDescription>Planner sent the last message over 2 hours ago and vendor hasn't replied</CardDescription>
+          <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
+
         </CardHeader>
         <CardContent>
           {isLoading ? (
