@@ -232,9 +232,8 @@ export default function AdminDashboard() {
 
       // Stalled conversations (24-hour threshold)
       const { data: stalled } = await (supabase as any).rpc('get_stalled_conversations', { hours_threshold: 24 });
-
       setStalledConversations((stalled || []) as StalledConversation[]);
-      setStalledCount(stalled?.length || 0);
+
 
       // Ceremony pipeline
       const { data: pipeline } = await (supabase as any).rpc('get_ceremony_pipeline');
