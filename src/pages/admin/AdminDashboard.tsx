@@ -338,6 +338,66 @@ export default function AdminDashboard() {
     { label: 'Total organisers', value: totalOrganisers, joined: organisersJoinedThisMonth, icon: Users },
   ];
 
+  // Activation and conversion cards
+  const totalCeremonies = Number(activation?.total_ceremonies || 0);
+  const ceremoniesWithRequest = Number(activation?.ceremonies_with_request || 0);
+  const ceremonyPct = totalCeremonies > 0 ? Math.round((ceremoniesWithRequest / totalCeremonies) * 100) : 0;
+  const realVendors = Number(activation?.real_vendors || 0);
+  const vendorsEverQuoted = Number(activation?.vendors_ever_quoted || 0);
+  const vendorsEverResponded = Number(activation?.vendors_ever_responded || 0);
+  const realOrganisers = Number(activation?.real_organisers || 0);
+  const organisersWithCeremony = Number(activation?.organisers_with_ceremony || 0);
+  const organisersWithRequest = Number(activation?.organisers_with_request || 0);
+  const medianHours = activation?.median_hours_to_first_response;
+
+  const activationCards = [
+    {
+      label: 'Ceremonies with a request sent',
+      value: String(ceremoniesWithRequest),
+      secondary: `of ${totalCeremonies} ceremonies (${ceremonyPct}%)`,
+      warn: ceremonyPct < 25,
+    },
+    {
+      label: 'Vendors who have quoted',
+      value: String(vendorsEverQuoted),
+      secondary: `of ${realVendors} vendors — ${vendorsEverResponded} have ever responded`,
+      warn: vendorsEverQuoted < realVendors / 4,
+    },
+    {
+      label: 'Organisers who created a ceremony',
+      value: String(organisersWithCeremony),
+      secondary: `of ${realOrganisers} — ${organisersWithRequest} sent a request`,
+      warn: false,
+    },
+    {
+      label: 'Median time to first vendor reply',
+      value: medianHours === null || medianHours === undefined ? '—' : `${Math.round(Number(medianHours))}h`,
+      secondary: 'across all requests answered',
+      warn: false,
+    },
+  ];
+
+  // Demand with no supply — top 5 unmet search labels
+  const demandSummary = useMemo(() => {
+    const counts: Record<string, number> = {};
+    (zeroResultSearches || []).forEach((row: any) => {
+      const cat = row?.metadata?.category;
+      const loc = row?.metadata?.location;
+      const query = row?.metadata?.query;
+      let label: string | null = null;
+      if (cat || loc) {
+        const catLabel = cat ? (categoryLabels[cat] || cat) : null;
+        label = catLabel && loc ? `${catLabel} in ${loc}` : (catLabel || loc);
+      } else if (query) {
+        label = String(query);
+      }
+      if (!label) return;
+      counts[label] = (counts[label] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [zeroResultSearches]);
+
+
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header with period selector */}
