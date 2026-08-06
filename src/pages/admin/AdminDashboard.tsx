@@ -212,6 +212,8 @@ export default function AdminDashboard() {
 
       const { data: activationStats } = await (supabase as any).rpc('get_admin_activation_stats');
       const act = Array.isArray(activationStats) ? activationStats[0] : activationStats;
+      setActivation(act ?? null);
+
 
       const { count: pendingCount } = await supabase
         .from('vendors')
