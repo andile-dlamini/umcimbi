@@ -289,7 +289,7 @@ export default function AdminDashboard() {
         .select('metadata, created_at')
         .eq('event_type', 'search_zero_results')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(200);
       setZeroResultSearches(zeroResults || []);
 
       const { data: allSearches } = await supabase
