@@ -16,5 +16,6 @@ Untouched: all other queries, the platform fee calculation, and the revenue card
 ## Technical notes
 
 - Add `const { data: activationStats } = await (supabase as any).rpc('get_admin_activation_stats');` next to the existing registration RPC call, unwrapping the first row.
-- New state `requestsAwaitingVendor`; remove `prevOrganisers` and `prevPendingQuotes` state plus their `fetchPrevCount` calls.
+- New state `requestsAwaitingVendor`; delete `newOrganisers`, `prevOrganisers` and `prevPendingQuotes` state, their fetch/`fetchPrevCount` calls, and the "New organisers" entry in `growthCards`.
+
 - Escrow query selects `deposit_amount, deposit_status, balance_amount, balance_status` filtered on `funds_held_since` not null and `funds_released_at` null.
