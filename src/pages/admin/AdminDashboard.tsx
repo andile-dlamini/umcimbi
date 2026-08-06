@@ -322,12 +322,12 @@ export default function AdminDashboard() {
   ];
 
   const growthCards = [
-    { label: 'New organisers', current: newOrganisers, prev: prevOrganisers, showPrev: true },
     { label: 'New ceremonies', current: newCeremonies, prev: prevCeremonies, showPrev: true },
     { label: 'Requests sent', current: newRequests, prev: prevRequests, showPrev: true },
     { label: 'Bookings confirmed', current: newBookings, prev: prevBookings, showPrev: true },
-    { label: 'Quotes pending', current: pendingQuotes, prev: prevPendingQuotes, showPrev: true },
-    { label: 'Awaiting vendor reply', current: stalledCount, prev: 0, showPrev: false },
+    { label: 'Quotes awaiting client', current: pendingQuotes, prev: 0, showPrev: false },
+    { label: 'Requests awaiting vendor', current: requestsAwaitingVendor, prev: 0, showPrev: false },
+
   ];
 
   const accountCards = [
