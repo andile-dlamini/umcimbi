@@ -252,14 +252,13 @@ export default function AdminDashboard() {
             .gte('created_at', prevStart).lt('created_at', start);
           return count || 0;
         };
-        setPrevOrganisers(await fetchPrevCount('user_roles', '*', { role: 'user' }));
         setPrevCeremonies(await fetchPrevCount('events', '*'));
         setPrevRequests(await fetchPrevCount('service_requests', '*'));
         setPrevBookings(await fetchPrevBookingCount());
-        setPrevPendingQuotes(await fetchPrevCount('quotes', '*', { status: 'pending_client' }));
       } else {
-        setPrevOrganisers(0); setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0); setPrevPendingQuotes(0);
+        setPrevCeremonies(0); setPrevRequests(0); setPrevBookings(0);
       }
+
 
       // Tier 3 — Funnel (always all-time)
       setFunnelRegistered(Number(stats?.total_organisers || 0));
