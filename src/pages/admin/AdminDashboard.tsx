@@ -93,8 +93,6 @@ export default function AdminDashboard() {
   const [avgBooking, setAvgBooking] = useState(0);
 
   // Growth signals
-  const [newOrganisers, setNewOrganisers] = useState(0);
-  const [prevOrganisers, setPrevOrganisers] = useState(0);
   const [newCeremonies, setNewCeremonies] = useState(0);
   const [prevCeremonies, setPrevCeremonies] = useState(0);
   const [newRequests, setNewRequests] = useState(0);
@@ -102,7 +100,8 @@ export default function AdminDashboard() {
   const [newBookings, setNewBookings] = useState(0);
   const [prevBookings, setPrevBookings] = useState(0);
   const [pendingQuotes, setPendingQuotes] = useState(0);
-  const [prevPendingQuotes, setPrevPendingQuotes] = useState(0);
+  const [requestsAwaitingVendor, setRequestsAwaitingVendor] = useState(0);
+
 
   // Stalled conversations
   const [stalledConversations, setStalledConversations] = useState<StalledConversation[]>([]);
