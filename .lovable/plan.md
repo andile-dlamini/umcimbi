@@ -20,8 +20,8 @@ Adds a single admin-only function returning funnel/activation metrics in one row
 - Real vendors, and how many have ever been requested, responded, or quoted.
 - Real organisers, and how many have created a ceremony or sent a request.
 - Total ceremonies and how many have at least one request.
-- Requests still awaiting a vendor, quotes still awaiting a client (non-expired).
-- Median hours to first vendor response.
+- Requests still awaiting a vendor, quotes still awaiting a client (non-expired), both scoped to real vendors only (excludes demo/banned).
+- Median hours to first vendor response, left unscoped across all answered requests for a wider sample.
 
 ## Technical notes
 
