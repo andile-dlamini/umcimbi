@@ -154,6 +154,109 @@ export default function VendorUpload() {
   );
 }
 
+interface IncompleteSignup {
+  user_id: string;
+  full_name: string | null;
+  phone_number: string | null;
+  email: string | null;
+  signed_up_at: string;
+}
+
+function CompleteExistingSignup() {
+  const [rows, setRows] = useState<IncompleteSignup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<IncompleteSignup | null>(null);
+  const [createdVendorId, setCreatedVendorId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase.rpc('get_incomplete_vendor_signups' as any);
+    if (error) toast.error('Failed to load signups');
+    else setRows((data ?? []) as IncompleteSignup[]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (selected && createdVendorId) {
+    return (
+      <VendorReleaseActions
+        vendorId={createdVendorId}
+        onReset={() => { setSelected(null); setCreatedVendorId(null); load(); }}
+      />
+    );
+  }
+
+  if (selected) {
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle>Vendor profile — {selected.full_name ?? selected.phone_number}</CardTitle>
+            <CardDescription>Completing the profile for an existing signup. Their account and login stay unchanged.</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setSelected(null)}>Back</Button>
+        </CardHeader>
+        <CardContent>
+          <VendorProfileForm
+            ownerUserId={selected.user_id}
+            signupSource="admin_manual"
+            mode="create"
+            stepped={false}
+            defaultPhoneNumber={selected.phone_number}
+            onCreated={(vendorId) => { setCreatedVendorId(vendorId); toast.success('Vendor profile created'); }}
+            submitLabel="Create vendor profile"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Vendor signups without a profile</CardTitle>
+        <CardDescription>People who signed up as vendors but never finished their profile. Pick one to complete it on their behalf.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No incomplete vendor signups.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Signed up</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.user_id}>
+                    <TableCell className="font-medium">{r.full_name ?? '—'}</TableCell>
+                    <TableCell>{r.phone_number ?? '—'}</TableCell>
+                    <TableCell>{new Date(r.signed_up_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => setSelected(r)}>
+                        <Pencil className="h-4 w-4 mr-1" /> Complete profile
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
 function VendorReleaseActions({ vendorId, onReset }: { vendorId: string; onReset: () => void }) {
   const [status, setStatus] = useState<{ smsSent: boolean; released: boolean; loginStatus: LoginStatus }>({ smsSent: false, released: false, loginStatus: 'unknown' });
   const [busy, setBusy] = useState<string | null>(null);
