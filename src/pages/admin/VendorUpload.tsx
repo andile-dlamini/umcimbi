@@ -19,7 +19,7 @@ interface AdminVendorRow extends Vendor {}
 type LoginStatus = 'unknown' | 'logged_in' | 'not_logged_in';
 
 export default function VendorUpload() {
-  const [tab, setTab] = useState<'new' | 'manage'>('new');
+  const [tab, setTab] = useState<'new' | 'existing' | 'manage'>('new');
 
   // NEW VENDOR flow
   const [newName, setNewName] = useState('');
