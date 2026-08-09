@@ -140,9 +140,14 @@ export default function VendorUpload() {
             )}
           </TabsContent>
 
+          <TabsContent value="existing">
+            <CompleteExistingSignup />
+          </TabsContent>
+
           <TabsContent value="manage">
             <ManageVendorsTable />
           </TabsContent>
+
         </Tabs>
       </div>
     </div>
