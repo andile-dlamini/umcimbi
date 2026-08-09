@@ -76,8 +76,9 @@ export default function VendorUpload() {
       <PageHeader title="Vendor Upload" showBack />
       <div className="px-4 py-6 max-w-5xl mx-auto">
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="new">New Vendor</TabsTrigger>
+            <TabsTrigger value="existing">Complete Signup</TabsTrigger>
             <TabsTrigger value="manage">Manage Vendors</TabsTrigger>
           </TabsList>
 
