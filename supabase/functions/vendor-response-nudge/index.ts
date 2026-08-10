@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       await sb.from("sms_notification_log").insert({
         user_id: ownerId, user_type: "vendor",
         event_type: "response_nudge__suppressed_dormant",
-        tier: "suppressed", related_id: srId, phone,
+        tier: "suppressed", related_id: srId, phone_number: phone,
       });
       results.push({ service_request: srId, skipped: "dormant" });
       continue;
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     const { error: dupErr } = await sb.from("sms_notification_log").insert({
       user_id: ownerId, user_type: "vendor",
-      event_type: "response_nudge", tier: "tier1", related_id: srId, phone,
+      event_type: "response_nudge", tier: "tier1", related_id: srId, phone_number: phone,
     });
     if (dupErr) { results.push({ service_request: srId, skipped: "dup_or_error" }); continue; }
 

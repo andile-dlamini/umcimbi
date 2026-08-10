@@ -295,8 +295,7 @@ export function VendorProfileForm({
       }
       vendorId = (inserted as any).id;
 
-      // Add vendor role for the owner (idempotent)
-      await supabase.from('user_roles').upsert({ user_id: ownerUserId, role: 'vendor' } as any, { onConflict: 'user_id,role' as any });
+      // Vendor role is granted server-side by the on_vendor_created trigger.
     }
 
     // Uploads
