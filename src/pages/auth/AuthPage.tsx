@@ -1164,16 +1164,16 @@ export default function AuthPage() {
               <CheckCircle2 className="h-10 w-10 text-success" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold mb-2">{isVendor ? 'Your business is live!' : "You're all set!"}</h2>
+              <h2 className="text-2xl font-bold mb-2">{isVendor ? 'Account created!' : "You're all set!"}</h2>
               <p className="text-muted-foreground">
                 {isVendor
-                  ? `Welcome to UMCIMBI, ${form.first_name}! Your vendor profile is ready to receive requests.`
+                  ? `Welcome to UMCIMBI, ${form.first_name}! Next, set up your business profile so families can find you.`
                   : `Welcome to UMCIMBI, ${form.first_name}! Your account is ready.`
                 }
               </p>
             </div>
             <Button className="w-full h-12" onClick={() => navigate(isVendor ? '/vendor-dashboard' : (redirectParam || '/'))}>
-              {isVendor ? 'Go to Dashboard' : 'Get Started'}
+              {isVendor ? 'Set up my business' : 'Get Started'}
             </Button>
           </CardContent>
         </Card>

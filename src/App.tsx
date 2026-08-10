@@ -197,9 +197,11 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <AppRoutes updateAvailable={needRefresh} />
-            </BrowserRouter>
+            <div className={needRefresh ? "pb-20" : undefined}>
+              <BrowserRouter>
+                <AppRoutes updateAvailable={needRefresh} />
+              </BrowserRouter>
+            </div>
             <UpdateBanner needRefresh={needRefresh} onRefresh={refresh} />
           </TooltipProvider>
         </RoleProvider>

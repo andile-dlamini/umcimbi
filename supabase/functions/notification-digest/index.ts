@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     const { error: dupErr } = await sb.from("sms_notification_log").insert({
       user_id: userId, user_type: "planner",
       event_type: bucketKey,
-      tier: "tier2", related_id: null, phone: (p as any).phone_number,
+      tier: "tier2", related_id: null, phone_number: (p as any).phone_number,
     });
     if (dupErr && String(dupErr.code) === "23505") continue;
 
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
 
     const { error: dupErr } = await sb.from("sms_notification_log").insert({
       user_id: ownerId, user_type: "vendor",
-      event_type: bucketKey, tier: "tier2", related_id: null, phone,
+      event_type: bucketKey, tier: "tier2", related_id: null, phone_number: phone,
     });
     if (dupErr && String(dupErr.code) === "23505") continue;
 

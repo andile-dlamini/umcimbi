@@ -44,8 +44,8 @@ export function AppShell({ children, updateAvailable = false }: AppShellProps) {
     location.pathname === r || location.pathname.startsWith(r)
   );
 
-  // Reserve space at the bottom so the update banner doesn't cover tap targets.
-  const bannerPad = updateAvailable ? 'pb-20' : '';
+  // Bottom spacing for the update banner is applied app-wide in App.tsx.
+  const bannerPad = '';
 
   if (hideNav) return <div className={bannerPad}>{children}</div>;
 
