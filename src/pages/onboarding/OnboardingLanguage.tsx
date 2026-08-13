@@ -64,8 +64,11 @@ const CATEGORY_ICONS: Partial<Record<VendorCategory, typeof Camera>> = {
 
 
 export default function OnboardingLanguage() {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all'>('all');
+  const [searchLocation, setSearchLocation] = useState('');
   const { isInstallable, isIOS, isStandalone, triggerInstall } = usePWAInstall();
 
   useEffect(() => {
