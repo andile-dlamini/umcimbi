@@ -155,6 +155,16 @@ export default function OnboardingLanguage() {
     setMobileMenuOpen(false);
   };
 
+  const handleVendorSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchCategory !== 'all') params.set('category', searchCategory);
+    if (searchLocation.trim()) params.set('location', searchLocation.trim());
+    const qs = params.toString();
+    navigate(qs ? `/vendors?${qs}` : '/vendors');
+  };
+
+
   return (
     <div className="min-h-screen" style={{ backgroundImage: 'none' }}>
 
@@ -166,21 +176,40 @@ export default function OnboardingLanguage() {
         'bg-transparent'}`
         }>
 
+        {/* Mobile utility strip — pinned inside the fixed header */}
+        <div className="md:hidden bg-[hsl(20_75%_45%)] text-white text-[12px] py-1.5 px-4 text-center">
+          Are you a vendor?{' '}
+          <Link to="/join/vendor" className="underline font-semibold inline-flex items-center gap-0.5">
+            Become a Vendor <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
         <div className="mx-auto max-w-6xl flex items-center justify-between px-5 sm:px-8 h-16">
           <div className="flex items-center gap-2.5">
-            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" width="180" height="64" className="h-16 w-auto brightness-0 invert" />
+            <img src="/images/umcimbi-logo.png" alt="UMCIMBI" width="180" height="96" className="h-20 sm:h-24 w-auto brightness-0 invert" />
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            {[['How', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
-            <button key={id} onClick={() => scrollTo(id)} className="text-[13px] text-white/60 hover:text-white transition-colors">
-                {label}
-              </button>
-            )}
+            <button onClick={() => scrollTo('how')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+              How it Works
+            </button>
+            <Link to="/vendors" className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+              Organisers
+            </Link>
+            <Link to="/join/vendor" className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+              Vendors
+            </Link>
+            <button onClick={() => scrollTo('faq')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+              FAQ
+            </button>
           </nav>
 
           <div className="flex items-center gap-2.5">
-            
+            <Link to="/join/vendor" className="hidden sm:inline-flex">
+              <Button variant="outline" size="sm" className="text-[13px] rounded-full border-white/30 !text-white bg-white/5 hover:bg-white/15">
+                Become a Vendor
+              </Button>
+            </Link>
             <Link to="/auth?mode=login">
               <Button variant="ghost" size="sm" className="text-[13px] text-white/80 hover:text-white hover:bg-white/10">Login</Button>
             </Link>
@@ -195,15 +224,17 @@ export default function OnboardingLanguage() {
 
         {mobileMenuOpen &&
         <div className="md:hidden border-t border-white/10 bg-[hsl(220_25%_12%/0.97)] backdrop-blur-md px-5 py-3 space-y-1">
-            {[['How it works', 'how'], ['Organisers', 'organisers'], ['Vendors', 'vendors'], ['FAQ', 'faq']].map(([label, id]) =>
-          <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left text-sm py-2.5 text-white/60 hover:text-white">{label}</button>
-          )}
-            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup" className="block pt-1">
+            <button onClick={() => scrollTo('how')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">How it Works</button>
+            <Link to="/vendors" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Organisers</Link>
+            <Link to="/join/vendor" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Vendors</Link>
+            <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">FAQ</button>
+            <Link onClick={() => { trackPixel('cta_get_started_clicked'); setMobileMenuOpen(false); }} to="/auth?mode=signup" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
           </div>
         }
       </header>
+
 
       {/* ═══ HERO — Full-viewport with background image ═══ */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -248,7 +279,7 @@ export default function OnboardingLanguage() {
               </button>
 
               <button
-                onClick={() => scrollTo('vendors')}
+                onClick={() => navigate('/join/vendor')}
                 className="group flex items-center gap-4 w-full text-left px-6 py-5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm hover:bg-white/15 hover:border-white/30 transition-all"
               >
                 <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
@@ -329,264 +360,64 @@ export default function OnboardingLanguage() {
         <div className="absolute inset-0 bg-[hsl(220_30%_8%/0.62)]" />
 
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">For Organisers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg mb-6">Use your time to plan UMCIMBI. Lose the stress.</h2>
-            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup&role=planner">
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                Register to start planning
-              </Button>
-            </Link>
-            <p className="text-sm text-white/50 mt-3">Free to join. Takes less than a minute.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg mb-4">Your traditional ceremony planning starts here</h2>
+            <p className="text-[15px] text-white/75 max-w-2xl mx-auto">
+              Find vetted vendors, ask for quotations, compare quotations, book and pay online.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-            { icon: ShieldCheck, title: 'Trusted vendors', body: 'Verified profiles and clearer accountability so you book with confidence.' },
-            { icon: BarChart3, title: 'Comparable quotes', body: 'Structured offers you can review side-by-side i.e. scope, price, terms.' },
-            { icon: LockIcon, title: 'Pay safely online', body: 'Your money is safely held until your ceremony is complete and you confirm delivery. No more cash risk.' }].
-            map(({ icon: Icon, title, body }) =>
-            <div key={title} className="group rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 p-7 hover:bg-white/[0.12] hover:-translate-y-1 transition-all duration-300">
-                <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-5">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-[15px] text-white">{title}</h3>
-                <p className="text-sm text-white/55 leading-relaxed mt-2">{body}</p>
-              </div>
-            )}
-          </div>
-          <div className="text-center mt-10">
-            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup&role=planner">
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                Register to start planning
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* ═══ FOR VENDORS — Clean light section ═══ */}
-      <section
-        id="vendors"
-        className="relative py-28 scroll-mt-20 overflow-hidden bg-background"
-        style={{
-          '--primary': '20 75% 40%',
-          '--accent': '20 65% 50%'
-        } as React.CSSProperties}>
-
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
-            <div>
-              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-foreground">Win better. Work with less back-and-forth.</h2>
-              <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to="/auth?mode=signup&role=vendor">
-                <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                  I'm a vendor — Register
-                </Button>
-              </Link>
-              <p className="text-sm text-muted-foreground/80 mt-3 mb-10">Free to list your business. Approved within 48 hours.</p>
-              <div className="space-y-5">
-                {[
-                { icon: Users, title: 'Get discovered by families', body: 'Show up when families in your category and area are actively searching.' },
-                { icon: Zap, title: 'Send quotations easily', body: 'Structured quotes with scope, pricing and terms, sent from your phone in minutes.' },
-                { icon: ShieldCheck, title: 'Be verified and trusted', body: 'A verified badge and a real profile build the trust that wins bookings.' },
-                { icon: LockIcon, title: 'Stop chasing money', body: 'Escrow protection means you get paid once the ceremony is delivered, not once you\'ve chased an invoice.' }].
-                map(({ icon: Icon, title, body }) =>
-                <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
-                    <div className="flex gap-5 items-start">
-                      <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[15px] text-foreground">{title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
-                      </div>
-                    </div>
-                  </div>
+          <form
+            onSubmit={handleVendorSearch}
+            className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto">
+            <Select value={searchCategory} onValueChange={(v) => setSearchCategory(v as VendorCategory | 'all')}>
+              <SelectTrigger className="sm:flex-1">
+                <SelectValue placeholder="Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                {LIVE_VENDOR_CATEGORY_FILTER_OPTIONS.map((opt) =>
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                 )}
-              </div>
-              <div className="mt-10">
-                <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to="/auth?mode=signup&role=vendor">
-                  <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                    I'm a vendor — Register
-                  </Button>
-                </Link>
-              </div>
-            </div>
+              </SelectContent>
+            </Select>
 
-            {/* Vendor illustration — Vendor Dashboard + Bookings */}
-            <div className="hidden md:flex flex-col justify-center items-center gap-5">
-              {/* Vendor Dashboard mockup — matches actual VendorDashboard layout */}
-              <div className="relative w-80 h-80">
-                <div className="absolute inset-0 rounded-[2rem] bg-muted/50 border border-border" />
-                <div className="absolute top-6 left-6 right-6 bottom-6 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
-                  {/* Page header */}
-                  <div className="h-8 bg-primary flex items-center justify-between px-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-lg bg-primary-foreground/20 flex items-center justify-center">
-                        <span className="text-[6px] font-bold text-primary-foreground">U</span>
-                      </div>
-                      <span className="text-[8px] font-semibold text-primary-foreground/80">Dashboard</span>
-                    </div>
-                    <div className="w-5 h-5 rounded-full bg-primary-foreground/15 flex items-center justify-center">
-                      <span className="text-[7px] text-primary-foreground/60">🔔</span>
-                    </div>
-                  </div>
+            <Input
+              value={searchLocation}
+              onChange={(e) => setSearchLocation(e.target.value)}
+              placeholder="Durban"
+              className="sm:flex-1" />
 
-                  {/* KPI heading */}
-                  <div className="px-3 pt-2.5 pb-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[7px] text-gray-400">📈</span>
-                      <span className="text-[7px] font-medium text-gray-400">Last 30 days</span>
-                    </div>
-                  </div>
+            <Button type="submit" className="rounded-full px-8 font-semibold">
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </form>
 
-                  {/* KPI 2×2 grid — matches actual dashboard */}
-                  <div className="px-3 grid grid-cols-2 gap-2 mb-2.5">
-                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <span className="text-[7px]">👁</span>
-                      </div>
-                      <div>
-                        <div className="text-[12px] font-bold text-gray-900">48</div>
-                        <div className="text-[5.5px] text-gray-400">Profile views</div>
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                        <span className="text-[7px]">📄</span>
-                      </div>
-                      <div>
-                        <div className="text-[12px] font-bold text-gray-900">12</div>
-                        <div className="text-[5.5px] text-gray-400">Quotations sent</div>
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                        <span className="text-[7px]">✓</span>
-                      </div>
-                      <div>
-                        <div className="text-[12px] font-bold text-gray-900">8</div>
-                        <div className="text-[5.5px] text-gray-400">Orders completed</div>
-                      </div>
-                    </div>
-                    <div className="rounded-xl border border-gray-100 p-2 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                        <span className="text-[7px]">💵</span>
-                      </div>
-                      <div>
-                        <div className="text-[12px] font-bold text-gray-900">R 94k</div>
-                        <div className="text-[5.5px] text-gray-400">Total payout</div>
-                      </div>
-                    </div>
-                  </div>
+          <div className="mt-14">
+            <h3 className="text-center text-xl sm:text-2xl font-bold text-white mb-8">Explore vendors by category</h3>
+            <div className="grid grid-cols-3 lg:grid-cols-9 gap-5">
+              {LIVE_VENDOR_CATEGORIES.filter((c) => c.value !== 'other').map((cat) => {
+                const Icon = CATEGORY_ICONS[cat.value] ?? MoreHorizontal;
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => navigate(`/vendors?category=${cat.value}`)}
+                    className="group flex flex-col items-center gap-2 text-center">
+                    <span className="w-16 h-16 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/25 transition-colors">
+                      <Icon className="h-7 w-7 text-secondary" />
+                    </span>
+                    <span className="text-[12px] leading-tight text-white/85">{cat.label}</span>
+                  </button>);
 
-                  {/* Incoming request card */}
-                  <div className="px-3 pb-1">
-                    <div className="text-[7px] text-gray-400 font-medium mb-2">Incoming Requests</div>
-                    <div className="rounded-xl border border-primary/15 p-2.5 bg-primary/[0.04] mb-2">
-                      <div className="flex justify-between items-start mb-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
-                            <span className="text-[7px] font-bold text-primary">N</span>
-                          </div>
-                          <div>
-                            <div className="text-[7px] font-semibold text-gray-800">Nomsa M.</div>
-                            <div className="text-[5.5px] text-gray-400">Umembeso · 15 Mar · 100 guests</div>
-                          </div>
-                        </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-primary/15">
-                          <span className="text-[6px] font-bold text-primary">New</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-1.5">
-                        <div className="flex-1 h-5 rounded-lg bg-primary flex items-center justify-center">
-                          <span className="text-[6px] font-semibold text-primary-foreground">Send Quotation</span>
-                        </div>
-                        <div className="h-5 px-2 rounded-lg bg-gray-100 flex items-center justify-center">
-                          <span className="text-[6px] text-gray-400">Decline</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Orders mockup */}
-              <div className="relative w-80 h-64">
-                <div className="absolute inset-0 rounded-[2rem] bg-white/[0.06] border border-white/10" />
-                <div className="absolute top-4 left-4 right-4 bottom-4 rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden">
-                  {/* Header */}
-                  <div className="h-7 bg-primary flex items-center justify-between px-3">
-                    <span className="text-[8px] font-semibold text-primary-foreground/80">Orders</span>
-                    <div className="px-1.5 py-0.5 rounded-full bg-primary-foreground/15">
-                      <span className="text-[6px] font-bold text-primary-foreground/70">3 Active</span>
-                    </div>
-                  </div>
-
-                  {/* 3-tab bar — Active / Completed / Other */}
-                  <div className="flex border-b border-gray-100">
-                    <div className="flex-1 text-center py-1.5 border-b-2 border-primary">
-                      <span className="text-[6px] font-semibold text-primary">Active</span>
-                    </div>
-                    <div className="flex-1 text-center py-1.5">
-                      <span className="text-[6px] text-gray-400">Completed</span>
-                    </div>
-                    <div className="flex-1 text-center py-1.5">
-                      <span className="text-[6px] text-gray-400">Other</span>
-                    </div>
-                  </div>
-
-                  <div className="px-3 py-2 space-y-2">
-                    {/* Order 1 — confirmed */}
-                    <div className="rounded-xl border border-green-200 p-2 bg-green-50/60">
-                      <div className="flex justify-between items-center mb-1">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                            <span className="text-[7px]">✓</span>
-                          </div>
-                          <div>
-                            <div className="text-[7px] font-semibold text-gray-800">Thandi K. — Umabo</div>
-                            <div className="text-[5.5px] text-gray-400">22 Mar · Durban</div>
-                          </div>
-                        </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-green-100">
-                          <span className="text-[6px] font-bold text-green-700">Confirmed</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[6px] text-gray-500">R 12,500</span>
-                        <span className="text-[6px] text-green-600 font-medium">Deposit paid</span>
-                      </div>
-                    </div>
-
-                    {/* Order 2 — pending deposit */}
-                    <div className="rounded-xl border border-amber-200 p-2 bg-amber-50/60">
-                      <div className="flex justify-between items-center mb-1">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
-                            <span className="text-[7px]">⏳</span>
-                          </div>
-                          <div>
-                            <div className="text-[7px] font-semibold text-gray-800">Sipho N. — Lobola</div>
-                            <div className="text-[5.5px] text-gray-400">5 Apr · Pretoria</div>
-                          </div>
-                        </div>
-                        <div className="px-1.5 py-0.5 rounded-full bg-amber-100">
-                          <span className="text-[6px] font-bold text-amber-700">Pending</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[6px] text-gray-500">R 8,200</span>
-                        <span className="text-[6px] text-amber-600 font-medium">Awaiting deposit</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              })}
             </div>
           </div>
+
+          <p className="text-sm text-white/50 mt-12 text-center">Free to join. Takes less than a minute.</p>
         </div>
       </section>
+
 
 
       {/* ═══ FAQ — Dark band ═══ */}
