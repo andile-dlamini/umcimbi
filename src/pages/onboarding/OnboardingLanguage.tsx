@@ -422,20 +422,6 @@ export default function OnboardingLanguage() {
       </section>
 
 
-      {/* ═══ HOW IT WORKS — Light band ═══ */}
-      <section id="how" className="py-28 bg-background scroll-mt-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <HowItWorks />
-          <div className="text-center mt-12">
-            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup">
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
-                Get started free
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ═══ FOR ORGANISERS — Immersive dark band with background image ═══ */}
       <section id="organisers" className="relative py-28 scroll-mt-20 overflow-hidden">
         <div
@@ -453,90 +439,30 @@ export default function OnboardingLanguage() {
             </p>
           </div>
 
-          <form
-            onSubmit={handleVendorSearch}
-            className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto">
-            <Select value={searchCategory || undefined} onValueChange={(v) => setSearchCategory(v as VendorCategory | 'all')}>
-              <SelectTrigger className="sm:flex-1">
-                <SelectValue placeholder="Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                {LIVE_VENDOR_CATEGORY_FILTER_OPTIONS.map((opt) =>
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-
-            <Input
-              value={searchLocation}
-              onChange={(e) => setSearchLocation(e.target.value)}
-              placeholder="Durban"
-              className="sm:flex-1" />
-
-            <Button type="submit" className="rounded-full px-8 font-semibold">
-              <Search className="h-4 w-4 mr-2" />
-              Search
-            </Button>
-          </form>
-
-          <div id="vendor-results" className="mt-12 scroll-mt-28">
-            {hasActiveFilter &&
-            <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="text-sm text-white/80">
-                  Showing{activeCategoryLabel ? ` ${activeCategoryLabel}` : ' all vendors'}
-                  {activeLocation.trim() ? ` in ${activeLocation.trim()}` : ''}
-                </span>
-                <button
-                onClick={clearFilter}
-                className="inline-flex items-center gap-1 text-sm font-semibold text-white bg-white/15 hover:bg-white/25 rounded-full px-3 py-1 transition-colors">
-                  <X className="h-3.5 w-3.5" /> Clear
-                </button>
-              </div>
-            }
-
-            {resultsLoading ?
-            <div className="flex justify-center py-10">
-                <Loader2 className="h-6 w-6 animate-spin text-white/70" />
-              </div> :
-            results.length === 0 ?
-            <div className="text-center py-10">
-                <p className="text-white/80">No vendors match that search yet.</p>
-                <Button onClick={clearFilter} variant="outline" size="sm" className="mt-4 rounded-full border-white/30 !text-white bg-white/5 hover:bg-white/15">
-                  Clear filter
-                </Button>
-              </div> :
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                {results.map((v) =>
-              <VendorTile key={v.id} vendor={v} showAbout onClick={() => handleVendorClick(v.id)} />
-              )}
-              </div>
-            }
-          </div>
-
-          <div className="mt-14">
-            <h3 className="text-center text-xl sm:text-2xl font-bold text-white mb-8">Explore vendors by category</h3>
-            <div className="grid grid-cols-3 lg:grid-cols-9 gap-5">
-              {LIVE_VENDOR_CATEGORIES.filter((c) => c.value !== 'other').map((cat) => {
-                const Icon = CATEGORY_ICONS[cat.value] ?? MoreHorizontal;
-                return (
-                  <button
-                    key={cat.value}
-                    onClick={() => handleCategoryClick(cat.value)}
-                    className="group flex flex-col items-center gap-2 text-center">
-                    <span className="w-16 h-16 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/25 transition-colors">
-                      <Icon className="h-7 w-7 text-secondary" />
-                    </span>
-                    <span className="text-[12px] leading-tight text-white/85">{cat.label}</span>
-                  </button>);
-
-              })}
-            </div>
-          </div>
+          <VendorBrowser
+            showSearchCard
+            syncUrl
+            resultCount={8}
+            onVendorClick={handleVendorClick} />
 
           <p className="text-sm text-white/50 mt-12 text-center">Free to join. Takes less than a minute.</p>
         </div>
       </section>
+
+      {/* ═══ HOW IT WORKS — Light band ═══ */}
+      <section id="how" className="py-28 bg-background scroll-mt-20">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <HowItWorks />
+          <div className="text-center mt-12">
+            <Link onClick={() => trackPixel('cta_get_started_clicked')} to="/auth?mode=signup">
+              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/15">
+                Get started free
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
 
 
