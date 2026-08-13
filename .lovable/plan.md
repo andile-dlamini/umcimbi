@@ -24,7 +24,7 @@ Delete the paragraph "Free to join. Takes less than a minute." from the organise
 ## 5. Orientation and exits in the auth flow (AuthPage.tsx)
 
 - **5a.** Add one compact, lightweight header used by the `login`, `role`, `auth_method`, `forgot_phone`, `forgot_otp` and `forgot_password` steps: existing back arrow on the left, UMCIMBI logo (`/images/umcimbi-logo.png`) linking to `/onboarding`.
-- **5b.** The role step's back arrow leaves auth: navigate to the `redirect` param when present, otherwise `/onboarding`.
+- **5b.** The role step's back arrow always leaves auth and goes to `/onboarding`, regardless of whether a `redirect` param is present. (The `redirect` param remains the post-signup destination only.)
 - **5c.** When a `redirect` param is present, show above the role / auth_method heading: "Create an account to contact this vendor" plus a plain text "Back to browsing" link to `/onboarding`. Hidden when there is no redirect param.
 
 No changes to step logic, validation, OTP, password handling, role options, or post-signup navigation.
