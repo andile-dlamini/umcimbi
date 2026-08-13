@@ -4,7 +4,9 @@ Turn the partner link `/join/vendor` into a real public marketing page instead o
 
 ## New page: src/pages/vendors/VendorLandingPage.tsx
 
-Reads `ref` from the URL once and builds one shared signup link (`/auth?mode=signup&role=vendor` plus `&ref=<ref>` when present) used by every call to action.
+Reads `ref` from the URL once and builds one shared signup link (`/auth?mode=signup&role=vendor` plus `&ref=<ref>` when present) used by every call to action. Sets the page title to "UMCIMBI — Join as a vendor" on mount, the same way the current landing page does.
+
+Tracking: reuse the existing pixel helper (no changes to it). Fire `cta_im_a_vendor_clicked` on the hero "Create your free profile" and the "I'm a vendor — Register" buttons, and `cta_get_started_clicked` on the header Register button.
 
 Sections in order:
 
