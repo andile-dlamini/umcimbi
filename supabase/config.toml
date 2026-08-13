@@ -51,3 +51,6 @@ verify_jwt = false
 [functions.vendor-registration-reminder]
 verify_jwt = false
 
+
+[functions.create-vendor-selfie-request]
+verify_jwt = false
