@@ -2220,6 +2220,7 @@ export type Database = {
       }
       recalculate_all_trust_scores: { Args: never; Returns: undefined }
       reset_own_vendor_dormancy: { Args: never; Returns: undefined }
+      sync_email_queue_service_key: { Args: { _key: string }; Returns: string }
       vault_create_email_queue_key: {
         Args: { new_secret: string }
         Returns: undefined
