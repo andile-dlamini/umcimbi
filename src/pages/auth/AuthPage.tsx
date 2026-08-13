@@ -167,6 +167,39 @@ function OnboardingStepper({ steps, currentStep }: { steps: Step[]; currentStep:
   );
 }
 
+// ─── AUTH HEADER ───
+function AuthHeader({ onBack }: { onBack?: () => void }) {
+  const navigate = useNavigate();
+  return (
+    <header className="flex items-center justify-between px-4 py-3 bg-[hsl(220_25%_12%)] border-b border-white/10">
+      <Button variant="ghost" size="icon" onClick={onBack || (() => navigate('/onboarding'))} className="-ml-2 text-white hover:bg-white/10">
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+      <Link to="/onboarding">
+        <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-7 w-auto brightness-0 invert" />
+      </Link>
+    </header>
+  );
+}
+
+// ─── REDIRECT BANNER ───
+function RedirectBanner({ redirectParam }: { redirectParam: string | null }) {
+  const navigate = useNavigate();
+  if (!redirectParam) return null;
+  return (
+    <div className="bg-white/80 border border-black/5 rounded-xl p-3 text-center mb-4">
+      <p className="text-sm text-foreground">Create an account to contact this vendor</p>
+      <button
+        type="button"
+        onClick={() => navigate('/onboarding')}
+        className="text-sm text-primary font-medium hover:underline mt-1"
+      >
+        Back to browsing
+      </button>
+    </div>
+  );
+}
+
 // ─── COMPLETE PROFILE STEP (for Google OAuth new users) ───
 function CompleteProfileStep() {
   const navigate = useNavigate();
@@ -833,11 +866,7 @@ export default function AuthPage() {
   if (step === 'login') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/onboarding')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </div>
+        <AuthHeader onBack={() => navigate('/onboarding')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
@@ -931,7 +960,7 @@ export default function AuthPage() {
   if (step === 'forgot_phone') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => setStep('login')}><ArrowLeft className="h-5 w-5" /></Button></div>
+        <AuthHeader onBack={() => setStep('login')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
@@ -969,7 +998,7 @@ export default function AuthPage() {
   if (step === 'forgot_otp') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => setStep('forgot_phone')}><ArrowLeft className="h-5 w-5" /></Button></div>
+        <AuthHeader onBack={() => setStep('forgot_phone')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
@@ -997,7 +1026,7 @@ export default function AuthPage() {
   if (step === 'forgot_password') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => setStep('forgot_otp')}><ArrowLeft className="h-5 w-5" /></Button></div>
+        <AuthHeader onBack={() => setStep('forgot_otp')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
@@ -1040,15 +1069,13 @@ export default function AuthPage() {
 
   // ─── STEP 1: ROLE CHOICE ───
   if (step === 'role') {
+    const roleBackHref = redirectParam?.startsWith('/') ? redirectParam : '/onboarding';
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => setStep('login')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </div>
+        <AuthHeader onBack={() => navigate(roleBackHref)} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <div className="w-full max-w-md space-y-6">
+            <RedirectBanner redirectParam={redirectParam} />
             <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold text-foreground">How will you use UMCIMBI?</h1>
               <p className="text-muted-foreground text-sm">Choose your path to get started</p>
@@ -1118,13 +1145,10 @@ export default function AuthPage() {
   if (step === 'auth_method') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <div className="px-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => setStep('role')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </div>
+        <AuthHeader onBack={() => setStep('role')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <div className="w-full max-w-md space-y-6">
+            <RedirectBanner redirectParam={redirectParam} />
             <div className="text-center space-y-2">
               <span className="inline-block text-xs font-medium uppercase tracking-wide text-muted-foreground bg-muted px-3 py-1 rounded-full">
                 Registering as: {selectedRole === 'vendor' ? 'Vendor' : 'Organiser'}
@@ -1202,6 +1226,7 @@ export default function AuthPage() {
       </div>
 
       <div className="flex-1 flex flex-col items-center px-4 pb-8">
+        <RedirectBanner redirectParam={redirectParam} />
         <OnboardingStepper steps={allSteps} currentStep={step} />
 
         <div className="w-full max-w-md">

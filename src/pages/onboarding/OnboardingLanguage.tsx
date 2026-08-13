@@ -312,7 +312,7 @@ export default function OnboardingLanguage() {
 
 
       {/* ═══ FOR ORGANISERS — Immersive dark band with background image ═══ */}
-      <section id="organisers" className="relative py-28 scroll-mt-20 overflow-hidden">
+      <section id="organisers" className="relative py-28 scroll-mt-20 overflow-hidden bg-[hsl(220_25%_5%)] border-t border-white/10">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url(/images/organisers-bg.jpg)' }} />
@@ -333,10 +333,9 @@ export default function OnboardingLanguage() {
             syncUrl
             resultCount={8}
             onVendorClick={handleVendorClick} />
-
-          <p className="text-sm text-white/50 mt-12 text-center">Free to join. Takes less than a minute.</p>
         </div>
       </section>
+
 
       {/* ═══ HOW IT WORKS — Light band ═══ */}
       <section id="how" className="py-28 bg-background scroll-mt-20">
