@@ -17,9 +17,7 @@ function json(body: unknown, status = 200) {
 }
 
 function authOk(req: Request) {
-  const h = req.headers.get("Authorization") ?? "";
-  const token = h.replace(/^Bearer\s+/i, "").trim();
-  return token && token === SERVICE_ROLE;
+  return isInternalCall(req);
 }
 
 type VendorEvent =
