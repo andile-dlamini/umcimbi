@@ -184,65 +184,28 @@ export default function VendorLandingPage() {
       </section>
 
       {/* ═══ ALREADY LISTED ═══ */}
-      {vendors.length > 0 && (
-        <section className="py-24 bg-background">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">See who is already listed</h2>
-            <p className="text-muted-foreground mt-3">
-              Vendors across KwaZulu-Natal are already taking bookings on UMCIMBI.
-            </p>
+      <section className="relative py-24 overflow-hidden bg-[hsl(220_30%_8%)]">
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">See who is already listed</h2>
+          <p className="text-white/70 mt-3">
+            Vendors across KwaZulu-Natal are already taking bookings on UMCIMBI.
+          </p>
 
-            <div className="mt-10">
-              <VendorCarousel vendors={vendors} onVendorClick={() => navigate('/')} />
-            </div>
-
-            <div className="mt-6">
-              <Link to="/">
-                <Button variant="outline" size="lg" className="rounded-full px-8">See the full directory</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ BENEFITS ═══ */}
-      <section
-        className="relative py-28 overflow-hidden bg-background"
-        style={{
-          '--primary': '20 75% 40%',
-          '--accent': '20 65% 50%',
-        } as React.CSSProperties}
-      >
-        <div className="relative mx-auto max-w-3xl px-5 sm:px-8">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-foreground">Win better. Work with less back-and-forth.</h2>
-
-          <div className="space-y-5">
-            {VENDOR_BENEFITS.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
-                <div className="flex gap-5 items-start">
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[15px] text-foreground">{title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="mt-10">
+            <VendorBrowser
+              showSearchCard={false}
+              resultCount={8}
+              onVendorClick={handleVendorClick} />
           </div>
 
           <div className="mt-10">
-            <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to={signupHref}>
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                I'm a vendor — Register
-              </Button>
+            <Link to="/onboarding#organisers">
+              <Button variant="outline" size="lg" className="rounded-full px-8 border-white/30 !text-white bg-white/5 hover:bg-white/15">See the full directory</Button>
             </Link>
-            <p className="text-sm text-muted-foreground/80 mt-3">Free to list your business. Approved within 48 hours.</p>
           </div>
         </div>
       </section>
+
 
       {/* ═══ HOW IT WORKS ═══ */}
       <section id="how" className="scroll-mt-20">
