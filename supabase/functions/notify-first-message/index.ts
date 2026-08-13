@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       const res = await sendConnectMobileSms(phoneNoPlus, body, `firstmsg_${message_id}`.slice(0, 60));
       if (logRow?.id) {
         await sb.from("sms_notification_log")
-          .update({ provider_response: `HTTP ${res.status}: ${String(res.body ?? "").slice(0, 200)}` })
+          .update({ provider_response: `HTTP ${res.status}: ${String(res.response ?? "").slice(0, 200)}` })
           .eq("id", logRow.id);
       }
       if (res.ok) {
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       const res = await sendConnectMobileSms(phoneNoPlus, body, `firstmsg_${message_id}`.slice(0, 60));
       if (logRow?.id) {
         await sb.from("sms_notification_log")
-          .update({ provider_response: `HTTP ${res.status}: ${String(res.body ?? "").slice(0, 200)}` })
+          .update({ provider_response: `HTTP ${res.status}: ${String(res.response ?? "").slice(0, 200)}` })
           .eq("id", logRow.id);
       }
       if (res.ok) {
