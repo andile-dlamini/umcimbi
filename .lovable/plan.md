@@ -37,8 +37,9 @@ So since 8 Aug the true count of missed vendor notifications is **3**: two first
 2. Overwrite the vault secret `email_queue_service_role_key` with that exact current key (update in place via the existing `vault_update_email_queue_key` function — no cron or trigger changes needed).
 3. Verify both callers:
    - **Cron caller:** trigger `notification-digest` and `vendor-response-nudge` manually and confirm 200 instead of 401.
-   - **Trigger caller:** create a real end-to-end test service request against a test vendor and confirm a `new_service_request` row lands in `sms_notification_log` with a real provider response ("Accepted for delivery"), i.e. the SMS actually reaches the vendor. Clean up the test request afterwards.
+   - **Trigger caller:** create a real end-to-end test service request against a test vendor, and separately open a test conversation first message, then confirm both land rows in `sms_notification_log` with a real provider response ("Accepted for delivery") — not an empty one. Clean up the test records afterwards.
 4. Re-check the `quote_sent` path: today's `quote_sent` log row has an empty provider response, meaning the send path was entered but the provider never confirmed. Confirm it produces a real provider response once the key matches; if not, diagnose separately.
-5. Report the missed-notification list (currently 1 service request) with vendor name and phone so you can contact them manually.
+5. Report the full missed list — the two conversations above (Thumoya, Siyaphila) plus the undelivered `quote_sent` — with vendor names and phone numbers, treating an empty provider response as not delivered.
+
 
 No frontend or edge function code changes are expected — this is a credential mismatch, not a logic bug.
