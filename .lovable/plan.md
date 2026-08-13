@@ -37,6 +37,7 @@ The admin page runs as a normal authenticated user, and the new table intentiona
 - Verifies the caller's JWT and that the caller has the `admin` role; otherwise 403.
 - Marks any existing unconsumed rows for that vendor as consumed (a new link invalidates the old one).
 - Inserts a new row with the supplied vendor id, a server-generated token, and `expires_at = now() + 24 hours`.
+- Gets an explicit `[functions.create-vendor-selfie-request]` entry in `supabase/config.toml` with `verify_jwt = false`, matching every other internally-authenticating function on this project (the only two `true` entries there are cron-invoked, non-user functions). The function does its own JWT verification and admin-role check in code.
 - Returns the token to the admin page so the existing link format and SMS sends stay identical.
 
 ## 4. src/pages/admin/VendorVerificationQueue.tsx
