@@ -29,7 +29,7 @@ Rather than block the fix on that unknown, the fix below is chosen so that it wo
 
 If the markup is missing from the response for any reason, it falls back to the signed URL exactly as today, so this cannot be worse than the current behaviour.
 
-Not in scope of this step, but flagged: `orders/*.html` in the same bucket, served by `get-order-pdf-url`, has the identical problem. Say the word and it gets the same treatment in the same pass.
+Order documents get the identical treatment in the same pass: `orders/*.html`, written by `generate-order-confirmation` and served by `get-order-pdf-url`, are the same HTML-called-a-PDF, and `viewOrderPdfAction` opens them the same broken way. Same change to the function, same blob rendering in the client, same fallback.
 
 ## 2. Copy
 
@@ -38,7 +38,36 @@ Not in scope of this step, but flagged: `orders/*.html` in the same bucket, serv
 
 ## 3. Name the artefact honestly in code
 
-`final_offer_pdf_key` stays as it is — no migration, no renames. A one-line comment goes where it is written in `generate-final-offer` and where it is read in `get-final-offer-url`, stating that the stored artefact is HTML, not a PDF, despite the column name.
+`final_offer_pdf_key` and `order_pdf_key` stay as they are — no migration, no renames. A one-line comment goes where each is written (`generate-final-offer`, `generate-order-confirmation`) and where each is read (`get-final-offer-url`, `get-order-pdf-url`), stating that the stored artefact is HTML, not a PDF, despite the column name.
+
+## 4. Escaping audit — already checked, reporting now
+
+Both templates were read before writing this. Every user-supplied value is passed through the same `escapeHtml` helper (escapes `&`, `<`, `>`, `"`) before interpolation:
+
+- Vendor: business name, registered business name, address lines, phone, email, website, registration number, VAT number.
+- Organiser: client name, event location, event type.
+- Quote: notes, offer number, order number, quotation ref, and in the order template each line item description.
+- Numbers and dates never reach the markup raw — they go through `formatCurrency` and `formatDate`.
+
+Two observations, no template rewrite proposed:
+
+- `escapeHtml` does not escape `'`. Every interpolation site is either element text or sits inside a double-quoted attribute, so a single quote cannot break out. Safe as written; worth adding `&#39;` for robustness if you want it, one character class in one helper.
+- The one value not escaped is `logoDataUrl`, built as `data:${contentType};base64,${base64}` inside a `src="..."`. `contentType` comes from the storage object's metadata for the vendor's own logo, not from free text. Low risk, but since it lands in an attribute it is the only interpolation without a guard. Flagging rather than changing.
+
+Conclusion: rendering this markup in a blob tab on our own origin does not introduce stored XSS through the fields listed above.
+
+## 5. Printing
+
+The templates already set `@page { size: A4; margin: 20mm }` but have no print rules beyond that, and nothing preventing a table splitting mid-row across a page break. Since print-to-PDF is the whole interim workaround, both templates get:
+
+- `page-break-inside: avoid` on table rows, info boxes, note boxes and the total row, so a row or a boxed section never straddles a page.
+- `thead { display: table-header-group }` so a table continuing onto a second page repeats its header.
+- `page-break-after: avoid` on section headings, so a heading never ends up alone at the foot of a page.
+- `@media print { body { padding: 0 } }` so the on-screen padding does not stack on top of the A4 margin.
+- A "Print / Save as PDF" button at the top of the document, hidden in print output, so the action is obvious rather than buried in a browser menu.
+
+Verification: the generated markup is rendered and paginated at A4 before this is called done, checking a multi-line-item order document specifically for a table cut across the break.
+
 
 ## Separately: what a real PDF via an external service actually costs
 
