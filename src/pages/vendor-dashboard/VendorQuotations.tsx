@@ -63,7 +63,7 @@ function VendorQuoteCard({ quote }: { quote: QuoteWithDetails }) {
             }}
           >
             <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'View PDF'}
+            {isLoadingPdf ? 'Loading...' : 'View quote'}
           </Button>
         )}
       </CardFooter>
