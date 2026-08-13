@@ -47,7 +47,8 @@ Deno.serve(async (req) => {
   }
 
   console.log("vault secret email_queue_service_role_key synced");
-  return new Response(JSON.stringify({ ok: true }), {
+  return new Response(JSON.stringify({ ok: true, env_fp: await fp(SERVICE_ROLE), caller_fp: await fp(token) }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
 });
