@@ -139,7 +139,7 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
 }
 
 /**
- * Fetch a signed URL for the order confirmation PDF and open it.
+ * Fetch the order confirmation document and open it in a new tab.
  * Opens a blank tab synchronously before awaiting the edge function to
  * survive mobile popup blockers.
  */
@@ -152,15 +152,20 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
 
     if (error || data?.error) {
       if (win) win.close();
-      toast.error(data?.error || 'Failed to load Order PDF');
+      toast.error(data?.error || "Couldn't open the order confirmation");
       return null;
     }
 
     const url = typeof data === 'string' ? data : data?.url;
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
       if (win) win.close();
-      toast.error('Could not load Order PDF');
+      toast.error("Couldn't open the order confirmation");
       return null;
+    }
+
+    const html = typeof data === 'object' ? (data as any)?.html : null;
+    if (typeof html === 'string' && html.length > 0) {
+      return renderDocument(win, html, url);
     }
 
     if (win) {
@@ -171,7 +176,7 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
     return url;
   } catch (err: any) {
     if (win) win.close();
-    toast.error(err?.message || 'Failed to load Order PDF');
+    toast.error(err?.message || "Couldn't open the order confirmation");
     return null;
   }
 }
