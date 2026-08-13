@@ -103,6 +103,15 @@ async function sendAndBump(
   const msgId = `${eventType}_${relatedId ?? "x"}_${Date.now()}`.slice(0, 60);
   const smsRes = await sendConnectMobileSms(phoneNoPlus, body, msgId);
 
+  // Write the provider's reply back onto the log row: an empty provider_response
+  // must never be mistaken for a delivered SMS.
+  if (logRes.id) {
+    await sb.from("sms_notification_log")
+      .update({ provider_response: `HTTP ${smsRes.status}: ${smsRes.response}`.slice(0, 500) })
+      .eq("id", logRes.id);
+  }
+
+
   if (recipient.user_type === "vendor" && recipient.vendor_id && smsRes.ok) {
     await sb.from("vendors").update({
       dormant_nudge_count: ((await sb.from("vendors").select("dormant_nudge_count").eq("id", recipient.vendor_id).maybeSingle()).data?.dormant_nudge_count ?? 0) + 1,
