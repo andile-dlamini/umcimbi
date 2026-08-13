@@ -37,7 +37,8 @@ Styling note: the markup is white-on-dark as it is today, so it stays inside a d
 
 - Delete the entire "Win better. Work with less back-and-forth." section: the four benefit cards, the "I'm a vendor — Register" button and the "Free to list your business. Approved within 48 hours." line (and the now-unused `VENDOR_BENEFITS` constant and its icon imports).
 - In "See who is already listed": keep the heading and sub copy, replace `VendorCarousel` with `<VendorBrowser showSearchCard={false} resultCount={8} onVendorClick={...} />` (no `syncUrl`). Tiles navigate to `/auth?mode=signup&role=vendor&redirect=<encoded /vendors/:id>`, preserving the `ref` query param the same way the existing `signupHref` does. This section becomes a dark band so the browser markup reads correctly.
-- "See the full directory" button now targets the landing page organisers section (`/#organisers`) instead of `/vendors`, since that route redirects.
+- "See the full directory" button now targets the organisers section of the landing page instead of `/vendors`, since that route redirects. Confirmed in `src/App.tsx`: for logged-out visitors `/` falls through to a `<Navigate to="/onboarding" replace />` catch-all, which drops the hash — so the button links directly to `/onboarding#organisers`.
+- Because React Router does not scroll to a hash on its own, `OnboardingLanguage` gets a small mount effect that scrolls the element matching `location.hash` into view (guarded so it only runs when a hash is present), so the button lands on the organisers section rather than the top of the page. Verified in the browser after the change.
 - Reorder sections to: hero, See who is already listed, How UMCIMBI works, FAQ, footer.
 - `src/components/vendors/VendorCarousel.tsx` stays on disk, unreferenced.
 
