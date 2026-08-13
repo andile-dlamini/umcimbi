@@ -18,7 +18,7 @@ Access:
 - Enable row level security, create **no policies**, and issue **no grants** to `anon` or `authenticated`. Only the service role (backend) can touch it. This is deliberate.
 
 Data move:
-- Insert one row per vendor whose `selfie_request_token` is not null, carrying the token, `expires_at = now() + 24 hours`, `consumed_at = null`.
+- Insert one row per vendor whose `selfie_request_token` is not null, carrying the token, `expires_at = now() + 24 hours`, and **`consumed_at = now()`** — those tokens have been readable by every signed-in user, so they migrate dead rather than live. A query against the database right now returns **zero** vendors with a token, so this affects **0 rows** and no vendor needs a re-issued link. The insert stays in the migration in case a token is created before it runs.
 - Then drop `selfie_request_token` (and its partial index) from `public.vendors`.
 - `selfie_request_sent_at` stays on vendors, untouched.
 - No RLS policy on `public.vendors` is changed.
