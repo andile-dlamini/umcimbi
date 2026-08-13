@@ -37,16 +37,16 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.notify-vendor-event]
-verify_jwt = false
+verify_jwt = true
 
 [functions.notify-first-message]
-verify_jwt = false
+verify_jwt = true
 
 [functions.vendor-response-nudge]
-verify_jwt = false
+verify_jwt = true
 
 [functions.notification-digest]
-verify_jwt = false
+verify_jwt = true
 
 [functions.vendor-registration-reminder]
 verify_jwt = false
