@@ -53,12 +53,13 @@ async function isDormantBlocked(sb: ReturnType<typeof createClient>, vendorId: s
 
 async function logSms(sb: ReturnType<typeof createClient>, row: {
   user_id: string; user_type: "vendor" | "planner"; event_type: string; tier: "tier1" | "tier2" | "suppressed";
-  related_id?: string | null; phone?: string | null; provider_response?: string | null;
+  related_id?: string | null; phone_number?: string | null; provider_response?: string | null;
 }) {
-  const { error } = await sb.from("sms_notification_log").insert(row);
+  const { data, error } = await sb.from("sms_notification_log").insert(row).select("id").maybeSingle();
   // unique-index violation ⇒ duplicate ⇒ treat as success
-  return { inserted: !error, duplicate: !!error && String(error.code) === "23505" };
+  return { inserted: !error, duplicate: !!error && String(error.code) === "23505", id: (data as any)?.id ?? null };
 }
+
 
 async function sendAndBump(
   sb: ReturnType<typeof createClient>,
@@ -101,6 +102,15 @@ async function sendAndBump(
   const body = renderSms(event, { name: recipient.name });
   const msgId = `${eventType}_${relatedId ?? "x"}_${Date.now()}`.slice(0, 60);
   const smsRes = await sendConnectMobileSms(phoneNoPlus, body, msgId);
+
+  // Write the provider's reply back onto the log row: an empty provider_response
+  // must never be mistaken for a delivered SMS.
+  if (logRes.id) {
+    await sb.from("sms_notification_log")
+      .update({ provider_response: `HTTP ${smsRes.status}: ${smsRes.response}`.slice(0, 500) })
+      .eq("id", logRes.id);
+  }
+
 
   if (recipient.user_type === "vendor" && recipient.vendor_id && smsRes.ok) {
     await sb.from("vendors").update({
