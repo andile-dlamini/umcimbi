@@ -106,7 +106,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
-        <Route path="/vendors" element={<PublicVendorsList />} />
+        <Route path="/vendors" element={<PublicVendorsRedirect />} />
         <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/join/vendor" element={<VendorLandingPage />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
