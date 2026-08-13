@@ -1590,6 +1590,55 @@ export type Database = {
           },
         ]
       }
+      vendor_selfie_requests: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          vendor_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+          vendor_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_selfie_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_selfie_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_selfie_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_verification_documents: {
         Row: {
           created_at: string
@@ -1694,7 +1743,6 @@ export type Database = {
           review_count: number | null
           selfie_photo_url: string | null
           selfie_request_sent_at: string | null
-          selfie_request_token: string | null
           show_registration_on_pdf: boolean
           show_vat_on_pdf: boolean
           signup_source: string | null
@@ -1764,7 +1812,6 @@ export type Database = {
           review_count?: number | null
           selfie_photo_url?: string | null
           selfie_request_sent_at?: string | null
-          selfie_request_token?: string | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
           signup_source?: string | null
@@ -1834,7 +1881,6 @@ export type Database = {
           review_count?: number | null
           selfie_photo_url?: string | null
           selfie_request_sent_at?: string | null
-          selfie_request_token?: string | null
           show_registration_on_pdf?: boolean
           show_vat_on_pdf?: boolean
           signup_source?: string | null

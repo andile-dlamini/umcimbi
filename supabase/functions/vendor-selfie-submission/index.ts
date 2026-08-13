@@ -53,18 +53,25 @@ Deno.serve(async (req) => {
     }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { data: vendor, error: vErr } = await admin
-      .from('vendors')
-      .select('id')
-      .eq('selfie_request_token', token)
+    const { data: request, error: vErr } = await admin
+      .from('vendor_selfie_requests')
+      .select('id, vendor_id, expires_at, consumed_at')
+      .eq('token', token)
       .maybeSingle();
 
-    if (vErr || !vendor) {
+    if (
+      vErr ||
+      !request ||
+      request.consumed_at !== null ||
+      new Date(request.expires_at).getTime() < Date.now()
+    ) {
       return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    const vendor = { id: request.vendor_id };
+
 
     const path = `${vendor.id}/selfie-${Date.now()}.${extFromMime(mime_type)}`;
     const { error: upErr } = await admin.storage
@@ -81,7 +88,7 @@ Deno.serve(async (req) => {
 
     const { error: updErr } = await admin
       .from('vendors')
-      .update({ selfie_photo_url: path, selfie_request_token: null })
+      .update({ selfie_photo_url: path })
       .eq('id', vendor.id);
 
     if (updErr) {
@@ -91,6 +98,14 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Single-use: the token cannot be replayed.
+    const { error: consumeErr } = await admin
+      .from('vendor_selfie_requests')
+      .update({ consumed_at: new Date().toISOString() })
+      .eq('id', request.id);
+    if (consumeErr) console.error('Failed to consume selfie token:', consumeErr);
+
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

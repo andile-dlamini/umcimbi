@@ -234,15 +234,24 @@ export default function VendorVerificationQueue() {
   const handleRequestSelfie = async (vendor: PendingVendor) => {
     setVendorBusy(vendor.id, true);
     try {
-      const token = crypto.randomUUID();
+      // The token lives in vendor_selfie_requests, which no client can write,
+      // so a service-role edge function issues it.
+      const { data: issued, error: issueError } = await supabase.functions.invoke(
+        'create-vendor-selfie-request',
+        { body: { vendor_id: vendor.id } }
+      );
+      if (issueError) throw issueError;
+      const token = (issued as { token?: string } | null)?.token;
+      if (!token) throw new Error('No token returned');
+
       const { error } = await supabase
         .from('vendors')
         .update({
-          selfie_request_token: token,
           selfie_request_sent_at: new Date().toISOString(),
         })
         .eq('id', vendor.id);
       if (error) throw error;
+
 
       await supabase.functions.invoke('send-vendor-status-sms', {
         body: { vendor_id: vendor.id, sms_type: 'request_selfie' },
