@@ -1,59 +1,24 @@
-# Move the selfie verification token out of the vendors table
+# SMS notifications: diagnosis
 
-The selfie link token currently lives on the vendor record. Because vendor rows are readable by any signed-in user and Postgres access rules work per row (not per column), that token is effectively public. Anyone could use it to submit an identity photo as another vendor and burn the real vendor's link.
+## What I found
 
-This moves the token into its own locked-down table that no client can read.
+The scheduled SMS jobs are running on time, but every call they make is being rejected.
 
-## 1. Database migration (new file in supabase/migrations)
+- All four notification cron jobs (vendor response nudge, notification digest, vendor registration reminder, admin daily brief) fire on schedule and report "succeeded" — cron itself is healthy.
+- Every HTTP call those jobs make to the notification functions in the last 24 hours came back `401 {"error":"Unauthorized"}` (41 responses, most recent 13:47 UTC today). Zero succeeded.
+- The last SMS actually delivered was on 8 Aug (`vendor_registration_reminder_72h`). Nothing has been sent since.
+- The cron jobs authenticate by reading the vault secret `email_queue_service_role_key` and sending it as the Bearer token. The functions (`notification-digest`, `vendor-response-nudge`, `notify-vendor-event`) compare that token byte-for-byte against their own `SUPABASE_SERVICE_ROLE_KEY` environment value and return 401 on mismatch.
 
-Create `public.vendor_selfie_requests`:
+Vault contents can't be read directly through the query tool, so the stored value can't be printed for comparison. But the evidence is conclusive: correct schedule, correct URLs, blanket 401 on the exact auth path that depends on that one secret. The stored copy of the service role key no longer matches the live one.
 
-- `id` uuid primary key, default `gen_random_uuid()`
-- `vendor_id` uuid not null, references `public.vendors(id)` on delete cascade
-- `token` text not null unique
-- `expires_at` timestamptz not null
-- `consumed_at` timestamptz null
-- `created_at` timestamptz not null default `now()`
+A second, smaller symptom: today's `quote_sent` log row was written with an empty provider response, meaning the send path was entered but the SMS provider never confirmed delivery. This is likely the same 401 wall on `notify-vendor-event`; it will be re-checked after the key is fixed rather than treated as a separate bug up front.
 
-Indexes on `token` and `vendor_id`.
+## Fix (on approval)
 
-Row level security enabled with **zero policies and no grants to anon/authenticated** — only the service role (edge functions) can touch it. `GRANT ALL ... TO service_role` only.
+1. Re-bind the backend service credentials so the current service role key is known to the environment.
+2. Overwrite the vault secret `email_queue_service_role_key` with that current key (update in place, same name — no cron job changes needed).
+3. Manually trigger `notification-digest` and `vendor-response-nudge` once and confirm they return 200 instead of 401.
+4. Re-check the `quote_sent` path: confirm a fresh Tier 1 event produces a log row with a real provider response ("Accepted for delivery"), and if not, diagnose that separately.
+5. Report which pending notifications, if any, were flushed by the first successful run.
 
-Then:
-- Copy every vendor with a live token into the new table (`expires_at = now() + 24 hours`, `consumed_at = null`).
-- Drop `selfie_request_token` from `public.vendors`.
-
-`selfie_request_sent_at` stays on vendors — the admin queue reads it and it is not sensitive. No vendor access-rule changes in this migration.
-
-## 2. New edge function: `create-vendor-selfie-request`
-
-The admin page cannot insert into a table with no policies, so the insert moves server-side.
-
-- Reuses the exact admin authorisation pattern already in `send-vendor-status-sms` (bearer token → `auth.getUser` → `user_roles` admin check; service-role key also accepted).
-- Input validated with Zod: `{ vendor_id: uuid }`.
-- Marks any existing unconsumed rows for that vendor as consumed (new link invalidates the old one), generates a fresh UUID token, inserts a row with `expires_at = now() + 24h`, and sets `selfie_request_sent_at` on the vendor.
-- Returns `{ token }` so the admin page can build the same link.
-- No `config.toml` change needed beyond registering this function's own entry (JWT verification stays on, matching the internal-verify pattern used by the other admin functions).
-
-## 3. `supabase/functions/vendor-selfie-submission/index.ts`
-
-- Look the token up in `vendor_selfie_requests` (`id, vendor_id, expires_at, consumed_at`) instead of on `vendors`.
-- Reject with the existing 404 / "Invalid or expired token" when: no row, `consumed_at` already set, or `expires_at` in the past.
-- On success: upload as today, update `vendors.selfie_photo_url` only, and set `consumed_at = now()` on the request row so the token cannot be reused.
-- Response shapes, status codes, and `verify_jwt = false` all unchanged.
-
-## 4. `src/pages/admin/VendorVerificationQueue.tsx`
-
-`handleRequestSelfie` stops writing to the vendors row. It calls the new edge function, takes the returned token, and continues exactly as before: the same two `send-vendor-status-sms` calls, the same `/verify/selfie?token=...` link, the same toast and refresh.
-
-## Not touched
-
-Vendor access policies, `verify_jwt` on existing functions, the `/verify/selfie` page and its client code, the `vendor-selfies` bucket, quotes/bookings/payments/payouts, and all public landing/directory surfaces.
-
-## Verification
-
-- Confirm `selfie_request_token` is gone from `public.vendors`.
-- Confirm `vendor_selfie_requests` has RLS on and zero policies.
-- Confirm the migration file exists in `supabase/migrations`.
-- Confirm an anon/authenticated client gets a permission error selecting from the new table.
-- End-to-end: admin generates a link, vendor submits a photo, the same token then fails on reuse, and an expired token is rejected.
+No frontend or edge function code changes are expected — this is a credential mismatch, not a logic bug.
