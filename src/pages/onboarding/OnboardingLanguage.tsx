@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -38,9 +38,13 @@ import {
   Droplets,
   Camera,
   Tent,
-  MoreHorizontal } from
+  MoreHorizontal,
+  X,
+  Loader2 } from
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
+import VendorTile, { VendorTileData } from '@/components/vendors/VendorTile';
+import { supabase } from '@/integrations/supabase/client';
 import HowItWorks from '@/components/onboarding/HowItWorks';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { trackPixel } from '@/lib/metaPixel';
@@ -67,8 +71,17 @@ export default function OnboardingLanguage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all' | ''>('');
-  const [searchLocation, setSearchLocation] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all' | ''>(
+    (searchParams.get('category') as VendorCategory) || ''
+  );
+  const [searchLocation, setSearchLocation] = useState(searchParams.get('location') || '');
+  const [activeCategory, setActiveCategory] = useState<VendorCategory | 'all' | ''>(
+    (searchParams.get('category') as VendorCategory) || ''
+  );
+  const [activeLocation, setActiveLocation] = useState(searchParams.get('location') || '');
+  const [results, setResults] = useState<VendorTileData[]>([]);
+  const [resultsLoading, setResultsLoading] = useState(true);
   const { isInstallable, isIOS, isStandalone, triggerInstall } = usePWAInstall();
 
   useEffect(() => {
@@ -158,14 +171,83 @@ export default function OnboardingLanguage() {
     setMobileMenuOpen(false);
   };
 
+  // Fetch + shuffle vendor results for the inline organisers browser.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setResultsLoading(true);
+      let query = (supabase as any).
+      from('vendors_directory_public').
+      select('id,name,category,location,logo_url,image_urls,about');
+
+      if (activeCategory && activeCategory !== 'all') query = query.eq('category', activeCategory);
+      if (activeLocation.trim()) query = query.ilike('location', `%${activeLocation.trim()}%`);
+
+      // Explicit 60-row slice, shuffled client side (PostgREST cannot order randomly).
+      // NOTE: once the active vendor count approaches 60 this needs revisiting — beyond
+      // that point the shuffle would only ever reorder the same fixed subset.
+      const { data, error } = await query.limit(60);
+      if (cancelled) return;
+
+      if (error || !data) {
+        setResults([]);
+      } else {
+        // Shuffle once, when the result arrives, and store it in state — never in render.
+        const shuffled = [...(data as VendorTileData[])];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setResults(shuffled.slice(0, 8));
+      }
+      setResultsLoading(false);
+    })();
+    return () => {cancelled = true;};
+  }, [activeCategory, activeLocation]);
+
+  const syncUrl = (category: string, location: string) => {
+    const params = new URLSearchParams();
+    if (category && category !== 'all') params.set('category', category);
+    if (location.trim()) params.set('location', location.trim());
+    setSearchParams(params, { replace: true });
+  };
+
+  const scrollToResults = () => {
+    document.getElementById('vendor-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const applyFilter = (category: VendorCategory | 'all' | '', location: string) => {
+    setActiveCategory(category);
+    setActiveLocation(location);
+    setSearchCategory(category);
+    setSearchLocation(location);
+    syncUrl(category, location);
+  };
+
+  const clearFilter = () => {
+    applyFilter('', '');
+  };
+
+  const handleCategoryClick = (category: VendorCategory) => {
+    applyFilter(category, activeLocation);
+    setTimeout(scrollToResults, 50);
+  };
+
   const handleVendorSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchCategory && searchCategory !== 'all') params.set('category', searchCategory);
-    if (searchLocation.trim()) params.set('location', searchLocation.trim());
-    const qs = params.toString();
-    navigate(qs ? `/vendors?${qs}` : '/vendors');
+    applyFilter(searchCategory, searchLocation);
+    setTimeout(scrollToResults, 50);
   };
+
+  const handleVendorClick = (vendorId: string) => {
+    navigate(`/auth?mode=signup&role=planner&redirect=${encodeURIComponent(`/vendors/${vendorId}`)}`);
+  };
+
+  const activeCategoryLabel =
+  activeCategory && activeCategory !== 'all' ?
+  LIVE_VENDOR_CATEGORIES.find((c) => c.value === activeCategory)?.label ?? activeCategory :
+  '';
+  const hasActiveFilter = Boolean(activeCategoryLabel || activeLocation.trim());
 
 
   return (
@@ -196,9 +278,9 @@ export default function OnboardingLanguage() {
             <button onClick={() => scrollTo('how')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
               How it Works
             </button>
-            <Link to="/vendors" className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+            <button onClick={() => scrollTo('organisers')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
               Organisers
-            </Link>
+            </button>
             <Link to="/join/vendor" className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
               Vendors
             </Link>
@@ -228,7 +310,7 @@ export default function OnboardingLanguage() {
         {mobileMenuOpen &&
         <div className="md:hidden border-t border-white/10 bg-[hsl(220_25%_12%/0.97)] backdrop-blur-md px-5 py-3 space-y-1">
             <button onClick={() => scrollTo('how')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">How it Works</button>
-            <Link to="/vendors" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Organisers</Link>
+            <button onClick={() => scrollTo('organisers')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Organisers</button>
             <Link to="/join/vendor" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Vendors</Link>
             <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">FAQ</button>
             <Link onClick={() => { trackPixel('cta_get_started_clicked'); setMobileMenuOpen(false); }} to="/auth?mode=signup" className="block pt-1">
@@ -397,6 +479,41 @@ export default function OnboardingLanguage() {
             </Button>
           </form>
 
+          <div id="vendor-results" className="mt-12 scroll-mt-28">
+            {hasActiveFilter &&
+            <div className="flex items-center justify-center gap-3 mb-6">
+                <span className="text-sm text-white/80">
+                  Showing{activeCategoryLabel ? ` ${activeCategoryLabel}` : ' all vendors'}
+                  {activeLocation.trim() ? ` in ${activeLocation.trim()}` : ''}
+                </span>
+                <button
+                onClick={clearFilter}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-white bg-white/15 hover:bg-white/25 rounded-full px-3 py-1 transition-colors">
+                  <X className="h-3.5 w-3.5" /> Clear
+                </button>
+              </div>
+            }
+
+            {resultsLoading ?
+            <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-white/70" />
+              </div> :
+            results.length === 0 ?
+            <div className="text-center py-10">
+                <p className="text-white/80">No vendors match that search yet.</p>
+                <Button onClick={clearFilter} variant="outline" size="sm" className="mt-4 rounded-full border-white/30 !text-white bg-white/5 hover:bg-white/15">
+                  Clear filter
+                </Button>
+              </div> :
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                {results.map((v) =>
+              <VendorTile key={v.id} vendor={v} showAbout onClick={() => handleVendorClick(v.id)} />
+              )}
+              </div>
+            }
+          </div>
+
           <div className="mt-14">
             <h3 className="text-center text-xl sm:text-2xl font-bold text-white mb-8">Explore vendors by category</h3>
             <div className="grid grid-cols-3 lg:grid-cols-9 gap-5">
@@ -405,7 +522,7 @@ export default function OnboardingLanguage() {
                 return (
                   <button
                     key={cat.value}
-                    onClick={() => navigate(`/vendors?category=${cat.value}`)}
+                    onClick={() => handleCategoryClick(cat.value)}
                     className="group flex flex-col items-center gap-2 text-center">
                     <span className="w-16 h-16 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/25 transition-colors">
                       <Icon className="h-7 w-7 text-secondary" />

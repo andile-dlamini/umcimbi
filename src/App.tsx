@@ -86,6 +86,20 @@ const PlannerJoinRedirect = () => {
   return <Navigate to={to} replace />;
 };
 
+// Logged-out /vendors now redirects to the landing page, preserving filters
+const PublicVendorsRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const params = new URLSearchParams();
+  const category = searchParams.get('category');
+  const location = searchParams.get('location');
+  if (category) params.set('category', category);
+  if (location) params.set('location', location);
+  const qs = params.toString();
+  // The logged-out landing page lives at /onboarding (the "/" catch-all sends there)
+  return <Navigate to={qs ? `/onboarding?${qs}` : '/onboarding'} replace />;
+};
+
+
 function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
   const { user, isLoading, isProfileComplete } = useAuth();
   useMetaPixelPageView();
@@ -106,7 +120,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
-        <Route path="/vendors" element={<PublicVendorsList />} />
+        <Route path="/vendors" element={<PublicVendorsRedirect />} />
         <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/join/vendor" element={<VendorLandingPage />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
