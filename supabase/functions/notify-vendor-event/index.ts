@@ -2,6 +2,7 @@
 // Requires service-role Bearer.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { renderSms, normalizeSaPhone, sendConnectMobileSms, SmsEvent } from "../_shared/smsTemplates.ts";
+import { isInternalCall } from "../_shared/internalAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,9 +17,7 @@ function json(body: unknown, status = 200) {
 }
 
 function authOk(req: Request) {
-  const h = req.headers.get("Authorization") ?? "";
-  const token = h.replace(/^Bearer\s+/i, "").trim();
-  return token && token === SERVICE_ROLE;
+  return isInternalCall(req);
 }
 
 type VendorEvent =

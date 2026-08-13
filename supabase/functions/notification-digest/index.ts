@@ -4,6 +4,7 @@
 // send one digest SMS and stamp last_notified_at.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { renderSms, normalizeSaPhone, sendConnectMobileSms } from "../_shared/smsTemplates.ts";
+import { isInternalCall } from "../_shared/internalAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,8 +20,7 @@ function json(b: unknown, s = 200) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
-  if (token !== SERVICE_ROLE) return json({ error: "Unauthorized" }, 401);
+  if (!isInternalCall(req)) return json({ error: "Unauthorized" }, 401);
 
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
   const now = new Date();

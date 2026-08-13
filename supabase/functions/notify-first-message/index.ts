@@ -1,6 +1,7 @@
 // notify-first-message: sends first-chat SMS to the recipient (opposite side of sender).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { renderSms, normalizeSaPhone, sendConnectMobileSms } from "../_shared/smsTemplates.ts";
+import { isInternalCall } from "../_shared/internalAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,8 +17,7 @@ function json(b: unknown, s = 200) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
-  if (token !== SERVICE_ROLE) return json({ error: "Unauthorized" }, 401);
+  if (!isInternalCall(req)) return json({ error: "Unauthorized" }, 401);
 
   try {
     const { conversation_id, sender_type, message_id } = await req.json();
@@ -54,17 +54,22 @@ Deno.serve(async (req) => {
         return json({ skipped: "dormant" });
       }
 
-      const { error: dupErr } = await sb.from("sms_notification_log").insert({
+      const { data: logRow, error: dupErr } = await sb.from("sms_notification_log").insert({
         user_id: ownerId, user_type: "vendor",
         event_type: "first_message_to_vendor",
         tier: "tier1", related_id: conversation_id, phone_number: phone,
-      });
+      }).select("id").maybeSingle();
       if (dupErr && String(dupErr.code) === "23505") return json({ skipped: "duplicate" });
 
       const phoneNoPlus = normalizeSaPhone(phone);
       if (!phoneNoPlus) return json({ skipped: "invalid_phone" });
       const body = renderSms("first_message_to_vendor", { name });
       const res = await sendConnectMobileSms(phoneNoPlus, body, `firstmsg_${message_id}`.slice(0, 60));
+      if (logRow?.id) {
+        await sb.from("sms_notification_log")
+          .update({ provider_response: `HTTP ${res.status}: ${String(res.response ?? "").slice(0, 200)}` })
+          .eq("id", logRow.id);
+      }
       if (res.ok) {
         await sb.from("vendors").update({
           dormant_nudge_count: ((v as any).dormant_nudge_count ?? 0) + 1,
@@ -81,17 +86,22 @@ Deno.serve(async (req) => {
       const { data: prof } = await sb.from("profiles").select("full_name, first_name, phone_number").eq("user_id", plannerId).maybeSingle();
       if (!prof) return json({ skipped: "no_profile" });
       const phone = (prof as any).phone_number;
-      const { error: dupErr } = await sb.from("sms_notification_log").insert({
+      const { data: logRow, error: dupErr } = await sb.from("sms_notification_log").insert({
         user_id: plannerId, user_type: "planner",
         event_type: "first_message_to_planner",
         tier: "tier1", related_id: conversation_id, phone_number: phone,
-      });
+      }).select("id").maybeSingle();
       if (dupErr && String(dupErr.code) === "23505") return json({ skipped: "duplicate" });
 
       const phoneNoPlus = normalizeSaPhone(phone);
       if (!phoneNoPlus) return json({ skipped: "invalid_phone" });
       const body = renderSms("first_message_to_planner", { name: (prof as any).first_name ?? (prof as any).full_name });
       const res = await sendConnectMobileSms(phoneNoPlus, body, `firstmsg_${message_id}`.slice(0, 60));
+      if (logRow?.id) {
+        await sb.from("sms_notification_log")
+          .update({ provider_response: `HTTP ${res.status}: ${String(res.response ?? "").slice(0, 200)}` })
+          .eq("id", logRow.id);
+      }
       if (res.ok) {
         await sb.from("profiles").update({ last_notified_at: new Date().toISOString() }).eq("user_id", plannerId);
       }
