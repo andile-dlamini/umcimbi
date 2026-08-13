@@ -91,6 +91,12 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false, 
               )}
             </div>
 
+            {vendor.about && (
+              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-3">
+                {vendor.about}
+              </p>
+            )}
+
             <div className="flex items-center gap-3 mt-1">
               {vendor.price_range_text && (
                 <p className="text-sm text-primary font-medium">
