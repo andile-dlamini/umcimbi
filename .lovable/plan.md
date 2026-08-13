@@ -1,4 +1,4 @@
-Scope: hide zero-review vendor ratings in card and detail views, and sort public directories by review count instead of rating so unrated vendors do not float to the top.
+Scope: hide zero-review vendor ratings in card and detail views, and sort vendor lists by review count instead of rating so unrated vendors do not float to the top.
 
 What will change
 
@@ -24,6 +24,17 @@ What will change
      - Add `nullsFirst: false` to the existing `is_super_vendor` order.
      - Replace `.order('rating', { ascending: false })` with `.order('review_count', { ascending: false, nullsFirst: false })`.
 
+5. `src/hooks/useVendors.ts`
+   - Replace `.order('rating', { ascending: false })` with `.order('review_count', { ascending: false, nullsFirst: false })`.
+   - Remove the rating ordering from this query.
+
+6. `src/hooks/useVendorsWithDistance.ts`
+   - In the `rating` sort case, change the comparator to compare `review_count` descending first (treating null as 0).
+   - Only fall back to comparing `rating` descending when review counts are equal.
+   - Keep the existing verified badge boost that runs before the switch.
+   - Leave the `distance` and `name` cases unchanged.
+   - Do not change the `SortOption` type, the default `sortBy` value, or the sort dropdown labels in `VendorsList.tsx`. The option remains called "rating"; only its comparator changes.
+
 What will not change
 
 - `src/components/vendors/VendorRating.tsx` and the review submission flow.
@@ -36,4 +47,5 @@ Verification
 
 - Confirm a vendor with `review_count === 0` shows no star and no rating number anywhere.
 - Confirm a vendor with at least one review still shows the star, rating value and review count normally.
-- Confirm the landing page and public directory queries still return results and sort reviewed vendors above unreviewed ones.
+- Confirm the vendor list queries and client-side sort still return reviewed vendors above unreviewed ones.
+
