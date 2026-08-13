@@ -113,6 +113,7 @@ serve(async (req) => {
       });
     }
 
+    // NOTE: despite the column name `final_offer_pdf_key`, the stored artefact is HTML, not a PDF.
     // Generate signed URL (valid for 5 minutes)
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("quote-pdfs")
