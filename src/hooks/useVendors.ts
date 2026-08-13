@@ -42,7 +42,7 @@ export function useVendors(filters?: {
       console.error('Error fetching vendors:', error);
       toast.error('Failed to load vendors');
     } else {
-      setVendors((data || []) as Vendor[]);
+      setVendors((data || []) as unknown as Vendor[]);
     }
     setIsLoading(false);
   }, [filters?.category, filters?.location, filters?.search]);
@@ -79,7 +79,7 @@ export function useVendor(vendorId: string | undefined) {
       if (error) {
         console.error('Error fetching vendor:', error);
       } else {
-        setVendor(data as Vendor | null);
+        setVendor(data as unknown as Vendor | null);
         
         // Increment view count via RPC to avoid race conditions (fire and forget)
         // NOTE: must call .then() — PostgrestBuilder is lazy and won't execute otherwise

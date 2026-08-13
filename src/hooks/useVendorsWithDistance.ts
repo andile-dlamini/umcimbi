@@ -70,7 +70,7 @@ export function useVendorsWithDistance(
       }
 
       const { data: vendorsData } = await query;
-      setVendors((vendorsData || []) as Vendor[]);
+      setVendors((vendorsData || []) as unknown as Vendor[]);
       setIsLoading(false);
     };
 
