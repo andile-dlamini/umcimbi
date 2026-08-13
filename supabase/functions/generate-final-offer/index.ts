@@ -139,9 +139,23 @@ function generatePdfHtml(
   .total-row { font-weight: bold; font-size: 14px; background: #f5f0e8; }
   .notes-box { background: #faf8f4; border-left: 3px solid #B8860B; padding: 12px; margin: 16px 0; border-radius: 0 6px 6px 0; font-size: 12px; }
   .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #999; }
+  .print-bar { text-align: right; margin-bottom: 16px; }
+  .print-bar button { font: inherit; font-size: 12px; padding: 8px 14px; border: 1px solid #B8860B; background: #B8860B; color: #fff; border-radius: 6px; cursor: pointer; }
+  /* Pagination: never split a row, boxed section or heading across a printed page */
+  table { page-break-inside: auto; }
+  tr, td, th { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  .info-grid, .info-box, .notes-box, .total-row, .footer { page-break-inside: avoid; }
+  .section-title { page-break-after: avoid; }
+  @media print {
+    body { padding: 0; }
+    .print-bar { display: none; }
+  }
 </style>
 </head>
 <body>
+  <div class="print-bar"><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
   ${header}
 
   <!-- Document title & number -->
