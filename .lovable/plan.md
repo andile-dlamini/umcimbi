@@ -37,7 +37,9 @@ For logged out visitors, `/vendors` redirects to `/` carrying any category and l
 
 ## Technical notes
 
-- Random ordering: PostgREST cannot order randomly, so the query fetches a larger slice and shuffles client side before slicing to the display count.
+- Random ordering: PostgREST cannot order randomly, so each query fetches an explicit slice of 60 rows and shuffles client side before slicing to the display count. The shuffle runs once when the result arrives and the shuffled array is held in state — never computed during render — so tiles do not jump while the visitor types in the location input. This applies to both the vendor landing carousel and the landing page results grid. A code comment notes that once the active vendor count approaches 60 this needs revisiting, since beyond that the shuffle only reorders the same fixed subset.
+- Landing page tile clicks reuse the existing behaviour from PublicVendorsList unchanged: navigate to `/auth?mode=signup&role=planner` with a `redirect` param encoding `/vendors/<vendorId>`.
+
 - Landing page results select `id, name, category, location, logo_url, image_urls, about` from `vendors_directory_public`; the vendor landing carousel keeps the existing column list.
 - URL state uses `useSearchParams` with `{ replace: true }`.
 - Carousel scroll uses a ref on the scroll container with `scrollBy`, `behavior` chosen from a `prefers-reduced-motion` media query, and a scroll listener to compute the disabled arrow states.
