@@ -2124,7 +2124,6 @@ export type Database = {
           rating: number | null
           registered_business_name: string | null
           review_count: number | null
-          selfie_photo_url: string | null
           selfie_request_sent_at: string | null
           show_registration_on_pdf: boolean | null
           show_vat_on_pdf: boolean | null
@@ -2190,7 +2189,6 @@ export type Database = {
           rating?: number | null
           registered_business_name?: string | null
           review_count?: number | null
-          selfie_photo_url?: string | null
           selfie_request_sent_at?: string | null
           show_registration_on_pdf?: boolean | null
           show_vat_on_pdf?: boolean | null
@@ -2256,7 +2254,6 @@ export type Database = {
           rating?: number | null
           registered_business_name?: string | null
           review_count?: number | null
-          selfie_photo_url?: string | null
           selfie_request_sent_at?: string | null
           show_registration_on_pdf?: boolean | null
           show_vat_on_pdf?: boolean | null
