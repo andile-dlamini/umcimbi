@@ -29,7 +29,7 @@ Rather than block the fix on that unknown, the fix below is chosen so that it wo
 
 If the markup is missing from the response for any reason, it falls back to the signed URL exactly as today, so this cannot be worse than the current behaviour.
 
-Not in scope of this step, but flagged: `orders/*.html` in the same bucket, served by `get-order-pdf-url`, has the identical problem. Say the word and it gets the same treatment in the same pass.
+Order documents get the identical treatment in the same pass: `orders/*.html`, written by `generate-order-confirmation` and served by `get-order-pdf-url`, are the same HTML-called-a-PDF, and `viewOrderPdfAction` opens them the same broken way. Same change to the function, same blob rendering in the client, same fallback.
 
 ## 2. Copy
 
