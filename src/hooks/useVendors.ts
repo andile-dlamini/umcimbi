@@ -16,7 +16,8 @@ export function useVendors(filters?: {
 
   const fetchVendors = useCallback(async () => {
     let query = supabase
-      .from('vendors')
+      // Curated view: same rows, minus banking/registration/admin-note columns.
+      .from('vendors_marketplace')
       .select('*')
       .eq('is_active', true)
       .eq('state_province', 'KwaZulu-Natal')
@@ -70,7 +71,7 @@ export function useVendor(vendorId: string | undefined) {
       }
 
       const { data, error } = await supabase
-        .from('vendors')
+        .from('vendors_marketplace')
         .select('*')
         .eq('id', vendorId)
         .maybeSingle();

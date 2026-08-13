@@ -42,7 +42,8 @@ export function useVendorsWithDistance(
 
       // Fetch vendors
       let query = supabase
-        .from('vendors')
+        // Curated view: same rows, minus banking/registration/admin-note columns.
+        .from('vendors_marketplace')
         .select('*')
         .eq('is_active', true)
         .eq('state_province', 'KwaZulu-Natal')

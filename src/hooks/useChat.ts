@@ -31,7 +31,7 @@ export const useConversations = () => {
         (convData || []).map(async (conv) => {
           // Fetch vendor
           const { data: vendor } = await supabase
-            .from('vendors')
+            .from('vendors_marketplace')
             .select('*')
             .eq('id', conv.vendor_id)
             .single();
@@ -171,7 +171,7 @@ export const useConversation = (conversationId: string | undefined) => {
 
         // Fetch vendor
         const { data: vendor } = await supabase
-          .from('vendors')
+          .from('vendors_marketplace')
           .select('*')
           .eq('id', conv.vendor_id)
           .single();
