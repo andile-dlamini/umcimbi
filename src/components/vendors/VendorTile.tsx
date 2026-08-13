@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 
 export interface VendorTileData {
@@ -19,17 +20,25 @@ interface VendorTileProps {
 }
 
 export default function VendorTile({ vendor, onClick, showAbout, className }: VendorTileProps) {
-  const image = vendor.image_urls?.[0] || vendor.logo_url;
+  const [imageFailed, setImageFailed] = useState(false);
+  const image = vendor.logo_url || vendor.image_urls?.[0];
   const about = vendor.about?.trim();
+  const showImage = image && !imageFailed;
 
   return (
     <button
       onClick={onClick}
       className={`group text-left rounded-2xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all ${className ?? ''}`}>
       <div className="h-40 w-full bg-muted overflow-hidden">
-        {image ?
-        <img src={image} alt={vendor.name} loading="lazy" className="w-full h-full object-cover" /> :
-        <div className="w-full h-full flex items-center justify-center bg-muted">
+        {showImage ?
+          <img
+            src={image}
+            alt={vendor.name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={() => setImageFailed(true)}
+          /> :
+          <div className="w-full h-full flex items-center justify-center bg-muted">
             <span className="text-2xl font-bold text-muted-foreground">
               {vendor.name.charAt(0).toUpperCase()}
             </span>
@@ -42,7 +51,7 @@ export default function VendorTile({ vendor, onClick, showAbout, className }: Ve
           {getVendorCategoryLabel(vendor.category as never)}{vendor.location ? ` · ${vendor.location}` : ''}
         </p>
         {showAbout && about &&
-        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{about}</p>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{about}</p>
         }
       </div>
     </button>

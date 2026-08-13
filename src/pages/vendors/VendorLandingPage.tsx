@@ -148,7 +148,7 @@ export default function VendorLandingPage() {
       </section>
 
       {/* ═══ ALREADY LISTED ═══ */}
-      <section className="relative py-24 overflow-hidden bg-[hsl(220_30%_8%)]">
+      <section className="relative py-24 overflow-hidden bg-[hsl(220_25%_5%)] border-t border-white/10">
         <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-white">See who is already listed</h2>
           <p className="text-white/70 mt-3">
@@ -161,14 +161,9 @@ export default function VendorLandingPage() {
               resultCount={8}
               onVendorClick={handleVendorClick} />
           </div>
-
-          <div className="mt-10">
-            <Link to="/onboarding#organisers">
-              <Button variant="outline" size="lg" className="rounded-full px-8 border-white/30 !text-white bg-white/5 hover:bg-white/15">See the full directory</Button>
-            </Link>
-          </div>
         </div>
       </section>
+
 
 
       {/* ═══ HOW IT WORKS ═══ */}
