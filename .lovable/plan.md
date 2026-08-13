@@ -26,9 +26,16 @@ The view-count RPC in `useVendor` stays as is; it is a function call, not a tabl
 
 Owner-scoped and admin-scoped code that legitimately needs the full row: `AuthContext.tsx`, `useVendors.ts` line 115 (`useMyVendorProfile`), `Settings.tsx`, `AuthPage.tsx`, `VendorOnboarding.tsx`, `VendorProfileForm.tsx`, `useEvents.ts`, `useServiceRequests.ts`, and everything under `src/pages/admin/`. All writes continue to go to the table, never the view.
 
-## 4. Types
+## 4. Types, and the field-usage audit (already done)
 
-Regenerate `src/integrations/supabase/types.ts` after the migration so the view is typed. The migrated hooks cast results to the existing `Vendor` type, which still declares the seven fields; if that cast now fails to compile, I will report the exact field and caller rather than adding the column back to the view.
+Regenerate `src/integrations/supabase/types.ts` after the migration so the view is typed. You are right that a clean compile proves nothing here: the hooks cast to the `Vendor` type, which still declares all seven fields, so TypeScript would accept the cast silently. I therefore grepped instead. Findings across the whole of `src/`:
+
+- **`registration_number` / `vat_number`** — read only in `BrandingSection.tsx` (display) and written in `VendorProfileForm.tsx`, `AuthPage.tsx`, `VendorOnboarding.tsx`, plus the admin queue.
+- **The four bank fields** — read only in `PayoutDetailsSection.tsx` and written in the same owner/admin forms.
+- **`admin_approval_notes`** — referenced only in `src/pages/admin/VendorVerificationQueue.tsx`.
+
+`BrandingSection` and `PayoutDetailsSection` are both rendered by `src/pages/profile/VendorProfile.tsx`, which gets its data from `useMyVendorProfile` — the owner-scoped query that stays on `public.vendors`. So none of the seven fields is reached from the four migrated callers or anything downstream of them: not the vendor list, not the vendor detail page, not the distance list, not chat. The migration is safe on the evidence, not just on the compiler.
+
 
 ## Verification
 
