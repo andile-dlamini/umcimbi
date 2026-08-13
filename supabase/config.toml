@@ -51,7 +51,3 @@ verify_jwt = false
 [functions.vendor-registration-reminder]
 verify_jwt = false
 
-
-
-[functions.sync-internal-key]
-verify_jwt = false
