@@ -120,7 +120,7 @@ export const useConversations = () => {
 
           return {
             ...conv,
-            vendor: vendor || undefined,
+            vendor: (vendor as unknown as ConversationWithDetails['vendor']) || undefined,
             event: event || undefined,
             user_profile: profile || undefined,
             last_message: lastMsg || undefined,
@@ -196,7 +196,7 @@ export const useConversation = (conversationId: string | undefined) => {
 
         setConversation({
           ...conv,
-          vendor: vendor || undefined,
+          vendor: (vendor as unknown as ConversationWithDetails['vendor']) || undefined,
           event: event || undefined,
           user_profile: profile || undefined,
         });
