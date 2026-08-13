@@ -8,35 +8,14 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
-  ShieldCheck,
-  Lock as LockIcon,
-  Users,
-  Zap,
   Menu,
   Instagram,
   Facebook,
   Music2,
 } from 'lucide-react';
 import HowItWorks from '@/components/onboarding/HowItWorks';
-import { supabase } from '@/integrations/supabase/client';
-import VendorCarousel from '@/components/vendors/VendorCarousel';
+import VendorBrowser from '@/components/vendors/VendorBrowser';
 import { trackPixel } from '@/lib/metaPixel';
-
-interface DirectoryVendor {
-  id: string;
-  name: string;
-  category: string;
-  location: string | null;
-  logo_url: string | null;
-  image_urls: string[] | null;
-}
-
-const VENDOR_BENEFITS = [
-  { icon: Users, title: 'Get discovered by families', body: 'Show up when families in your category and area are actively searching.' },
-  { icon: Zap, title: 'Send quotations easily', body: 'Structured quotes with scope, pricing and terms, sent from your phone in minutes.' },
-  { icon: ShieldCheck, title: 'Be verified and trusted', body: 'A verified badge and a real profile build the trust that wins bookings.' },
-  { icon: LockIcon, title: 'Stop chasing money', body: 'Escrow protection means you get paid once the ceremony is delivered, not once you\'ve chased an invoice.' },
-];
 
 const FAQ_ITEMS = [
   { q: 'What is UMCIMBI?', a: 'UMCIMBI is a platform that helps you plan traditional South African ceremonies by connecting you with trusted, verified vendors. You can request quotes, compare options, and manage your entire ceremony plan in one place.' },
@@ -54,7 +33,12 @@ export default function VendorLandingPage() {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [vendors, setVendors] = useState<DirectoryVendor[]>([]);
+
+  const handleVendorClick = (vendorId: string) => {
+    navigate(
+      `${signupHref}&redirect=${encodeURIComponent(`/vendors/${vendorId}`)}`
+    );
+  };
 
   useEffect(() => {
     document.title = 'UMCIMBI — Join as a vendor';
@@ -76,26 +60,6 @@ export default function VendorLandingPage() {
     };
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      // Fetch an explicit slice of 60 rows and shuffle client side (PostgREST cannot
-      // order randomly). NOTE: once the active vendor count approaches 60 this needs
-      // revisiting — beyond that the shuffle only ever reorders the same fixed subset.
-      const { data, error } = await (supabase as any)
-        .from('vendors_directory_public')
-        .select('id,name,category,location,logo_url,image_urls')
-        .limit(60);
-      if (!error && data) {
-        // Shuffle once, here, and store the result — never during render.
-        const shuffled = [...(data as DirectoryVendor[])];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        setVendors(shuffled.slice(0, 10));
-      }
-    })();
-  }, []);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -184,65 +148,28 @@ export default function VendorLandingPage() {
       </section>
 
       {/* ═══ ALREADY LISTED ═══ */}
-      {vendors.length > 0 && (
-        <section className="py-24 bg-background">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">See who is already listed</h2>
-            <p className="text-muted-foreground mt-3">
-              Vendors across KwaZulu-Natal are already taking bookings on UMCIMBI.
-            </p>
+      <section className="relative py-24 overflow-hidden bg-[hsl(220_30%_8%)]">
+        <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">See who is already listed</h2>
+          <p className="text-white/70 mt-3">
+            Vendors across KwaZulu-Natal are already taking bookings on UMCIMBI.
+          </p>
 
-            <div className="mt-10">
-              <VendorCarousel vendors={vendors} onVendorClick={() => navigate('/')} />
-            </div>
-
-            <div className="mt-6">
-              <Link to="/">
-                <Button variant="outline" size="lg" className="rounded-full px-8">See the full directory</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ BENEFITS ═══ */}
-      <section
-        className="relative py-28 overflow-hidden bg-background"
-        style={{
-          '--primary': '20 75% 40%',
-          '--accent': '20 65% 50%',
-        } as React.CSSProperties}
-      >
-        <div className="relative mx-auto max-w-3xl px-5 sm:px-8">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">For Vendors</p>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-10 text-foreground">Win better. Work with less back-and-forth.</h2>
-
-          <div className="space-y-5">
-            {VENDOR_BENEFITS.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="group rounded-2xl bg-muted/50 border border-border p-6 hover:bg-muted hover:-translate-y-1 transition-all duration-300">
-                <div className="flex gap-5 items-start">
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[15px] text-foreground">{title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{body}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="mt-10">
+            <VendorBrowser
+              showSearchCard={false}
+              resultCount={8}
+              onVendorClick={handleVendorClick} />
           </div>
 
           <div className="mt-10">
-            <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to={signupHref}>
-              <Button size="lg" className="h-13 text-[15px] font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                I'm a vendor — Register
-              </Button>
+            <Link to="/onboarding#organisers">
+              <Button variant="outline" size="lg" className="rounded-full px-8 border-white/30 !text-white bg-white/5 hover:bg-white/15">See the full directory</Button>
             </Link>
-            <p className="text-sm text-muted-foreground/80 mt-3">Free to list your business. Approved within 48 hours.</p>
           </div>
         </div>
       </section>
+
 
       {/* ═══ HOW IT WORKS ═══ */}
       <section id="how" className="scroll-mt-20">
