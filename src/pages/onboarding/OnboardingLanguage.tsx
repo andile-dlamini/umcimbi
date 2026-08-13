@@ -133,83 +133,10 @@ export default function OnboardingLanguage() {
     setMobileMenuOpen(false);
   };
 
-  // Fetch + shuffle vendor results for the inline organisers browser.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setResultsLoading(true);
-      let query = (supabase as any).
-      from('vendors_directory_public').
-      select('id,name,category,location,logo_url,image_urls,about');
-
-      if (activeCategory && activeCategory !== 'all') query = query.eq('category', activeCategory);
-      if (activeLocation.trim()) query = query.ilike('location', `%${activeLocation.trim()}%`);
-
-      // Explicit 60-row slice, shuffled client side (PostgREST cannot order randomly).
-      // NOTE: once the active vendor count approaches 60 this needs revisiting — beyond
-      // that point the shuffle would only ever reorder the same fixed subset.
-      const { data, error } = await query.limit(60);
-      if (cancelled) return;
-
-      if (error || !data) {
-        setResults([]);
-      } else {
-        // Shuffle once, when the result arrives, and store it in state — never in render.
-        const shuffled = [...(data as VendorTileData[])];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        setResults(shuffled.slice(0, 8));
-      }
-      setResultsLoading(false);
-    })();
-    return () => {cancelled = true;};
-  }, [activeCategory, activeLocation]);
-
-  const syncUrl = (category: string, location: string) => {
-    const params = new URLSearchParams();
-    if (category && category !== 'all') params.set('category', category);
-    if (location.trim()) params.set('location', location.trim());
-    setSearchParams(params, { replace: true });
-  };
-
-  const scrollToResults = () => {
-    document.getElementById('vendor-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const applyFilter = (category: VendorCategory | 'all' | '', location: string) => {
-    setActiveCategory(category);
-    setActiveLocation(location);
-    setSearchCategory(category);
-    setSearchLocation(location);
-    syncUrl(category, location);
-  };
-
-  const clearFilter = () => {
-    applyFilter('', '');
-  };
-
-  const handleCategoryClick = (category: VendorCategory) => {
-    applyFilter(category, activeLocation);
-    setTimeout(scrollToResults, 50);
-  };
-
-  const handleVendorSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilter(searchCategory, searchLocation);
-    setTimeout(scrollToResults, 50);
-  };
-
   const handleVendorClick = (vendorId: string) => {
     navigate(`/auth?mode=signup&role=planner&redirect=${encodeURIComponent(`/vendors/${vendorId}`)}`);
   };
 
-  const activeCategoryLabel =
-  activeCategory && activeCategory !== 'all' ?
-  LIVE_VENDOR_CATEGORIES.find((c) => c.value === activeCategory)?.label ?? activeCategory :
-  '';
-  const hasActiveFilter = Boolean(activeCategoryLabel || activeLocation.trim());
 
 
   return (
