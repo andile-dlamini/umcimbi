@@ -29,7 +29,10 @@ Will silently return nothing after migration 2 — these are the ones you asked 
 
 The four surfaces you listed as must-not-break (browse, vendor detail, distance list, chat) all read `vendors_marketplace` already and are fine. The breakage is in the joined reads above, which the earlier pass did not migrate because embedded joins were out of scope.
 
-**This is a decision point.** Dropping the policy without addressing that table leaves several logged-in screens blank. Recommended: do it in the same pass — repoint those joins from `vendors` to `vendors_marketplace` (the view exposes the same id column, so the embed works the same way), and switch `useEvents` and `useServiceRequests` point reads to the view too. That is presentation-layer wiring only, no logic change. If you would rather keep this pass to the two migrations exactly as written, say so and I will ship only those and leave the joins for a follow-up — with those screens blank in between.
+**Row visibility does not change.** The broad policy's condition is identical to the view's new WHERE clause, so a deactivated or switched-off-province vendor already returns null through these joins today for anyone who is not the owner or an admin. Verified against the data: 10 vendors are currently hidden by that filter, and no quote, request or booking references any of them. Repointing the joins at the view changes which columns are reachable, not which rows.
+
+**Included in this pass:** repoint the ten joined and point reads from `vendors` to `vendors_marketplace`. The embed relationship through the view is confirmed to resolve. This is wiring only — no logic change.
+
 
 ## Migration 1 — convert the view
 
