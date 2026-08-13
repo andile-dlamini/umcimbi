@@ -130,6 +130,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
       <Route path="/feedback/vendor" element={<FeedbackVendor />} />
       <Route path="/verify/selfie" element={<SelfieSubmission />} />
+      <Route path="/join/vendor" element={<VendorLandingPage />} />
       
       <Route path="*" element={
 
