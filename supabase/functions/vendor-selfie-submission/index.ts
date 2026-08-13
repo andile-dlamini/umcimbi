@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     const { error: updErr } = await admin
       .from('vendors')
-      .update({ selfie_photo_url: path, selfie_request_token: null })
+      .update({ selfie_photo_url: path })
       .eq('id', vendor.id);
 
     if (updErr) {
@@ -98,6 +98,14 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Single-use: the token cannot be replayed.
+    const { error: consumeErr } = await admin
+      .from('vendor_selfie_requests')
+      .update({ consumed_at: new Date().toISOString() })
+      .eq('id', request.id);
+    if (consumeErr) console.error('Failed to consume selfie token:', consumeErr);
+
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
