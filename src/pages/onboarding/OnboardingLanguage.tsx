@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue } from
+'@/components/ui/select';
 import {
   Accordion,
   AccordionContent,
@@ -15,28 +21,47 @@ import {
   PopoverTrigger } from
 '@/components/ui/popover';
 import {
-  ShieldCheck,
-  BarChart3,
-  Lock as LockIcon,
-  Users,
-  Zap,
   Menu,
   ArrowRight,
-  CheckCircle2,
-  Sparkles,
-  Play,
   Download,
   Instagram,
   Facebook,
   Music2,
   PartyPopper,
-  Store } from
+  Store,
+  Search,
+  Shirt,
+  UtensilsCrossed,
+  Snowflake,
+  Sparkles,
+  CalendarCheck,
+  Droplets,
+  Camera,
+  Tent,
+  MoreHorizontal } from
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
 import HowItWorks from '@/components/onboarding/HowItWorks';
-import FeatureIcon from '@/components/illustrations/FeatureIcon';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { trackPixel } from '@/lib/metaPixel';
+import {
+  LIVE_VENDOR_CATEGORIES,
+  LIVE_VENDOR_CATEGORY_FILTER_OPTIONS,
+  VendorCategory } from
+'@/lib/vendorCategories';
+
+const CATEGORY_ICONS: Partial<Record<VendorCategory, typeof Camera>> = {
+  attire_tailoring: Shirt,
+  catering: UtensilsCrossed,
+  cold_room_hire: Snowflake,
+  decor: Sparkles,
+  dj_sound_audio: Music2,
+  event_planning: CalendarCheck,
+  mobile_toilets: Droplets,
+  photographer: Camera,
+  tents: Tent
+};
+
 
 export default function OnboardingLanguage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
