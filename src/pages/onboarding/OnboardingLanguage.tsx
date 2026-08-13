@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue } from
-'@/components/ui/select';
 import {
   Accordion,
   AccordionContent,
@@ -28,65 +20,35 @@ import {
   Facebook,
   Music2,
   PartyPopper,
-  Store,
-  Search,
-  Shirt,
-  UtensilsCrossed,
-  Snowflake,
-  Sparkles,
-  CalendarCheck,
-  Droplets,
-  Camera,
-  Tent,
-  MoreHorizontal,
-  X,
-  Loader2 } from
+  Store } from
 'lucide-react';
 import HeroSereneIllustration from '@/components/illustrations/HeroSereneIllustration';
-import VendorTile, { VendorTileData } from '@/components/vendors/VendorTile';
-import { supabase } from '@/integrations/supabase/client';
+import VendorBrowser from '@/components/vendors/VendorBrowser';
 import HowItWorks from '@/components/onboarding/HowItWorks';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { trackPixel } from '@/lib/metaPixel';
-import {
-  LIVE_VENDOR_CATEGORIES,
-  LIVE_VENDOR_CATEGORY_FILTER_OPTIONS,
-  VendorCategory } from
-'@/lib/vendorCategories';
-
-const CATEGORY_ICONS: Partial<Record<VendorCategory, typeof Camera>> = {
-  attire_tailoring: Shirt,
-  catering: UtensilsCrossed,
-  cold_room_hire: Snowflake,
-  decor: Sparkles,
-  dj_sound_audio: Music2,
-  event_planning: CalendarCheck,
-  mobile_toilets: Droplets,
-  photographer: Camera,
-  tents: Tent
-};
-
 
 export default function OnboardingLanguage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all' | ''>(
-    (searchParams.get('category') as VendorCategory) || ''
-  );
-  const [searchLocation, setSearchLocation] = useState(searchParams.get('location') || '');
-  const [activeCategory, setActiveCategory] = useState<VendorCategory | 'all' | ''>(
-    (searchParams.get('category') as VendorCategory) || ''
-  );
-  const [activeLocation, setActiveLocation] = useState(searchParams.get('location') || '');
-  const [results, setResults] = useState<VendorTileData[]>([]);
-  const [resultsLoading, setResultsLoading] = useState(true);
   const { isInstallable, isIOS, isStandalone, triggerInstall } = usePWAInstall();
 
   useEffect(() => {
     document.title = 'UMCIMBI — Plan your ceremony with confidence';
   }, []);
+
+  // React Router does not scroll to a hash target on its own.
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.slice(1);
+    const t = setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    return () => clearTimeout(t);
+  }, [location.hash]);
+
 
   // Inject FAQPage JSON-LD for SEO
   useEffect(() => {
