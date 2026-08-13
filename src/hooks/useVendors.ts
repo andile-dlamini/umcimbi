@@ -260,7 +260,7 @@ export function useSavedVendors() {
     setIsLoading(true);
     const { data, error } = await supabase
       .from('saved_vendors')
-      .select('vendor_id, vendors(id, name, category, image_urls, rating, review_count)')
+      .select('vendor_id, vendors_marketplace(id, name, category, image_urls, rating, review_count)')
       .eq('user_id', user.id);
 
     if (error) {
@@ -268,7 +268,7 @@ export function useSavedVendors() {
       setSavedVendors([]);
     } else {
       const list = (data || [])
-        .map((row: any) => row.vendors)
+        .map((row: any) => row.vendors_marketplace)
         .filter(Boolean) as SavedVendorItem[];
       setSavedVendors(list);
     }
@@ -326,7 +326,7 @@ export function useVendorLocations() {
   useEffect(() => {
     const fetchLocations = async () => {
       const { data } = await supabase
-        .from('vendors')
+        .from('vendors_marketplace')
         .select('location')
         .eq('is_active', true)
         .not('location', 'is', null);

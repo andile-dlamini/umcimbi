@@ -202,7 +202,7 @@ export function useEventVendors(eventId: string | undefined) {
     }
 
     // Update vendor's added_to_events_count (fire and forget)
-    supabase.from('vendors').select('added_to_events_count').eq('id', vendorId).single().then(({ data }) => {
+    supabase.from('vendors_marketplace').select('added_to_events_count').eq('id', vendorId).single().then(({ data }) => {
       if (data) {
         supabase.from('vendors').update({ added_to_events_count: (data.added_to_events_count || 0) + 1 }).eq('id', vendorId);
       }

@@ -36,11 +36,11 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
       const [{ data: serviceRequests }, { data: bookings }] = await Promise.all([
         supabase
           .from('service_requests')
-          .select('status, vendor:vendors(category)')
+          .select('status, vendor:vendors_marketplace(category)')
           .eq('event_id', eventId),
         supabase
           .from('bookings')
-          .select('booking_status, vendor:vendors(category)')
+          .select('booking_status, vendor:vendors_marketplace(category)')
           .eq('event_id', eventId),
       ]);
 

@@ -19,7 +19,7 @@ export function useMyServiceRequests() {
       .select(`
         *,
         event:events(*),
-        vendor:vendors(*)
+        vendor:vendors_marketplace(*)
       `)
       .eq('requester_user_id', user.id)
       .order('created_at', { ascending: false });
@@ -65,7 +65,7 @@ export function useMyServiceRequests() {
       .single();
 
     const { data: vendor } = await supabase
-      .from('vendors')
+      .from('vendors_marketplace')
       .select('name')
       .eq('id', request.vendor_id)
       .single();

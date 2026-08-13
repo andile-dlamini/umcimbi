@@ -17,7 +17,7 @@ export function useClientBookings() {
       .from('bookings')
       .select(`
         *,
-        vendor:vendors(id, name, category, rating, image_urls, phone_number, whatsapp_number),
+        vendor:vendors_marketplace(id, name, category, rating, image_urls, phone_number, whatsapp_number),
         event:events(id, name, date, location)
       `)
       .eq('client_id', user.id)
@@ -249,7 +249,7 @@ export function useBookingDetails(bookingId: string | undefined) {
       .from('bookings')
       .select(`
         *,
-        vendor:vendors(id, name, category, rating, image_urls, phone_number, whatsapp_number),
+        vendor:vendors_marketplace(id, name, category, rating, image_urls, phone_number, whatsapp_number),
         event:events(id, name, date, location)
       `)
       .eq('id', bookingId)
