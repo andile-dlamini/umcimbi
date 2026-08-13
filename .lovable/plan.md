@@ -18,7 +18,7 @@ Access:
 - Enable row level security, create **no policies**, and issue **no grants** to `anon` or `authenticated`. Only the service role (backend) can touch it. This is deliberate.
 
 Data move:
-- Insert one row per vendor whose `selfie_request_token` is not null, carrying the token, `expires_at = now() + 24 hours`, `consumed_at = null`.
+- Insert one row per vendor whose `selfie_request_token` is not null, carrying the token, `expires_at = now() + 24 hours`, and **`consumed_at = now()`** — those tokens have been readable by every signed-in user, so they migrate dead rather than live. A query against the database right now returns **zero** vendors with a token, so this affects **0 rows** and no vendor needs a re-issued link. The insert stays in the migration in case a token is created before it runs.
 - Then drop `selfie_request_token` (and its partial index) from `public.vendors`.
 - `selfie_request_sent_at` stays on vendors, untouched.
 - No RLS policy on `public.vendors` is changed.
@@ -37,6 +37,7 @@ The admin page runs as a normal authenticated user, and the new table intentiona
 - Verifies the caller's JWT and that the caller has the `admin` role; otherwise 403.
 - Marks any existing unconsumed rows for that vendor as consumed (a new link invalidates the old one).
 - Inserts a new row with the supplied vendor id, a server-generated token, and `expires_at = now() + 24 hours`.
+- Gets an explicit `[functions.create-vendor-selfie-request]` entry in `supabase/config.toml` with `verify_jwt = false`, matching every other internally-authenticating function on this project (the only two `true` entries there are cron-invoked, non-user functions). The function does its own JWT verification and admin-role check in code.
 - Returns the token to the admin page so the existing link format and SMS sends stay identical.
 
 ## 4. src/pages/admin/VendorVerificationQueue.tsx
