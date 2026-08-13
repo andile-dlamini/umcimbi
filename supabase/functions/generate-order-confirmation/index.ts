@@ -138,9 +138,23 @@ function generateOrderHtml(
   .notes-box { background: #faf8f4; border-left: 3px solid #B8860B; padding: 12px; margin: 16px 0; border-radius: 0 6px 6px 0; font-size: 12px; }
   .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #999; }
   .status-badge { display: inline-block; background: #2e7d32; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+  .print-bar { text-align: right; margin-bottom: 16px; }
+  .print-bar button { font: inherit; font-size: 12px; padding: 8px 14px; border: 1px solid #B8860B; background: #B8860B; color: #fff; border-radius: 6px; cursor: pointer; }
+  /* Pagination: never split a row, boxed section or heading across a printed page */
+  table { page-break-inside: auto; }
+  tr, td, th { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  .info-grid, .info-box, .notes-box, .total-row, .subtotal-row, .footer { page-break-inside: avoid; }
+  .section-title { page-break-after: avoid; }
+  @media print {
+    body { padding: 0; }
+    .print-bar { display: none; }
+  }
 </style>
 </head>
 <body>
+  <div class="print-bar"><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
   ${header}
 
   <!-- Document title & numbers -->
@@ -330,6 +344,7 @@ Deno.serve(async (req) => {
     );
 
     const htmlBytes = new TextEncoder().encode(html);
+    // NOTE: despite the column name `order_pdf_key`, the stored artefact is HTML, not a PDF.
     const pdfKey = `orders/${booking_id}/${order_number}.html`;
 
     const { error: uploadError } = await supabase.storage

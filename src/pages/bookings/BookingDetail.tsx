@@ -287,7 +287,7 @@ export default function BookingDetail() {
               )}
             </div>
 
-            {/* View Order PDF - only if generated */}
+            {/* View order confirmation - only if generated */}
             {(booking as any).order_pdf_key && (
               <Button
                 variant="outline"
@@ -297,7 +297,7 @@ export default function BookingDetail() {
                 disabled={isLoadingPdf}
               >
                 {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
-                View Order PDF
+                View order confirmation
               </Button>
             )}
 

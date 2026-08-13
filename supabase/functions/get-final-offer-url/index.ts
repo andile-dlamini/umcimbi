@@ -113,6 +113,7 @@ serve(async (req) => {
       });
     }
 
+    // NOTE: despite the column name `final_offer_pdf_key`, the stored artefact is HTML, not a PDF.
     // Generate signed URL (valid for 5 minutes)
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("quote-pdfs")
@@ -126,10 +127,27 @@ serve(async (req) => {
       });
     }
 
+    // Also return the markup itself so the client can render it in a blob tab,
+    // instead of relying on how Storage serves a text/html object.
+    let html: string | null = null;
+    try {
+      const { data: fileData, error: dlError } = await supabase.storage
+        .from("quote-pdfs")
+        .download(quote.final_offer_pdf_key);
+      if (dlError) {
+        console.error("Download error:", dlError);
+      } else if (fileData) {
+        html = await fileData.text();
+      }
+    } catch (dlErr) {
+      console.error("Download exception:", dlErr);
+    }
+
     return new Response(
       JSON.stringify({
         url: signedUrlData.signedUrl,
         offer_number: quote.offer_number,
+        html,
       }),
       {
         status: 200,

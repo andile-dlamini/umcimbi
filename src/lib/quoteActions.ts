@@ -2,11 +2,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 /**
- * Fetch a signed URL for the quote's final offer PDF and open it.
+ * The stored quote / order documents are HTML (despite the *_pdf_key column
+ * names). Storage serves them without a content-disposition, and some
+ * deployments downgrade the content type, so the browser can end up showing
+ * raw source. Rendering the markup ourselves as a same-origin text/html blob
+ * sidesteps whatever Storage would have sent.
+ */
+function renderDocument(win: Window | null, html: string, fallbackUrl: string): string {
+  const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  if (win) {
+    win.location.href = blobUrl;
+  } else {
+    window.location.href = blobUrl;
+  }
+  // Blob stays alive long enough for the tab to load it.
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  return fallbackUrl;
+}
+
+/**
+ * Fetch the quote's final offer document and open it in a new tab.
  * Opens a blank tab SYNCHRONOUSLY (inside the user-gesture tap) before
  * awaiting the edge function, so mobile Safari / in-app browsers don't
  * silently block the popup.
- * Returns the URL on success, null on failure.
+ * Returns the signed URL on success, null on failure.
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
   const win = window.open('', '_blank', 'noopener,noreferrer');
@@ -16,9 +35,9 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
     });
 
     if (error) {
-      console.error('[VIEW_PDF] invoke error', error);
+      console.error('[VIEW_QUOTE] invoke error', error);
       if (win) win.close();
-      toast.error('Failed to load PDF');
+      toast.error("Couldn't open the quote");
       return null;
     }
 
@@ -28,23 +47,28 @@ export async function viewQuotePdfAction(quoteId: string): Promise<string | null
         : (data as any)?.url;
 
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
-      console.error('[VIEW_PDF] unexpected response shape', data);
+      console.error('[VIEW_QUOTE] unexpected response shape', data);
       if (win) win.close();
-      toast.error(typeof data === 'object' && data?.error ? data.error : 'Could not load PDF');
+      toast.error(typeof data === 'object' && data?.error ? data.error : "Couldn't open the quote");
       return null;
     }
 
+    const html = typeof data === 'object' ? (data as any)?.html : null;
+    if (typeof html === 'string' && html.length > 0) {
+      return renderDocument(win, html, url);
+    }
+
+    // Fallback: hand the signed URL to the tab, exactly as before.
     if (win) {
       win.location.href = url;
     } else {
-      // Blank popup was blocked — open in current tab so it still works.
       window.location.href = url;
     }
     return url;
   } catch (err: any) {
-    console.error('[VIEW_PDF] exception:', err);
+    console.error('[VIEW_QUOTE] exception:', err);
     if (win) win.close();
-    toast.error(err?.message || 'Failed to load PDF');
+    toast.error(err?.message || "Couldn't open the quote");
     return null;
   }
 }
@@ -115,7 +139,7 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
 }
 
 /**
- * Fetch a signed URL for the order confirmation PDF and open it.
+ * Fetch the order confirmation document and open it in a new tab.
  * Opens a blank tab synchronously before awaiting the edge function to
  * survive mobile popup blockers.
  */
@@ -128,15 +152,20 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
 
     if (error || data?.error) {
       if (win) win.close();
-      toast.error(data?.error || 'Failed to load Order PDF');
+      toast.error(data?.error || "Couldn't open the order confirmation");
       return null;
     }
 
     const url = typeof data === 'string' ? data : data?.url;
     if (!url || typeof url !== 'string' || !url.startsWith('http')) {
       if (win) win.close();
-      toast.error('Could not load Order PDF');
+      toast.error("Couldn't open the order confirmation");
       return null;
+    }
+
+    const html = typeof data === 'object' ? (data as any)?.html : null;
+    if (typeof html === 'string' && html.length > 0) {
+      return renderDocument(win, html, url);
     }
 
     if (win) {
@@ -147,7 +176,7 @@ export async function viewOrderPdfAction(bookingId: string): Promise<string | nu
     return url;
   } catch (err: any) {
     if (win) win.close();
-    toast.error(err?.message || 'Failed to load Order PDF');
+    toast.error(err?.message || "Couldn't open the order confirmation");
     return null;
   }
 }

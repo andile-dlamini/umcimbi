@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // NOTE: despite the column name `order_pdf_key`, the stored artefact is HTML, not a PDF.
     // Generate signed URL (5 min)
     const { data: signedData, error: signError } = await supabase.storage
       .from("quote-pdfs")
@@ -89,7 +90,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ url: signedData.signedUrl }), {
+    // Also return the markup so the client can render it in a blob tab.
+    let html: string | null = null;
+    try {
+      const { data: fileData, error: dlError } = await supabase.storage
+        .from("quote-pdfs")
+        .download(booking.order_pdf_key);
+      if (dlError) {
+        console.error("Download error:", dlError);
+      } else if (fileData) {
+        html = await fileData.text();
+      }
+    } catch (dlErr) {
+      console.error("Download exception:", dlErr);
+    }
+
+    return new Response(JSON.stringify({ url: signedData.signedUrl, html }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

@@ -110,7 +110,7 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
             onClick={handleViewPdf}
           >
             <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'Order PDF'}
+            {isLoadingPdf ? 'Loading...' : 'Order confirmation'}
           </Button>
         )}
       </CardFooter>

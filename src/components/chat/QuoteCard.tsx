@@ -226,7 +226,7 @@ export function QuoteCard({ metadata, isVendorView, messageId, onStatusChange, o
           disabled={isLoadingPdf}
         >
           {isLoadingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
-          View PDF
+          View quote
         </Button>
 
         {/* Only show action buttons if NOT superseded */}
