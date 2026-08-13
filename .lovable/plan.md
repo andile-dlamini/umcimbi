@@ -60,4 +60,4 @@ The public directory view, other tables' rules, selfie verification, escrow, SMS
 - As an ordinary signed-in user: rows come back from the marketplace view, zero rows from a direct read of the vendors table, and no bank column is reachable.
 - As a vendor owner: own profile still readable and editable, bank details still load through the owner-scoped function.
 - As an admin: everything still visible.
-- Browse, vendor detail, distance list and chat all still return results; if the join fix is included, quotes, bookings, requests, saved vendors and the event vendor tabs too.
+- Browse, vendor detail, distance list, chat, quotes, bookings, requests, saved vendors and the event vendor tabs all still return results.
