@@ -33,6 +33,7 @@ import VendorsList from "@/pages/vendors/VendorsList";
 import PublicVendorsList from "@/pages/vendors/PublicVendorsList";
 import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
+import VendorLandingPage from "@/pages/vendors/VendorLandingPage";
 import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
 import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
@@ -107,7 +108,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/waitlist" element={<WaitlistPage />} />
         <Route path="/vendors" element={<PublicVendorsList />} />
         <Route path="/unsubscribe" element={<EmailUnsubscribe />} />
-        <Route path="/join/vendor" element={<VendorJoinRedirect />} />
+        <Route path="/join/vendor" element={<VendorLandingPage />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -129,6 +130,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
       <Route path="/feedback/vendor" element={<FeedbackVendor />} />
       <Route path="/verify/selfie" element={<SelfieSubmission />} />
+      <Route path="/join/vendor" element={<VendorLandingPage />} />
       
       <Route path="*" element={
 
