@@ -53,12 +53,13 @@ async function isDormantBlocked(sb: ReturnType<typeof createClient>, vendorId: s
 
 async function logSms(sb: ReturnType<typeof createClient>, row: {
   user_id: string; user_type: "vendor" | "planner"; event_type: string; tier: "tier1" | "tier2" | "suppressed";
-  related_id?: string | null; phone?: string | null; provider_response?: string | null;
+  related_id?: string | null; phone_number?: string | null; provider_response?: string | null;
 }) {
-  const { error } = await sb.from("sms_notification_log").insert(row);
+  const { data, error } = await sb.from("sms_notification_log").insert(row).select("id").maybeSingle();
   // unique-index violation ⇒ duplicate ⇒ treat as success
-  return { inserted: !error, duplicate: !!error && String(error.code) === "23505" };
+  return { inserted: !error, duplicate: !!error && String(error.code) === "23505", id: (data as any)?.id ?? null };
 }
+
 
 async function sendAndBump(
   sb: ReturnType<typeof createClient>,
