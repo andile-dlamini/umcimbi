@@ -67,7 +67,7 @@ export default function OnboardingLanguage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all'>('all');
+  const [searchCategory, setSearchCategory] = useState<VendorCategory | 'all' | ''>('');
   const [searchLocation, setSearchLocation] = useState('');
   const { isInstallable, isIOS, isStandalone, triggerInstall } = usePWAInstall();
 
@@ -161,7 +161,7 @@ export default function OnboardingLanguage() {
   const handleVendorSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (searchCategory !== 'all') params.set('category', searchCategory);
+    if (searchCategory && searchCategory !== 'all') params.set('category', searchCategory);
     if (searchLocation.trim()) params.set('location', searchLocation.trim());
     const qs = params.toString();
     navigate(qs ? `/vendors?${qs}` : '/vendors');
@@ -374,7 +374,7 @@ export default function OnboardingLanguage() {
           <form
             onSubmit={handleVendorSearch}
             className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto">
-            <Select value={searchCategory} onValueChange={(v) => setSearchCategory(v as VendorCategory | 'all')}>
+            <Select value={searchCategory || undefined} onValueChange={(v) => setSearchCategory(v as VendorCategory | 'all')}>
               <SelectTrigger className="sm:flex-1">
                 <SelectValue placeholder="Categories" />
               </SelectTrigger>
