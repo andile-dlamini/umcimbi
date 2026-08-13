@@ -355,6 +355,7 @@ serve(async (req) => {
     // Use Lovable AI gateway to convert HTML to clean text summary (not ideal but functional)
     // For proper PDF, we store the HTML and serve it as a downloadable document
     const htmlBytes = new TextEncoder().encode(html);
+    // NOTE: despite the column name `final_offer_pdf_key`, the stored artefact is HTML, not a PDF.
     const pdfKey = `offers/${quote_id}/${offerNumber}.html`;
 
     // Upload HTML as the "PDF" (will be rendered by the browser for download/print)
