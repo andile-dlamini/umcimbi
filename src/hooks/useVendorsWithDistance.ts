@@ -107,8 +107,12 @@ export function useVendorsWithDistance(
         case 'name':
           return a.name.localeCompare(b.name);
         case 'rating':
-        default:
-          return (b.rating || 0) - (a.rating || 0);
+        default: {
+          const aCount = a.review_count ?? 0;
+          const bCount = b.review_count ?? 0;
+          if (aCount !== bCount) return bCount - aCount;
+          return (b.rating ?? 0) - (a.rating ?? 0);
+        }
       }
     });
   }, [vendors, event, sortBy]);

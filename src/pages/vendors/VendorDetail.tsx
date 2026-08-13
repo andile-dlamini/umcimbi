@@ -301,15 +301,17 @@ export default function VendorDetail() {
         </div>
 
         <div className="flex items-center gap-4 text-sm mt-2 flex-wrap">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-warning text-warning" />
-            <span className="font-medium text-foreground">
-              {Number(vendor.rating ?? 0).toFixed(1)}
-            </span>
-            <span className="text-muted-foreground">
-              ({vendor.review_count ?? 0} reviews)
-            </span>
-          </div>
+          {(vendor.review_count ?? 0) > 0 && vendor.rating != null && (
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-warning text-warning" />
+              <span className="font-medium text-foreground">
+                {Number(vendor.rating ?? 0).toFixed(1)}
+              </span>
+              <span className="text-muted-foreground">
+                ({vendor.review_count ?? 0} reviews)
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-1 text-muted-foreground">
             <Briefcase className="h-4 w-4" />
             <span>{vendor.added_to_events_count ?? 0} events</span>

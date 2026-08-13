@@ -22,8 +22,8 @@ export default function PublicVendorsList() {
       const { data, error } = await (supabase as any)
         .from('vendors_directory_public')
         .select('*')
-        .order('is_super_vendor', { ascending: false })
-        .order('rating', { ascending: false });
+        .order('is_super_vendor', { ascending: false, nullsFirst: false })
+        .order('review_count', { ascending: false, nullsFirst: false });
       if (!error && data) setVendors(data as unknown as Vendor[]);
       setIsLoading(false);
     })();

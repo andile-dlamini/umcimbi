@@ -81,7 +81,8 @@ export default function VendorLandingPage() {
       const { data, error } = await (supabase as any)
         .from('vendors_directory_public')
         .select('id,name,category,location,logo_url,image_urls')
-        .order('rating', { ascending: false })
+        .order('is_super_vendor', { ascending: false, nullsFirst: false })
+        .order('review_count', { ascending: false, nullsFirst: false })
         .limit(4);
       if (!error && data) setVendors(data as DirectoryVendor[]);
     })();
