@@ -8,35 +8,14 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
-  ShieldCheck,
-  Lock as LockIcon,
-  Users,
-  Zap,
   Menu,
   Instagram,
   Facebook,
   Music2,
 } from 'lucide-react';
 import HowItWorks from '@/components/onboarding/HowItWorks';
-import { supabase } from '@/integrations/supabase/client';
-import VendorCarousel from '@/components/vendors/VendorCarousel';
+import VendorBrowser from '@/components/vendors/VendorBrowser';
 import { trackPixel } from '@/lib/metaPixel';
-
-interface DirectoryVendor {
-  id: string;
-  name: string;
-  category: string;
-  location: string | null;
-  logo_url: string | null;
-  image_urls: string[] | null;
-}
-
-const VENDOR_BENEFITS = [
-  { icon: Users, title: 'Get discovered by families', body: 'Show up when families in your category and area are actively searching.' },
-  { icon: Zap, title: 'Send quotations easily', body: 'Structured quotes with scope, pricing and terms, sent from your phone in minutes.' },
-  { icon: ShieldCheck, title: 'Be verified and trusted', body: 'A verified badge and a real profile build the trust that wins bookings.' },
-  { icon: LockIcon, title: 'Stop chasing money', body: 'Escrow protection means you get paid once the ceremony is delivered, not once you\'ve chased an invoice.' },
-];
 
 const FAQ_ITEMS = [
   { q: 'What is UMCIMBI?', a: 'UMCIMBI is a platform that helps you plan traditional South African ceremonies by connecting you with trusted, verified vendors. You can request quotes, compare options, and manage your entire ceremony plan in one place.' },
@@ -54,7 +33,12 @@ export default function VendorLandingPage() {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [vendors, setVendors] = useState<DirectoryVendor[]>([]);
+
+  const handleVendorClick = (vendorId: string) => {
+    navigate(
+      `${signupHref}&redirect=${encodeURIComponent(`/vendors/${vendorId}`)}`
+    );
+  };
 
   useEffect(() => {
     document.title = 'UMCIMBI — Join as a vendor';
@@ -76,26 +60,6 @@ export default function VendorLandingPage() {
     };
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      // Fetch an explicit slice of 60 rows and shuffle client side (PostgREST cannot
-      // order randomly). NOTE: once the active vendor count approaches 60 this needs
-      // revisiting — beyond that the shuffle only ever reorders the same fixed subset.
-      const { data, error } = await (supabase as any)
-        .from('vendors_directory_public')
-        .select('id,name,category,location,logo_url,image_urls')
-        .limit(60);
-      if (!error && data) {
-        // Shuffle once, here, and store the result — never during render.
-        const shuffled = [...(data as DirectoryVendor[])];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        setVendors(shuffled.slice(0, 10));
-      }
-    })();
-  }, []);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
