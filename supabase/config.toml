@@ -7,7 +7,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.release-escrow]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-transactional-email]
 verify_jwt = false
