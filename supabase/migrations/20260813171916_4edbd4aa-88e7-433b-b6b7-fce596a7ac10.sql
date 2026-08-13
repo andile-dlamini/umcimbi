@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Active vendors in live provinces viewable by authenticated user" ON public.vendors;
