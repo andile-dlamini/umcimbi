@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import HowItWorks from '@/components/onboarding/HowItWorks';
 import { supabase } from '@/integrations/supabase/client';
-import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import VendorCarousel from '@/components/vendors/VendorCarousel';
 import { trackPixel } from '@/lib/metaPixel';
 
 interface DirectoryVendor {
@@ -78,13 +78,22 @@ export default function VendorLandingPage() {
 
   useEffect(() => {
     (async () => {
+      // Fetch an explicit slice of 60 rows and shuffle client side (PostgREST cannot
+      // order randomly). NOTE: once the active vendor count approaches 60 this needs
+      // revisiting — beyond that the shuffle only ever reorders the same fixed subset.
       const { data, error } = await (supabase as any)
         .from('vendors_directory_public')
         .select('id,name,category,location,logo_url,image_urls')
-        .order('is_super_vendor', { ascending: false, nullsFirst: false })
-        .order('review_count', { ascending: false, nullsFirst: false })
-        .limit(4);
-      if (!error && data) setVendors(data as DirectoryVendor[]);
+        .limit(60);
+      if (!error && data) {
+        // Shuffle once, here, and store the result — never during render.
+        const shuffled = [...(data as DirectoryVendor[])];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setVendors(shuffled.slice(0, 10));
+      }
     })();
   }, []);
 
@@ -183,39 +192,12 @@ export default function VendorLandingPage() {
               Vendors across KwaZulu-Natal are already taking bookings on UMCIMBI.
             </p>
 
-            <div className="mt-10 flex gap-5 overflow-x-auto pb-4 -mx-5 px-5 sm:mx-0 sm:px-0">
-              {vendors.map((v) => {
-                const image = v.image_urls?.[0] || v.logo_url;
-                return (
-                  <button
-                    key={v.id}
-                    onClick={() => navigate('/vendors')}
-                    className="group text-left shrink-0 w-60 rounded-2xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all"
-                  >
-                    <div className="h-40 w-full bg-muted overflow-hidden">
-                      {image ? (
-                        <img src={image} alt={v.name} loading="lazy" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted">
-                          <span className="text-2xl font-bold text-muted-foreground">
-                            {v.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-foreground truncate">{v.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 truncate">
-                        {getVendorCategoryLabel(v.category as never)}{v.location ? ` · ${v.location}` : ''}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="mt-10">
+              <VendorCarousel vendors={vendors} onVendorClick={() => navigate('/')} />
             </div>
 
             <div className="mt-6">
-              <Link to="/vendors">
+              <Link to="/">
                 <Button variant="outline" size="lg" className="rounded-full px-8">See the full directory</Button>
               </Link>
             </div>
