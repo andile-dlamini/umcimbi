@@ -263,7 +263,7 @@ export default function CompareQuotes() {
         .from('quotes')
         .select(`
           id, price, deposit_percentage, expires_at, notes, offer_number, status,
-          vendor:vendors!quotes_vendor_id_fkey(id, name, category, rating, review_count, image_urls, business_verification_status, is_super_vendor, jobs_completed),
+          vendor:vendors_marketplace(id, name, category, rating, review_count, image_urls, business_verification_status, is_super_vendor, jobs_completed),
           request:service_requests!quotes_request_id_fkey(event_id)
         `)
         .eq('status', 'pending_client')

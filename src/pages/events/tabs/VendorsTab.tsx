@@ -49,7 +49,7 @@ export function VendorsTab({ eventId }: VendorsTabProps) {
         .select(`
           booking_status,
           agreed_price,
-          vendor:vendors(*)
+          vendor:vendors_marketplace(*)
         `)
         .eq('event_id', eventId);
 
