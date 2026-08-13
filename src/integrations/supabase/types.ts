@@ -1910,6 +1910,7 @@ export type Database = {
     Views: {
       vendors_directory_public: {
         Row: {
+          about: string | null
           business_verification_status:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -1927,6 +1928,7 @@ export type Database = {
           state_province: string | null
         }
         Insert: {
+          about?: string | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -1944,6 +1946,7 @@ export type Database = {
           state_province?: string | null
         }
         Update: {
+          about?: string | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
