@@ -86,6 +86,19 @@ const PlannerJoinRedirect = () => {
   return <Navigate to={to} replace />;
 };
 
+// Logged-out /vendors now redirects to the landing page, preserving filters
+const PublicVendorsRedirect = () => {
+  const [searchParams] = useSearchParams();
+  const params = new URLSearchParams();
+  const category = searchParams.get('category');
+  const location = searchParams.get('location');
+  if (category) params.set('category', category);
+  if (location) params.set('location', location);
+  const qs = params.toString();
+  return <Navigate to={qs ? `/?${qs}` : '/'} replace />;
+};
+
+
 function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
   const { user, isLoading, isProfileComplete } = useAuth();
   useMetaPixelPageView();
