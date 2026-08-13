@@ -1069,10 +1069,9 @@ export default function AuthPage() {
 
   // ─── STEP 1: ROLE CHOICE ───
   if (step === 'role') {
-    const roleBackHref = redirectParam?.startsWith('/') ? redirectParam : '/onboarding';
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background flex flex-col">
-        <AuthHeader onBack={() => navigate(roleBackHref)} />
+        <AuthHeader onBack={() => navigate('/onboarding')} />
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <div className="w-full max-w-md space-y-6">
             <RedirectBanner redirectParam={redirectParam} />
