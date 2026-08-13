@@ -2,27 +2,36 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-seed-token",
 };
 
+// Seeds two throwaway demo logins against the live database.
+// The vendor profile is created hidden (is_active = false, is_demo = true) so it
+// never appears in public browsing, the marketplace view or the public directory.
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const expectedAuth = `Bearer ${serviceKey}`;
-  if (req.headers.get("authorization") !== expectedAuth) {
+  const seedToken = Deno.env.get("DEMO_SEED_TOKEN") ?? "";
+  const provided =
+    req.headers.get("x-seed-token") ?? "";
+  const authHeader = req.headers.get("authorization") ?? "";
+
+  const authorized =
+    authHeader === `Bearer ${serviceKey}` ||
+    (seedToken.length > 0 && provided === seedToken);
+
+  if (!authorized) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    serviceKey
-  );
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
 
-  const password = "DemoUmcimbi2026!";
+  const password = "Demo123!";
   const accounts = [
     {
       phone: "+27820000901",
@@ -41,24 +50,15 @@ Deno.serve(async (req) => {
   const results: any[] = [];
 
   for (const acc of accounts) {
-    // Delete if exists (match by email OR phone, also clear old umcimbi.co.za demo emails)
+    const phoneNoPlus = acc.phone.replace("+", "");
+
+    // Remove any previous version of this demo account
     const { data: existing } = await supabase.auth.admin.listUsers();
-    const matches = existing.users.filter(
-      (u) =>
-        u.email === acc.email ||
-        u.phone === acc.phone.replace("+", "") ||
-        u.email === `demo.organiser@umcimbi.co.za` ||
-        u.email === `demo.vendor@umcimbi.co.za`
-    );
-    for (const m of matches) {
-      if (
-        m.email === acc.email ||
-        m.phone === acc.phone.replace("+", "") ||
-        (acc.role === "user" && m.email === "demo.organiser@umcimbi.co.za") ||
-        (acc.role === "vendor" && m.email === "demo.vendor@umcimbi.co.za")
-      ) {
-        await supabase.auth.admin.deleteUser(m.id);
-      }
+    for (const u of existing.users.filter(
+      (u) => u.email === acc.email || u.phone === phoneNoPlus
+    )) {
+      await supabase.from("vendors").delete().eq("owner_user_id", u.id);
+      await supabase.auth.admin.deleteUser(u.id);
     }
 
     const { data: created, error } = await supabase.auth.admin.createUser({
@@ -87,27 +87,60 @@ Deno.serve(async (req) => {
         full_name: `${acc.first_name} ${acc.surname}`,
         phone_number: acc.phone,
         phone_verified: true,
+        is_profile_complete: true,
+        is_demo: true,
         email: acc.email,
       })
       .eq("user_id", created.user.id);
+
+    let vendorId: string | null = null;
 
     if (acc.role === "vendor") {
       await supabase
         .from("user_roles")
         .insert({ user_id: created.user.id, role: "vendor" });
+
+      const { data: vendor, error: vErr } = await supabase
+        .from("vendors")
+        .insert({
+          owner_user_id: created.user.id,
+          name: "Demo Vendor (Testing)",
+          category: "catering",
+          vendor_business_type: "independent",
+          business_verification_status: "verified",
+          about:
+            "Internal demo account used for testing the vendor experience. Not a real service provider.",
+          location: "Durban",
+          city: "Durban",
+          state_province: "KwaZulu-Natal",
+          country: "South Africa",
+          phone_number: acc.phone,
+          whatsapp_number: acc.phone,
+          email: acc.email,
+          is_active: false, // hidden from all public browsing surfaces
+          is_demo: true,
+        })
+        .select("id")
+        .single();
+
+      if (vErr) {
+        results.push({ email: acc.email, user_id: created.user.id, error: vErr.message });
+        continue;
+      }
+      vendorId = vendor.id;
     }
 
-    results.push({ email: acc.email, user_id: created.user.id, ok: true });
+    results.push({
+      email: acc.email,
+      phone: acc.phone,
+      user_id: created.user.id,
+      vendor_id: vendorId,
+      ok: true,
+    });
   }
 
   return new Response(
-    JSON.stringify({
-      ok: true,
-      seeded: results.filter((r) => r.ok).length,
-      results: results.map((r) => ({ email: r.email, user_id: r.user_id, ok: !!r.ok, error: r.error })),
-    }, null, 2),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    JSON.stringify({ ok: true, password, results }, null, 2),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
