@@ -52,3 +52,6 @@ verify_jwt = false
 verify_jwt = false
 
 
+
+[functions.sync-internal-key]
+verify_jwt = false
