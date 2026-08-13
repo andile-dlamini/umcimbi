@@ -95,7 +95,8 @@ const PublicVendorsRedirect = () => {
   if (category) params.set('category', category);
   if (location) params.set('location', location);
   const qs = params.toString();
-  return <Navigate to={qs ? `/?${qs}` : '/'} replace />;
+  // The logged-out landing page lives at /onboarding (the "/" catch-all sends there)
+  return <Navigate to={qs ? `/onboarding?${qs}` : '/onboarding'} replace />;
 };
 
 
