@@ -35,7 +35,7 @@ export default function VendorCarousel({ vendors, onVendorClick, showAbout }: Ve
   const scrollByTile = (direction: -1 | 1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const tile = el.querySelector<HTMLElement>('[data-tile]');
+    const tile = el.firstElementChild as HTMLElement | null;
     const amount = (tile?.offsetWidth ?? 240) + 20;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     el.scrollBy({ left: direction * amount, behavior: reduced ? 'auto' : 'smooth' });
@@ -54,8 +54,6 @@ export default function VendorCarousel({ vendors, onVendorClick, showAbout }: Ve
           onClick={() => onVendorClick?.(v)}
           className="shrink-0 w-60" />
         )}
-        {/* marker for tile width measurement */}
-        <span data-tile className="hidden" />
       </div>
 
       {canLeft &&
