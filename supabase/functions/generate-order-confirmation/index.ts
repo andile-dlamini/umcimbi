@@ -344,6 +344,7 @@ Deno.serve(async (req) => {
     );
 
     const htmlBytes = new TextEncoder().encode(html);
+    // NOTE: despite the column name `order_pdf_key`, the stored artefact is HTML, not a PDF.
     const pdfKey = `orders/${booking_id}/${order_number}.html`;
 
     const { error: uploadError } = await supabase.storage
