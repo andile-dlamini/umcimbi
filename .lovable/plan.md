@@ -44,13 +44,15 @@ One line, primary first, joined by a middle dot, each label through `getVendorCa
 
 ## 4. Editing
 
-`src/components/vendors/VendorProfileForm.tsx` gains an "Additional services" multi-select beneath the primary category selector:
+`src/components/vendors/VendorProfileForm.tsx` gains an "Additional services" multi-select beneath the existing primary category selector:
 
 - Options from `LIVE_VENDOR_CATEGORIES`, excluding `other` and the currently selected primary.
 - Changing the primary to a value already in additional removes it from additional, so the CHECK constraint can never be violated.
 - Helper text: pricing is set for the primary category only.
 
-Not added to the signup flow in `AuthPage.tsx`.
+`src/pages/profile/VendorProfile.tsx` also gets this multi-select, placed near the existing read-only category badge at line 214, saving through the existing `updateVendorProfile` from `useMyVendorProfile`. The same option list applies (`LIVE_VENDOR_CATEGORIES` excluding `other` and the current primary). The primary category stays read-only on this page — it is not made editable here because changing it would alter the pricing model, and that remains a separate decision.
+
+Not added to the signup flow in `AuthPage.tsx`. Vendors add additional categories after signing up, consistent with how the rest of the profile is completed after login.
 
 ## 5. Pricing unchanged
 
