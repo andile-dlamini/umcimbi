@@ -53,6 +53,7 @@ import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
 import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import VendorTrust from "@/pages/admin/VendorTrust";
 import AdminOperations from "@/pages/admin/AdminOperations";
+import AdminQuotations from "@/pages/admin/AdminQuotations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
@@ -184,6 +185,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
           <Route index element={<AdminDashboard />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="operations" element={<AdminOperations />} />
+          <Route path="quotations" element={<AdminQuotations />} />
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="vendor-trust" element={<VendorTrust />} />
