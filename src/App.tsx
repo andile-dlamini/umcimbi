@@ -53,6 +53,7 @@ import VendorVerificationQueue from "@/pages/admin/VendorVerificationQueue";
 import SuperVendorManagement from "@/pages/admin/SuperVendorManagement";
 import VendorTrust from "@/pages/admin/VendorTrust";
 import AdminOperations from "@/pages/admin/AdminOperations";
+import AdminQuotations from "@/pages/admin/AdminQuotations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
