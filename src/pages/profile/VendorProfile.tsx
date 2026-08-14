@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -14,6 +15,7 @@ import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
 
@@ -46,6 +48,7 @@ export default function VendorProfile() {
     email: '',
     location: '',
     image_urls: [] as string[],
+    additional_categories: [] as string[],
     instagram_url: '',
     tiktok_url: '',
     facebook_url: '',
@@ -89,6 +92,7 @@ export default function VendorProfile() {
       email: vendor.email || '',
       location: vendor.location || '',
       image_urls: vendor.image_urls || [],
+      additional_categories: (vendor.additional_categories as string[]) || [],
       instagram_url: toHandle((vendor as any).instagram_url || ''),
       tiktok_url: toHandle((vendor as any).tiktok_url || ''),
       facebook_url: toHandle((vendor as any).facebook_url || ''),
@@ -106,6 +110,7 @@ export default function VendorProfile() {
       email: editData.email || null,
       location: editData.location || null,
       image_urls: editData.image_urls,
+      additional_categories: editData.additional_categories,
       instagram_url: toSocialUrl('instagram', editData.instagram_url),
       tiktok_url: toSocialUrl('tiktok', editData.tiktok_url),
       facebook_url: toSocialUrl('facebook', editData.facebook_url),
