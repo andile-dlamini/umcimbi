@@ -215,9 +215,16 @@ export default function VendorProfile() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-              <Badge variant="outline" className="mb-2">
-                  {getVendorCategoryLabel(vendor.category)}
-                </Badge>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge variant="outline">
+                    {getVendorCategoryLabel(vendor.category)}
+                  </Badge>
+                  {(vendor.additional_categories as string[] || []).map((cat) => (
+                    <Badge key={cat} variant="secondary" className="text-xs">
+                      {getVendorCategoryLabel(cat)}
+                    </Badge>
+                  ))}
+                </div>
                 <div className="flex items-center gap-1.5">
                   <CardTitle>{vendor.name}</CardTitle>
                   <VendorBadges 
@@ -284,6 +291,28 @@ export default function VendorProfile() {
                   value={editData.price_range_text}
                   onChange={(formatted) => setEditData({ ...editData, price_range_text: formatted })}
                 />
+                <div className="space-y-2">
+                  <Label>Additional services</Label>
+                  <p className="text-xs text-muted-foreground">Choose other categories you can deliver. Pricing stays tied to your primary category.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {LIVE_VENDOR_CATEGORIES.filter((cat) => cat.value !== 'other' && cat.value !== vendor.category).map((cat) => (
+                      <label key={cat.value} className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
+                        <Checkbox
+                          checked={editData.additional_categories.includes(cat.value)}
+                          onCheckedChange={(checked) => {
+                            setEditData(prev => ({
+                              ...prev,
+                              additional_categories: checked
+                                ? [...prev.additional_categories, cat.value]
+                                : prev.additional_categories.filter(c => c !== cat.value),
+                            }));
+                          }}
+                        />
+                        <span className="text-sm">{cat.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Phone</Label>
