@@ -236,6 +236,7 @@ export function VendorProfileForm({
     const vendorPayload: Record<string, unknown> = {
       name: formData.name.trim(),
       category: formData.category,
+      additional_categories: formData.additionalCategories,
       location: composedLocation,
       about: formData.about.trim() || null,
       price_range_text: formData.price_range_text.trim() || null,
@@ -458,7 +459,14 @@ export function VendorProfileForm({
 
           <div className="space-y-2">
             <Label>Category *</Label>
-            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v as VendorCategory })}>
+            <Select value={formData.category} onValueChange={(v) => {
+              const newCategory = v as VendorCategory;
+              setFormData(prev => ({
+                ...prev,
+                category: newCategory,
+                additionalCategories: prev.additionalCategories.filter(c => c !== newCategory),
+              }));
+            }}>
               <SelectTrigger className={`h-12 ${errors.category ? 'border-destructive' : ''}`}>
                 <SelectValue placeholder="Select your service category" />
               </SelectTrigger>
@@ -469,6 +477,29 @@ export function VendorProfileForm({
               </SelectContent>
             </Select>
             {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Additional services</Label>
+            <p className="text-xs text-muted-foreground">Select any other categories you can deliver. These help families discover you, but pricing is set for your primary category only.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              {LIVE_VENDOR_CATEGORIES.filter((cat) => cat.value !== 'other' && cat.value !== formData.category).map((cat) => (
+                <label key={cat.value} className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
+                  <Checkbox
+                    checked={formData.additionalCategories.includes(cat.value)}
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        additionalCategories: checked
+                          ? [...prev.additionalCategories, cat.value]
+                          : prev.additionalCategories.filter(c => c !== cat.value),
+                      }));
+                    }}
+                  />
+                  <span className="text-sm">{cat.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-4 pt-2 border-t border-border">
