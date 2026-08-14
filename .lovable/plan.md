@@ -7,14 +7,17 @@ An admin-only view of every quote in the system, with a derived funnel stage, su
 New file exporting:
 
 - `FUNNEL_STAGES` — ordered stage list: Requested, Quoted, Accepted, Deposit paid, Completed, Disputed, Lost.
-- `getQuoteStage({ quoteStatus, requestStatus, bookingStatus, depositStatus })` — evaluated furthest-first so a booking that reached deposit never reports as Quoted:
+- `getQuoteStage({ quoteStatus, requestStatus, bookingStatus, depositStatus })` — all booking-level terminal states evaluated before quote-level ones, so a booking that reached deposit never reports as Quoted and a cancelled booking never sits in Accepted:
   1. `booking_status = disputed` → Disputed
   2. `booking_status = completed` → Completed
-  3. `deposit_status = paid` or `booking_status = confirmed` → Deposit paid
-  4. quote `client_accepted` (no booking, or booking `pending_deposit`) → Accepted
+  3. `booking_status = cancelled` → Lost
+  4. `deposit_status = paid` or `booking_status = confirmed` → Deposit paid
   5. quote `client_declined` / `expired`, or request `declined` / `vendor_declined` / `expired` / `cancelled` → Lost
-  6. quote `pending_client` / `adjustment_requested` → Quoted
-  7. request `pending` with no quote → Requested
+  6. quote `client_accepted` (no booking, or booking `pending_deposit`) → Accepted
+  7. quote `pending_client` / `adjustment_requested` → Quoted
+  8. request `pending` with no quote → Requested
+
+  Accepted sits after the Lost check, so a request cancelled after its quote was accepted reports Lost.
 - A stage → badge-variant/colour map so the UI does not invent its own.
 
 ## 2. Page — `src/pages/admin/AdminQuotations.tsx`
