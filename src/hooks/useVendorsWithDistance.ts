@@ -50,7 +50,7 @@ export function useVendorsWithDistance(
         .not('category', 'in', `(${HIDDEN_VENDOR_CATEGORIES.join(',')})`);
 
       if (filters?.category && filters.category !== 'all') {
-        query = query.eq('category', filters.category);
+        query = query.or(`category.eq.${filters.category},additional_categories.cs.{${filters.category}}`);
       }
 
       if (filters?.location && filters.location !== 'All Locations') {

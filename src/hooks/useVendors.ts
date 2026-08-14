@@ -25,7 +25,7 @@ export function useVendors(filters?: {
       .order('review_count', { ascending: false, nullsFirst: false });
 
     if (filters?.category && filters.category !== 'all') {
-      query = query.eq('category', filters.category);
+      query = query.or(`category.eq.${filters.category},additional_categories.cs.{${filters.category}}`);
     }
 
     if (filters?.location && filters.location !== 'All Locations') {
