@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
 
 export interface VendorTileData {
   id: string;
@@ -48,7 +48,16 @@ export default function VendorTile({ vendor, onClick, showAbout, className }: Ve
       <div className="p-4">
         <h3 className="font-semibold text-foreground truncate">{vendor.name}</h3>
         <p className="text-sm text-muted-foreground mt-1 truncate">
-          {getVendorCategoryLabel(vendor.category as never)}{vendor.location ? ` · ${vendor.location}` : ''}
+          {(() => {
+            const { text, more } = truncateVendorCategories(vendor, 2);
+            return (
+              <>
+                {text}
+                {more > 0 && <span className="text-muted-foreground/70">{` +${more} more`}</span>}
+                {vendor.location ? ` · ${vendor.location}` : ''}
+              </>
+            );
+          })()}
         </p>
         {showAbout && about &&
           <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{about}</p>

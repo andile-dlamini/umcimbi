@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vendor } from '@/types/database';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
 import { formatDistance } from '@/lib/distanceUtils';
 import { cn } from '@/lib/utils';
 
@@ -57,8 +57,16 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false, 
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <Badge variant="outline" className="text-xs bg-accent/20 text-accent border-accent/50">
-                {getVendorCategoryLabel(vendor.category)}
+              <Badge variant="outline" className="text-xs bg-accent/20 text-accent border-accent/50 truncate max-w-[180px]">
+                {(() => {
+                  const { text, more } = truncateVendorCategories(vendor, 2);
+                  return (
+                    <>
+                      {text}
+                      {more > 0 && <span className="opacity-70">{` +${more}`}</span>}
+                    </>
+                  );
+                })()}
               </Badge>
               {isSelected && (
                 <Badge className="text-xs bg-success text-success-foreground">

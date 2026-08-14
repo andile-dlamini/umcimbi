@@ -21,7 +21,7 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
 import {
   Select,
   SelectContent,
@@ -291,7 +291,15 @@ export default function VendorDetail() {
 
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <Badge variant="secondary">
-            {getVendorCategoryLabel(vendor.category)}
+            {(() => {
+              const { text, more } = truncateVendorCategories(vendor as any, 2);
+              return (
+                <>
+                  {text}
+                  {more > 0 && <span className="opacity-70">{` +${more}`}</span>}
+                </>
+              );
+            })()}
           </Badge>
           <VendorBadges
             businessVerificationStatus={v.business_verification_status}
