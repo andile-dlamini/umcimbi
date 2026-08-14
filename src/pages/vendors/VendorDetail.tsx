@@ -292,7 +292,7 @@ export default function VendorDetail() {
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <Badge variant="secondary">
             {(() => {
-              const { text, more } = truncateVendorCategories(vendor as any, 2);
+              const { text, more } = truncateVendorCategories(vendor, 2);
               return (
                 <>
                   {text}
