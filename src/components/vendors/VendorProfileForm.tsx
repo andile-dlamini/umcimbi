@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AddressFields, AddressData } from '@/components/shared/AddressFields';
+import { Checkbox } from '@/components/ui/checkbox';
 import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { geocodeAddress } from '@/lib/geocodingService';
 import { cn } from '@/lib/utils';
@@ -78,6 +79,7 @@ export interface VendorProfileFormProps {
 interface FormDataShape {
   name: string;
   category: VendorCategory | '';
+  additionalCategories: VendorCategory[];
   about: string;
   price_range_text: string;
   instagram_url: string;
@@ -123,6 +125,7 @@ export function VendorProfileForm({
   const [formData, setFormData] = useState<FormDataShape>({
     name: existingVendor?.name ?? '',
     category: (existingVendor?.category as VendorCategory) ?? '',
+    additionalCategories: (existingVendor?.additional_categories as VendorCategory[]) ?? [],
     about: existingVendor?.about ?? '',
     price_range_text: existingVendor?.price_range_text ?? '',
     instagram_url: extractSocialHandle((existingVendor as any)?.instagram_url),
