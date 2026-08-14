@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   MessageSquare,
   Upload,
+  FileText,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
