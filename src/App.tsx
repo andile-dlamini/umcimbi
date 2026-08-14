@@ -185,6 +185,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
           <Route index element={<AdminDashboard />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="operations" element={<AdminOperations />} />
+          <Route path="quotations" element={<AdminQuotations />} />
           <Route path="verification-queue" element={<VendorVerificationQueue />} />
           <Route path="super-vendors" element={<SuperVendorManagement />} />
           <Route path="vendor-trust" element={<VendorTrust />} />
