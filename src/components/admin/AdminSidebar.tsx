@@ -26,6 +26,7 @@ const navItems = [
   { label: 'Overview', to: '/admin', icon: LayoutDashboard, end: true },
   { label: 'Revenue', to: '/admin/revenue', icon: DollarSign },
   { label: 'Operations Queue', to: '/admin/operations', icon: ClipboardList },
+  { label: 'Quotations', to: '/admin/quotations', icon: FileText },
   { label: 'Vendor Approvals', to: '/admin/verification-queue', icon: BadgeCheck },
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
   { label: 'Vendor Upload', to: '/admin/vendor-upload', icon: Upload },
