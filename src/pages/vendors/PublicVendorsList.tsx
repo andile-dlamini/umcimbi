@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { VendorCard } from '@/components/shared/VendorCard';
-import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory, vendorHasCategory } from '@/lib/vendorCategories';
 import { supabase } from '@/integrations/supabase/client';
 import type { Vendor } from '@/types/database';
 
@@ -47,7 +47,7 @@ export default function PublicVendorsList() {
 
   const filtered = vendors.filter((v) => {
     const matchesSearch = !search || v.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = category === 'all' || v.category === category;
+    const matchesCategory = category === 'all' || vendorHasCategory(v, category);
     return matchesSearch && matchesCategory;
   });
 

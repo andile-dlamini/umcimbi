@@ -29,8 +29,8 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   LIVE_VENDOR_CATEGORIES,
   LIVE_VENDOR_CATEGORY_FILTER_OPTIONS,
-  VendorCategory } from
-'@/lib/vendorCategories';
+  VendorCategory,
+} from '@/lib/vendorCategories';
 
 const CATEGORY_ICONS: Partial<Record<VendorCategory, typeof Camera>> = {
   attire_tailoring: Shirt,
@@ -81,7 +81,9 @@ export default function VendorBrowser({
       from('vendors_directory_public').
       select('id,name,category,location,logo_url,image_urls,about');
 
-      if (activeCategory && activeCategory !== 'all') query = query.eq('category', activeCategory);
+      if (activeCategory && activeCategory !== 'all') {
+        query = query.or(`category.eq.${activeCategory},additional_categories.cs.{${activeCategory}}`);
+      }
       if (activeLocation.trim()) query = query.ilike('location', `%${activeLocation.trim()}%`);
 
       // Explicit 60-row slice, shuffled client side (PostgREST cannot order randomly).

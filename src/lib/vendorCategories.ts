@@ -60,6 +60,28 @@ export function getVendorCategoryLabel(category: string): string {
   return VENDOR_CATEGORY_LABELS[category as VendorCategory] || category;
 }
 
+export interface VendorWithCategories {
+  category: string;
+  additional_categories?: string[] | null;
+}
+
+export function vendorHasCategory(vendor: VendorWithCategories, category: string): boolean {
+  return vendor.category === category || (vendor.additional_categories ?? []).includes(category);
+}
+
+export function formatVendorCategories(vendor: VendorWithCategories): string {
+  const all = [vendor.category, ...(vendor.additional_categories ?? [])].filter(Boolean);
+  const labels = all.map((c) => getVendorCategoryLabel(c));
+  return labels.join(' · ');
+}
+
+export function truncateVendorCategories(vendor: VendorWithCategories, max = 2): { text: string; more: number } {
+  const all = [vendor.category, ...(vendor.additional_categories ?? [])].filter(Boolean);
+  const labels = all.map((c) => getVendorCategoryLabel(c));
+  if (labels.length <= max) return { text: labels.join(' · '), more: 0 };
+  return { text: labels.slice(0, max).join(' · '), more: labels.length - max };
+}
+
 // Categories for filter dropdowns (includes "all" option)
 export const VENDOR_CATEGORY_FILTER_OPTIONS: { value: VendorCategory | 'all'; label: string }[] = [
   { value: 'all', label: 'All Categories' },

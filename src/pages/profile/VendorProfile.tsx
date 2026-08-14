@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -14,6 +15,7 @@ import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { useMyVendorProfile } from '@/hooks/useVendors';
 import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { LIVE_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
 
@@ -46,6 +48,7 @@ export default function VendorProfile() {
     email: '',
     location: '',
     image_urls: [] as string[],
+    additional_categories: [] as string[],
     instagram_url: '',
     tiktok_url: '',
     facebook_url: '',
@@ -89,6 +92,7 @@ export default function VendorProfile() {
       email: vendor.email || '',
       location: vendor.location || '',
       image_urls: vendor.image_urls || [],
+      additional_categories: (vendor.additional_categories as string[]) || [],
       instagram_url: toHandle((vendor as any).instagram_url || ''),
       tiktok_url: toHandle((vendor as any).tiktok_url || ''),
       facebook_url: toHandle((vendor as any).facebook_url || ''),
@@ -106,6 +110,7 @@ export default function VendorProfile() {
       email: editData.email || null,
       location: editData.location || null,
       image_urls: editData.image_urls,
+      additional_categories: editData.additional_categories,
       instagram_url: toSocialUrl('instagram', editData.instagram_url),
       tiktok_url: toSocialUrl('tiktok', editData.tiktok_url),
       facebook_url: toSocialUrl('facebook', editData.facebook_url),
@@ -210,9 +215,16 @@ export default function VendorProfile() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-              <Badge variant="outline" className="mb-2">
-                  {getVendorCategoryLabel(vendor.category)}
-                </Badge>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge variant="outline">
+                    {getVendorCategoryLabel(vendor.category)}
+                  </Badge>
+                  {(vendor.additional_categories as string[] || []).map((cat) => (
+                    <Badge key={cat} variant="secondary" className="text-xs">
+                      {getVendorCategoryLabel(cat)}
+                    </Badge>
+                  ))}
+                </div>
                 <div className="flex items-center gap-1.5">
                   <CardTitle>{vendor.name}</CardTitle>
                   <VendorBadges 
@@ -279,6 +291,28 @@ export default function VendorProfile() {
                   value={editData.price_range_text}
                   onChange={(formatted) => setEditData({ ...editData, price_range_text: formatted })}
                 />
+                <div className="space-y-2">
+                  <Label>Additional services</Label>
+                  <p className="text-xs text-muted-foreground">Choose other categories you can deliver. Pricing stays tied to your primary category.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {LIVE_VENDOR_CATEGORIES.filter((cat) => cat.value !== 'other' && cat.value !== vendor.category).map((cat) => (
+                      <label key={cat.value} className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
+                        <Checkbox
+                          checked={editData.additional_categories.includes(cat.value)}
+                          onCheckedChange={(checked) => {
+                            setEditData(prev => ({
+                              ...prev,
+                              additional_categories: checked
+                                ? [...prev.additional_categories, cat.value]
+                                : prev.additional_categories.filter(c => c !== cat.value),
+                            }));
+                          }}
+                        />
+                        <span className="text-sm">{cat.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>Phone</Label>

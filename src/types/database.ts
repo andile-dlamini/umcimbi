@@ -49,6 +49,7 @@ export interface Vendor {
   owner_user_id: string | null;
   name: string;
   category: VendorCategory;
+  additional_categories?: VendorCategory[] | null;
   location: string | null;
   latitude: number | null;
   longitude: number | null;

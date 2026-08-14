@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { EventType } from '@/types/database';
-import { VendorCategory, VENDOR_CATEGORY_LABELS } from '@/lib/vendorCategories';
+import { VendorCategory, VENDOR_CATEGORY_LABELS, vendorHasCategory } from '@/lib/vendorCategories';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight } from 'lucide-react';
@@ -36,11 +36,11 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
       const [{ data: serviceRequests }, { data: bookings }] = await Promise.all([
         supabase
           .from('service_requests')
-          .select('status, vendor:vendors_marketplace(category)')
+          .select('status, vendor:vendors_marketplace(category, additional_categories)')
           .eq('event_id', eventId),
         supabase
           .from('bookings')
-          .select('booking_status, vendor:vendors_marketplace(category)')
+          .select('booking_status, vendor:vendors_marketplace(category, additional_categories)')
           .eq('event_id', eventId),
       ]);
 
@@ -48,10 +48,10 @@ export function BookVendorsTab({ eventId, eventType }: Props) {
 
       for (const cat of categories) {
         const catBookings = (bookings || []).filter(
-          (b: any) => b.vendor?.category === cat
+          (b: any) => b.vendor && vendorHasCategory(b.vendor, cat)
         );
         const catRequests = (serviceRequests || []).filter(
-          (r: any) => r.vendor?.category === cat
+          (r: any) => r.vendor && vendorHasCategory(r.vendor, cat)
         );
         const depositDue = catBookings.some((b: any) => b.booking_status === 'pending_deposit');
         const balanceDue = catBookings.some((b: any) =>

@@ -1768,6 +1768,7 @@ export type Database = {
         Row: {
           about: string | null
           added_to_events_count: number | null
+          additional_categories: Database["public"]["Enums"]["vendor_category"][]
           address_line_1: string | null
           address_line_2: string | null
           admin_approval_notes: string | null
@@ -1837,6 +1838,7 @@ export type Database = {
         Insert: {
           about?: string | null
           added_to_events_count?: number | null
+          additional_categories?: Database["public"]["Enums"]["vendor_category"][]
           address_line_1?: string | null
           address_line_2?: string | null
           admin_approval_notes?: string | null
@@ -1906,6 +1908,7 @@ export type Database = {
         Update: {
           about?: string | null
           added_to_events_count?: number | null
+          additional_categories?: Database["public"]["Enums"]["vendor_category"][]
           address_line_1?: string | null
           address_line_2?: string | null
           admin_approval_notes?: string | null
@@ -2027,6 +2030,9 @@ export type Database = {
       vendors_directory_public: {
         Row: {
           about: string | null
+          additional_categories:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           business_verification_status:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2045,6 +2051,9 @@ export type Database = {
         }
         Insert: {
           about?: string | null
+          additional_categories?:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2063,6 +2072,9 @@ export type Database = {
         }
         Update: {
           about?: string | null
+          additional_categories?:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2085,6 +2097,9 @@ export type Database = {
         Row: {
           about: string | null
           added_to_events_count: number | null
+          additional_categories:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           address_line_1: string | null
           address_line_2: string | null
           avg_response_time_minutes: number | null
@@ -2150,6 +2165,9 @@ export type Database = {
         Insert: {
           about?: string | null
           added_to_events_count?: number | null
+          additional_categories?:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           address_line_1?: string | null
           address_line_2?: string | null
           avg_response_time_minutes?: number | null
@@ -2215,6 +2233,9 @@ export type Database = {
         Update: {
           about?: string | null
           added_to_events_count?: number | null
+          additional_categories?:
+            | Database["public"]["Enums"]["vendor_category"][]
+            | null
           address_line_1?: string | null
           address_line_2?: string | null
           avg_response_time_minutes?: number | null
