@@ -663,13 +663,27 @@ export default function AdminDashboard() {
       {/* Vendors to nudge */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
-            Vendor chats unanswered over 24h
-          </CardTitle>
-          <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
-
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                Vendor chats unanswered over 24h
+              </CardTitle>
+              <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
+            </div>
+            {stalledConversations.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => dismissStalled(stalledConversations.map(c => c.conversation_id))}
+              >
+                Clear all
+              </Button>
+            )}
+          </div>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="space-y-3 animate-pulse">
