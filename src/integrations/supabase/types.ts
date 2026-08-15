@@ -246,6 +246,7 @@ export type Database = {
       }
       conversations: {
         Row: {
+          admin_stalled_dismissed_at: string | null
           created_at: string
           event_id: string | null
           id: string
@@ -255,6 +256,7 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          admin_stalled_dismissed_at?: string | null
           created_at?: string
           event_id?: string | null
           id?: string
@@ -264,6 +266,7 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          admin_stalled_dismissed_at?: string | null
           created_at?: string
           event_id?: string | null
           id?: string

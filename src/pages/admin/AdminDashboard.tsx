@@ -397,6 +397,17 @@ export default function AdminDashboard() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [zeroResultSearches]);
 
+  const dismissStalled = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const previous = stalledConversations;
+    setStalledConversations(prev => prev.filter(c => !ids.includes(c.conversation_id)));
+    const { error } = await (supabase as any)
+      .from('conversations')
+      .update({ admin_stalled_dismissed_at: new Date().toISOString() })
+      .in('id', ids);
+    if (error) setStalledConversations(previous);
+  };
+
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -652,13 +663,27 @@ export default function AdminDashboard() {
       {/* Vendors to nudge */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
-            Vendor chats unanswered over 24h
-          </CardTitle>
-          <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
-
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                Vendor chats unanswered over 24h
+              </CardTitle>
+              <CardDescription>Planner sent the last message over 24 hours ago and vendor hasn't replied</CardDescription>
+            </div>
+            {stalledConversations.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => dismissStalled(stalledConversations.map(c => c.conversation_id))}
+              >
+                Clear all
+              </Button>
+            )}
+          </div>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="space-y-3 animate-pulse">
@@ -691,9 +716,15 @@ export default function AdminDashboard() {
                         </p>
                       )}
                     </div>
-                    <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 shrink-0">
-                      {c.hours_since_reply}h ago
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
+                        {c.hours_since_reply}h ago
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={() => dismissStalled([c.conversation_id])}>
+                        Dismiss
+                      </Button>
+                    </div>
+
                   </div>
                 </div>
               ))}
