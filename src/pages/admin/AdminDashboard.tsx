@@ -397,6 +397,17 @@ export default function AdminDashboard() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [zeroResultSearches]);
 
+  const dismissStalled = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const previous = stalledConversations;
+    setStalledConversations(prev => prev.filter(c => !ids.includes(c.conversation_id)));
+    const { error } = await (supabase as any)
+      .from('conversations')
+      .update({ admin_stalled_dismissed_at: new Date().toISOString() })
+      .in('id', ids);
+    if (error) setStalledConversations(previous);
+  };
+
 
   return (
     <div className="space-y-6 max-w-5xl">
