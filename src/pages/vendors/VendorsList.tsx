@@ -178,7 +178,7 @@ export default function VendorsList() {
               onClick={() => setPage(p => p + 1)}
               className="w-full py-3 text-sm font-medium text-primary border border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
             >
-              Show more vendors ({vendors.length - page * PAGE_SIZE} remaining)
+              Show more vendors
             </button>
           )}
 
