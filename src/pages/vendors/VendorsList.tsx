@@ -157,14 +157,13 @@ export default function VendorsList() {
 
         {/* Results */}
         <div className="space-y-3 pt-2">
-          <p className="text-sm text-muted-foreground">
-            {isLoading ? 'Loading...' : `Showing ${Math.min(page * PAGE_SIZE, vendors.length)} of ${vendors.length} vendor${vendors.length !== 1 ? 's' : ''}`}
-            {selectedEventId && !hasEventCoordinates && (
+          {selectedEventId && !hasEventCoordinates && (
+            <p className="text-sm text-muted-foreground">
               <span className="block text-xs mt-1">
                 Set ceremony location to see distances
               </span>
-            )}
-          </p>
+            </p>
+          )}
 
           {vendors.slice(0, page * PAGE_SIZE).map((vendor) => (
             <VendorCard
