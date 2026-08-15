@@ -716,9 +716,15 @@ export default function AdminDashboard() {
                         </p>
                       )}
                     </div>
-                    <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200 shrink-0">
-                      {c.hours_since_reply}h ago
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
+                        {c.hours_since_reply}h ago
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={() => dismissStalled([c.conversation_id])}>
+                        Dismiss
+                      </Button>
+                    </div>
+
                   </div>
                 </div>
               ))}
