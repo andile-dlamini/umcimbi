@@ -117,7 +117,17 @@ export function MakeQuotationSheet({
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Non-2xx responses surface as a generic FunctionsHttpError; the real
+        // reason (e.g. "No event found") lives in the response body.
+        let msg = '';
+        try {
+          const body = await (error as any)?.context?.json?.();
+          msg = body?.error || '';
+        } catch { /* body already consumed or not JSON */ }
+        toast.error(msg || error.message || 'Failed to send quotation');
+        return;
+      }
       if (data?.error) {
         toast.error(data.error);
         return;
@@ -126,9 +136,10 @@ export function MakeQuotationSheet({
       toast.success(isAdjustment ? `Quotation ${data.offer_number} updated!` : `Quotation ${data.offer_number} sent!`);
       onOpenChange(false);
       onSuccess?.();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error sending quote:', err);
-      toast.error('Failed to send quotation');
+      toast.error(err?.message || 'Failed to send quotation');
+
     } finally {
       setIsSubmitting(false);
     }
