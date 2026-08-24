@@ -80,7 +80,7 @@ export default function AdminQuotations() {
         quoteIds.length
           ? supabase
               .from('bookings')
-              .select('quote_id, booking_status, deposit_status')
+              .select('quote_id, booking_status, deposit_status, balance_status, funds_released_at')
               .in('quote_id', quoteIds)
           : Promise.resolve({ data: [] as any[] } as any),
         (async () => {
