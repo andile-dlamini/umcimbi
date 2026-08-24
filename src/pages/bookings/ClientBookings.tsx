@@ -96,24 +96,25 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 gap-2">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenChat}>
-          <MessageCircle className="h-4 w-4 mr-2" />
+      <CardFooter className="p-4 pt-0 gap-2 flex-wrap">
+        <Button variant="outline" size="sm" className="flex-1 min-w-[8rem]" onClick={handleOpenChat}>
+          <MessageCircle className="h-4 w-4 mr-2 shrink-0" />
           Open Chat
         </Button>
         {(booking as any).order_pdf_key && (
           <Button
             variant="outline"
             size="sm"
-            className="flex-1"
+            className="flex-1 min-w-[8rem]"
             disabled={isLoadingPdf}
             onClick={handleViewPdf}
           >
-            <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'Order confirmation'}
+            <FileText className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{isLoadingPdf ? 'Loading...' : 'Order confirmation'}</span>
           </Button>
         )}
       </CardFooter>
+
     </Card>
   );
 }
@@ -163,20 +164,21 @@ export default function ClientBookings() {
           </Card>
         ) : (
           <Tabs defaultValue="payment-due" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="payment-due">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto gap-1 p-1">
+              <TabsTrigger value="payment-due" className="text-xs whitespace-nowrap px-2 py-2">
                 Payment Due ({paymentDueOrders.length})
               </TabsTrigger>
-              <TabsTrigger value="upcoming">
+              <TabsTrigger value="upcoming" className="text-xs whitespace-nowrap px-2 py-2">
                 Upcoming ({upcomingOrders.length})
               </TabsTrigger>
-              <TabsTrigger value="completed">
+              <TabsTrigger value="completed" className="text-xs whitespace-nowrap px-2 py-2">
                 Completed ({completedOrders.length})
               </TabsTrigger>
-              <TabsTrigger value="cancelled">
+              <TabsTrigger value="cancelled" className="text-xs whitespace-nowrap px-2 py-2">
                 Cancelled ({cancelledOrders.length})
               </TabsTrigger>
             </TabsList>
+
 
             <TabsContent value="payment-due" className="mt-4 space-y-3">
               {paymentDueOrders.length === 0 ? (
