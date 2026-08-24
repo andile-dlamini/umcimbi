@@ -10,7 +10,10 @@ Three paths mark a balance as paid. The Ozow webhook keeps the booking `confirme
 
 2. **Client balance payment (EFT dialog)** — `src/components/chat/EftPaymentDialog.tsx` auto-confirm else-branch: same fix, pointing back to the hook.
 
-3. **Correct balance due date** — both deposit-paid branches currently set `balance_due_at = now`. Change both to read the booking's `event_date_time` and apply the webhook's rule: ceremony date minus five days, floored to now if that is already past, and now when `event_date_time` is null. No join to `events`. `balance_status = 'due'` unchanged.
+3. **Correct balance due date** — both deposit-paid branches currently set `balance_due_at = now`. Instead:
+   - Add one exported helper in `src/lib` — `deriveBalanceDueAt(eventDateTime)`: returns now when the value is null, otherwise ceremony date minus five days, floored to now when that is already past. A comment notes that `supabase/functions/ozow-webhook/index.ts` (lines 112-118) holds a parallel implementation that must stay in sync, since the webhook cannot import from `src/`.
+   - In both `src/hooks/useBookings.ts` (`updatePaymentStatus`) and `src/components/chat/EftPaymentDialog.tsx`, when the deposit is marked paid, do an explicit single-row fetch of `event_date_time` for that booking id before building the updates object, and pass it to the helper. Not read from the hook's local `bookings` state, which can be stale and this value decides when money is due.
+   - No join to `events`; `balance_status = 'due'` unchanged.
 
 4. **New funnel stage** — `src/lib/quoteFunnel.ts`: add `'Balance paid'` to the `FunnelStage` union, to `FUNNEL_STAGES` and to `FUNNEL_STAGE_CLASSES` (violet), all between `Deposit paid` and `Completed`. Add optional `balanceStatus` and `fundsReleasedAt` to `QuoteStageInput` and reorder the booking-level checks so `fundsReleasedAt` (or an explicit `completed` status) means Completed, and a paid balance without release reports Balance paid. Header comment updated to say Completed now means escrow actually released. Both fields optional, so existing callers keep compiling.
 
