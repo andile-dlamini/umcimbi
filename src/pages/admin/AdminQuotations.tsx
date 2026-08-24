@@ -119,6 +119,8 @@ export default function AdminQuotations() {
               requestStatus: q.request?.status,
               bookingStatus: booking?.booking_status,
               depositStatus: booking?.deposit_status,
+              balanceStatus: booking?.balance_status,
+              fundsReleasedAt: booking?.funds_released_at,
             }),
           };
         })
