@@ -182,8 +182,8 @@ export default function AdminQuotations() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full" />
           ))}
         </div>
