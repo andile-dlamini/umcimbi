@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { deriveBalanceDueAt } from '@/lib/balanceDue';
 
 interface EftPaymentDialogProps {
   open: boolean;
