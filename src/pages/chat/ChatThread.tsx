@@ -703,7 +703,9 @@ const ChatThread = () => {
               <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
                 📸 Your vendor has uploaded proof of delivery
               </p>
+              <DeliveryProofThumbnails proofs={bookingProofs} />
               <div className="flex gap-2">
+
                 <Button
                   size="sm"
                   variant="default"
