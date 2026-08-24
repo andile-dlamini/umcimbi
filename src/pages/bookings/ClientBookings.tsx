@@ -96,24 +96,25 @@ function BookingCard({ booking, onClick }: { booking: BookingWithDetails; onClic
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 gap-2">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenChat}>
-          <MessageCircle className="h-4 w-4 mr-2" />
+      <CardFooter className="p-4 pt-0 gap-2 flex-wrap">
+        <Button variant="outline" size="sm" className="flex-1 min-w-[8rem]" onClick={handleOpenChat}>
+          <MessageCircle className="h-4 w-4 mr-2 shrink-0" />
           Open Chat
         </Button>
         {(booking as any).order_pdf_key && (
           <Button
             variant="outline"
             size="sm"
-            className="flex-1"
+            className="flex-1 min-w-[8rem]"
             disabled={isLoadingPdf}
             onClick={handleViewPdf}
           >
-            <FileText className="h-4 w-4 mr-2" />
-            {isLoadingPdf ? 'Loading...' : 'Order confirmation'}
+            <FileText className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{isLoadingPdf ? 'Loading...' : 'Order confirmation'}</span>
           </Button>
         )}
       </CardFooter>
+
     </Card>
   );
 }
