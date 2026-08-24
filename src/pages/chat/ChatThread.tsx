@@ -13,6 +13,8 @@ import { ReviewDialog } from '@/components/chat/ReviewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ChatDetailsDrawer } from '@/components/chat/ChatDetailsDrawer';
+import { DeliveryProofThumbnails } from '@/components/chat/DeliveryProofThumbnails';
+
 
 const ChatThread = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
