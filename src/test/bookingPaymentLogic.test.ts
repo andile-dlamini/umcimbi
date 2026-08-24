@@ -45,7 +45,10 @@ describe('Payment status transitions', () => {
     expect(updates.balance_due_at).toBeDefined();
   });
 
-  it('BOOK-HP-04: balance paid sets correct state', () => {
+  it('BOOK-HP-04: balance paid keeps the booking confirmed and holds the funds', () => {
+    // 'completed' and funds_released_at are written only by release-escrow.
+    // Setting 'completed' here would make release-escrow skip the booking and
+    // block the vendor payout permanently.
     const updates: Record<string, unknown> = {};
     const field = 'balance_status';
     const status = 'paid';
@@ -53,9 +56,14 @@ describe('Payment status transitions', () => {
     updates[field] = status;
     if (field === 'balance_status' && status === 'paid') {
       updates.balance_paid_at = new Date().toISOString();
+      updates.booking_status = 'confirmed';
+      updates.funds_held_since = new Date().toISOString();
     }
 
     expect(updates.balance_paid_at).toBeDefined();
+    expect(updates.booking_status).toBe('confirmed');
+    expect(updates.booking_status).not.toBe('completed');
+    expect(updates.funds_held_since).toBeDefined();
   });
 });
 
