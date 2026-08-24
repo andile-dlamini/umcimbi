@@ -205,7 +205,7 @@ export default function AdminQuotations() {
       </div>
 
       {/* Stage summary */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {stageSummary.map((s) => (
           <Card key={s.stage}>
             <CardContent className="pt-6">
