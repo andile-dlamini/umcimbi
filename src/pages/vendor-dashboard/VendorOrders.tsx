@@ -109,12 +109,13 @@ export default function VendorOrders() {
           </Card>
         ) : (
           <Tabs defaultValue="payment-due" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="payment-due">Payment Due ({paymentDueOrders.length})</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming ({upcomingOrders.length})</TabsTrigger>
-              <TabsTrigger value="completed">Completed ({completedOrders.length})</TabsTrigger>
-              <TabsTrigger value="cancelled">Cancelled ({cancelledOrders.length})</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto gap-1 p-1">
+              <TabsTrigger value="payment-due" className="text-xs whitespace-nowrap px-2 py-2">Payment Due ({paymentDueOrders.length})</TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-xs whitespace-nowrap px-2 py-2">Upcoming ({upcomingOrders.length})</TabsTrigger>
+              <TabsTrigger value="completed" className="text-xs whitespace-nowrap px-2 py-2">Completed ({completedOrders.length})</TabsTrigger>
+              <TabsTrigger value="cancelled" className="text-xs whitespace-nowrap px-2 py-2">Cancelled ({cancelledOrders.length})</TabsTrigger>
             </TabsList>
+
 
             <TabsContent value="payment-due" className="mt-4 space-y-3">
               {paymentDueOrders.length === 0 ? (
