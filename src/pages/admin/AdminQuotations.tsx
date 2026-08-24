@@ -80,7 +80,7 @@ export default function AdminQuotations() {
         quoteIds.length
           ? supabase
               .from('bookings')
-              .select('quote_id, booking_status, deposit_status')
+              .select('quote_id, booking_status, deposit_status, balance_status, funds_released_at')
               .in('quote_id', quoteIds)
           : Promise.resolve({ data: [] as any[] } as any),
         (async () => {
@@ -119,6 +119,8 @@ export default function AdminQuotations() {
               requestStatus: q.request?.status,
               bookingStatus: booking?.booking_status,
               depositStatus: booking?.deposit_status,
+              balanceStatus: booking?.balance_status,
+              fundsReleasedAt: booking?.funds_released_at,
             }),
           };
         })
@@ -180,8 +182,8 @@ export default function AdminQuotations() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full" />
           ))}
         </div>
@@ -203,7 +205,7 @@ export default function AdminQuotations() {
       </div>
 
       {/* Stage summary */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {stageSummary.map((s) => (
           <Card key={s.stage}>
             <CardContent className="pt-6">

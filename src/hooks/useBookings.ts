@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Booking, BookingWithDetails, CreateBooking, BookingStatus, PaymentStatus, DeliveryProof, BookingReview } from '@/types/booking';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { deriveBalanceDueAt } from '@/lib/balanceDue';
 
 // Hook for clients to manage their bookings
 export function useClientBookings() {
@@ -67,15 +68,26 @@ export function useClientBookings() {
     const updates: Record<string, any> = { [field]: status };
     
     if (field === 'deposit_status' && status === 'paid') {
+      // Fetch the ceremony date fresh — this value decides when money is due.
+      const { data: bkDate } = await supabase
+        .from('bookings')
+        .select('event_date_time')
+        .eq('id', bookingId)
+        .single();
+
       updates.booking_status = 'confirmed';
       updates.balance_status = 'due';
       updates.deposit_paid_at = new Date().toISOString();
-      updates.balance_due_at = new Date().toISOString();
+      updates.balance_due_at = deriveBalanceDueAt(bkDate?.event_date_time);
     }
 
     if (field === 'balance_status' && status === 'paid') {
       updates.balance_paid_at = new Date().toISOString();
-      updates.booking_status = 'completed';
+      // Must mirror ozow-webhook: the booking stays 'confirmed' and the money is
+      // marked as held. Only release-escrow may write 'completed' or
+      // funds_released_at — setting 'completed' here blocks the vendor payout.
+      updates.booking_status = 'confirmed';
+      updates.funds_held_since = new Date().toISOString();
     }
 
     const { error } = await supabase

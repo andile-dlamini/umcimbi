@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { deriveBalanceDueAt } from '@/lib/balanceDue';
 
 interface EftPaymentDialogProps {
   open: boolean;
@@ -59,15 +60,24 @@ export function EftPaymentDialog({ open, onOpenChange, bookingId, kind, amount, 
       // Auto-confirm: mark payment as paid directly
       const updates: Record<string, any> = {};
       if (kind === 'deposit') {
+        // Fetch the ceremony date fresh — this value decides when money is due.
+        const { data: bkDate } = await supabase
+          .from('bookings')
+          .select('event_date_time')
+          .eq('id', bookingId)
+          .single();
+
         updates.deposit_status = 'paid';
         updates.deposit_paid_at = new Date().toISOString();
         updates.booking_status = 'confirmed';
         updates.balance_status = 'due';
-        updates.balance_due_at = new Date().toISOString();
+        updates.balance_due_at = deriveBalanceDueAt(bkDate?.event_date_time);
       } else {
         updates.balance_status = 'paid';
         updates.balance_paid_at = new Date().toISOString();
-        updates.booking_status = 'completed';
+        // Must mirror ozow-webhook — see useBookings.updatePaymentStatus.
+        updates.booking_status = 'confirmed';
+        updates.funds_held_since = new Date().toISOString();
       }
       await supabase
         .from('bookings')
