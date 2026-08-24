@@ -78,6 +78,7 @@ export default function AdminOperations() {
     } catch (err: any) {
       toast.error(err?.message || 'Failed to confirm resolution');
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
