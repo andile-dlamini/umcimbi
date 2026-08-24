@@ -1,24 +1,12 @@
-# Prevent duplicate vendor payouts
+# Prevent duplicate vendor payouts (code changes only)
 
 Close the race that sent two identical R3,250 deposit instructions to Ozow for UMC-O-2026-000038, and make duplicates loud instead of silent.
 
-## Blocker to settle first: the existing duplicate row
+## Out of scope in this task
 
-Booking `03def34d…` currently has two `deposit` rows in `vendor_payouts`, both `submitted`. The new partial unique index cannot be created while both exist. Nothing here touches Ozow — the cancellation stays manual with their support — but one of the two rows has to leave the `('pending','submitted','paid')` set for the index to build.
+No migration and no `vendor_payouts` row changes. The unique index and the record corrections wait on Ozow support confirming cancellation of the two queued payouts, and will come as a separate task.
 
-Recommended: keep the first row untouched, and mark the second (Aug 23 06:01:50, `20260823-db36-…`) as `failed` with `failure_reason` set to a plain note that it was a duplicate submission being reversed manually with Ozow. This is a bookkeeping correction only. If you'd rather wait for Ozow's confirmation before altering that row, the index creation waits with it.
-
-## Change 1 — Database constraint
-
-New migration:
-
-```sql
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_vendor_payout_active
-ON public.vendor_payouts (booking_id, payout_type)
-WHERE status IN ('pending', 'submitted', 'paid');
-```
-
-Failed and rejected payouts stay retryable, as intended today.
+For the record, when requested the corrections will be: `20260823-db36-4aee-be34-eaa383fb9783` set to `paid` with `paid_at` (this one was actually disbursed), `20260823-f9d2-4758-bfa5-d2f7fbdac6fb` set to `rejected`, and the balance payout `20260824-708c-4665-a347-517c1ea66d37` set to `rejected` — leaving exactly one deposit row in the active set so the partial unique index can build.
 
 ## Change 2 — Graceful 409 in trigger-vendor-payout
 
@@ -28,11 +16,11 @@ In `supabase/functions/trigger-vendor-payout/index.ts`, the insert around line 3
 { "error": "Payout already exists for this booking", "status": "duplicate_blocked" }
 ```
 
-instead of the generic 500. All other insert errors keep the existing 500.
+instead of the generic 500. All other insert errors keep the existing 500. This makes the function ready for the index the moment it is created.
 
-Ordering is already correct — the insert at line 307 precedes the Ozow POST at line 336, so a blocked duplicate returns before any outbound request. No reordering needed; confirmed by reading the file.
+Ordering is already correct — the insert at line 307 precedes the Ozow POST at line 336, so a blocked duplicate returns before any outbound request. No reordering needed.
 
-The existing read-based guard (line 163) stays as a cheap early exit. The index is the real protection.
+The existing read-based guard (line 163) stays as a cheap early exit.
 
 Untouched: the amount calculation and the 1.08 divisor, and the response-status mapping in `normalizeInitialStatus`.
 
@@ -46,6 +34,6 @@ In `supabase/functions/release-escrow/index.ts`, the `fetch` to `trigger-vendor-
 
 ## Technical notes
 
-- Migration is index-only; no table, grant, or policy changes.
+- No database changes in this task.
 - Both edge functions get redeployed after editing.
 - No cancel or reversal call to Ozow is added anywhere.
