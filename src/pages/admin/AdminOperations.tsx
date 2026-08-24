@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ClipboardList, AlertTriangle, ExternalLink, Clock, BadgeCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,8 +48,13 @@ export default function AdminOperations() {
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [percentage, setPercentage] = useState<number>(100);
   const [submitting, setSubmitting] = useState(false);
+  // Synchronous in-flight guard: `submitting` only blocks after a re-render, so a
+  // double-click inside the same tick could otherwise fire two payout invocations.
+  const submittingRef = useRef(false);
 
   const handleConfirmResolution = async (d: DisputedBooking) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     const calculated = Math.round((d.balance_amount / 1.08 * percentage / 100) * 100) / 100;
     setSubmitting(true);
     try {
@@ -73,6 +78,7 @@ export default function AdminOperations() {
     } catch (err: any) {
       toast.error(err?.message || 'Failed to confirm resolution');
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };

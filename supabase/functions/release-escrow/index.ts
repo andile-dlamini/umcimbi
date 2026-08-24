@@ -71,7 +71,7 @@ async function releaseBooking(bookingId: string, supabase: any, supabaseUrl: str
 
   // Invoke trigger-vendor-payout
   try {
-    await fetch(supabaseUrl + "/functions/v1/trigger-vendor-payout", {
+    const payoutRes = await fetch(supabaseUrl + "/functions/v1/trigger-vendor-payout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,6 +79,18 @@ async function releaseBooking(bookingId: string, supabase: any, supabaseUrl: str
       },
       body: JSON.stringify({ booking_id: bookingId, payout_type: "balance" }),
     });
+
+    if (!payoutRes.ok) {
+      let bodyText = "";
+      try {
+        bodyText = await payoutRes.text();
+      } catch {
+        bodyText = "<unreadable response body>";
+      }
+      console.error(
+        `trigger-vendor-payout failed for booking ${bookingId}: HTTP ${payoutRes.status} — ${bodyText}`,
+      );
+    }
   } catch (payoutErr) {
     console.error("trigger-vendor-payout call failed:", payoutErr);
   }
