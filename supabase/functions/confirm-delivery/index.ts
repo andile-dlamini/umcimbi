@@ -97,8 +97,14 @@ Deno.serve(async (req) => {
       .eq("id", booking_id);
 
     // Non-blocking trust score recalculation
-    supabase.rpc('calculate_vendor_trust_score', { p_vendor_id: booking.vendor_id })
-      .catch((e: any) => console.error('Trust score recalc failed (non-blocking):', e));
+    try {
+      const { error: rpcError } = await supabase.rpc('calculate_vendor_trust_score', {
+        p_vendor_id: booking.vendor_id,
+      });
+      if (rpcError) console.error('Trust score recalc failed (non-blocking):', rpcError);
+    } catch (e) {
+      console.error('Trust score recalc threw (non-blocking):', e);
+    }
 
     // Invoke release-escrow
     await fetch(supabaseUrl + "/functions/v1/release-escrow", {
