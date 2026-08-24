@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Booking, BookingWithDetails, CreateBooking, BookingStatus, PaymentStatus, DeliveryProof, BookingReview } from '@/types/booking';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { deriveBalanceDueAt } from '@/lib/balanceDue';
 
 // Hook for clients to manage their bookings
 export function useClientBookings() {
