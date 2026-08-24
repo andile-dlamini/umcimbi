@@ -321,6 +321,17 @@ Deno.serve(async (req) => {
       .select("id")
       .single();
 
+    // Unique-violation (23505) means a concurrent invocation already created an
+    // active payout for this booking/payout_type. Return the same 409 as the read
+    // guard above — and critically, before any request reaches Ozow.
+    if (insertError && (insertError as { code?: string }).code === "23505") {
+      console.error("trigger-vendor-payout: duplicate blocked by unique index", {
+        booking_id: booking.id,
+        payout_type,
+      });
+      return jsonResponse({ error: "Payout already exists for this booking", status: "duplicate_blocked" }, 409);
+    }
+
     if (insertError || !payout) return jsonResponse({ error: "Failed to create payout record" }, 500);
 
     let responsePayload: Record<string, unknown> = {};
