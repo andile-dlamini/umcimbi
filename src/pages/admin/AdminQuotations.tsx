@@ -68,36 +68,47 @@ export default function AdminQuotations() {
         .from('quotes')
         .select(`
           id, offer_number, price, created_at, status, final_offer_pdf_key,
-          vendor:vendors(id, name, category),
+          vendor:vendors(id, name, category, is_demo),
           request:service_requests(id, status, requester_user_id, event:events(id, name, type))
         `)
         .order('created_at', { ascending: false });
 
-      const list = (quotes || []) as any[];
+      const allQuotes = (quotes || []) as any[];
+
+      // Demo / sandbox traffic must never show up in operational funnel numbers.
+      const demoUserIds = new Set<string>();
+      const requesterIds = Array.from(
+        new Set(allQuotes.map((q) => q.request?.requester_user_id).filter(Boolean))
+      );
+      const { data: requesterProfiles } = requesterIds.length
+        ? await supabase
+            .from('profiles')
+            .select('user_id, full_name, is_demo')
+            .in('user_id', requesterIds)
+        : ({ data: [] as any[] } as any);
+      (requesterProfiles || []).forEach((p: any) => {
+        if (p.is_demo) demoUserIds.add(p.user_id);
+      });
+
+      const list = allQuotes.filter(
+        (q) => !q.vendor?.is_demo && !demoUserIds.has(q.request?.requester_user_id)
+      );
       const quoteIds = list.map((q) => q.id);
 
-      const [{ data: bookings }, { data: profiles }] = await Promise.all([
-        quoteIds.length
-          ? supabase
-              .from('bookings')
-              .select('quote_id, booking_status, deposit_status, balance_status, funds_released_at')
-              .in('quote_id', quoteIds)
-          : Promise.resolve({ data: [] as any[] } as any),
-        (async () => {
-          const userIds = Array.from(
-            new Set(list.map((q) => q.request?.requester_user_id).filter(Boolean))
-          );
-          if (!userIds.length) return { data: [] as any[] } as any;
-          return supabase.from('profiles').select('user_id, full_name').in('user_id', userIds);
-        })(),
-      ]);
+      const { data: bookings } = quoteIds.length
+        ? await supabase
+            .from('bookings')
+            .select('quote_id, booking_status, deposit_status, balance_status, funds_released_at')
+            .in('quote_id', quoteIds)
+        : ({ data: [] as any[] } as any);
 
       const bookingByQuote = new Map<string, any>();
       (bookings || []).forEach((b: any) => {
         if (b.quote_id) bookingByQuote.set(b.quote_id, b);
       });
       const nameByUser = new Map<string, string>();
-      (profiles || []).forEach((p: any) => nameByUser.set(p.user_id, p.full_name || '—'));
+      (requesterProfiles || []).forEach((p: any) => nameByUser.set(p.user_id, p.full_name || '—'));
+
 
       setRows(
         list.map((q) => {
