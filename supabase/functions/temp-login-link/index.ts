@@ -1,4 +1,4 @@
-// TEMPORARY one-off admin utility: generate a magic sign-in link for a user.
+// TEMPORARY one-off admin utility: set a temporary password for a user.
 // Delete after use.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -9,14 +9,14 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const { email, redirect_to } = await req.json();
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-      options: { redirectTo: redirect_to },
+    const { user_id, password } = await req.json();
+    const { error } = await supabase.auth.admin.updateUserById(user_id, {
+      password,
+      email_confirm: true,
+      phone_confirm: true,
     });
     if (error) throw error;
-    return new Response(JSON.stringify({ link: data.properties?.action_link }), {
+    return new Response(JSON.stringify({ ok: true }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
