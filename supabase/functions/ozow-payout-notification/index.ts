@@ -60,6 +60,20 @@ function normalizeStatus(status: string) {
   return "pending";
 }
 
+function getToken(req: Request, payload: Record<string, unknown>) {
+  const auth = req.headers.get("authorization") ?? "";
+  if (auth.toLowerCase().startsWith("bearer ")) return auth.slice(7).trim();
+  return String(
+    req.headers.get("x-access-token") ??
+      req.headers.get("AccessToken") ??
+      req.headers.get("accesstoken") ??
+      payload.AccessToken ??
+      payload.accessToken ??
+      payload.access_token ??
+      ""
+  ).trim();
+}
+
 function extractRefs(payload: Record<string, unknown>) {
   return {
     status: (() => {
@@ -77,6 +91,8 @@ function extractRefs(payload: Record<string, unknown>) {
     internalReference: String(payload.InternalReference ?? payload.internalReference ?? payload.internal_reference ?? payload.PayoutReference ?? payload.payoutReference ?? payload.Reference ?? payload.reference ?? "").trim(),
     ozowReference: String(payload.OzowReference ?? payload.ozowReference ?? payload.OzowPayoutReference ?? payload.ozowPayoutReference ?? "").trim(),
     ozowPayoutId: String(payload.OzowPayoutId ?? payload.ozowPayoutId ?? payload.PayoutId ?? payload.payoutId ?? "").trim(),
+    merchantReference: String(payload.MerchantReference ?? payload.merchantReference ?? payload.merchant_reference ?? "").trim(),
+    customerBankReference: String(payload.CustomerBankReference ?? payload.customerBankReference ?? payload.customer_bank_reference ?? "").trim(),
     failureReason: String(payload.FailureReason ?? payload.failureReason ?? payload.ErrorMessage ?? payload.errorMessage ?? payload.Message ?? payload.message ?? "").trim(),
   };
 }
@@ -85,25 +101,81 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
-  const expectedAccessToken = Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "";
-  const providedAccessToken = req.headers.get("accesstoken") ?? req.headers.get("AccessToken") ?? req.headers.get("x-access-token") ?? "";
-  if (!expectedAccessToken || providedAccessToken !== expectedAccessToken) {
+  const expectedAccessToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
+
+  let payload: Record<string, unknown> = {};
+  let parseError: unknown = null;
+  try {
+    payload = (await parsePayload(req)) as Record<string, unknown>;
+  } catch (err) {
+    parseError = err;
+  }
+
+  const providedAccessToken = getToken(req, payload);
+  const authorized = Boolean(expectedAccessToken) && providedAccessToken === expectedAccessToken;
+
+  if (!authorized) {
+    // Log the rejected attempt (redacted, no payout state written) so we have evidence next time.
+    console.error("ozow-payout-notification rejected:", JSON.stringify({
+      headers: redactHeaders(req.headers),
+      payloadKeys: Object.keys(payload),
+      parseFailed: Boolean(parseError),
+      tokenPresent: providedAccessToken.length > 0,
+      expectedConfigured: Boolean(expectedAccessToken),
+    }));
+    try {
+      const logClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      await logClient.from("payout_webhook_events").insert({
+        vendor_payout_id: null,
+        event_type: "notification_rejected",
+        ozow_status: String(payload.Status ?? payload.status ?? "unauthorized"),
+        raw_payload: null,
+        redacted_payload: redactValue(payload),
+        headers_redacted: redactHeaders(req.headers),
+      });
+    } catch (_e) { /* never block the response on logging */ }
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
-
+  if (parseError) {
+    console.error("ozow-payout-notification parse error:", parseError);
+    return jsonResponse({ error: "Invalid payload" }, 400);
+  }
 
   try {
-    const payload = await parsePayload(req);
     const refs = extractRefs(payload);
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    let payoutQuery = supabase.from("vendor_payouts").select("id");
-    const filters = [refs.internalReference && `internal_reference.eq.${refs.internalReference}`, refs.ozowReference && `ozow_reference.eq.${refs.ozowReference}`, refs.ozowPayoutId && `ozow_payout_id.eq.${refs.ozowPayoutId}`].filter(Boolean).join(",");
-    if (!filters) return jsonResponse({ error: "Missing payout reference" }, 400);
+    const payoutQuery = supabase.from("vendor_payouts").select("id");
+    const refCandidates = [refs.internalReference, refs.ozowReference, refs.ozowPayoutId, refs.merchantReference, refs.customerBankReference].filter(Boolean);
+    const filters = [
+      refs.internalReference && `internal_reference.eq.${refs.internalReference}`,
+      refs.ozowReference && `ozow_reference.eq.${refs.ozowReference}`,
+      refs.ozowPayoutId && `ozow_payout_id.eq.${refs.ozowPayoutId}`,
+      ...refCandidates.flatMap((ref) => [`internal_reference.eq.${ref}`, `ozow_reference.eq.${ref}`, `ozow_payout_id.eq.${ref}`]),
+    ].filter(Boolean).join(",");
+    if (!filters) {
+      console.error("ozow-payout-notification missing reference:", JSON.stringify({ payloadKeys: Object.keys(payload) }));
+      return jsonResponse({ error: "Missing payout reference" }, 400);
+    }
 
-    const { data: payout, error: payoutError } = await payoutQuery.or(filters).maybeSingle();
-    if (payoutError || !payout) return jsonResponse({ error: "Payout not found" }, 404);
+    const { data: payout, error: payoutError } = await payoutQuery.or(filters).limit(1).maybeSingle();
+    if (payoutError || !payout) {
+      console.error("ozow-payout-notification payout not found:", JSON.stringify({ refs, payoutError: payoutError?.message ?? null }));
+      // Store the event unattached so the payload survives for reconciliation.
+      try {
+        await supabase.from("payout_webhook_events").insert({
+          vendor_payout_id: null,
+          event_type: "notification_unmatched",
+          ozow_status: refs.status,
+          raw_payload: null,
+          redacted_payload: redactValue(payload),
+          headers_redacted: redactHeaders(req.headers),
+        });
+      } catch (_e) { /* ignore */ }
+      return jsonResponse({ error: "Payout not found" }, 404);
+    }
+
 
     const normalizedStatus = normalizeStatus(refs.status);
     const now = new Date().toISOString();
