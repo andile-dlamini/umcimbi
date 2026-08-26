@@ -54,3 +54,13 @@ verify_jwt = false
 
 [functions.create-vendor-selfie-request]
 verify_jwt = false
+
+[functions.ozow-payout-notification]
+verify_jwt = false
+
+[functions.ozow-payout-verification]
+verify_jwt = false
+
+[functions.ozow-payout-callback]
+verify_jwt = false
+
