@@ -88,40 +88,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
-  const expectedAccessToken = (Deno.env.get("OZOW_PAYOUT_ACCESS_TOKEN") ?? "").trim();
-
   let payload: Record<string, unknown> = {};
   let parseError: unknown = null;
   try {
     payload = (await parsePayload(req)) as Record<string, unknown>;
   } catch (err) {
     parseError = err;
-  }
-
-  const providedAccessToken = getToken(req, payload);
-  const authorized = Boolean(expectedAccessToken) && providedAccessToken === expectedAccessToken;
-
-  if (!authorized) {
-    // Log the rejected attempt (redacted, no payout state written) so we have evidence next time.
-    console.error("ozow-payout-notification rejected:", JSON.stringify({
-      headers: redactHeaders(req.headers),
-      payloadKeys: Object.keys(payload),
-      parseFailed: Boolean(parseError),
-      tokenPresent: providedAccessToken.length > 0,
-      expectedConfigured: Boolean(expectedAccessToken),
-    }));
-    try {
-      const logClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-      await logClient.from("payout_webhook_events").insert({
-        vendor_payout_id: null,
-        event_type: "notification_rejected",
-        ozow_status: String(payload.Status ?? payload.status ?? "unauthorized"),
-        raw_payload: null,
-        redacted_payload: redactValue(payload),
-        headers_redacted: redactHeaders(req.headers),
-      });
-    } catch (_e) { /* never block the response on logging */ }
-    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   if (parseError) {
