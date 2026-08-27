@@ -21,7 +21,7 @@ interface FeedbackRow {
   user_id: string | null;
   user_email: string | null;
   user_role: string | null;
-  feedback_type: 'bug' | 'idea' | 'praise' | 'other';
+  feedback_type: 'bug' | 'idea' | 'praise' | 'other' | 'unmet_demand';
   message: string;
   page_url: string | null;
   user_agent: string | null;
@@ -34,6 +34,7 @@ const TYPE_META: Record<FeedbackRow['feedback_type'], { label: string; icon: any
   idea: { label: 'Idea', icon: Lightbulb, className: 'bg-amber-500/10 text-amber-700 border-amber-500/30' },
   praise: { label: 'Praise', icon: PartyPopper, className: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30' },
   other: { label: 'Other', icon: MessageCircle, className: 'bg-slate-500/10 text-slate-700 border-slate-500/30' },
+  unmet_demand: { label: 'Unmet demand', icon: MessageSquare, className: 'bg-amber-500/10 text-amber-700 border-amber-500/30' },
 };
 
 export default function AdminFeedback() {
@@ -136,6 +137,7 @@ export default function AdminFeedback() {
             <SelectItem value="idea">Idea</SelectItem>
             <SelectItem value="praise">Praise</SelectItem>
             <SelectItem value="other">Other</SelectItem>
+            <SelectItem value="unmet_demand">Unmet demand</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>

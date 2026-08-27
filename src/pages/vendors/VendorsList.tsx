@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/trackEvent';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown, BadgeCheck, Star, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,9 @@ import { VendorCard } from '@/components/shared/VendorCard';
 import { useVendorsWithDistance, SortOption } from '@/hooks/useVendorsWithDistance';
 import { useEvents } from '@/hooks/useEvents';
 import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
@@ -27,6 +31,7 @@ export default function VendorsList() {
   const PAGE_SIZE = 10;
   const { events } = useEvents();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
     selectedEventId || undefined,
     { 
@@ -38,9 +43,62 @@ export default function VendorsList() {
     }
   );
 
+  const [needInput, setNeedInput] = useState('');
+  const [whereInput, setWhereInput] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+
   useEffect(() => { setPage(1); }, [search, category, locationFilter, verifiedOnly, superVendorsOnly]);
 
+  const handleUnmetDemandSubmit = async () => {
+    setValidationError(null);
+    const need = needInput.trim();
+    const where = whereInput.trim();
+
+    if (!need) {
+      setValidationError('Please tell us what you need.');
+      return;
+    }
+
+    const message = `Needs: ${need} | Where: ${where || 'not specified'} | Filters — category: ${category === 'all' ? 'all' : category}, location: ${locationFilter || 'none'}, search: ${search || 'none'}`;
+
+    if (message.length < 10 || message.length > 2000) {
+      setValidationError('Please keep your request between 10 and 2000 characters.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-feedback', {
+        body: {
+          feedback_type: 'unmet_demand',
+          message,
+          page_url: window.location.origin + location.pathname,
+          user_agent: navigator.userAgent,
+        },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Thank you!',
+        description: 'We got your request and will follow up.',
+      });
+      setNeedInput('');
+      setWhereInput('');
+    } catch (err: any) {
+      console.error('unmet demand submit error:', err);
+      toast({
+        title: 'Could not send request',
+        description: err?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   useEffect(() => {
+
     if (isLoading) return;
     if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
       return;
@@ -183,13 +241,38 @@ export default function VendorsList() {
           )}
 
           {!isLoading && vendors.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No vendors found</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Try adjusting your filters
+            <div className="py-8 px-4 rounded-2xl border border-card-border bg-card/50 space-y-4">
+              <p className="text-sm font-medium text-foreground text-center leading-relaxed">
+                Couldn't find what you were looking for. Tell us what you need and where you need it and we will find it for you
               </p>
+              <div className="space-y-3">
+                <Input
+                  placeholder="What do you need?"
+                  value={needInput}
+                  onChange={(e) => setNeedInput(e.target.value)}
+                  className="border-card-border"
+                />
+                <Input
+                  placeholder="Where do you need it?"
+                  value={whereInput}
+                  onChange={(e) => setWhereInput(e.target.value)}
+                  className="border-card-border"
+                />
+                <Button
+                  onClick={handleUnmetDemandSubmit}
+                  disabled={submitting}
+                  className="w-full"
+                >
+                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Send
+                </Button>
+                {validationError && (
+                  <p className="text-xs text-destructive text-center">{validationError}</p>
+                )}
+              </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
