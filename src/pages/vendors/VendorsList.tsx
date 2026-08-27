@@ -241,13 +241,38 @@ export default function VendorsList() {
           )}
 
           {!isLoading && vendors.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No vendors found</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Try adjusting your filters
+            <div className="py-8 px-4 rounded-2xl border border-card-border bg-card/50 space-y-4">
+              <p className="text-sm font-medium text-foreground text-center leading-relaxed">
+                Couldn't find what you were looking for. Tell us what you need and where you need it and we will find it for you
               </p>
+              <div className="space-y-3">
+                <Input
+                  placeholder="What do you need?"
+                  value={needInput}
+                  onChange={(e) => setNeedInput(e.target.value)}
+                  className="border-card-border"
+                />
+                <Input
+                  placeholder="Where do you need it?"
+                  value={whereInput}
+                  onChange={(e) => setWhereInput(e.target.value)}
+                  className="border-card-border"
+                />
+                <Button
+                  onClick={handleUnmetDemandSubmit}
+                  disabled={submitting}
+                  className="w-full"
+                >
+                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Send
+                </Button>
+                {validationError && (
+                  <p className="text-xs text-destructive text-center">{validationError}</p>
+                )}
+              </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
