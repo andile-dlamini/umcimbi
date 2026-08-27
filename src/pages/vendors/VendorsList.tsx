@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/trackEvent';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { Search, MapPin, ArrowUpDown, BadgeCheck, Star } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown, BadgeCheck, Star, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,9 @@ import { VendorCard } from '@/components/shared/VendorCard';
 import { useVendorsWithDistance, SortOption } from '@/hooks/useVendorsWithDistance';
 import { useEvents } from '@/hooks/useEvents';
 import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
 
 export default function VendorsList() {
   const [search, setSearch] = useState('');
