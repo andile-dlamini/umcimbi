@@ -11,6 +11,15 @@ function sanitizeVendorSearchTerm(term: string): string {
     .trim();
 }
 
+function buildVendorSearchFilter(searchTerm: string): string | null {
+  const sanitized = sanitizeVendorSearchTerm(searchTerm);
+  const words = sanitized.split(/\s+/).filter(Boolean).slice(0, 5);
+  if (words.length === 0) return null;
+  return words
+    .map((word) => `name.ilike.%${word}%,about.ilike.%${word}%`)
+    .join(',');
+}
+
 export interface VendorWithDistance extends Vendor {
   distanceKm: number | null;
 }
