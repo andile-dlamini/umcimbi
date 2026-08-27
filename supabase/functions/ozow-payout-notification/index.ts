@@ -60,19 +60,6 @@ function normalizeStatus(status: string) {
   return "pending";
 }
 
-function getToken(req: Request, payload: Record<string, unknown>) {
-  const auth = req.headers.get("authorization") ?? "";
-  if (auth.toLowerCase().startsWith("bearer ")) return auth.slice(7).trim();
-  return String(
-    req.headers.get("x-access-token") ??
-      req.headers.get("AccessToken") ??
-      req.headers.get("accesstoken") ??
-      payload.AccessToken ??
-      payload.accessToken ??
-      payload.access_token ??
-      ""
-  ).trim();
-}
 
 function extractRefs(payload: Record<string, unknown>) {
   return {
