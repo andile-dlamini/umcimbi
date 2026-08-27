@@ -39,5 +39,15 @@ When an authenticated organiser searches the vendor directory and gets no result
 - No other changes.
 
 ## Out of scope
-- No database migration (the `feedback` table already supports arbitrary `feedback_type` values).
 - No changes to the public vendor directory, feedback button, or any other component.
+
+## 4. New migration file in `supabase/migrations/`
+- Drop the existing `feedback_feedback_type_check` CHECK constraint on `public.feedback.feedback_type` (confirmed present; current allowed values: `'bug'`, `'idea'`, `'praise'`, `'other'`).
+- Recreate it with the new value included:
+  ```sql
+  ALTER TABLE public.feedback DROP CONSTRAINT feedback_feedback_type_check;
+  ALTER TABLE public.feedback ADD CONSTRAINT feedback_feedback_type_check
+    CHECK (feedback_type IN ('bug','idea','praise','other','unmet_demand'));
+  ```
+- No other table or policy changes.
+
