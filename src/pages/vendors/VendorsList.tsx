@@ -31,6 +31,7 @@ export default function VendorsList() {
   const PAGE_SIZE = 10;
   const { events } = useEvents();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { vendors, isLoading, sortBy, setSortBy, hasEventCoordinates } = useVendorsWithDistance(
     selectedEventId || undefined,
     { 
@@ -41,6 +42,12 @@ export default function VendorsList() {
       superVendorsOnly,
     }
   );
+
+  const [needInput, setNeedInput] = useState('');
+  const [whereInput, setWhereInput] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
 
   useEffect(() => { setPage(1); }, [search, category, locationFilter, verifiedOnly, superVendorsOnly]);
 
