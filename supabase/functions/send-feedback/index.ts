@@ -42,7 +42,7 @@ serve(async (req) => {
     const pageUrl = body.page_url ? String(body.page_url).slice(0, 500) : null;
     const userAgent = body.user_agent ? String(body.user_agent).slice(0, 500) : null;
 
-    if (!['bug', 'idea', 'praise', 'other'].includes(feedbackType)) {
+    if (!['bug', 'idea', 'praise', 'other', 'unmet_demand'].includes(feedbackType)) {
       return new Response(JSON.stringify({ error: 'Invalid feedback_type' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
