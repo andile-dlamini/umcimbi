@@ -51,7 +51,54 @@ export default function VendorsList() {
 
   useEffect(() => { setPage(1); }, [search, category, locationFilter, verifiedOnly, superVendorsOnly]);
 
+  const handleUnmetDemandSubmit = async () => {
+    setValidationError(null);
+    const need = needInput.trim();
+    const where = whereInput.trim();
+
+    if (!need) {
+      setValidationError('Please tell us what you need.');
+      return;
+    }
+
+    const message = `Needs: ${need} | Where: ${where || 'not specified'} | Filters — category: ${category === 'all' ? 'all' : category}, location: ${locationFilter || 'none'}, search: ${search || 'none'}`;
+
+    if (message.length < 10 || message.length > 2000) {
+      setValidationError('Please keep your request between 10 and 2000 characters.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-feedback', {
+        body: {
+          feedback_type: 'unmet_demand',
+          message,
+          page_url: window.location.origin + location.pathname,
+          user_agent: navigator.userAgent,
+        },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Thank you!',
+        description: 'We got your request and will follow up.',
+      });
+      setNeedInput('');
+      setWhereInput('');
+    } catch (err: any) {
+      console.error('unmet demand submit error:', err);
+      toast({
+        title: 'Could not send request',
+        description: err?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   useEffect(() => {
+
     if (isLoading) return;
     if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
       return;
