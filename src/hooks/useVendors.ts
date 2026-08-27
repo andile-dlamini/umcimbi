@@ -40,9 +40,9 @@ export function useVendors(filters?: {
     }
 
     if (filters?.search) {
-      const sanitized = sanitizeVendorSearchTerm(filters.search);
-      if (sanitized) {
-        query = query.or(`name.ilike.%${sanitized}%,about.ilike.%${sanitized}%`);
+      const orFilter = buildVendorSearchFilter(filters.search);
+      if (orFilter) {
+        query = query.or(orFilter);
       }
     }
 
