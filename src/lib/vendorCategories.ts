@@ -100,7 +100,6 @@ export const HIDDEN_VENDOR_CATEGORIES: VendorCategory[] = [
   'drinks_ice_delivery',
   'florist',
   'invitations_stationery',
-  'livestock',
   'makeup_beauty',
   'transport',
 ];

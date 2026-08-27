@@ -4,6 +4,13 @@ import { Vendor, Event } from '@/types/database';
 import { getDistanceInKm } from '@/lib/distanceUtils';
 import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 
+function sanitizeVendorSearchTerm(term: string): string {
+  return term
+    .replace(/[,"()\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export interface VendorWithDistance extends Vendor {
   distanceKm: number | null;
 }
@@ -58,7 +65,10 @@ export function useVendorsWithDistance(
       }
 
       if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,about.ilike.%${filters.search}%`);
+        const sanitized = sanitizeVendorSearchTerm(filters.search);
+        if (sanitized) {
+          query = query.or(`name.ilike.%${sanitized}%,about.ilike.%${sanitized}%`);
+        }
       }
 
       if (filters?.verifiedOnly) {

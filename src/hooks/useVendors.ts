@@ -6,6 +6,13 @@ import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories
 import { geocodeAddress } from '@/lib/geocodingService';
 import { toast } from 'sonner';
 
+function sanitizeVendorSearchTerm(term: string): string {
+  return term
+    .replace(/[,"()\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function useVendors(filters?: {
   category?: VendorCategory | 'all';
   location?: string;
@@ -33,7 +40,10 @@ export function useVendors(filters?: {
     }
 
     if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,about.ilike.%${filters.search}%`);
+      const sanitized = sanitizeVendorSearchTerm(filters.search);
+      if (sanitized) {
+        query = query.or(`name.ilike.%${sanitized}%,about.ilike.%${sanitized}%`);
+      }
     }
 
     const { data, error } = await query;
