@@ -121,7 +121,7 @@ serve(async (req) => {
     const escape = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    const typeLabel = { bug: 'Bug', idea: 'Idea', praise: 'Praise', other: 'Other' }[feedbackType];
+    const typeLabel = ({ bug: 'Bug', idea: 'Idea', praise: 'Praise', other: 'Other', unmet_demand: 'Unmet demand' } as Record<string, string>)[feedbackType] || feedbackType;
 
     const html = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f5f3ef;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#222;">

@@ -242,6 +242,7 @@ export default function VendorsList() {
 
           {!isLoading && vendors.length === 0 && (
             <div className="py-8 px-4 rounded-2xl border border-card-border bg-card/50 space-y-4">
+              <h3 className="text-base font-semibold text-center text-foreground">No vendors found</h3>
               <p className="text-sm font-medium text-foreground text-center leading-relaxed">
                 Couldn't find what you were looking for. Tell us what you need and where you need it and we will find it for you
               </p>
@@ -270,6 +271,19 @@ export default function VendorsList() {
                   <p className="text-xs text-destructive text-center">{validationError}</p>
                 )}
               </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setSearch('');
+                  setCategory('all');
+                  setLocationFilter('');
+                  setVerifiedOnly(false);
+                  setSuperVendorsOnly(false);
+                }}
+              >
+                Clear all filters
+              </Button>
             </div>
           )}
 
