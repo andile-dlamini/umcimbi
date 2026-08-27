@@ -84,6 +84,16 @@ function extractRefs(payload: Record<string, unknown>) {
   };
 }
 
+// DO NOT ADD AUTH/TOKEN VALIDATION TO THIS ENDPOINT.
+// Ozow's payout notification webhook sends no merchant-side auth token or header.
+// This was confirmed directly by Ozow support (Teyla) during staging tests, and the
+// auth check was removed for that reason on 2026-05-05, tested end-to-end successfully.
+// It was mistakenly reintroduced on 2026-05-21 during an unrelated security-hardening
+// pass (bundled with admin-daily-brief, release-escrow, seed-demo-users), which broke
+// every PayoutCompleted callback silently for ~3 months until caught on 2026-08-26 via
+// manual reconciliation of order UMC-O-2026-000038.
+// If this endpoint needs stronger protection later, use an IP allowlist of Ozow's
+// notification egress ranges instead — never a shared-secret token check here.
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
