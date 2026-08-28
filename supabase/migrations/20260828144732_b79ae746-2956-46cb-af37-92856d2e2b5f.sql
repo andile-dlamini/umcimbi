@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.post_review_prompt_on_completion() FROM PUBLIC, anon, authenticated;
