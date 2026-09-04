@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ImagePlus, Camera, Upload, Info, AlertTriangle, ChevronRight } from 'lucide-react';
 import { PricingInput } from '@/components/vendors/PricingInput';
+import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -156,6 +157,19 @@ export function VendorProfileForm({
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [showcaseFiles, setShowcaseFiles] = useState<{ file: File; preview: string }[]>([]);
   const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string }[]>([]);
+  const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (mode !== 'edit' || !existingVendor?.id) return;
+    supabase
+      .from('vendor_service_regions')
+      .select('region_id')
+      .eq('vendor_id', existingVendor.id)
+      .then(({ data, error }) => {
+        if (error) console.error('Error loading vendor service regions:', error);
+        setServiceRegionIds((data ?? []).map((r) => r.region_id));
+      });
+  }, [mode, existingVendor?.id]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -278,6 +292,24 @@ export function VendorProfileForm({
         return;
       }
       vendorId = existingVendor.id;
+
+      // Sync service regions (non-blocking on failure)
+      const { error: delRegionsErr } = await supabase
+        .from('vendor_service_regions')
+        .delete()
+        .eq('vendor_id', vendorId);
+      if (delRegionsErr) {
+        console.error('Error clearing vendor service regions:', delRegionsErr);
+        toast.error('Profile saved, but service areas could not be updated');
+      } else if (serviceRegionIds.length > 0) {
+        const { error: insRegionsErr } = await supabase
+          .from('vendor_service_regions')
+          .insert(serviceRegionIds.map((regionId) => ({ vendor_id: vendorId, region_id: regionId })) as any);
+        if (insRegionsErr) {
+          console.error('Error saving vendor service regions:', insRegionsErr);
+          toast.error('Profile saved, but service areas could not be updated');
+        }
+      }
     } else {
       const insertPayload = {
         ...vendorPayload,
@@ -642,6 +674,14 @@ export function VendorProfileForm({
             <h3 className="text-sm font-medium mb-3">Business Address</h3>
             <AddressFields data={address} onChange={setAddress} errors={errors} />
           </div>
+
+          {mode === 'edit' && existingVendor && (
+            <VendorServiceRegions
+              vendorId={existingVendor.id}
+              value={serviceRegionIds}
+              onChange={setServiceRegionIds}
+            />
+          )}
 
           <PricingInput
             category={formData.category}

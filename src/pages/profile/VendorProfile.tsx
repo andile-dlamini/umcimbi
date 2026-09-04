@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
 import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle, Briefcase } from 'lucide-react';
 import { PricingInput } from '@/components/vendors/PricingInput';
 import { Button } from '@/components/ui/button';
@@ -53,6 +56,26 @@ export default function VendorProfile() {
     tiktok_url: '',
     facebook_url: '',
   });
+  const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
+  const [serviceRegionNames, setServiceRegionNames] = useState<string[]>([]);
+
+  const vendorId = vendor?.id;
+  useEffect(() => {
+    if (!vendorId) return;
+    supabase
+      .from('vendor_service_regions')
+      .select('region_id, service_regions(name)')
+      .eq('vendor_id', vendorId)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error loading vendor service regions:', error);
+          return;
+        }
+        const rows = (data ?? []) as any[];
+        setServiceRegionIds(rows.map((r) => r.region_id));
+        setServiceRegionNames(rows.map((r) => r.service_regions?.name).filter(Boolean));
+      });
+  }, [vendorId]);
 
   if (isLoading) {
     return (
@@ -117,6 +140,35 @@ export default function VendorProfile() {
     } as any);
     setIsSaving(false);
     if (success) {
+      // Sync service regions (non-blocking on failure)
+      const { error: delErr } = await supabase
+        .from('vendor_service_regions')
+        .delete()
+        .eq('vendor_id', vendor.id);
+      let regionsFailed = false;
+      if (delErr) {
+        console.error('Error clearing vendor service regions:', delErr);
+        regionsFailed = true;
+      } else if (serviceRegionIds.length > 0) {
+        const { error: insErr } = await supabase
+          .from('vendor_service_regions')
+          .insert(serviceRegionIds.map((regionId) => ({ vendor_id: vendor.id, region_id: regionId })) as any);
+        if (insErr) {
+          console.error('Error saving vendor service regions:', insErr);
+          regionsFailed = true;
+        }
+      }
+      if (regionsFailed) {
+        toast.error('Profile saved, but service areas could not be updated');
+      } else if (serviceRegionIds.length > 0) {
+        const { data: regionRows } = await supabase
+          .from('service_regions')
+          .select('id, name')
+          .in('id', serviceRegionIds);
+        setServiceRegionNames((regionRows ?? []).map((r) => r.name));
+      } else {
+        setServiceRegionNames([]);
+      }
       setIsEditing(false);
     }
   };
@@ -278,6 +330,11 @@ export default function VendorProfile() {
                     placeholder="City, Province"
                   />
                 </div>
+                <VendorServiceRegions
+                  vendorId={vendor.id}
+                  value={serviceRegionIds}
+                  onChange={setServiceRegionIds}
+                />
                 <div className="space-y-2">
                   <Label>About</Label>
                   <Textarea
@@ -381,6 +438,13 @@ export default function VendorProfile() {
                   <div>
                     <p className="text-sm font-medium mb-1">Price range</p>
                     <p className="text-sm text-primary font-medium">{vendor.price_range_text}</p>
+                  </div>
+                )}
+
+                {serviceRegionNames.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Service areas</p>
+                    <p className="text-sm text-muted-foreground">{serviceRegionNames.join(', ')}</p>
                   </div>
                 )}
 
