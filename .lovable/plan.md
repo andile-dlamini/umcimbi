@@ -17,8 +17,7 @@ Add the KZN service-region taxonomy to the backend. Nothing in the app reads it 
 
 ## Technical notes
 
-- The SQL is applied exactly as supplied, in one migration file, unchanged: tables, indexes, the `events.service_area_id` column, RLS enablement, six policies, and both seed inserts.
-- One deviation flagged for your call: the supplied SQL has no `GRANT` statements. Without grants to `anon`/`authenticated`/`service_role`, the Data API returns a permission error for these tables even though the policies allow reads — so when the app starts reading them in step 2, every query fails. Recommendation: apply your SQL verbatim now, then a second tiny migration adds the grants (`SELECT` to `anon` and `authenticated` on all three, `INSERT`/`DELETE` to `authenticated` on `vendor_service_regions`, `ALL` to `service_role`). Say the word if you'd rather fold the grants into the same file.
+- The SQL is applied exactly as supplied, in one migration file, unchanged: tables, indexes, the `events.service_area_id` column, RLS enablement, six policies, both seed inserts, and the appended GRANT block.
 - No TypeScript, component, hook, page, or edge function is touched.
 - After the migration runs, `src/integrations/supabase/types.ts` is regenerated automatically so the three tables and the new events column appear in types. It is not hand-edited.
 
