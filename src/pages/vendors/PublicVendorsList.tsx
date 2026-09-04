@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,6 +8,8 @@ import { VendorCard } from '@/components/shared/VendorCard';
 import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory, vendorHasCategory } from '@/lib/vendorCategories';
 import { supabase } from '@/integrations/supabase/client';
 import type { Vendor } from '@/types/database';
+import { LocationCombobox, LocationSelection } from '@/components/vendors/LocationCombobox';
+import { fetchVendorRegionMap, applyRegionFilterAndSort } from '@/hooks/useVendors';
 
 export default function PublicVendorsList() {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ export default function PublicVendorsList() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<VendorCategory | 'all'>(initialCategory);
-  const [locationFilter, setLocationFilter] = useState(searchParams.get('location') ?? '');
+  const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -35,15 +37,14 @@ export default function PublicVendorsList() {
         .order('is_super_vendor', { ascending: false, nullsFirst: false })
         .order('review_count', { ascending: false, nullsFirst: false });
 
-      if (locationFilter.trim()) {
-        query = query.ilike('location', `%${locationFilter.trim()}%`);
+      const [{ data, error }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+      if (!error && data) {
+        const rows = data as unknown as Vendor[];
+        setVendors(applyRegionFilterAndSort(rows, regionMap, locationSelection?.regionId ?? null));
       }
-
-      const { data, error } = await query;
-      if (!error && data) setVendors(data as unknown as Vendor[]);
       setIsLoading(false);
     })();
-  }, [locationFilter]);
+  }, [locationSelection?.regionId]);
 
   const filtered = vendors.filter((v) => {
     const matchesSearch = !search || v.name.toLowerCase().includes(search.toLowerCase());
@@ -101,14 +102,8 @@ export default function PublicVendorsList() {
               </SelectContent>
             </Select>
 
-            <div className="relative flex-1">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Filter by location..."
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-                className="pl-10 border-card-border"
-              />
+            <div className="flex-1">
+              <LocationCombobox value={locationSelection} onChange={setLocationSelection} />
             </div>
           </div>
         </div>

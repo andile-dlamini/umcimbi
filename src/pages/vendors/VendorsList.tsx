@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/trackEvent';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { Search, MapPin, ArrowUpDown, BadgeCheck, Star, Loader2 } from 'lucide-react';
+import { Search, ArrowUpDown, BadgeCheck, Star, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
