@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Vendor, Event } from '@/types/database';
 import { getDistanceInKm } from '@/lib/distanceUtils';
 import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
+import { fetchVendorRegionMap, applyRegionFilterAndSort } from '@/hooks/useVendors';
 
 function sanitizeVendorSearchTerm(term: string): string {
   return term
@@ -30,7 +31,7 @@ export function useVendorsWithDistance(
   eventId?: string,
   filters?: {
     category?: VendorCategory | 'all';
-    location?: string;
+    regionId?: string | null;
     search?: string;
     verifiedOnly?: boolean;
     superVendorsOnly?: boolean;
@@ -40,6 +41,7 @@ export function useVendorsWithDistance(
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('rating');
+  const [vendorsWithRegions, setVendorsWithRegions] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,10 +71,6 @@ export function useVendorsWithDistance(
         query = query.or(`category.eq.${filters.category},additional_categories.cs.{${filters.category}}`);
       }
 
-      if (filters?.location && filters.location !== 'All Locations') {
-        query = query.ilike('location', `%${filters.location}%`);
-      }
-
       if (filters?.search) {
         const orFilter = buildVendorSearchFilter(filters.search);
         if (orFilter) {
@@ -88,13 +86,15 @@ export function useVendorsWithDistance(
         query = query.eq('is_super_vendor', true);
       }
 
-      const { data: vendorsData } = await query;
-      setVendors((vendorsData || []) as unknown as Vendor[]);
+      const [{ data: vendorsData }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+      const rows = (vendorsData || []) as unknown as Vendor[];
+      setVendorsWithRegions(new Set([...regionMap.entries()].filter(([, set]) => set.size > 0).map(([id]) => id)));
+      setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
       setIsLoading(false);
     };
 
     fetchData();
-  }, [eventId, filters?.category, filters?.location, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
+  }, [eventId, filters?.category, filters?.regionId, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
 
   // Compute distances and sort
   const vendorsWithDistance: VendorWithDistance[] = useMemo(() => {
@@ -111,8 +111,12 @@ export function useVendorsWithDistance(
       ),
     }));
 
-    // Sort with badge boost: verified vendors first, then by selected sort
+    // Sort: vendors with declared service regions first, then badge boost, then selected sort
     return withDistance.sort((a, b) => {
+      const aRegion = vendorsWithRegions.has(a.id) ? 1 : 0;
+      const bRegion = vendorsWithRegions.has(b.id) ? 1 : 0;
+      if (aRegion !== bRegion) return bRegion - aRegion;
+
       // Badge boost
       const aBoost = ((a as any).business_verification_status === 'verified' ? 1 : 0);
       const bBoost = ((b as any).business_verification_status === 'verified' ? 1 : 0);
@@ -135,7 +139,7 @@ export function useVendorsWithDistance(
         }
       }
     });
-  }, [vendors, event, sortBy]);
+  }, [vendors, event, sortBy, vendorsWithRegions]);
 
   return {
     vendors: vendorsWithDistance,

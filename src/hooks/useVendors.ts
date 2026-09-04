@@ -22,9 +22,47 @@ function buildVendorSearchFilter(searchTerm: string): string | null {
     .join(',');
 }
 
+// Vendors declare the regions they serve in vendor_service_regions. The marketplace
+// views have no PostgREST relationship to that table, so the match runs client-side.
+export async function fetchVendorRegionMap(): Promise<Map<string, Set<string>>> {
+  const { data, error } = await supabase.from('vendor_service_regions').select('vendor_id, region_id');
+  const map = new Map<string, Set<string>>();
+  if (error) {
+    console.error('Error fetching vendor service regions:', error);
+    return map;
+  }
+  (data ?? []).forEach((row: { vendor_id: string; region_id: string }) => {
+    const set = map.get(row.vendor_id) ?? new Set<string>();
+    set.add(row.region_id);
+    map.set(row.vendor_id, set);
+  });
+  return map;
+}
+
+export function applyRegionFilterAndSort<T extends { id: string }>(
+  rows: T[],
+  regionMap: Map<string, Set<string>>,
+  regionId?: string | null
+): T[] {
+  const filtered = regionId
+    ? rows.filter((v) => {
+        const set = regionMap.get(v.id);
+        // A vendor with no declared regions matches every region.
+        return !set || set.size === 0 || set.has(regionId);
+      })
+    : rows;
+
+  // Vendors with at least one declared region rank ahead of those with none,
+  // preserving the incoming order within each group.
+  return filtered
+    .map((v, index) => ({ v, index, declared: (regionMap.get(v.id)?.size ?? 0) > 0 ? 1 : 0 }))
+    .sort((a, b) => (b.declared - a.declared) || (a.index - b.index))
+    .map((entry) => entry.v);
+}
+
 export function useVendors(filters?: {
   category?: VendorCategory | 'all';
-  location?: string;
+  regionId?: string | null;
   search?: string;
 }) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -44,10 +82,6 @@ export function useVendors(filters?: {
       query = query.or(`category.eq.${filters.category},additional_categories.cs.{${filters.category}}`);
     }
 
-    if (filters?.location && filters.location !== 'All Locations') {
-      query = query.ilike('location', `%${filters.location}%`);
-    }
-
     if (filters?.search) {
       const orFilter = buildVendorSearchFilter(filters.search);
       if (orFilter) {
@@ -55,16 +89,17 @@ export function useVendors(filters?: {
       }
     }
 
-    const { data, error } = await query;
+    const [{ data, error }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
 
     if (error) {
       console.error('Error fetching vendors:', error);
       toast.error('Failed to load vendors');
     } else {
-      setVendors((data || []) as unknown as Vendor[]);
+      const rows = (data || []) as unknown as Vendor[];
+      setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
     }
     setIsLoading(false);
-  }, [filters?.category, filters?.location, filters?.search]);
+  }, [filters?.category, filters?.regionId, filters?.search]);
 
   useEffect(() => {
     fetchVendors();
