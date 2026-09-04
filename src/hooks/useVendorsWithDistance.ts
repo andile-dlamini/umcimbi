@@ -69,10 +69,6 @@ export function useVendorsWithDistance(
         query = query.or(`category.eq.${filters.category},additional_categories.cs.{${filters.category}}`);
       }
 
-      if (filters?.location && filters.location !== 'All Locations') {
-        query = query.ilike('location', `%${filters.location}%`);
-      }
-
       if (filters?.search) {
         const orFilter = buildVendorSearchFilter(filters.search);
         if (orFilter) {
