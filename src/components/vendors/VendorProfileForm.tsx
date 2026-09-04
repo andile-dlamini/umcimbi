@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ImagePlus, Camera, Upload, Info, AlertTriangle, ChevronRight } from 'lucide-react';
 import { PricingInput } from '@/components/vendors/PricingInput';
+import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -156,6 +157,19 @@ export function VendorProfileForm({
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [showcaseFiles, setShowcaseFiles] = useState<{ file: File; preview: string }[]>([]);
   const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string }[]>([]);
+  const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (mode !== 'edit' || !existingVendor?.id) return;
+    supabase
+      .from('vendor_service_regions')
+      .select('region_id')
+      .eq('vendor_id', existingVendor.id)
+      .then(({ data, error }) => {
+        if (error) console.error('Error loading vendor service regions:', error);
+        setServiceRegionIds((data ?? []).map((r) => r.region_id));
+      });
+  }, [mode, existingVendor?.id]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
