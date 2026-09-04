@@ -292,6 +292,24 @@ export function VendorProfileForm({
         return;
       }
       vendorId = existingVendor.id;
+
+      // Sync service regions (non-blocking on failure)
+      const { error: delRegionsErr } = await supabase
+        .from('vendor_service_regions')
+        .delete()
+        .eq('vendor_id', vendorId);
+      if (delRegionsErr) {
+        console.error('Error clearing vendor service regions:', delRegionsErr);
+        toast.error('Profile saved, but service areas could not be updated');
+      } else if (serviceRegionIds.length > 0) {
+        const { error: insRegionsErr } = await supabase
+          .from('vendor_service_regions')
+          .insert(serviceRegionIds.map((regionId) => ({ vendor_id: vendorId, region_id: regionId })) as any);
+        if (insRegionsErr) {
+          console.error('Error saving vendor service regions:', insRegionsErr);
+          toast.error('Profile saved, but service areas could not be updated');
+        }
+      }
     } else {
       const insertPayload = {
         ...vendorPayload,
@@ -656,6 +674,14 @@ export function VendorProfileForm({
             <h3 className="text-sm font-medium mb-3">Business Address</h3>
             <AddressFields data={address} onChange={setAddress} errors={errors} />
           </div>
+
+          {mode === 'edit' && existingVendor && (
+            <VendorServiceRegions
+              vendorId={existingVendor.id}
+              value={serviceRegionIds}
+              onChange={setServiceRegionIds}
+            />
+          )}
 
           <PricingInput
             category={formData.category}
