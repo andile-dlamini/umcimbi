@@ -30,7 +30,7 @@ export function useVendorsWithDistance(
   eventId?: string,
   filters?: {
     category?: VendorCategory | 'all';
-    location?: string;
+    regionId?: string | null;
     search?: string;
     verifiedOnly?: boolean;
     superVendorsOnly?: boolean;
