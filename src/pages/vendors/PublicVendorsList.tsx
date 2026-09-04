@@ -28,6 +28,29 @@ export default function PublicVendorsList() {
   const [category, setCategory] = useState<VendorCategory | 'all'>(initialCategory);
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
 
+  // Resolve the ?location= label (region or area name) into a region selection on first load.
+  useEffect(() => {
+    const label = searchParams.get('location');
+    if (!label) return;
+    (async () => {
+      const [{ data: region }, { data: area }] = await Promise.all([
+        supabase.from('service_regions').select('id, name').ilike('name', label).maybeSingle(),
+        supabase.from('service_areas').select('region_id, name').ilike('name', label).maybeSingle(),
+      ]);
+      if (region) setLocationSelection({ regionId: region.id, label: region.name });
+      else if (area) setLocationSelection({ regionId: area.region_id, label: area.name });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLocationChange = (next: LocationSelection | null) => {
+    setLocationSelection(next);
+    const params = new URLSearchParams(searchParams);
+    if (next) params.set('location', next.label);
+    else params.delete('location');
+    setSearchParams(params, { replace: true });
+  };
+
   useEffect(() => {
     (async () => {
       setIsLoading(true);
