@@ -139,7 +139,7 @@ export function useVendorsWithDistance(
         }
       }
     });
-  }, [vendors, event, sortBy]);
+  }, [vendors, event, sortBy, vendorsWithRegions]);
 
   return {
     vendors: vendorsWithDistance,
