@@ -15,6 +15,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, VendorCategory } from '@/lib/vendorCategories';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { LocationCombobox, LocationSelection } from '@/components/vendors/LocationCombobox';
 
 
 export default function VendorsList() {
@@ -37,7 +38,7 @@ export default function VendorsList() {
     selectedEventId || undefined,
     { 
       category, 
-      location: locationFilter || 'All Locations', 
+      regionId: locationSelection?.regionId ?? null,
       search,
       verifiedOnly,
       superVendorsOnly,
@@ -50,7 +51,7 @@ export default function VendorsList() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
 
-  useEffect(() => { setPage(1); }, [search, category, locationFilter, verifiedOnly, superVendorsOnly]);
+  useEffect(() => { setPage(1); }, [search, category, locationSelection?.regionId, verifiedOnly, superVendorsOnly]);
 
   const handleUnmetDemandSubmit = async () => {
     setValidationError(null);
@@ -62,7 +63,7 @@ export default function VendorsList() {
       return;
     }
 
-    const message = `Needs: ${need} | Where: ${where || 'not specified'} | Filters — category: ${category === 'all' ? 'all' : category}, location: ${locationFilter || 'none'}, search: ${search || 'none'}`;
+    const message = `Needs: ${need} | Where: ${where || 'not specified'} | Filters — category: ${category === 'all' ? 'all' : category}, location: ${locationSelection?.label || typedLocation || 'none'}, search: ${search || 'none'}`;
 
     if (message.length < 10 || message.length > 2000) {
       setValidationError('Please keep your request between 10 and 2000 characters.');
@@ -101,7 +102,7 @@ export default function VendorsList() {
   useEffect(() => {
 
     if (isLoading) return;
-    if (!search && category === 'all' && !locationFilter && !verifiedOnly && !superVendorsOnly) {
+    if (!search && category === 'all' && !locationSelection && !typedLocation && !verifiedOnly && !superVendorsOnly) {
       return;
     }
     const timeout = setTimeout(() => {
@@ -112,7 +113,7 @@ export default function VendorsList() {
         metadata: {
           query: search || null,
           category: category !== 'all' ? category : null,
-          location: locationFilter || null,
+          location: locationSelection?.label || typedLocation || null,
           verified_only: verifiedOnly,
           super_vendors_only: superVendorsOnly,
           results_count: vendors.length,
@@ -120,7 +121,7 @@ export default function VendorsList() {
       });
     }, 1500);
     return () => clearTimeout(timeout);
-  }, [search, category, locationFilter, verifiedOnly, superVendorsOnly, vendors.length, isLoading, user?.id]);
+  }, [search, category, locationSelection?.label, typedLocation, verifiedOnly, superVendorsOnly, vendors.length, isLoading, user?.id]);
 
   return (
     <div className="min-h-screen pb-safe">
@@ -170,13 +171,14 @@ export default function VendorsList() {
             </SelectContent>
           </Select>
 
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Filter by location..."
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="pl-10 border-card-border"
+          <div className="flex-1">
+            <LocationCombobox
+              value={locationSelection}
+              onChange={(next) => {
+                setLocationSelection(next);
+                if (next) setTypedLocation('');
+              }}
+              onNoMatch={(typed) => setTypedLocation(typed)}
             />
           </div>
         </div>
@@ -216,6 +218,11 @@ export default function VendorsList() {
 
         {/* Results */}
         <div className="space-y-3 pt-2">
+          {locationSelection && (
+            <p className="text-xs text-muted-foreground">
+              Showing vendors serving {locationSelection.label}
+            </p>
+          )}
           {selectedEventId && !hasEventCoordinates && (
             <p className="text-sm text-muted-foreground">
               <span className="block text-xs mt-1">
@@ -278,7 +285,8 @@ export default function VendorsList() {
                 onClick={() => {
                   setSearch('');
                   setCategory('all');
-                  setLocationFilter('');
+                  setLocationSelection(null);
+                  setTypedLocation('');
                   setVerifiedOnly(false);
                   setSuperVendorsOnly(false);
                 }}
