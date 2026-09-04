@@ -441,6 +441,13 @@ export default function VendorProfile() {
                   </div>
                 )}
 
+                {serviceRegionNames.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Service areas</p>
+                    <p className="text-sm text-muted-foreground">{serviceRegionNames.join(', ')}</p>
+                  </div>
+                )}
+
                 <div className="space-y-2 pt-2">
                   {vendor.phone_number && (
                     <div className="flex items-center gap-2 text-sm">
