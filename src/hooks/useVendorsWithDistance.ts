@@ -88,6 +88,7 @@ export function useVendorsWithDistance(
 
       const [{ data: vendorsData }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
       const rows = (vendorsData || []) as unknown as Vendor[];
+      setVendorsWithRegions(new Set([...regionMap.entries()].filter(([, set]) => set.size > 0).map(([id]) => id)));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
       setIsLoading(false);
     };
