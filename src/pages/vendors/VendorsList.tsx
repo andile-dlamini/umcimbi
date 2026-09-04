@@ -23,7 +23,8 @@ export default function VendorsList() {
   const [category, setCategory] = useState<VendorCategory | 'all'>(
     (searchParams.get('category') as VendorCategory) || 'all'
   );
-  const [locationFilter, setLocationFilter] = useState('');
+  const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
+  const [typedLocation, setTypedLocation] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
