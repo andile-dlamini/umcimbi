@@ -41,6 +41,7 @@ export function useVendorsWithDistance(
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('rating');
+  const [vendorsWithRegions, setVendorsWithRegions] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
