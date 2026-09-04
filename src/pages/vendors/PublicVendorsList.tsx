@@ -13,7 +13,7 @@ import { fetchVendorRegionMap, applyRegionFilterAndSort } from '@/hooks/useVendo
 
 export default function PublicVendorsList() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const initialCategory = (() => {
     const raw = searchParams.get('category');
