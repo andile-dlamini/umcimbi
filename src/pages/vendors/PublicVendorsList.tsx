@@ -126,7 +126,7 @@ export default function PublicVendorsList() {
             </Select>
 
             <div className="flex-1">
-              <LocationCombobox value={locationSelection} onChange={setLocationSelection} />
+              <LocationCombobox value={locationSelection} onChange={handleLocationChange} />
             </div>
           </div>
         </div>
