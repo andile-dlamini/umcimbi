@@ -140,6 +140,35 @@ export default function VendorProfile() {
     } as any);
     setIsSaving(false);
     if (success) {
+      // Sync service regions (non-blocking on failure)
+      const { error: delErr } = await supabase
+        .from('vendor_service_regions')
+        .delete()
+        .eq('vendor_id', vendor.id);
+      let regionsFailed = false;
+      if (delErr) {
+        console.error('Error clearing vendor service regions:', delErr);
+        regionsFailed = true;
+      } else if (serviceRegionIds.length > 0) {
+        const { error: insErr } = await supabase
+          .from('vendor_service_regions')
+          .insert(serviceRegionIds.map((regionId) => ({ vendor_id: vendor.id, region_id: regionId })) as any);
+        if (insErr) {
+          console.error('Error saving vendor service regions:', insErr);
+          regionsFailed = true;
+        }
+      }
+      if (regionsFailed) {
+        toast.error('Profile saved, but service areas could not be updated');
+      } else if (serviceRegionIds.length > 0) {
+        const { data: regionRows } = await supabase
+          .from('service_regions')
+          .select('id, name')
+          .in('id', serviceRegionIds);
+        setServiceRegionNames((regionRows ?? []).map((r) => r.name));
+      } else {
+        setServiceRegionNames([]);
+      }
       setIsEditing(false);
     }
   };
@@ -301,6 +330,11 @@ export default function VendorProfile() {
                     placeholder="City, Province"
                   />
                 </div>
+                <VendorServiceRegions
+                  vendorId={vendor.id}
+                  value={serviceRegionIds}
+                  onChange={setServiceRegionIds}
+                />
                 <div className="space-y-2">
                   <Label>About</Label>
                   <Textarea
