@@ -111,8 +111,12 @@ export function useVendorsWithDistance(
       ),
     }));
 
-    // Sort with badge boost: verified vendors first, then by selected sort
+    // Sort: vendors with declared service regions first, then badge boost, then selected sort
     return withDistance.sort((a, b) => {
+      const aRegion = vendorsWithRegions.has(a.id) ? 1 : 0;
+      const bRegion = vendorsWithRegions.has(b.id) ? 1 : 0;
+      if (aRegion !== bRegion) return bRegion - aRegion;
+
       // Badge boost
       const aBoost = ((a as any).business_verification_status === 'verified' ? 1 : 0);
       const bBoost = ((b as any).business_verification_status === 'verified' ? 1 : 0);
