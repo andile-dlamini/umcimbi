@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
 import { Store, MapPin, Phone, Mail, Globe, MessageCircle, Eye, Users, Edit2, Save, Trash2, Clock, XCircle, Briefcase } from 'lucide-react';
 import { PricingInput } from '@/components/vendors/PricingInput';
 import { Button } from '@/components/ui/button';
@@ -53,6 +56,26 @@ export default function VendorProfile() {
     tiktok_url: '',
     facebook_url: '',
   });
+  const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
+  const [serviceRegionNames, setServiceRegionNames] = useState<string[]>([]);
+
+  const vendorId = vendor?.id;
+  useEffect(() => {
+    if (!vendorId) return;
+    supabase
+      .from('vendor_service_regions')
+      .select('region_id, service_regions(name)')
+      .eq('vendor_id', vendorId)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error loading vendor service regions:', error);
+          return;
+        }
+        const rows = (data ?? []) as any[];
+        setServiceRegionIds(rows.map((r) => r.region_id));
+        setServiceRegionNames(rows.map((r) => r.service_regions?.name).filter(Boolean));
+      });
+  }, [vendorId]);
 
   if (isLoading) {
     return (
