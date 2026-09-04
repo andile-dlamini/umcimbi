@@ -532,6 +532,7 @@ export type Database = {
           name: string
           notes: string | null
           owner_user_id: string
+          service_area_id: string | null
           size: string | null
           state_province: string | null
           type: Database["public"]["Enums"]["event_type"]
@@ -549,6 +550,7 @@ export type Database = {
           name: string
           notes?: string | null
           owner_user_id: string
+          service_area_id?: string | null
           size?: string | null
           state_province?: string | null
           type: Database["public"]["Enums"]["event_type"]
@@ -566,12 +568,21 @@ export type Database = {
           name?: string
           notes?: string | null
           owner_user_id?: string
+          service_area_id?: string | null
           size?: string | null
           state_province?: string | null
           type?: Database["public"]["Enums"]["event_type"]
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feedback: {
         Row: {
@@ -1176,6 +1187,65 @@ export type Database = {
           },
         ]
       }
+      service_areas: {
+        Row: {
+          aliases: string[]
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          region_id: string
+        }
+        Insert: {
+          aliases?: string[]
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+          region_id: string
+        }
+        Update: {
+          aliases?: string[]
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          region_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_areas_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "service_regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_regions: {
+        Row: {
+          code: string
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       service_requests: {
         Row: {
           budget_range: string | null
@@ -1698,6 +1768,60 @@ export type Database = {
           },
           {
             foreignKeyName: "vendor_selfie_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_service_regions: {
+        Row: {
+          created_at: string
+          region_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          region_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          region_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_service_regions_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "service_regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_service_regions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_service_regions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_directory_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_service_regions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_marketplace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_service_regions_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors_public"
