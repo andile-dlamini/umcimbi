@@ -84,13 +84,14 @@ export function useVendorsWithDistance(
         query = query.eq('is_super_vendor', true);
       }
 
-      const { data: vendorsData } = await query;
-      setVendors((vendorsData || []) as unknown as Vendor[]);
+      const [{ data: vendorsData }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+      const rows = (vendorsData || []) as unknown as Vendor[];
+      setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
       setIsLoading(false);
     };
 
     fetchData();
-  }, [eventId, filters?.category, filters?.location, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
+  }, [eventId, filters?.category, filters?.regionId, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
 
   // Compute distances and sort
   const vendorsWithDistance: VendorWithDistance[] = useMemo(() => {
