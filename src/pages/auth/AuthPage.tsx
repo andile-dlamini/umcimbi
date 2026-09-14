@@ -602,8 +602,13 @@ export default function AuthPage() {
       trackPixel('registration_completed', selectedRole ? { role: selectedRole } : undefined);
       trackPixel('CompleteRegistration', { content_name: selectedRole ?? 'planner' }, true);
 
-      setStep('success');
-      toast.success('Account created successfully!');
+      if (selectedRole === 'vendor') {
+        setStep('business');
+        toast.success("Account created. Let's set up your business.");
+      } else {
+        setStep('success');
+        toast.success('Account created successfully!');
+      }
     } catch { toast.error('Network error. Please try again.'); }
     finally { setIsLoading(false); }
   };
