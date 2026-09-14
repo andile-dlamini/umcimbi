@@ -39,6 +39,35 @@ export async function fetchVendorRegionMap(): Promise<Map<string, Set<string>>> 
   return map;
 }
 
+// Display counterpart to fetchVendorRegionMap: human-readable region names per
+// vendor, ordered by display_order, for cards/tiles. Filtering uses the map above.
+export async function fetchVendorRegionNames(): Promise<Map<string, string[]>> {
+  const { data, error } = await supabase
+    .from('vendor_service_regions')
+    .select('vendor_id, service_regions(name, display_order)');
+  const map = new Map<string, string[]>();
+  if (error) {
+    console.error('Error fetching vendor service region names:', error);
+    return map;
+  }
+  (data ?? []).forEach((row: any) => {
+    const name = row.service_regions?.name;
+    if (!name) return;
+    const list = map.get(row.vendor_id) ?? [];
+    list.push(JSON.stringify([row.service_regions.display_order ?? 0, name]) as unknown as string);
+    map.set(row.vendor_id, list);
+  });
+  // Sort each vendor's names by display_order (packed above), then unpack.
+  map.forEach((list, vendorId) => {
+    const sorted = (list as unknown as string[])
+      .map((s) => JSON.parse(s) as [number, string])
+      .sort((a, b) => a[0] - b[0])
+      .map(([, name]) => name);
+    map.set(vendorId, sorted);
+  });
+  return map;
+}
+
 export function applyRegionFilterAndSort<T extends { id: string }>(
   rows: T[],
   regionMap: Map<string, Set<string>>,
