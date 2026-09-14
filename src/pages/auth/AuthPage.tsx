@@ -679,9 +679,9 @@ export default function AuthPage() {
         name: vendorForm.name.trim(),
         category: vendorForm.category as VendorCategory,
         whatsapp_number: null,
-        instagram_url: normalizeUrl(vendorForm.instagram_url),
-        facebook_url: normalizeUrl(vendorForm.facebook_url),
-        tiktok_url: normalizeUrl(vendorForm.tiktok_url),
+        instagram_url: toSocialUrl('instagram', vendorForm.instagram_url),
+        facebook_url: toSocialUrl('facebook', vendorForm.facebook_url),
+        tiktok_url: toSocialUrl('tiktok', vendorForm.tiktok_url),
         languages: vendorForm.languages,
         image_urls: [],
         vendor_business_type: vendorBusinessType,
@@ -1394,13 +1394,13 @@ export default function AuthPage() {
                   <div className="space-y-2 pt-2">
                     <Label>Social media links *</Label>
                     <p className="text-xs text-muted-foreground">Add at least one so clients can see your work.</p>
-                    <Input type="text" placeholder="Instagram link (optional)" value={vendorForm.instagram_url}
+                    <Input type="text" placeholder="e.g. maswazicatering" value={vendorForm.instagram_url}
                       onChange={e => setVendorForm({ ...vendorForm, instagram_url: e.target.value })}
                       className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
-                    <Input type="text" placeholder="Facebook link (optional)" value={vendorForm.facebook_url}
+                    <Input type="text" placeholder="e.g. maswazicatering" value={vendorForm.facebook_url}
                       onChange={e => setVendorForm({ ...vendorForm, facebook_url: e.target.value })}
                       className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
-                    <Input type="text" placeholder="TikTok link (optional)" value={vendorForm.tiktok_url}
+                    <Input type="text" placeholder="e.g. maswazicatering" value={vendorForm.tiktok_url}
                       onChange={e => setVendorForm({ ...vendorForm, tiktok_url: e.target.value })}
                       className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
                     {errors.social_links && <p className="text-sm text-destructive">{errors.social_links}</p>}
