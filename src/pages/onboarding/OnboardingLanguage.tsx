@@ -329,7 +329,7 @@ export default function OnboardingLanguage() {
           </div>
 
           <VendorBrowser
-            showSearchCard
+            showSearchCard={false}
             syncUrl
             resultCount={8}
             onVendorClick={handleVendorClick} />
