@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const firstName = profileByUserId.get(v.owner_user_id)?.first_name?.trim() || 'there';
+      const firstName = profileByUserId.get(v.owner_user_id)?.first_name?.trim() || v.name?.trim() || 'there';
       recipients.push({
         user_id: v.owner_user_id,
         vendor_id: v.id,
