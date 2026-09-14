@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { geocodeAddress } from '@/lib/geocodingService';
 import { cn } from '@/lib/utils';
+import { toSocialUrl, extractSocialHandle } from '@/lib/socialLinks';
 import { toast } from 'sonner';
 import type { Vendor } from '@/types/database';
 
@@ -34,17 +35,6 @@ const vendorSchema = z.object({
   facebook_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
 
-function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
-  const cleaned = handle.trim().replace(/^@/, '');
-  if (!cleaned) return null;
-  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
-  const bases = {
-    instagram: 'https://instagram.com/',
-    tiktok: 'https://tiktok.com/@',
-    facebook: 'https://facebook.com/',
-  };
-  return bases[platform] + cleaned;
-}
 
 const SOUTH_AFRICAN_BANKS = [
   { name: 'ABSA', branchCode: '632005' },
@@ -98,10 +88,6 @@ interface FormDataShape {
   bank_account_type: string;
 }
 
-function extractSocialHandle(url: string | null | undefined): string {
-  if (!url) return '';
-  return url.replace(/^https?:\/\/(www\.)?(instagram\.com\/|tiktok\.com\/@?|facebook\.com\/)/, '');
-}
 
 export function VendorProfileForm({
   ownerUserId,
