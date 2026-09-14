@@ -148,6 +148,7 @@ export default function HowItWorks({ audience = 'planner' }: { audience?: 'plann
 
   useEffect(() => {
     const draw = () => {
+      iconRefs.current.length = steps.length;
       const container = containerRef.current;
       const svg = svgRef.current;
       if (!container || !svg) return;
@@ -175,13 +176,19 @@ export default function HowItWorks({ audience = 'planner' }: { audience?: 'plann
         : '';
     };
 
-    const t = window.setTimeout(draw, 100);
+    draw();
+
     window.addEventListener('resize', draw);
+    const observer = new ResizeObserver(draw);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
     return () => {
-      window.clearTimeout(t);
       window.removeEventListener('resize', draw);
+      observer.disconnect();
     };
-  }, []);
+  }, [steps]);
 
   return (
     <div className="w-full">
