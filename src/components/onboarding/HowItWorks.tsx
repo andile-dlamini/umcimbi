@@ -23,7 +23,7 @@ interface Step {
   align: Align;
 }
 
-const STEPS: Step[] = [
+const PLANNER_STEPS: Step[] = [
   {
     role: 'Organiser',
     roleColor: '#D85A30',
@@ -71,7 +71,7 @@ const STEPS: Step[] = [
     border: '#B5D4F4',
     Icon: ShieldCheck,
     title: 'Payment held securely',
-    desc: 'Deposit paid immediately to vendor to confirm the booking. Balance held safely by UMCIMBI and released only once your ceremony is done.',
+    desc: 'Deposit paid immediately to vendor confirm the booking. Balance held safely by UMCIMBI and released only once your ceremony is done.',
     align: 'left',
   },
   {
@@ -83,6 +83,59 @@ const STEPS: Step[] = [
     title: 'Ceremony done',
     desc: 'Vendor uploads proof of delivery, the organiser marks the job as complete. The balance is paid straight to the vendor. Leave a review for your community.',
     align: 'right',
+  },
+];
+
+const VENDOR_STEPS: Step[] = [
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: Sparkles,
+    title: 'Create your profile',
+    desc: 'Add your business name, categories, photos and the areas you serve.',
+    align: 'left',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: ShieldCheck,
+    title: 'Complete verification',
+    desc: 'Submit your documents so families know your business is genuine.',
+    align: 'right',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: MessageCircle,
+    title: 'Receive enquiries',
+    desc: 'Families planning ceremonies send service requests straight to your profile.',
+    align: 'left',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: ReceiptText,
+    title: 'Send quotations',
+    desc: 'Reply with a formal quotation in the app and agree the details by chat.',
+    align: 'right',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: CircleCheck,
+    title: 'Fulfil the booking',
+    desc: 'Deliver on the day, upload proof, and get paid into your bank account.',
+    align: 'left',
   },
 ];
 
