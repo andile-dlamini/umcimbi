@@ -669,6 +669,12 @@ export default function AuthPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast.error('Session expired. Please sign in again.'); setIsLoading(false); return; }
 
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('phone_number')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
     const vendorBusinessType = vendorForm.is_registered_business ? 'registered_business' as const : 'independent' as const;
     const verificationStatus = vendorForm.is_registered_business ? 'pending' as const : 'not_applicable' as const;
 
@@ -678,6 +684,7 @@ export default function AuthPage() {
         owner_user_id: user.id,
         name: vendorForm.name.trim(),
         category: vendorForm.category as VendorCategory,
+        phone_number: profileRow?.phone_number ?? null,
         whatsapp_number: null,
         instagram_url: toSocialUrl('instagram', vendorForm.instagram_url),
         facebook_url: toSocialUrl('facebook', vendorForm.facebook_url),
