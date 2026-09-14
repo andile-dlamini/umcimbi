@@ -1829,6 +1829,33 @@ export type Database = {
           },
         ]
       }
+      vendor_sms_log: {
+        Row: {
+          campaign: string
+          id: string
+          provider_response: string | null
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          campaign: string
+          id?: string
+          provider_response?: string | null
+          sent_at?: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          campaign?: string
+          id?: string
+          provider_response?: string | null
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vendor_verification_documents: {
         Row: {
           created_at: string
