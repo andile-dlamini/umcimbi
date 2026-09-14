@@ -23,13 +23,6 @@ import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
 import { toSocialUrl } from '@/lib/socialLinks';
 
-function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
-  const cleaned = handle.trim().replace(/^@/, '');
-  if (!cleaned) return null;
-  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) return cleaned;
-  const bases = { instagram: 'https://instagram.com/', tiktok: 'https://tiktok.com/@', facebook: 'https://facebook.com/' };
-  return bases[platform] + cleaned;
-}
 
 function toHandle(url: string): string {
   if (!url) return '';
