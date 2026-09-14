@@ -114,13 +114,20 @@ export function useVendors(filters?: {
       }
     }
 
-    const [{ data, error }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+    const [{ data, error }, regionMap, regionNames] = await Promise.all([
+      query,
+      fetchVendorRegionMap(),
+      fetchVendorRegionNames(),
+    ]);
 
     if (error) {
       console.error('Error fetching vendors:', error);
       toast.error('Failed to load vendors');
     } else {
-      const rows = (data || []) as unknown as Vendor[];
+      const rows = ((data || []) as unknown as Vendor[]).map((v) => ({
+        ...v,
+        service_region_names: regionNames.get(v.id) ?? [],
+      }));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
     }
     setIsLoading(false);
