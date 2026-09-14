@@ -35,6 +35,7 @@ import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorLandingPage from "@/pages/vendors/VendorLandingPage";
 import CompleteProfile from "@/pages/vendors/CompleteProfile";
+import UpdateServiceAreas from "@/pages/vendors/UpdateServiceAreas";
 import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
 import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
@@ -134,6 +135,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/feedback/vendor" element={<FeedbackVendor />} />
         <Route path="/verify/selfie" element={<SelfieSubmission />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
+        <Route path="/update-service-areas" element={<UpdateServiceAreas />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
 
       </Routes>
@@ -179,6 +181,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/payment/error" element={<PaymentError />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
+        <Route path="/update-service-areas" element={<UpdateServiceAreas />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />

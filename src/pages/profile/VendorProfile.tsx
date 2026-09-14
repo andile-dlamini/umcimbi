@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
@@ -33,10 +33,12 @@ function toHandle(url: string): string {
 
 export default function VendorProfile() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { vendor, isLoading, updateVendorProfile, deleteVendorProfile } = useMyVendorProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const autoEditStarted = useRef(false);
   const [editData, setEditData] = useState({
     about: '',
     price_range_text: '',
@@ -70,6 +72,16 @@ export default function VendorProfile() {
         setServiceRegionNames(rows.map((r) => r.service_regions?.name).filter(Boolean));
       });
   }, [vendorId]);
+
+  // Auto-open edit mode when arriving from /update-service-areas
+  useEffect(() => {
+    if (isLoading) return;
+    if (autoEditStarted.current) return;
+    if (searchParams.get('edit') === '1' && vendor && !isEditing) {
+      autoEditStarted.current = true;
+      startEditing();
+    }
+  }, [isLoading, searchParams, vendor, isEditing]);
 
   if (isLoading) {
     return (
@@ -324,11 +336,13 @@ export default function VendorProfile() {
                     placeholder="City, Province"
                   />
                 </div>
-                <VendorServiceRegions
-                  vendorId={vendor.id}
-                  value={serviceRegionIds}
-                  onChange={setServiceRegionIds}
-                />
+                <div id="service-areas">
+                  <VendorServiceRegions
+                    vendorId={vendor.id}
+                    value={serviceRegionIds}
+                    onChange={setServiceRegionIds}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>About</Label>
                   <Textarea
