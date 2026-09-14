@@ -6,6 +6,7 @@ import {
   CircleCheck,
   ShieldCheck,
   PartyPopper,
+  MessageCircle,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -22,7 +23,7 @@ interface Step {
   align: Align;
 }
 
-const STEPS: Step[] = [
+const PLANNER_STEPS: Step[] = [
   {
     role: 'Organiser',
     roleColor: '#D85A30',
@@ -85,10 +86,65 @@ const STEPS: Step[] = [
   },
 ];
 
-export default function HowItWorks() {
+const VENDOR_STEPS: Step[] = [
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: Sparkles,
+    title: 'Create your profile',
+    desc: 'Add your business name, categories, photos and the areas you serve.',
+    align: 'left',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: ShieldCheck,
+    title: 'Complete verification',
+    desc: 'Submit your documents so families know your business is genuine.',
+    align: 'right',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: MessageCircle,
+    title: 'Receive enquiries',
+    desc: 'Families planning ceremonies send service requests straight to your profile.',
+    align: 'left',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: ReceiptText,
+    title: 'Send quotations',
+    desc: 'Reply with a formal quotation in the app and agree the details by chat.',
+    align: 'right',
+  },
+  {
+    role: 'Vendor',
+    roleColor: '#0F6E56',
+    bg: '#F0FAF6',
+    border: '#9FE1CB',
+    Icon: CircleCheck,
+    title: 'Fulfil the booking',
+    desc: 'Deliver on the day, upload proof, and get paid into your bank account.',
+    align: 'left',
+  },
+];
+
+export default function HowItWorks({ audience = 'planner' }: { audience?: 'planner' | 'vendor' }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const iconRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  const steps = audience === 'vendor' ? VENDOR_STEPS : PLANNER_STEPS;
 
   useEffect(() => {
     const draw = () => {
@@ -134,7 +190,9 @@ export default function HowItWorks() {
           How UMCIMBI works
         </h2>
         <p className="text-muted-foreground mt-2" style={{ fontSize: 13 }}>
-          From ceremony idea to celebration — here's the journey
+          {audience === 'vendor'
+            ? "From profile to payment — here's the journey"
+            : "From ceremony idea to celebration — here's the journey"}
         </p>
       </div>
 
@@ -147,7 +205,7 @@ export default function HowItWorks() {
         />
 
         <div className="relative space-y-8" style={{ zIndex: 1 }}>
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const { Icon } = step;
             const isRight = step.align === 'right';
             return (
