@@ -73,6 +73,16 @@ export default function VendorProfile() {
       });
   }, [vendorId]);
 
+  // Auto-open edit mode when arriving from /update-service-areas
+  useEffect(() => {
+    if (isLoading) return;
+    if (autoEditStarted.current) return;
+    if (searchParams.get('edit') === '1' && vendor && !isEditing) {
+      autoEditStarted.current = true;
+      startEditing();
+    }
+  }, [isLoading, searchParams, vendor, isEditing]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen pb-safe">
@@ -326,11 +336,13 @@ export default function VendorProfile() {
                     placeholder="City, Province"
                   />
                 </div>
-                <VendorServiceRegions
-                  vendorId={vendor.id}
-                  value={serviceRegionIds}
-                  onChange={setServiceRegionIds}
-                />
+                <div id="service-areas">
+                  <VendorServiceRegions
+                    vendorId={vendor.id}
+                    value={serviceRegionIds}
+                    onChange={setServiceRegionIds}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>About</Label>
                   <Textarea
