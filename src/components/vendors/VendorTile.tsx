@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
 
 export interface VendorTileData {
   id: string;
@@ -9,6 +9,7 @@ export interface VendorTileData {
   logo_url: string | null;
   image_urls: string[] | null;
   about?: string | null;
+  service_region_names?: string[];
 }
 
 interface VendorTileProps {
