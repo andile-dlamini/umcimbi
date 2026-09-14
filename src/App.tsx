@@ -34,6 +34,7 @@ import PublicVendorsList from "@/pages/vendors/PublicVendorsList";
 import VendorDetail from "@/pages/vendors/VendorDetail";
 import VendorOnboarding from "@/pages/vendors/VendorOnboarding";
 import VendorLandingPage from "@/pages/vendors/VendorLandingPage";
+import CompleteProfile from "@/pages/vendors/CompleteProfile";
 import VendorProfile from "@/pages/profile/VendorProfile";
 import VendorDashboard from "@/pages/vendor-dashboard/VendorDashboard";
 import VendorRequests from "@/pages/vendor-dashboard/VendorRequests";
