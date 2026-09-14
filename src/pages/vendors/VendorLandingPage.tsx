@@ -131,15 +131,15 @@ export default function VendorLandingPage() {
           <div className="max-w-2xl space-y-7 text-center md:text-left" style={{ textShadow: '0 2px 20px hsl(220 25% 6% / 0.5)' }}>
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider">For Vendors</p>
             <h1 className="text-[2.25rem] sm:text-[2.75rem] lg:text-5xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg">
-              Join the fastest-growing traditional ceremony platform
+              Help families find your business for their traditional ceremonies.
             </h1>
             <p className="text-lg text-white/80 leading-relaxed">
-              UMCIMBI lets you get discovered by families planning their traditional ceremonies, you create professional quotes in minutes and you get paid directly in your bank account.
+              UMCIMBI lets you showcase your work, receive enquiries and send quotations. We are open to event vendors across KwaZulu-Natal. Registration is free.
             </p>
             <div style={{ textShadow: 'none' }}>
               <Link onClick={() => trackPixel('cta_im_a_vendor_clicked')} to={signupHref}>
                 <Button size="lg" className="h-14 text-base font-semibold px-10 rounded-full shadow-lg shadow-primary/25">
-                  Create your free profile
+                  Create your free vendor profile
                 </Button>
               </Link>
             </div>
