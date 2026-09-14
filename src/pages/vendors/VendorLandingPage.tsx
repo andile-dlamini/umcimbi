@@ -168,7 +168,7 @@ export default function VendorLandingPage() {
 
       {/* ═══ HOW IT WORKS ═══ */}
       <section id="how" className="scroll-mt-20">
-        <HowItWorks />
+        <HowItWorks audience="vendor" />
       </section>
 
       {/* ═══ FAQ ═══ */}
