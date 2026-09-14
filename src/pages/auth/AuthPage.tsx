@@ -5,7 +5,7 @@ import {
   PartyPopper, Store, Phone, Mail, Globe, ImagePlus, Camera,
   ChevronsUpDown, Check, Upload, Info
 } from 'lucide-react';
-import { PricingInput } from '@/components/vendors/PricingInput';
+import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,10 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { AddressFields, AddressData } from '@/components/shared/AddressFields';
 import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { COUNTRIES, getCountryByCode } from '@/data/countries';
 import { useAuth } from '@/context/AuthContext';
@@ -89,19 +87,13 @@ const passwordSchema = z.object({
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
   category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
-  address_line_1: z.string().trim().min(1, 'Address Line 1 is required').max(200),
-  address_line_2: z.string().trim().max(200).optional().or(z.literal('')),
-  city: z.string().trim().min(1, 'City / Suburb is required').max(100),
-  state_province: z.string().trim().max(100).optional().or(z.literal('')),
-  country: z.string().trim().min(1, 'Country is required'),
-  postal_code: z.string().trim().min(1, 'Postal / Zip Code is required').max(20),
-  phone_country: z.string().min(1, 'Please select a country code'),
-  phone_number: z.string().trim().min(1, 'Phone number is required'),
-  about: z.string().trim().max(2000).optional().or(z.literal('')),
-  price_range_text: z.string().trim().max(100).optional().or(z.literal('')),
-  email: z.string().trim().email('Please enter a valid email').max(255).optional().or(z.literal('')),
-  website_url: z.string().trim().max(500).optional().or(z.literal('')),
 });
+
+const normalizeUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+};
 
 // ─── TYPES ───
 type UserRole = 'planner' | 'vendor';
@@ -434,32 +426,24 @@ export default function AuthPage() {
   const [vendorForm, setVendorForm] = useState({
     name: '',
     category: '' as VendorCategory | '',
-    about: '',
-    price_range_text: '',
-    phone_country: 'ZA' as string,
-    phone_number: '',
-    email: '',
-    website_url: '',
+    instagram_url: '',
+    facebook_url: '',
+    tiktok_url: '',
     languages: ['English'],
     is_registered_business: false,
     registered_business_name: '',
     registration_number: '',
     vat_number: '',
   });
-  const [vendorAddress, setVendorAddress] = useState<AddressData>({
-    address_line_1: '', address_line_2: '', city: '', state_province: '', country: 'ZA', postal_code: '',
-  });
+  const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [showcaseFiles, setShowcaseFiles] = useState<{ file: File; preview: string }[]>([]);
   const [verificationFiles, setVerificationFiles] = useState<{ file: File; docType: string; preview: string }[]>([]);
-  const [phoneCountryOpen, setPhoneCountryOpen] = useState(false);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const showcaseInputRef = useRef<HTMLInputElement>(null);
   const verificationInputRef = useRef<HTMLInputElement>(null);
-
-  const selectedPhoneCountry = COUNTRIES.find(c => c.code === vendorForm.phone_country) || COUNTRIES[0];
 
   // Timers
   useEffect(() => {
@@ -656,8 +640,7 @@ export default function AuthPage() {
   const handleBusinessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    const dataToValidate = { ...vendorForm, ...vendorAddress };
-    const validation = vendorSchema.safeParse(dataToValidate);
+    const validation = vendorSchema.safeParse(vendorForm);
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
       validation.error.errors.forEach(err => { if (err.path[0]) fieldErrors[err.path[0].toString()] = err.message; });
@@ -665,9 +648,15 @@ export default function AuthPage() {
       toast.error(validation.error.errors[0]?.message);
       return;
     }
-    if (!validateLocalPhone(vendorForm.phone_number, vendorForm.phone_country)) {
-      setErrors(prev => ({ ...prev, phone_number: `Please enter a valid ${selectedPhoneCountry.name} phone number` }));
-      toast.error(`Please enter a valid ${selectedPhoneCountry.name} phone number`);
+    const hasSocial = [vendorForm.instagram_url, vendorForm.facebook_url, vendorForm.tiktok_url]
+      .some(v => v.trim().length > 0);
+    if (!hasSocial) {
+      setErrors(prev => ({ ...prev, social_links: 'Please add at least one social media link' }));
+      toast.error('Please add at least one social media link');
+      return;
+    }
+    if (serviceRegionIds.length === 0) {
+      toast.error('Please select at least one service area');
       return;
     }
     trackPixel('business_step_completed', { role: 'vendor' });
@@ -679,12 +668,6 @@ export default function AuthPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast.error('Session expired. Please sign in again.'); setIsLoading(false); return; }
 
-    const e164Phone = toE164WithCountry(vendorForm.phone_number, vendorForm.phone_country);
-    let websiteUrl = vendorForm.website_url.trim() || null;
-    if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) websiteUrl = 'https://' + websiteUrl;
-
-    const locationParts = [vendorAddress.city.trim(), vendorAddress.state_province?.trim()].filter(Boolean);
-    const composedLocation = locationParts.join(', ') || null;
     const vendorBusinessType = vendorForm.is_registered_business ? 'registered_business' as const : 'independent' as const;
     const verificationStatus = vendorForm.is_registered_business ? 'pending' as const : 'not_applicable' as const;
 
@@ -694,21 +677,12 @@ export default function AuthPage() {
         owner_user_id: user.id,
         name: vendorForm.name.trim(),
         category: vendorForm.category as VendorCategory,
-        location: composedLocation,
-        about: vendorForm.about.trim() || null,
-        price_range_text: vendorForm.price_range_text.trim() || null,
-        phone_number: e164Phone,
         whatsapp_number: null,
-        email: vendorForm.email.trim() || null,
-        website_url: websiteUrl,
+        instagram_url: normalizeUrl(vendorForm.instagram_url),
+        facebook_url: normalizeUrl(vendorForm.facebook_url),
+        tiktok_url: normalizeUrl(vendorForm.tiktok_url),
         languages: vendorForm.languages,
         image_urls: [],
-        address_line_1: vendorAddress.address_line_1.trim(),
-        address_line_2: vendorAddress.address_line_2.trim() || null,
-        city: vendorAddress.city.trim(),
-        state_province: vendorAddress.state_province.trim() || null,
-        country: vendorAddress.country,
-        postal_code: vendorAddress.postal_code.trim(),
         vendor_business_type: vendorBusinessType,
         business_verification_status: verificationStatus,
         registered_business_name: vendorForm.is_registered_business ? vendorForm.registered_business_name.trim() || null : null,
@@ -724,6 +698,17 @@ export default function AuthPage() {
       setIsLoading(false);
       return;
     }
+
+    if (serviceRegionIds.length > 0) {
+      const { error: regionError } = await supabase
+        .from('vendor_service_regions')
+        .insert(serviceRegionIds.map(region_id => ({ vendor_id: vendorData.id, region_id })));
+      if (regionError) {
+        console.error('Service region save error:', regionError);
+        toast.error('Profile created, but service areas could not be saved');
+      }
+    }
+
 
     // Upload images
     const uploadedUrls: string[] = [];
@@ -1404,75 +1389,27 @@ export default function AuthPage() {
                     )}
                   </div>
 
-                  {/* Address */}
-                  <div className="pt-2"><h3 className="text-sm font-medium mb-3">Business Address *</h3><AddressFields data={vendorAddress} onChange={setVendorAddress} errors={errors} /></div>
-
-                  {/* About */}
-                  <div className="space-y-2">
-                    <Label>About your business</Label>
-                    <Textarea placeholder="Describe your services..." value={vendorForm.about} onChange={e => setVendorForm({ ...vendorForm, about: e.target.value })} rows={3} />
+                  {/* Social links */}
+                  <div className="space-y-2 pt-2">
+                    <Label>Social media links *</Label>
+                    <p className="text-xs text-muted-foreground">Add at least one so clients can see your work.</p>
+                    <Input type="text" placeholder="Instagram link (optional)" value={vendorForm.instagram_url}
+                      onChange={e => setVendorForm({ ...vendorForm, instagram_url: e.target.value })}
+                      className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
+                    <Input type="text" placeholder="Facebook link (optional)" value={vendorForm.facebook_url}
+                      onChange={e => setVendorForm({ ...vendorForm, facebook_url: e.target.value })}
+                      className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
+                    <Input type="text" placeholder="TikTok link (optional)" value={vendorForm.tiktok_url}
+                      onChange={e => setVendorForm({ ...vendorForm, tiktok_url: e.target.value })}
+                      className={`h-12 ${errors.social_links ? 'border-destructive' : ''}`} />
+                    {errors.social_links && <p className="text-sm text-destructive">{errors.social_links}</p>}
                   </div>
 
-                  {/* Price Range */}
-                  <PricingInput
-                    category={vendorForm.category}
-                    value={vendorForm.price_range_text}
-                    onChange={(formatted) => setVendorForm({ ...vendorForm, price_range_text: formatted })}
-                  />
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <Label>Business phone *</Label>
-                    <div className="flex gap-2">
-                      <Popover open={phoneCountryOpen} onOpenChange={setPhoneCountryOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" role="combobox" className="w-[120px] h-12 justify-between px-2 flex-shrink-0">
-                            <span className="flex items-center gap-1 text-sm truncate"><span>{selectedPhoneCountry.flag}</span><span>{selectedPhoneCountry.dial}</span></span>
-                            <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[280px] p-0" align="start">
-                          <Command><CommandInput placeholder="Search country..." /><CommandList><CommandEmpty>No country found.</CommandEmpty><CommandGroup>
-                            {COUNTRIES.map(c => (
-                              <CommandItem key={c.code} value={`${c.name} ${c.dial}`} onSelect={() => { setVendorForm({ ...vendorForm, phone_country: c.code }); setPhoneCountryOpen(false); }}>
-                                <Check className={cn('mr-2 h-4 w-4', vendorForm.phone_country === c.code ? 'opacity-100' : 'opacity-0')} />
-                                <span className="mr-2">{c.flag}</span><span className="flex-1">{c.name}</span><span className="text-muted-foreground text-sm">{c.dial}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup></CommandList></Command>
-                        </PopoverContent>
-                      </Popover>
-                      <div className="relative flex-1">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input type="tel" placeholder="082 123 4567" value={vendorForm.phone_number}
-                          onChange={e => setVendorForm({ ...vendorForm, phone_number: e.target.value })}
-                          className={`pl-10 h-12 ${errors.phone_number ? 'border-destructive' : ''}`} />
-                      </div>
-                    </div>
-                    {errors.phone_number && <p className="text-sm text-destructive">{errors.phone_number}</p>}
+                  {/* Service areas */}
+                  <div className="pt-2">
+                    <VendorServiceRegions vendorId={null} value={serviceRegionIds} onChange={setServiceRegionIds} />
                   </div>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label>Business email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input type="email" placeholder="business@example.com" value={vendorForm.email}
-                        onChange={e => setVendorForm({ ...vendorForm, email: e.target.value })}
-                        className={`pl-10 h-12 ${errors.email ? 'border-destructive' : ''}`} />
-                    </div>
-                  </div>
-
-                  {/* Website */}
-                  <div className="space-y-2">
-                    <Label>Website</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input type="text" placeholder="https://..." value={vendorForm.website_url}
-                        onChange={e => setVendorForm({ ...vendorForm, website_url: e.target.value })}
-                        className={`pl-10 h-12`} />
-                    </div>
-                  </div>
 
                   <Button type="submit" className="w-full h-12 mt-4">
                     <ArrowRight className="h-4 w-4 mr-2" />Continue to Showcase
@@ -1547,16 +1484,17 @@ export default function AuthPage() {
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1 h-12" onClick={() => handleFinalVendorSubmit()} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    {showcaseFiles.length === 0 ? 'Skip & Finish' : 'Finish Setup'}
+                  <Button
+                    className="flex-1 h-12"
+                    onClick={() => {
+                      if (showcaseFiles.length === 0) { toast.error('Please add at least one photo'); return; }
+                      handleFinalVendorSubmit();
+                    }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                    Finish Setup
                   </Button>
-                  {showcaseFiles.length > 0 && (
-                    <Button className="flex-1 h-12" onClick={() => handleFinalVendorSubmit()} disabled={isLoading}>
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                      Complete
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
