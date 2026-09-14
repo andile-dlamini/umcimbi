@@ -139,10 +139,12 @@ const VENDOR_STEPS: Step[] = [
   },
 ];
 
-export default function HowItWorks() {
+export default function HowItWorks({ audience = 'planner' }: { audience?: 'planner' | 'vendor' }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const iconRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  const steps = audience === 'vendor' ? VENDOR_STEPS : PLANNER_STEPS;
 
   useEffect(() => {
     const draw = () => {
@@ -188,7 +190,9 @@ export default function HowItWorks() {
           How UMCIMBI works
         </h2>
         <p className="text-muted-foreground mt-2" style={{ fontSize: 13 }}>
-          From ceremony idea to celebration — here's the journey
+          {audience === 'vendor'
+            ? "From profile to payment — here's the journey"
+            : "From ceremony idea to celebration — here's the journey"}
         </p>
       </div>
 
@@ -201,7 +205,7 @@ export default function HowItWorks() {
         />
 
         <div className="relative space-y-8" style={{ zIndex: 1 }}>
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const { Icon } = step;
             const isRight = step.align === 'right';
             return (
