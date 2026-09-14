@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorServiceRegions } from '@/components/vendors/VendorServiceRegions';
@@ -33,10 +33,12 @@ function toHandle(url: string): string {
 
 export default function VendorProfile() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { vendor, isLoading, updateVendorProfile, deleteVendorProfile } = useMyVendorProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const autoEditStarted = useRef(false);
   const [editData, setEditData] = useState({
     about: '',
     price_range_text: '',
