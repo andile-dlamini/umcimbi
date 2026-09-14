@@ -50,20 +50,16 @@ export async function fetchVendorRegionNames(): Promise<Map<string, string[]>> {
     console.error('Error fetching vendor service region names:', error);
     return map;
   }
+  const byVendor = new Map<string, { order: number; name: string }[]>();
   (data ?? []).forEach((row: any) => {
     const name = row.service_regions?.name;
     if (!name) return;
-    const list = map.get(row.vendor_id) ?? [];
-    list.push(JSON.stringify([row.service_regions.display_order ?? 0, name]) as unknown as string);
-    map.set(row.vendor_id, list);
+    const list = byVendor.get(row.vendor_id) ?? [];
+    list.push({ order: row.service_regions.display_order ?? 0, name });
+    byVendor.set(row.vendor_id, list);
   });
-  // Sort each vendor's names by display_order (packed above), then unpack.
-  map.forEach((list, vendorId) => {
-    const sorted = (list as unknown as string[])
-      .map((s) => JSON.parse(s) as [number, string])
-      .sort((a, b) => a[0] - b[0])
-      .map(([, name]) => name);
-    map.set(vendorId, sorted);
+  byVendor.forEach((list, vendorId) => {
+    map.set(vendorId, list.sort((a, b) => a.order - b.order).map((r) => r.name));
   });
   return map;
 }
