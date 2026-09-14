@@ -26,6 +26,7 @@ import {
 'lucide-react';
 import VendorTile, { VendorTileData } from '@/components/vendors/VendorTile';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchVendorRegionNames } from '@/hooks/useVendors';
 import {
   LIVE_VENDOR_CATEGORIES,
   LIVE_VENDOR_CATEGORY_FILTER_OPTIONS,
@@ -89,14 +90,21 @@ export default function VendorBrowser({
       // Explicit 60-row slice, shuffled client side (PostgREST cannot order randomly).
       // NOTE: once the active vendor count approaches 60 this needs revisiting — beyond
       // that point the shuffle would only ever reorder the same fixed subset.
-      const { data, error } = await query.limit(60);
+      const [{ data, error }, regionNames] = await Promise.all([
+        query.limit(60),
+        fetchVendorRegionNames(),
+      ]);
       if (cancelled) return;
 
       if (error || !data) {
         setResults([]);
       } else {
+        const rows = (data as VendorTileData[]).map((v) => ({
+          ...v,
+          service_region_names: regionNames.get(v.id) ?? [],
+        }));
         // Shuffle once, when the result arrives, and store it in state — never in render.
-        const shuffled = [...(data as VendorTileData[])];
+        const shuffled = [...rows];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

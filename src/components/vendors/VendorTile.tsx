@@ -51,11 +51,17 @@ export default function VendorTile({ vendor, onClick, showAbout, className }: Ve
         <p className="text-sm text-muted-foreground mt-1 truncate">
           {(() => {
             const { text, more } = truncateVendorCategories(vendor, 2);
+            const area = formatServiceAreas(vendor.service_region_names, vendor.location);
             return (
               <>
                 {text}
                 {more > 0 && <span className="text-muted-foreground/70">{` +${more} more`}</span>}
-                {vendor.location ? ` · ${vendor.location}` : ''}
+                {area && (
+                  <>
+                    {` · ${area.text}`}
+                    {area.more > 0 && <span className="text-muted-foreground/70">{` +${area.more} more`}</span>}
+                  </>
+                )}
               </>
             );
           })()}
