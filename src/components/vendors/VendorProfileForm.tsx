@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { LIVE_VENDOR_CATEGORIES, LIVE_VENDOR_CATEGORY_VALUES, VendorCategory } from '@/lib/vendorCategories';
 import { geocodeAddress } from '@/lib/geocodingService';
 import { cn } from '@/lib/utils';
+import { toSocialUrl, extractSocialHandle } from '@/lib/socialLinks';
 import { toast } from 'sonner';
 import type { Vendor } from '@/types/database';
 

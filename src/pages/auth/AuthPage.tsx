@@ -89,11 +89,7 @@ const vendorSchema = z.object({
   category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
 });
 
-const normalizeUrl = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-};
+import { toSocialUrl } from '@/lib/socialLinks';
 
 // ─── TYPES ───
 type UserRole = 'planner' | 'vendor';

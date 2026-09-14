@@ -21,6 +21,7 @@ import { getVendorCategoryLabel } from '@/lib/vendorCategories';
 import { LIVE_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
+import { toSocialUrl } from '@/lib/socialLinks';
 
 function toSocialUrl(platform: 'instagram' | 'tiktok' | 'facebook', handle: string): string | null {
   const cleaned = handle.trim().replace(/^@/, '');
