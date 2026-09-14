@@ -71,7 +71,7 @@ const PLANNER_STEPS: Step[] = [
     border: '#B5D4F4',
     Icon: ShieldCheck,
     title: 'Payment held securely',
-    desc: 'Deposit paid immediately to vendor confirm the booking. Balance held safely by UMCIMBI and released only once your ceremony is done.',
+    desc: 'Deposit paid immediately to vendor to confirm the booking. Balance held safely by UMCIMBI and released only once your ceremony is done.',
     align: 'left',
   },
   {
