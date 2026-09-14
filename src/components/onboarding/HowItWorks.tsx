@@ -6,6 +6,7 @@ import {
   CircleCheck,
   ShieldCheck,
   PartyPopper,
+  MessageCircle,
   type LucideIcon,
 } from 'lucide-react';
 
