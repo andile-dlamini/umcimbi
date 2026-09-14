@@ -133,6 +133,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
         <Route path="/feedback/vendor" element={<FeedbackVendor />} />
         <Route path="/verify/selfie" element={<SelfieSubmission />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
 
       </Routes>
@@ -177,6 +178,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/error" element={<PaymentError />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/vendor-dashboard" element={<VendorDashboard />} />
         <Route path="/vendor-dashboard/requests" element={<VendorRequests />} />
         <Route path="/vendor-dashboard/bookings" element={<VendorBookings />} />
