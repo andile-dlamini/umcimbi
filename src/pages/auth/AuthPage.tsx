@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import { trackPixel } from '@/lib/metaPixel';
+import { toSocialUrl } from '@/lib/socialLinks';
 
 // ─── CONSTANTS ───
 const SA_DIAL = '+27';
@@ -89,7 +90,6 @@ const vendorSchema = z.object({
   category: z.enum(LIVE_VENDOR_CATEGORY_VALUES, { required_error: 'Please select a category' }),
 });
 
-import { toSocialUrl } from '@/lib/socialLinks';
 
 // ─── TYPES ───
 type UserRole = 'planner' | 'vendor';
