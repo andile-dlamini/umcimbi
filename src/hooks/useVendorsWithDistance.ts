@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Vendor, Event } from '@/types/database';
 import { getDistanceInKm } from '@/lib/distanceUtils';
 import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
-import { fetchVendorRegionMap, applyRegionFilterAndSort } from '@/hooks/useVendors';
+import { fetchVendorRegionMap, fetchVendorRegionNames, applyRegionFilterAndSort } from '@/hooks/useVendors';
 
 function sanitizeVendorSearchTerm(term: string): string {
   return term
@@ -86,8 +86,15 @@ export function useVendorsWithDistance(
         query = query.eq('is_super_vendor', true);
       }
 
-      const [{ data: vendorsData }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
-      const rows = (vendorsData || []) as unknown as Vendor[];
+      const [{ data: vendorsData }, regionMap, regionNames] = await Promise.all([
+        query,
+        fetchVendorRegionMap(),
+        fetchVendorRegionNames(),
+      ]);
+      const rows = ((vendorsData || []) as unknown as Vendor[]).map((v) => ({
+        ...v,
+        service_region_names: regionNames.get(v.id) ?? [],
+      }));
       setVendorsWithRegions(new Set([...regionMap.entries()].filter(([, set]) => set.size > 0).map(([id]) => id)));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
       setIsLoading(false);

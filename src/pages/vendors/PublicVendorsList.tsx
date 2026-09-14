@@ -9,7 +9,7 @@ import { LIVE_VENDOR_CATEGORY_FILTER_OPTIONS, LIVE_VENDOR_CATEGORY_VALUES, Vendo
 import { supabase } from '@/integrations/supabase/client';
 import type { Vendor } from '@/types/database';
 import { LocationCombobox, LocationSelection } from '@/components/vendors/LocationCombobox';
-import { fetchVendorRegionMap, applyRegionFilterAndSort } from '@/hooks/useVendors';
+import { fetchVendorRegionMap, fetchVendorRegionNames, applyRegionFilterAndSort } from '@/hooks/useVendors';
 
 export default function PublicVendorsList() {
   const navigate = useNavigate();
@@ -60,9 +60,16 @@ export default function PublicVendorsList() {
         .order('is_super_vendor', { ascending: false, nullsFirst: false })
         .order('review_count', { ascending: false, nullsFirst: false });
 
-      const [{ data, error }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+      const [{ data, error }, regionMap, regionNames] = await Promise.all([
+        query,
+        fetchVendorRegionMap(),
+        fetchVendorRegionNames(),
+      ]);
       if (!error && data) {
-        const rows = data as unknown as Vendor[];
+        const rows = (data as unknown as Vendor[]).map((v) => ({
+          ...v,
+          service_region_names: regionNames.get(v.id) ?? [],
+        }));
         setVendors(applyRegionFilterAndSort(rows, regionMap, locationSelection?.regionId ?? null));
       }
       setIsLoading(false);

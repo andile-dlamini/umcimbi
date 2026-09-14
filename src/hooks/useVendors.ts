@@ -39,6 +39,31 @@ export async function fetchVendorRegionMap(): Promise<Map<string, Set<string>>> 
   return map;
 }
 
+// Display counterpart to fetchVendorRegionMap: human-readable region names per
+// vendor, ordered by display_order, for cards/tiles. Filtering uses the map above.
+export async function fetchVendorRegionNames(): Promise<Map<string, string[]>> {
+  const { data, error } = await supabase
+    .from('vendor_service_regions')
+    .select('vendor_id, service_regions(name, display_order)');
+  const map = new Map<string, string[]>();
+  if (error) {
+    console.error('Error fetching vendor service region names:', error);
+    return map;
+  }
+  const byVendor = new Map<string, { order: number; name: string }[]>();
+  (data ?? []).forEach((row: any) => {
+    const name = row.service_regions?.name;
+    if (!name) return;
+    const list = byVendor.get(row.vendor_id) ?? [];
+    list.push({ order: row.service_regions.display_order ?? 0, name });
+    byVendor.set(row.vendor_id, list);
+  });
+  byVendor.forEach((list, vendorId) => {
+    map.set(vendorId, list.sort((a, b) => a.order - b.order).map((r) => r.name));
+  });
+  return map;
+}
+
 export function applyRegionFilterAndSort<T extends { id: string }>(
   rows: T[],
   regionMap: Map<string, Set<string>>,
@@ -89,13 +114,20 @@ export function useVendors(filters?: {
       }
     }
 
-    const [{ data, error }, regionMap] = await Promise.all([query, fetchVendorRegionMap()]);
+    const [{ data, error }, regionMap, regionNames] = await Promise.all([
+      query,
+      fetchVendorRegionMap(),
+      fetchVendorRegionNames(),
+    ]);
 
     if (error) {
       console.error('Error fetching vendors:', error);
       toast.error('Failed to load vendors');
     } else {
-      const rows = (data || []) as unknown as Vendor[];
+      const rows = ((data || []) as unknown as Vendor[]).map((v) => ({
+        ...v,
+        service_region_names: regionNames.get(v.id) ?? [],
+      }));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
     }
     setIsLoading(false);

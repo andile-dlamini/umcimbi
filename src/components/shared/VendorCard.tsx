@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vendor } from '@/types/database';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
 import { formatDistance } from '@/lib/distanceUtils';
 import { cn } from '@/lib/utils';
 
 interface VendorCardProps {
-  vendor: Vendor & { distanceKm?: number | null };
+  vendor: Vendor & { distanceKm?: number | null; service_region_names?: string[] };
   eventId?: string;
   isSelected?: boolean;
   showDistance?: boolean;
@@ -91,12 +91,21 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false, 
                 </div>
               )}
               
-              {vendor.location && (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span className="truncate">{vendor.location}</span>
-                </div>
-              )}
+              {(() => {
+                const area = formatServiceAreas(vendor.service_region_names, vendor.location);
+                if (!area) return null;
+                return (
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span className="truncate">
+                      {area.text}
+                      {area.more > 0 && (
+                        <span className="text-muted-foreground/70">{` +${area.more} more`}</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
 
             {vendor.about && (

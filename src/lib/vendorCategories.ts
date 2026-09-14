@@ -82,6 +82,21 @@ export function truncateVendorCategories(vendor: VendorWithCategories, max = 2):
   return { text: labels.slice(0, max).join(' · '), more: labels.length - max };
 }
 
+// Pick what a card shows for "where this vendor works": the first declared
+// service region (with a count of the rest), else the free-text location.
+export function formatServiceAreas(
+  names: string[] | undefined,
+  fallback: string | null
+): { text: string; more: number } | null {
+  if (names && names.length > 0) {
+    return { text: names[0], more: names.length - 1 };
+  }
+  if (fallback && fallback.trim().length > 0) {
+    return { text: fallback, more: 0 };
+  }
+  return null;
+}
+
 // Categories for filter dropdowns (includes "all" option)
 export const VENDOR_CATEGORY_FILTER_OPTIONS: { value: VendorCategory | 'all'; label: string }[] = [
   { value: 'all', label: 'All Categories' },
