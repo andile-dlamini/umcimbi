@@ -273,12 +273,14 @@ export default function VendorVerificationQueue() {
 
   const handleApprove = async (vendor: PendingVendor) => {
     setVendorBusy(vendor.id, true);
+    // Only the "CIPC/registration doc reviewed" checkbox grants the Registered Business tag.
+    const registrationReviewed = checklist[vendor.id]?.[1] === true;
     try {
       const { error } = await supabase
         .from('vendors')
         .update({
           is_active: true,
-          business_verification_status: 'verified',
+          business_verification_status: registrationReviewed ? 'verified' : 'not_applicable',
           verification_reviewed_at: new Date().toISOString(),
           verification_reviewed_by: user?.id ?? null,
         })
@@ -297,7 +299,11 @@ export default function VendorVerificationQueue() {
           if (rpcErr) console.error('Trust score recalc failed:', rpcErr);
         });
 
-      toast.success(`${vendor.name} approved & activated`);
+      toast.success(
+        registrationReviewed
+          ? `${vendor.name} approved & activated as a Registered Business`
+          : `${vendor.name} approved & activated (no verification tag)`
+      );
       removeFromList(vendor.id);
     } catch (e) {
       console.error(e);
