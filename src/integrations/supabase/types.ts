@@ -2678,6 +2678,14 @@ export type Database = {
         }[]
       }
       get_vendor_last_sign_in: { Args: { _vendor_id: string }; Returns: string }
+      get_vendor_public_stats: {
+        Args: never
+        Returns: {
+          completed_bookings: number
+          responds_quickly: boolean
+          vendor_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
