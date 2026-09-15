@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/trackEvent';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { Search, ArrowUpDown, BadgeCheck, Star, Loader2 } from 'lucide-react';
+import { Search, ArrowUpDown, BadgeCheck, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,7 +28,6 @@ export default function VendorsList() {
   const [typedLocation, setTypedLocation] = useState('');
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [superVendorsOnly, setSuperVendorsOnly] = useState(false);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const { events } = useEvents();
@@ -41,7 +40,6 @@ export default function VendorsList() {
       regionId: locationSelection?.regionId ?? null,
       search,
       verifiedOnly,
-      superVendorsOnly,
     }
   );
 
@@ -51,7 +49,7 @@ export default function VendorsList() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
 
-  useEffect(() => { setPage(1); }, [search, category, locationSelection?.regionId, verifiedOnly, superVendorsOnly]);
+  useEffect(() => { setPage(1); }, [search, category, locationSelection?.regionId, verifiedOnly]);
 
   const handleUnmetDemandSubmit = async () => {
     setValidationError(null);
@@ -102,7 +100,7 @@ export default function VendorsList() {
   useEffect(() => {
 
     if (isLoading) return;
-    if (!search && category === 'all' && !locationSelection && !typedLocation && !verifiedOnly && !superVendorsOnly) {
+    if (!search && category === 'all' && !locationSelection && !typedLocation && !verifiedOnly) {
       return;
     }
     const timeout = setTimeout(() => {
@@ -115,13 +113,12 @@ export default function VendorsList() {
           category: category !== 'all' ? category : null,
           location: locationSelection?.label || typedLocation || null,
           verified_only: verifiedOnly,
-          super_vendors_only: superVendorsOnly,
           results_count: vendors.length,
         },
       });
     }, 1500);
     return () => clearTimeout(timeout);
-  }, [search, category, locationSelection?.label, typedLocation, verifiedOnly, superVendorsOnly, vendors.length, isLoading, user?.id]);
+  }, [search, category, locationSelection?.label, typedLocation, verifiedOnly, vendors.length, isLoading, user?.id]);
 
   return (
     <div className="min-h-screen pb-safe">
@@ -190,13 +187,6 @@ export default function VendorsList() {
             <Label htmlFor="verified" className="text-xs flex items-center gap-1 cursor-pointer">
               <BadgeCheck className="h-3.5 w-3.5 text-blue-500" />
               Verified only
-            </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch id="super" checked={superVendorsOnly} onCheckedChange={setSuperVendorsOnly} />
-            <Label htmlFor="super" className="text-xs flex items-center gap-1 cursor-pointer">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              Super Vendors
             </Label>
           </div>
         </div>
@@ -288,7 +278,7 @@ export default function VendorsList() {
                   setLocationSelection(null);
                   setTypedLocation('');
                   setVerifiedOnly(false);
-                  setSuperVendorsOnly(false);
+                  
                 }}
               >
                 Clear all filters

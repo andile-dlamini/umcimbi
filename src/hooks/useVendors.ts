@@ -64,6 +64,26 @@ export async function fetchVendorRegionNames(): Promise<Map<string, string[]>> {
   return map;
 }
 
+// Earned-badge inputs per vendor. Bookings and service requests are private per
+// account, so the aggregate comes from a read-only security-definer function.
+export async function fetchVendorBadgeStats(): Promise<
+  Map<string, { completedBookings: number; respondsQuickly: boolean }>
+> {
+  const map = new Map<string, { completedBookings: number; respondsQuickly: boolean }>();
+  const { data, error } = await (supabase as any).rpc('get_vendor_public_stats');
+  if (error) {
+    console.error('Error fetching vendor badge stats:', error);
+    return map;
+  }
+  (data ?? []).forEach((row: { vendor_id: string; completed_bookings: number | string; responds_quickly: boolean }) => {
+    map.set(row.vendor_id, {
+      completedBookings: Number(row.completed_bookings) || 0,
+      respondsQuickly: !!row.responds_quickly,
+    });
+  });
+  return map;
+}
+
 export function applyRegionFilterAndSort<T extends { id: string }>(
   rows: T[],
   regionMap: Map<string, Set<string>>,
@@ -114,10 +134,11 @@ export function useVendors(filters?: {
       }
     }
 
-    const [{ data, error }, regionMap, regionNames] = await Promise.all([
+    const [{ data, error }, regionMap, regionNames, badgeStats] = await Promise.all([
       query,
       fetchVendorRegionMap(),
       fetchVendorRegionNames(),
+      fetchVendorBadgeStats(),
     ]);
 
     if (error) {
@@ -127,6 +148,8 @@ export function useVendors(filters?: {
       const rows = ((data || []) as unknown as Vendor[]).map((v) => ({
         ...v,
         service_region_names: regionNames.get(v.id) ?? [],
+        completed_bookings: badgeStats.get(v.id)?.completedBookings ?? 0,
+        responds_quickly: badgeStats.get(v.id)?.respondsQuickly ?? false,
       }));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
     }

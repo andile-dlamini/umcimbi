@@ -287,7 +287,6 @@ export default function VendorProfile() {
                   <CardTitle>{vendor.name}</CardTitle>
                   <VendorBadges 
                     businessVerificationStatus={vendor.business_verification_status}
-                    isSuperVendor={vendor.is_super_vendor}
                     size="md"
                   />
                 </div>
