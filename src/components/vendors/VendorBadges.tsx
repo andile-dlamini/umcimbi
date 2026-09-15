@@ -39,7 +39,7 @@ export function VendorBadges({
                 <BadgeCheck className={cn(iconSize, 'text-blue-500')} />
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[220px] text-center">
+            <TooltipContent side="top" collisionPadding={12} className="z-50 max-w-[260px] whitespace-normal break-words text-center">
               Registered Business – UMCIMBI has verified this vendor's company registration documents
             </TooltipContent>
           </Tooltip>
@@ -53,7 +53,7 @@ export function VendorBadges({
                 <span className="text-xs font-medium text-emerald-600">{completedBookings}</span>
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[220px] text-center">
+            <TooltipContent side="top" collisionPadding={12} className="z-50 max-w-[260px] whitespace-normal break-words text-center">
               {`This vendor has completed ${completedBookings} ${completedBookings === 1 ? 'ceremony' : 'ceremonies'} booked through UMCIMBI`}
             </TooltipContent>
           </Tooltip>
@@ -66,7 +66,7 @@ export function VendorBadges({
                 <Zap className={cn(iconSize, 'text-amber-500')} />
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[220px] text-center">
+            <TooltipContent side="top" collisionPadding={12} className="z-50 max-w-[260px] whitespace-normal break-words text-center">
               This vendor usually replies to quotation requests within a day
             </TooltipContent>
           </Tooltip>
