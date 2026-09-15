@@ -273,12 +273,14 @@ export default function VendorVerificationQueue() {
 
   const handleApprove = async (vendor: PendingVendor) => {
     setVendorBusy(vendor.id, true);
+    // Only the "CIPC/registration doc reviewed" checkbox grants the Registered Business tag.
+    const registrationReviewed = checklist[vendor.id]?.[1] === true;
     try {
       const { error } = await supabase
         .from('vendors')
         .update({
           is_active: true,
-          business_verification_status: 'verified',
+          business_verification_status: registrationReviewed ? 'verified' : 'not_applicable',
           verification_reviewed_at: new Date().toISOString(),
           verification_reviewed_by: user?.id ?? null,
         })
