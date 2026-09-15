@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Vendor, Event } from '@/types/database';
 import { getDistanceInKm } from '@/lib/distanceUtils';
 import { VendorCategory, HIDDEN_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
-import { fetchVendorRegionMap, fetchVendorRegionNames, applyRegionFilterAndSort } from '@/hooks/useVendors';
+import { fetchVendorRegionMap, fetchVendorRegionNames, fetchVendorBadgeStats, applyRegionFilterAndSort } from '@/hooks/useVendors';
 
 function sanitizeVendorSearchTerm(term: string): string {
   return term
@@ -34,7 +34,6 @@ export function useVendorsWithDistance(
     regionId?: string | null;
     search?: string;
     verifiedOnly?: boolean;
-    superVendorsOnly?: boolean;
   }
 ) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
