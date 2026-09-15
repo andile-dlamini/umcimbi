@@ -81,18 +81,17 @@ export function useVendorsWithDistance(
         query = query.eq('business_verification_status', 'verified');
       }
 
-      if (filters?.superVendorsOnly) {
-        query = query.eq('is_super_vendor', true);
-      }
-
-      const [{ data: vendorsData }, regionMap, regionNames] = await Promise.all([
+      const [{ data: vendorsData }, regionMap, regionNames, badgeStats] = await Promise.all([
         query,
         fetchVendorRegionMap(),
         fetchVendorRegionNames(),
+        fetchVendorBadgeStats(),
       ]);
       const rows = ((vendorsData || []) as unknown as Vendor[]).map((v) => ({
         ...v,
         service_region_names: regionNames.get(v.id) ?? [],
+        completed_bookings: badgeStats.get(v.id)?.completedBookings ?? 0,
+        responds_quickly: badgeStats.get(v.id)?.respondsQuickly ?? false,
       }));
       setVendorsWithRegions(new Set([...regionMap.entries()].filter(([, set]) => set.size > 0).map(([id]) => id)));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
