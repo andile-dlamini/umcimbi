@@ -299,7 +299,11 @@ export default function VendorVerificationQueue() {
           if (rpcErr) console.error('Trust score recalc failed:', rpcErr);
         });
 
-      toast.success(`${vendor.name} approved & activated`);
+      toast.success(
+        registrationReviewed
+          ? `${vendor.name} approved & activated as a Registered Business`
+          : `${vendor.name} approved & activated (no verification tag)`
+      );
       removeFromList(vendor.id);
     } catch (e) {
       console.error(e);
