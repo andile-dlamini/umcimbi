@@ -16,8 +16,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { VendorImageGallery } from '@/components/vendors/VendorImageGallery';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { useMyVendorProfile } from '@/hooks/useVendors';
-import { getVendorCategoryLabel } from '@/lib/vendorCategories';
+import { useMyVendorProfile, fetchVendorBadgeStats } from '@/hooks/useVendors';
+import { getVendorCategoryLabel, formatServiceAreas } from '@/lib/vendorCategories';
 import { LIVE_VENDOR_CATEGORIES } from '@/lib/vendorCategories';
 import { BrandingSection } from '@/components/vendors/BrandingSection';
 import { PayoutDetailsSection } from '@/components/vendors/PayoutDetailsSection';
@@ -54,8 +54,17 @@ export default function VendorProfile() {
   });
   const [serviceRegionIds, setServiceRegionIds] = useState<string[]>([]);
   const [serviceRegionNames, setServiceRegionNames] = useState<string[]>([]);
+  const [badgeStats, setBadgeStats] = useState<{ completedBookings: number; respondsQuickly: boolean } | null>(null);
 
   const vendorId = vendor?.id;
+  useEffect(() => {
+    if (!vendorId) return;
+    let cancelled = false;
+    fetchVendorBadgeStats().then((stats) => {
+      if (!cancelled) setBadgeStats(stats.get(vendorId) ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [vendorId]);
   useEffect(() => {
     if (!vendorId) return;
     supabase
@@ -287,6 +296,8 @@ export default function VendorProfile() {
                   <CardTitle>{vendor.name}</CardTitle>
                   <VendorBadges 
                     businessVerificationStatus={vendor.business_verification_status}
+                    completedBookings={badgeStats?.completedBookings}
+                    respondsQuickly={badgeStats?.respondsQuickly}
                     size="md"
                   />
                 </div>
@@ -303,12 +314,17 @@ export default function VendorProfile() {
                     <span className="text-xs text-destructive">Verification rejected</span>
                   </div>
                 )}
-                {vendor.location && (
-                  <CardDescription className="flex items-center gap-1 mt-1">
-                    <MapPin className="h-3 w-3" />
-                    {vendor.location}
-                  </CardDescription>
-                )}
+                {(() => {
+                  const area = formatServiceAreas(serviceRegionNames, vendor.location);
+                  if (!area) return null;
+                  return (
+                    <CardDescription className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3" />
+                      {area.text}
+                      {area.more > 0 && <span className="opacity-70">{` +${area.more} more`}</span>}
+                    </CardDescription>
+                  );
+                })()}
               </div>
               {!isEditing ? (
                 <Button variant="outline" size="sm" onClick={startEditing}>
