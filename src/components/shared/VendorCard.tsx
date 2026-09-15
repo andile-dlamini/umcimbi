@@ -9,7 +9,12 @@ import { formatDistance } from '@/lib/distanceUtils';
 import { cn } from '@/lib/utils';
 
 interface VendorCardProps {
-  vendor: Vendor & { distanceKm?: number | null; service_region_names?: string[] };
+  vendor: Vendor & {
+    distanceKm?: number | null;
+    service_region_names?: string[];
+    completed_bookings?: number;
+    responds_quickly?: boolean;
+  };
   eventId?: string;
   isSelected?: boolean;
   showDistance?: boolean;
@@ -78,7 +83,9 @@ export function VendorCard({ vendor, eventId, isSelected, showDistance = false, 
             <h3 className="font-semibold text-foreground truncate flex items-center gap-1">
               {vendor.name}
               <VendorBadges 
-                businessVerificationStatus={(vendor as any).business_verification_status} 
+                businessVerificationStatus={(vendor as any).business_verification_status}
+                completedBookings={vendor.completed_bookings}
+                respondsQuickly={vendor.responds_quickly}
               />
             </h3>
             

@@ -215,7 +215,6 @@ export default function SettingsPage() {
                       {activeRole === 'vendor' && vendorStats && (
                         <VendorBadges
                           businessVerificationStatus={vendorStats.business_verification_status}
-                          isSuperVendor={vendorStats.is_super_vendor}
                           className="ml-1"
                         />
                       )}

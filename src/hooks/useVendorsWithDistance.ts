@@ -99,7 +99,7 @@ export function useVendorsWithDistance(
     };
 
     fetchData();
-  }, [eventId, filters?.category, filters?.regionId, filters?.search, filters?.verifiedOnly, filters?.superVendorsOnly]);
+  }, [eventId, filters?.category, filters?.regionId, filters?.search, filters?.verifiedOnly]);
 
   // Compute distances and sort
   const vendorsWithDistance: VendorWithDistance[] = useMemo(() => {

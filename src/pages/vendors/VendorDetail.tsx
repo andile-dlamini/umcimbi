@@ -303,7 +303,6 @@ export default function VendorDetail() {
           </Badge>
           <VendorBadges
             businessVerificationStatus={v.business_verification_status}
-            isSuperVendor={v.is_super_vendor}
             size="md"
           />
         </div>
