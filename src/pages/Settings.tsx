@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, Bell, KeyRound, Eye, EyeOff, Loader2, Store, Shield, Edit2, Save, X, LayoutDashboard, ArrowRight, HelpCircle, PlayCircle, Star } from 'lucide-react';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
+import { fetchVendorBadgeStats } from '@/hooks/useVendors';
 import { clearTour } from '@/hooks/useOnboardingTour';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +51,8 @@ export default function SettingsPage() {
     review_count: number;
     business_verification_status: string | null;
     is_super_vendor: boolean;
+    completed_bookings?: number;
+    responds_quickly?: boolean;
   } | null>(null);
 
   // SMS notification preference (separate from in-app notifications toggle)
@@ -91,14 +94,23 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user || !isVendor) { setVendorStats(null); return; }
+    let cancelled = false;
     supabase
       .from('vendors')
       .select('id, rating, review_count, business_verification_status, is_super_vendor')
       .eq('owner_user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        if (data) setVendorStats(data as any);
+      .then(async ({ data }) => {
+        if (!data || cancelled) return;
+        const stats = await fetchVendorBadgeStats();
+        if (cancelled) return;
+        setVendorStats({
+          ...data,
+          completed_bookings: stats.get(data.id)?.completedBookings ?? 0,
+          responds_quickly: stats.get(data.id)?.respondsQuickly ?? false,
+        } as any);
       });
+    return () => { cancelled = true; };
   }, [user, isVendor]);
 
   const handleReplayTour = () => {
@@ -215,6 +227,8 @@ export default function SettingsPage() {
                       {activeRole === 'vendor' && vendorStats && (
                         <VendorBadges
                           businessVerificationStatus={vendorStats.business_verification_status}
+                          completedBookings={vendorStats.completed_bookings}
+                          respondsQuickly={vendorStats.responds_quickly}
                           className="ml-1"
                         />
                       )}
