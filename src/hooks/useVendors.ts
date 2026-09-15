@@ -134,10 +134,11 @@ export function useVendors(filters?: {
       }
     }
 
-    const [{ data, error }, regionMap, regionNames] = await Promise.all([
+    const [{ data, error }, regionMap, regionNames, badgeStats] = await Promise.all([
       query,
       fetchVendorRegionMap(),
       fetchVendorRegionNames(),
+      fetchVendorBadgeStats(),
     ]);
 
     if (error) {
@@ -147,6 +148,8 @@ export function useVendors(filters?: {
       const rows = ((data || []) as unknown as Vendor[]).map((v) => ({
         ...v,
         service_region_names: regionNames.get(v.id) ?? [],
+        completed_bookings: badgeStats.get(v.id)?.completedBookings ?? 0,
+        responds_quickly: badgeStats.get(v.id)?.respondsQuickly ?? false,
       }));
       setVendors(applyRegionFilterAndSort(rows, regionMap, filters?.regionId));
     }
