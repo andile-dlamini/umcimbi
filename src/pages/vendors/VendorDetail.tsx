@@ -6,7 +6,7 @@ import {
   Heart,
   Star,
   MapPin,
-  Briefcase,
+  
   Camera,
   X,
   ChevronLeft,
@@ -21,7 +21,7 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
-import { getVendorCategoryLabel, truncateVendorCategories } from '@/lib/vendorCategories';
+import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
 import {
   Select,
   SelectContent,
@@ -303,6 +303,8 @@ export default function VendorDetail() {
           </Badge>
           <VendorBadges
             businessVerificationStatus={v.business_verification_status}
+            completedBookings={v.completed_bookings}
+            respondsQuickly={v.responds_quickly}
             size="md"
           />
         </div>
@@ -319,16 +321,21 @@ export default function VendorDetail() {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Briefcase className="h-4 w-4" />
-            <span>{vendor.added_to_events_count ?? 0} events</span>
-          </div>
-          {vendor.location && (
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{vendor.location}</span>
-            </div>
-          )}
+          {(() => {
+            const area = formatServiceAreas(v.service_region_names, vendor.location);
+            if (!area) return null;
+            return (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>
+                  {area.text}
+                  {area.more > 0 && (
+                    <span className="text-muted-foreground/70">{` +${area.more} more`}</span>
+                  )}
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

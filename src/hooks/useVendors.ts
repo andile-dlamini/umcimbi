@@ -179,16 +179,29 @@ export function useVendor(vendorId: string | undefined) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('vendors_marketplace')
-        .select('*')
-        .eq('id', vendorId)
-        .maybeSingle();
+      const [{ data, error }, regionNames, badgeStats] = await Promise.all([
+        supabase
+          .from('vendors_marketplace')
+          .select('*')
+          .eq('id', vendorId)
+          .maybeSingle(),
+        fetchVendorRegionNames(),
+        fetchVendorBadgeStats(),
+      ]);
 
       if (error) {
         console.error('Error fetching vendor:', error);
       } else {
-        setVendor(data as unknown as Vendor | null);
+        if (data) {
+          setVendor({
+            ...(data as unknown as Vendor),
+            service_region_names: regionNames.get((data as any).id) ?? [],
+            completed_bookings: badgeStats.get((data as any).id)?.completedBookings ?? 0,
+            responds_quickly: badgeStats.get((data as any).id)?.respondsQuickly ?? false,
+          } as unknown as Vendor);
+        } else {
+          setVendor(null);
+        }
         
         // Increment view count via RPC to avoid race conditions (fire and forget)
         // NOTE: must call .then() — PostgrestBuilder is lazy and won't execute otherwise
