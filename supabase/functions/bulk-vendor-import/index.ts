@@ -23,12 +23,17 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function normalizePhone(raw: string): string {
-  let n = String(raw).replace(/\s/g, "");
-  if (n.startsWith("0")) n = "+27" + n.slice(1);
-  if (!n.startsWith("+")) n = "+" + n;
-  return n;
+// Strip every character that isn't a digit, so stray spaces, dashes, brackets,
+// non-breaking spaces or invisible unicode can never leak into the shadow email.
+function normalizePhone(raw: string): string | null {
+  let digits = String(raw).replace(/\D/g, "");
+  if (digits.startsWith("0027")) digits = digits.slice(4);
+  else if (digits.startsWith("27") && digits.length === 11) digits = digits.slice(2);
+  else if (digits.startsWith("0")) digits = digits.slice(1);
+  if (digits.length !== 9) return null;
+  return "+27" + digits;
 }
+
 
 async function requireAdmin(req: Request): Promise<{ ok: true; userId: string } | Response> {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -70,6 +75,10 @@ Deno.serve(async (req) => {
       if (!name || !phoneRaw) return json({ error: "name and phone_number required" }, 400);
 
       const normalized = normalizePhone(phoneRaw);
+      if (!normalized) {
+        return json({ error: "Enter a valid South African mobile number, e.g. 0821234567" }, 400);
+      }
+
 
       const { data: existing } = await admin
         .from("profiles")
