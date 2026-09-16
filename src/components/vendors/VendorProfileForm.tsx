@@ -311,13 +311,24 @@ export function VendorProfileForm({
         .single();
       if (insertErr || !inserted) {
         console.error('Error creating vendor:', insertErr);
-        toast.error('Failed to create vendor profile');
+        toast.error(insertErr?.message ? `Failed to create vendor profile: ${insertErr.message}` : 'Failed to create vendor profile');
         setIsLoading(false);
         return;
       }
       vendorId = (inserted as any).id;
 
+      if (serviceRegionIds.length > 0) {
+        const { error: insRegionsErr } = await supabase
+          .from('vendor_service_regions')
+          .insert(serviceRegionIds.map((regionId) => ({ vendor_id: vendorId, region_id: regionId })) as any);
+        if (insRegionsErr) {
+          console.error('Error saving vendor service regions:', insRegionsErr);
+          toast.error('Profile created, but service areas could not be saved');
+        }
+      }
+
       // Vendor role is granted server-side by the on_vendor_created trigger.
+
     }
 
     // Uploads
@@ -661,13 +672,12 @@ export function VendorProfileForm({
             <AddressFields data={address} onChange={setAddress} errors={errors} />
           </div>
 
-          {mode === 'edit' && existingVendor && (
-            <VendorServiceRegions
-              vendorId={existingVendor.id}
-              value={serviceRegionIds}
-              onChange={setServiceRegionIds}
-            />
-          )}
+          <VendorServiceRegions
+            vendorId={existingVendor?.id ?? null}
+            value={serviceRegionIds}
+            onChange={setServiceRegionIds}
+          />
+
 
           <PricingInput
             category={formData.category}
