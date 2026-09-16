@@ -75,6 +75,10 @@ Deno.serve(async (req) => {
       if (!name || !phoneRaw) return json({ error: "name and phone_number required" }, 400);
 
       const normalized = normalizePhone(phoneRaw);
+      if (!normalized) {
+        return json({ error: "Enter a valid South African mobile number, e.g. 0821234567" }, 400);
+      }
+
 
       const { data: existing } = await admin
         .from("profiles")
