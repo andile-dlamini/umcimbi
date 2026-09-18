@@ -889,6 +889,18 @@ export default function AdminDashboard() {
           <CardDescription>What planners are searching for on the vendors page</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-2xl font-bold">{isLoading ? '–' : searchCount}</p>
+              <p className="text-xs text-muted-foreground">Searches ({periodLabel})</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{isLoading ? '–' : zeroResultCount}</p>
+              <p className="text-xs text-muted-foreground">Returned no vendors</p>
+            </div>
+          </div>
+
+
 
 
           <div>
