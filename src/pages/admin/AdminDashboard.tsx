@@ -124,6 +124,8 @@ export default function AdminDashboard() {
   // Search activity
   const [zeroResultSearches, setZeroResultSearches] = useState<any[]>([]);
   const [topSearchedCategories, setTopSearchedCategories] = useState<Record<string, number>>({});
+  const [searchCount, setSearchCount] = useState(0);
+  const [zeroResultCount, setZeroResultCount] = useState(0);
 
 
   // Real account statistics
@@ -292,16 +294,20 @@ export default function AdminDashboard() {
         .limit(200);
       setZeroResultSearches(zeroResults || []);
 
-      const { data: allSearches } = await supabase
+      let searchQuery = supabase
         .from('platform_events')
-        .select('metadata')
+        .select('metadata, event_type')
         .in('event_type', ['search_performed', 'search_zero_results']);
+      if (start) searchQuery = searchQuery.gte('created_at', start);
+      const { data: allSearches } = await searchQuery;
       const catCounts: Record<string, number> = {};
       (allSearches || []).forEach((row: any) => {
         const cat = row.metadata?.category;
         if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
       });
       setTopSearchedCategories(catCounts);
+      setSearchCount((allSearches || []).length);
+      setZeroResultCount((allSearches || []).filter((r: any) => r.event_type === 'search_zero_results').length);
 
       setIsLoading(false);
     };
@@ -317,6 +323,8 @@ export default function AdminDashboard() {
   ];
   const funnelMax = funnelSteps[0]?.count || 1;
   const funnelOpacities = [1, 0.75, 0.5, 0.3];
+
+  const periodLabel = period === 'week' ? 'this week' : period === 'month' ? 'this month' : 'all time';
 
   const periodButtons: { label: string; value: Period }[] = [
     { label: 'This week', value: 'week' },
@@ -883,6 +891,18 @@ export default function AdminDashboard() {
           <CardDescription>What planners are searching for on the vendors page</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-2xl font-bold">{isLoading ? '–' : searchCount}</p>
+              <p className="text-xs text-muted-foreground">Searches ({periodLabel})</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{isLoading ? '–' : zeroResultCount}</p>
+              <p className="text-xs text-muted-foreground">Returned no vendors</p>
+            </div>
+          </div>
+
+
 
 
           <div>
