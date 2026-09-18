@@ -324,6 +324,8 @@ export default function AdminDashboard() {
   const funnelMax = funnelSteps[0]?.count || 1;
   const funnelOpacities = [1, 0.75, 0.5, 0.3];
 
+  const periodLabel = period === 'week' ? 'this week' : period === 'month' ? 'this month' : 'all time';
+
   const periodButtons: { label: string; value: Period }[] = [
     { label: 'This week', value: 'week' },
     { label: 'This month', value: 'month' },
