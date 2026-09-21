@@ -36,6 +36,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://www.umcimbi.co.za/careers/vendor-growth-manager</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.umcimbi.co.za/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
