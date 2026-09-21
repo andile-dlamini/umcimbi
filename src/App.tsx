@@ -146,7 +146,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
 
   // Fully authenticated
   return (
-      <Routes>
+    <Routes>
       <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
       <Route path="/careers/vendor-growth-manager" element={<CareersVendorGrowthManager />} />
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />

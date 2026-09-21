@@ -72,7 +72,7 @@ export default function CareersVendorGrowthManager() {
       {/* Header */}
       <header className="mx-auto max-w-3xl px-5 sm:px-8 pt-8 flex items-center justify-between">
         <img src="/images/umcimbi-logo.png" alt="UMCIMBI" className="h-7" />
-        <Link to="/onboarding">
+        <Link to="/onboarding#careers">
           <Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
             <ArrowLeft size={16} className="mr-1" /> Back
           </Button>
