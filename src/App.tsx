@@ -15,6 +15,7 @@ import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
 import AuthCallback from "@/pages/auth/AuthCallback";
 import ContactPage from "@/pages/contact/ContactPage";
+import CareersVendorGrowthManager from "@/pages/careers/CareersVendorGrowthManager";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import WaitlistPage from "@/pages/WaitlistPage";

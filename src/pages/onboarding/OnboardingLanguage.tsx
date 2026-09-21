@@ -176,6 +176,9 @@ export default function OnboardingLanguage() {
             <button onClick={() => scrollTo('faq')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
               FAQ
             </button>
+            <button onClick={() => scrollTo('careers')} className="text-[15px] font-semibold text-white/90 hover:text-white transition-colors">
+              Careers
+            </button>
           </nav>
 
           <div className="flex items-center gap-2.5">
@@ -202,6 +205,7 @@ export default function OnboardingLanguage() {
             <button onClick={() => scrollTo('organisers')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Organisers</button>
             <Link to="/join/vendor" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Vendors</Link>
             <button onClick={() => scrollTo('faq')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">FAQ</button>
+            <button onClick={() => scrollTo('careers')} className="block w-full text-left text-sm py-2.5 text-white/80 hover:text-white">Careers</button>
             <Link onClick={() => { trackPixel('cta_get_started_clicked'); setMobileMenuOpen(false); }} to="/auth?mode=signup" className="block pt-1">
               <Button size="sm" className="w-full rounded-full">Register</Button>
             </Link>
@@ -376,6 +380,24 @@ export default function OnboardingLanguage() {
               </AccordionItem>
             )}
           </Accordion>
+        </div>
+      </section>
+
+
+      {/* ═══ CAREERS — placed as the LAST section, right before the Footer ═══ */}
+      <section id="careers" className="py-28 bg-[hsl(220_25%_8%)] scroll-mt-20 border-t border-white/5">
+        <div className="mx-auto max-w-2xl px-5 sm:px-8 text-center">
+          <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Careers</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Help us grow UMCIMBI on the ground</h2>
+          <p className="text-[15px] text-white/70 max-w-xl mx-auto mb-8">
+            We're looking for a driven, commission-based Vendor Growth Manager to help onboard
+            ceremony vendors across eThekwini and PMB. No CV needed — just tell us why you'd be great at it.
+          </p>
+          <Link to="/careers/vendor-growth-manager">
+            <Button size="lg" variant="outline" className="rounded-full border-white/30 !text-white bg-white/5 hover:bg-white/15 font-semibold">
+              View the role <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
 
