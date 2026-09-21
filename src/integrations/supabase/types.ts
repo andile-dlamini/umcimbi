@@ -664,6 +664,42 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role_slug: string
+          socials: string | null
+          status: string
+          story: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role_slug: string
+          socials?: string | null
+          status?: string
+          story: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role_slug?: string
+          socials?: string | null
+          status?: string
+          story?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       live_provinces: {
         Row: {
           launched_at: string
