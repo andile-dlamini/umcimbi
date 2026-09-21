@@ -1,5 +1,5 @@
-// PHASE 1: form submits via mailto:, same pattern as ContactPage.tsx.
-// No database/edge function dependency — safe to ship standalone.
+// PHASE 3: form submits via the submit-job-application edge function,
+// which inserts into job_applications and sends an acknowledgment email.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, MapPin, Clock, Coins } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Coins, CheckCircle2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const WORD_LIMIT = 100;
 
@@ -19,6 +20,10 @@ export default function CareersVendorGrowthManager() {
 
   const wordCount = story.trim() ? story.trim().split(/\s+/).length : 0;
   const overLimit = wordCount > WORD_LIMIT;
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Vendor Growth Manager (Commission-Based) — Careers at UMCIMBI';
@@ -59,12 +64,22 @@ export default function CareersVendorGrowthManager() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body =
-      `Name: ${name}%0AEmail: ${email}%0ASocials: ${socials}%0A%0A${encodeURIComponent(story)}`;
-    window.location.href =
-      `mailto:andile@umcimbi.co.za?subject=${encodeURIComponent('Vendor Growth Manager application — ' + name)}&body=${body}`;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { error: fnError } = await supabase.functions.invoke('submit-job-application', {
+        body: { role_slug: 'vendor-growth-manager', name, email, story, socials },
+      });
+      if (fnError) throw fnError;
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong sending your application. Please try again, or email andile@umcimbi.co.za directly.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
