@@ -9,12 +9,31 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, MapPin, Clock, Coins, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { z } from 'zod';
 
 const WORD_LIMIT = 100;
+const normalisePhone = (value: string) => {
+  const compact = value.trim().replace(/[\s()-]/g, '');
+  return compact.startsWith('0') ? `+27${compact.slice(1)}` : compact;
+};
+const applicationSchema = z.object({
+  name: z.string().trim().min(1, 'Please enter your name.').max(200, 'Your name is too long.'),
+  email: z.string().trim().email('Please enter a valid email address.').max(255),
+  phone: z.string().trim().transform(normalisePhone).refine(
+    value => /^\+27[1-8]\d{8}$/.test(value),
+    'Please enter a valid South African phone number.',
+  ),
+  story: z.string().trim().min(1, 'Please share your story.').max(5000).refine(
+    value => value.split(/\s+/).length <= WORD_LIMIT,
+    `Your story must be ${WORD_LIMIT} words or fewer.`,
+  ),
+  socials: z.string().trim().min(1, 'Please add at least one social media handle.').max(500),
+});
 
 export default function CareersVendorGrowthManager() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [story, setStory] = useState('');
   const [socials, setSocials] = useState('');
 
@@ -26,7 +45,7 @@ export default function CareersVendorGrowthManager() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Vendor Growth Manager (Commission-Based) — Careers at UMCIMBI';
+    document.title = 'Vendor Growth Manager (Commission-Based) | Careers at UMCIMBI';
 
     // JobPosting structured data for Google for Jobs
     const jobPosting = {
@@ -34,7 +53,7 @@ export default function CareersVendorGrowthManager() {
       '@type': 'JobPosting',
       title: 'Vendor Growth Manager (Commission-Based)',
       description:
-        "UMCIMBI is a digital marketplace connecting South African families planning traditional ceremonies with vetted vendors. We're looking for a driven, commission-based Vendor Growth Manager to identify, contact and onboard event and ceremony vendors in and around eThekwini and PMB, from first contact through to a completed, active profile. This is a flexible, 100% commission-based role tied to real outcomes rather than hours worked — ideal for a student or early-career professional who wants real sales and business development experience with an early-stage startup. No CV required to apply.",
+        "UMCIMBI is a digital marketplace connecting South African families planning traditional ceremonies with vetted vendors. We're looking for a driven, commission-based Vendor Growth Manager to identify, contact and onboard event and ceremony vendors in and around eThekwini and PMB, from first contact through to a completed, active profile. This is a flexible, 100% commission-based role tied to real outcomes rather than hours worked. It is ideal for a student or early-career professional who wants real sales and business development experience with an early-stage startup. No CV required to apply.",
       datePosted: '2026-09-17',
       validThrough: '2026-12-31T00:00:00+02:00',
       employmentType: 'CONTRACTOR',
@@ -66,11 +85,16 @@ export default function CareersVendorGrowthManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+    const parsed = applicationSchema.safeParse({ name, email, phone, story, socials });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check your application details.');
+      return;
+    }
+    setSubmitting(true);
     try {
       const { error: fnError } = await supabase.functions.invoke('submit-job-application', {
-        body: { role_slug: 'vendor-growth-manager', name, email, story, socials },
+        body: { role_slug: 'vendor-growth-manager', ...parsed.data },
       });
       if (fnError) throw fnError;
       setSubmitted(true);
@@ -112,7 +136,7 @@ export default function CareersVendorGrowthManager() {
         <div className="space-y-4 text-[15px] text-white/70 leading-relaxed mb-10">
           <p>
             UMCIMBI is a digital marketplace connecting South African families planning traditional
-            ceremonies — Lobola, Umembeso, Umbondo, Umabo and more — with vetted vendors: caterers,
+            ceremonies, including Lobola, Umembeso, Umbondo, Umabo and more, with vetted vendors: caterers,
             tent and decor hire, photographers, cold rooms, mobile toilets and more. Launched in May
             2026, UMCIMBI is live in KwaZulu-Natal ahead of national rollout in the near future.
           </p>
@@ -161,7 +185,7 @@ export default function CareersVendorGrowthManager() {
           <ul className="space-y-2.5 text-[15px] text-white/70 leading-relaxed list-disc list-inside">
             <li>Real startup experience with an early-stage tech company</li>
             <li>Direct access to the founder for real feedback on your outreach and pitch</li>
-            <li>Flexible — work around your studies, set your own hours</li>
+            <li>Flexible, so you can work around your studies and set your own hours</li>
             <li>Uncapped earning potential, no ceiling</li>
             <li>Build your own network of business relationships</li>
             <li>Room to grow into bigger, paid roles as UMCIMBI scales nationally</li>
@@ -174,13 +198,13 @@ export default function CareersVendorGrowthManager() {
             {submitted ? (
             <div className="py-6 text-center space-y-3">
               <CheckCircle2 className="mx-auto text-emerald-400" size={40} />
-              <h2 className="text-xl font-bold text-white">Thanks — we've got your application.</h2>
+              <h2 className="text-xl font-bold text-white">Thanks, we've got your application.</h2>
               <p className="text-sm text-white/60">We'll be in touch by email either way.</p>
             </div>
             ) : (
             <>
             <h2 className="text-xl font-bold text-white mb-1">Apply</h2>
-            <p className="text-sm text-white/50 mb-5">No CV needed — just answer the one question below.</p>
+            <p className="text-sm text-white/50 mb-5">No CV needed. Just answer the one question below.</p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="name" className="text-white/70 text-xs">Your Name</Label>
@@ -190,7 +214,14 @@ export default function CareersVendorGrowthManager() {
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-white/70 text-xs">Your Email</Label>
                 <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="you@example.com" />
+                   maxLength={255} autoComplete="email"
+                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="you@example.com" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="text-white/70 text-xs">Your Phone Number</Label>
+                <Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} required
+                  maxLength={20} autoComplete="tel" inputMode="tel"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="e.g. 071 234 5678" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="story" className="text-white/70 text-xs">
@@ -210,10 +241,14 @@ export default function CareersVendorGrowthManager() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="socials" className="text-white/70 text-xs">
-                  Your social handles (TikTok, Facebook and/or Instagram)
+                  Your social handles
                 </Label>
+                <p className="text-xs text-white/40 leading-relaxed">
+                  Add Instagram, TikTok and Facebook together in this field. Include every account you use.
+                </p>
                 <Input id="socials" value={socials} onChange={e => setSocials(e.target.value)} required
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="@yourhandle" />
+                  maxLength={500}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="Instagram: @name, TikTok: @name, Facebook: Name" />
               </div>
               {error && <p className="text-xs text-red-400">{error}</p>}
               <Button type="submit" disabled={overLimit || submitting} className="w-full h-12 rounded-full text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed">

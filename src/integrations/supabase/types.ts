@@ -670,6 +670,7 @@ export type Database = {
           email: string
           id: string
           name: string
+          phone: string | null
           role_slug: string
           socials: string | null
           status: string
@@ -681,6 +682,7 @@ export type Database = {
           email: string
           id?: string
           name: string
+          phone?: string | null
           role_slug: string
           socials?: string | null
           status?: string
@@ -692,6 +694,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          phone?: string | null
           role_slug?: string
           socials?: string | null
           status?: string

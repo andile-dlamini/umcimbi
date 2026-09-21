@@ -21,6 +21,7 @@ interface JobApplicationRow {
   role_slug: string;
   name: string;
   email: string;
+  phone: string | null;
   story: string;
   socials: string | null;
   status: 'received' | 'shortlisted' | 'declined' | 'hired';
@@ -164,6 +165,7 @@ export default function AdminCareers() {
                       <TableCell>
                         <p className="text-sm font-medium">{r.name}</p>
                         <p className="text-xs text-muted-foreground truncate max-w-[180px]">{r.email}</p>
+                        {r.phone && <p className="text-xs text-muted-foreground">{r.phone}</p>}
                       </TableCell>
                       <TableCell className="max-w-md">
                         <p className="text-sm truncate">{r.story}</p>
@@ -195,6 +197,11 @@ export default function AdminCareers() {
               </SheetHeader>
 
               <div className="space-y-5 mt-6">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Phone</p>
+                  <p className="text-sm">{selected.phone ?? 'Not provided'}</p>
+                </div>
+
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Story</p>
                   <div className="p-3 rounded-md bg-muted/50 whitespace-pre-line text-sm">

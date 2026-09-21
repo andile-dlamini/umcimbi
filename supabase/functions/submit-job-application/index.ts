@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { z } from 'npm:zod@3.25.76'
 
 // Public function: called from the Careers page application form.
 // No auth required (applicants aren't logged in). Inserts the application
@@ -7,9 +8,21 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 // per the job_applications policy) and sends an acknowledgment email via
 // the existing send-transactional-email function.
 //
-// Body: { role_slug: string, name: string, email: string, story: string, socials?: string }
+// Body: { role_slug: string, name: string, email: string, phone: string, story: string, socials: string }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const normalisePhone = (value: string) => {
+  const compact = value.trim().replace(/[\s()-]/g, '')
+  return compact.startsWith('0') ? `+27${compact.slice(1)}` : compact
+}
+
+const BodySchema = z.object({
+  role_slug: z.string().trim().min(1).max(100),
+  name: z.string().trim().min(1).max(200),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().transform(normalisePhone).refine(value => /^\+27[1-8]\d{8}$/.test(value)),
+  story: z.string().trim().min(1).max(5000).refine(value => value.split(/\s+/).length <= 100),
+  socials: z.string().trim().min(1).max(500),
+})
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -23,26 +36,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json().catch(() => null)
-    if (!body || typeof body !== 'object') {
-      return json({ error: 'Invalid request body' }, 400)
+    const parsed = BodySchema.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) {
+      return json({ error: 'Invalid application details', fields: parsed.error.flatten().fieldErrors }, 400)
     }
-
-    const role_slug = typeof body.role_slug === 'string' ? body.role_slug.trim() : ''
-    const name = typeof body.name === 'string' ? body.name.trim() : ''
-    const email = typeof body.email === 'string' ? body.email.trim() : ''
-    const story = typeof body.story === 'string' ? body.story.trim() : ''
-    const socials = typeof body.socials === 'string' ? body.socials.trim() : null
-
-    if (!role_slug || !name || !email || !story) {
-      return json({ error: 'Missing required fields' }, 400)
-    }
-    if (!EMAIL_RE.test(email) || email.length > 255) {
-      return json({ error: 'Invalid email address' }, 400)
-    }
-    if (name.length > 200 || story.length > 5000 || (socials && socials.length > 500)) {
-      return json({ error: 'One of the fields is too long' }, 400)
-    }
+    const { role_slug, name, email, phone, story, socials } = parsed.data
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -50,7 +48,7 @@ Deno.serve(async (req) => {
 
     const { data: application, error: insertError } = await admin
       .from('job_applications')
-      .insert({ role_slug, name, email, story, socials })
+      .insert({ role_slug, name, email, phone, story, socials })
       .select()
       .single()
 
