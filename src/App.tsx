@@ -15,6 +15,7 @@ import OnboardingLanguage from "@/pages/onboarding/OnboardingLanguage";
 import AuthPage from "@/pages/auth/AuthPage";
 import AuthCallback from "@/pages/auth/AuthCallback";
 import ContactPage from "@/pages/contact/ContactPage";
+import CareersVendorGrowthManager from "@/pages/careers/CareersVendorGrowthManager";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import WaitlistPage from "@/pages/WaitlistPage";
@@ -128,6 +129,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
         <Route path="/join/vendor" element={<VendorLandingPage />} />
         <Route path="/join/planner" element={<PlannerJoinRedirect />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/careers/vendor-growth-manager" element={<CareersVendorGrowthManager />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
@@ -144,8 +146,9 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
 
   // Fully authenticated
   return (
-    <Routes>
+      <Routes>
       <Route path="/feedback/planner-no-event" element={<FeedbackPlannerNoEvent />} />
+      <Route path="/careers/vendor-growth-manager" element={<CareersVendorGrowthManager />} />
       <Route path="/feedback/planner-no-vendor" element={<FeedbackPlannerNoVendor />} />
       <Route path="/feedback/vendor" element={<FeedbackVendor />} />
       <Route path="/verify/selfie" element={<SelfieSubmission />} />
