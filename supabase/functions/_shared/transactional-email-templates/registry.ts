@@ -10,7 +10,9 @@ export interface TemplateEntry {
 }
 
 import { template as launchAnnouncement } from './launch-announcement.tsx'
+import { template as jobApplicationReceived } from './job-application-received.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'launch-announcement': launchAnnouncement,
+  'job-application-received': jobApplicationReceived,
 }
