@@ -72,6 +72,12 @@ export default function CareersVendorGrowthManager() {
           addressCountry: 'ZA',
         },
       },
+      identifier: {
+        '@type': 'PropertyValue',
+        name: 'UMCIMBI',
+        value: 'vendor-growth-manager-2026',
+      },
+      directApply: true,
     };
     const script = document.createElement('script');
     script.type = 'application/ld+json';
