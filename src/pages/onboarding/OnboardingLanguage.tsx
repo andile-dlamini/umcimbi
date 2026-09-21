@@ -43,10 +43,13 @@ export default function OnboardingLanguage() {
   useEffect(() => {
     if (!location.hash) return;
     const id = location.hash.slice(1);
-    const t = setTimeout(() => {
+    const scroll = () => {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-    return () => clearTimeout(t);
+    };
+    // Retry: images loading above the target shift the layout mid-scroll,
+    // which can leave the first smooth scroll short of the section.
+    const timers = [100, 600, 1200].map((delay) => setTimeout(scroll, delay));
+    return () => timers.forEach(clearTimeout);
   }, [location.hash]);
 
 
