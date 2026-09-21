@@ -171,6 +171,14 @@ export default function CareersVendorGrowthManager() {
         {/* Application form */}
         <Card className="bg-white/5 border-white/10 backdrop-blur-md">
           <CardContent className="p-6">
+            {submitted ? (
+            <div className="py-6 text-center space-y-3">
+              <CheckCircle2 className="mx-auto text-emerald-400" size={40} />
+              <h2 className="text-xl font-bold text-white">Thanks — we've got your application.</h2>
+              <p className="text-sm text-white/60">We'll be in touch by email either way.</p>
+            </div>
+            ) : (
+            <>
             <h2 className="text-xl font-bold text-white mb-1">Apply</h2>
             <p className="text-sm text-white/50 mb-5">No CV needed — just answer the one question below.</p>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -207,10 +215,13 @@ export default function CareersVendorGrowthManager() {
                 <Input id="socials" value={socials} onChange={e => setSocials(e.target.value)} required
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30" placeholder="@yourhandle" />
               </div>
-              <Button type="submit" disabled={overLimit} className="w-full h-12 rounded-full text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed">
-                Submit Application
+              {error && <p className="text-xs text-red-400">{error}</p>}
+              <Button type="submit" disabled={overLimit || submitting} className="w-full h-12 rounded-full text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed">
+                {submitting ? 'Sending…' : 'Submit Application'}
               </Button>
             </form>
+            </>
+            )}
           </CardContent>
         </Card>
       </main>
