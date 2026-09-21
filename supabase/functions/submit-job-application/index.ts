@@ -19,7 +19,7 @@ const BodySchema = z.object({
   role_slug: z.string().trim().min(1).max(100),
   name: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(255),
-  phone: z.string().trim().transform(normalisePhone).refine(value => /^\+27[6-8]\d{8}$/.test(value)),
+  phone: z.string().trim().transform(normalisePhone).refine(value => /^\+27[1-8]\d{8}$/.test(value)),
   story: z.string().trim().min(1).max(5000).refine(value => value.split(/\s+/).length <= 100),
   socials: z.string().trim().min(1).max(500),
 })

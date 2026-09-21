@@ -20,8 +20,8 @@ const applicationSchema = z.object({
   name: z.string().trim().min(1, 'Please enter your name.').max(200, 'Your name is too long.'),
   email: z.string().trim().email('Please enter a valid email address.').max(255),
   phone: z.string().trim().transform(normalisePhone).refine(
-    value => /^\+27[6-8]\d{8}$/.test(value),
-    'Please enter a valid South African mobile number.',
+    value => /^\+27[1-8]\d{8}$/.test(value),
+    'Please enter a valid South African phone number.',
   ),
   story: z.string().trim().min(1, 'Please share your story.').max(5000).refine(
     value => value.split(/\s+/).length <= WORD_LIMIT,
