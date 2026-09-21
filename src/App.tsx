@@ -60,6 +60,7 @@ import AdminQuotations from "@/pages/admin/AdminQuotations";
 import AdminRevenue from "@/pages/admin/AdminRevenue";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminFeedback from "@/pages/admin/AdminFeedback";
+import AdminCareers from "@/pages/admin/AdminCareers";
 import VendorUpload from "@/pages/admin/VendorUpload";
 
 
@@ -201,6 +202,7 @@ function AppRoutes({ updateAvailable }: { updateAvailable: boolean }) {
           <Route path="vendor-upload" element={<VendorUpload />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="feedback" element={<AdminFeedback />} />
+          <Route path="careers" element={<AdminCareers />} />
 
         </Route>
         <Route path="/onboarding" element={<Navigate to="/" replace />} />

@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Upload,
   FileText,
+  Briefcase,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -32,6 +33,7 @@ const navItems = [
   { label: 'Vendor Trust', to: '/admin/vendor-trust', icon: ShieldCheck },
   { label: 'Vendor Upload', to: '/admin/vendor-upload', icon: Upload },
   { label: 'Feedback', to: '/admin/feedback', icon: MessageSquare },
+  { label: 'Careers', to: '/admin/careers', icon: Briefcase },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
 ];
 
