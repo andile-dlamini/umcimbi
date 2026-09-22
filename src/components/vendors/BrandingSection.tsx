@@ -97,7 +97,7 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
                 </Button>
                 <input
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept="image/*,.heic,.heif"
                   className="hidden"
                   onChange={handleLogoUpload}
                 />

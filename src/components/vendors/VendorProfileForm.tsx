@@ -478,7 +478,7 @@ export function VendorProfileForm({
                   </div>
                 )}
               </div>
-              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+              <input ref={logoInputRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={handleLogoChange} />
               <p className="text-[10px] text-muted-foreground text-center mt-1">Optional</p>
             </div>
             <div className="flex-1 space-y-2">
@@ -715,7 +715,7 @@ export function VendorProfileForm({
                 </div>
               )}
             </div>
-            <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+            <input ref={showcaseInputRef} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={handleShowcaseAdd} />
             <p className="text-xs text-muted-foreground">Add photos of your work to attract clients. You can also add these later.</p>
           </div>
 

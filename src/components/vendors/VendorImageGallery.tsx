@@ -64,8 +64,8 @@ export function VendorImageGallery({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('Image must be less than 20MB');
       return;
     }
 
@@ -106,8 +106,8 @@ export function VendorImageGallery({
         toast.error('Please select only image files');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Each image must be less than 5MB');
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('Each image must be less than 20MB');
         return;
       }
     }
@@ -235,7 +235,7 @@ export function VendorImageGallery({
           <input
             ref={mainImageInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
             onChange={handleMainImageChange}
           />
@@ -281,7 +281,7 @@ export function VendorImageGallery({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             className="hidden"
             onChange={handleGalleryImagesAdd}

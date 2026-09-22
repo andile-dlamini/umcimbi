@@ -1356,7 +1356,7 @@ export default function AuthPage() {
                         {logoPreview ? <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" /> :
                           <div className="flex flex-col items-center gap-1"><Camera className="h-5 w-5 text-muted-foreground" /><span className="text-[10px] text-muted-foreground">Logo</span></div>}
                       </div>
-                      <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                      <input ref={logoInputRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={handleLogoChange} />
                     </div>
                     <div className="flex-1 space-y-2">
                       <Label htmlFor="biz_name">Business name *</Label>
@@ -1458,7 +1458,7 @@ export default function AuthPage() {
                       </div>
                     )}
                   </div>
-                  <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+                  <input ref={showcaseInputRef} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={handleShowcaseAdd} />
                 </div>
 
                 {/* Verification Docs (if registered business) */}
