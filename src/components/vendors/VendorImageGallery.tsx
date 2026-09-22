@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 interface VendorImageGalleryProps {
   vendorId: string;
@@ -29,7 +30,8 @@ export function VendorImageGallery({
   const galleryImages = imageUrls.slice(1, 15);
   const canAddMore = imageUrls.length < 15;
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (original: File): Promise<string | null> => {
+    const file = await prepareImageForUpload(original);
     const fileExt = file.name.split('.').pop();
     const fileName = `${vendorId}/${Date.now()}.${fileExt}`;
     

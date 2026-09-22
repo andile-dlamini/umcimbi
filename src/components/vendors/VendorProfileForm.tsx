@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { toSocialUrl, extractSocialHandle } from '@/lib/socialLinks';
 import { toast } from 'sonner';
 import type { Vendor } from '@/types/database';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),

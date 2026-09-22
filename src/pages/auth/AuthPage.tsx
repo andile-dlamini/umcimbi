@@ -26,6 +26,7 @@ import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import { trackPixel } from '@/lib/metaPixel';
 import { toSocialUrl } from '@/lib/socialLinks';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 // ─── CONSTANTS ───
 const SA_DIAL = '+27';
