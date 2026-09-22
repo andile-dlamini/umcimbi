@@ -770,10 +770,20 @@ export default function VendorVerificationQueue() {
                     <Button
                       className="bg-amber-500 hover:bg-amber-600 text-white"
                       onClick={() => handleRequestInfo(vendor)}
-                      disabled={isBusy}
+                      disabled={isBusy || !vendor.phone_number}
+                      title={
+                        vendor.phone_number
+                          ? undefined
+                          : 'No phone number on file for this vendor'
+                      }
                     >
                       <AlertCircle className="h-4 w-4 mr-1" /> Request More Info
                     </Button>
+                    {!vendor.phone_number && (
+                      <p className="w-full text-xs text-destructive">
+                        No phone number on file — SMS actions are unavailable for this vendor.
+                      </p>
+                    )}
                     <Button
                       variant="outline"
                       className="border-destructive text-destructive hover:bg-destructive/10"
