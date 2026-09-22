@@ -320,6 +320,10 @@ export default function VendorVerificationQueue() {
       toast.error('Please add notes describing what is needed');
       return;
     }
+    if (!vendor.phone_number) {
+      toast.error(`${vendor.name} has no phone number on file, so no SMS can be sent`);
+      return;
+    }
     setVendorBusy(vendor.id, true);
     try {
       // Persist notes first
@@ -328,14 +332,30 @@ export default function VendorVerificationQueue() {
         .update({ admin_approval_notes: notes })
         .eq('id', vendor.id);
 
-      const { error } = await supabase.functions.invoke('send-vendor-status-sms', {
+      const { data, error } = await supabase.functions.invoke('send-vendor-status-sms', {
         body: { vendor_id: vendor.id, sms_type: 'request_info', notes },
       });
-      if (error) throw error;
+      if (error) {
+        let detail = error.message;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.text === 'function') {
+          try {
+            const body = await ctx.text();
+            const parsedBody = JSON.parse(body);
+            detail = parsedBody?.error ?? body ?? detail;
+          } catch {
+            /* keep default message */
+          }
+        }
+        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      }
+      if (data && (data as { error?: string }).error) {
+        throw new Error((data as { error?: string }).error);
+      }
       toast.success('More-info SMS sent');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to send SMS');
+      toast.error(`Could not send SMS: ${(e as Error).message}`);
     } finally {
       setVendorBusy(vendor.id, false);
     }
@@ -750,10 +770,20 @@ export default function VendorVerificationQueue() {
                     <Button
                       className="bg-amber-500 hover:bg-amber-600 text-white"
                       onClick={() => handleRequestInfo(vendor)}
-                      disabled={isBusy}
+                      disabled={isBusy || !vendor.phone_number}
+                      title={
+                        vendor.phone_number
+                          ? undefined
+                          : 'No phone number on file for this vendor'
+                      }
                     >
                       <AlertCircle className="h-4 w-4 mr-1" /> Request More Info
                     </Button>
+                    {!vendor.phone_number && (
+                      <p className="w-full text-xs text-destructive">
+                        No phone number on file — SMS actions are unavailable for this vendor.
+                      </p>
+                    )}
                     <Button
                       variant="outline"
                       className="border-destructive text-destructive hover:bg-destructive/10"
