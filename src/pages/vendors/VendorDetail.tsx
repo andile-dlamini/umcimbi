@@ -78,9 +78,11 @@ export default function VendorDetail() {
     };
   }, [user, id]);
 
-  useEffect(() => {
-    if (galleryOpen) setGalleryIndex(0);
-  }, [galleryOpen]);
+  const openGalleryAt = (index: number) => {
+    setGalleryIndex(index);
+    setGalleryOpen(true);
+  };
+
 
   const handleChatWithVendor = async () => {
     if (!user) {
