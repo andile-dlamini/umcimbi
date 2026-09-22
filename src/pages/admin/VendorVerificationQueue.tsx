@@ -320,6 +320,10 @@ export default function VendorVerificationQueue() {
       toast.error('Please add notes describing what is needed');
       return;
     }
+    if (!vendor.phone_number) {
+      toast.error(`${vendor.name} has no phone number on file, so no SMS can be sent`);
+      return;
+    }
     setVendorBusy(vendor.id, true);
     try {
       // Persist notes first
