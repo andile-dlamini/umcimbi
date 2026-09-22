@@ -274,7 +274,7 @@ export default function VendorDetail() {
           {totalImages > 3 && (
             <button
               type="button"
-              onClick={() => setGalleryOpen(true)}
+              onClick={() => openGalleryAt(0)}
               className="absolute bottom-3 right-3 z-10 rounded-full bg-background/95 backdrop-blur-sm shadow-md px-3 py-1.5 text-xs font-medium text-foreground hover:bg-background transition-colors"
             >
               Show all {totalImages} photos
