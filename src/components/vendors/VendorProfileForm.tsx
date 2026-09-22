@@ -162,7 +162,7 @@ export function VendorProfileForm({
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) return toast.error('Please select an image file');
-    if (file.size > 5 * 1024 * 1024) return toast.error('Image must be less than 5MB');
+    if (file.size > 20 * 1024 * 1024) return toast.error('Image must be less than 20MB');
     setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
@@ -175,7 +175,7 @@ export function VendorProfileForm({
     const toAdd = Array.from(files).slice(0, remaining);
     for (const file of toAdd) {
       if (!file.type.startsWith('image/')) { toast.error('Please select only image files'); return; }
-      if (file.size > 5 * 1024 * 1024) { toast.error('Each image must be less than 5MB'); return; }
+      if (file.size > 20 * 1024 * 1024) { toast.error('Each image must be less than 20MB'); return; }
     }
     const newItems = toAdd.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
     setShowcaseFiles(prev => [...prev, ...newItems]);

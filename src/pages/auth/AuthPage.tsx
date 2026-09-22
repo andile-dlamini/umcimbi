@@ -616,7 +616,7 @@ export default function AuthPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be less than 5MB'); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
     setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
@@ -629,7 +629,7 @@ export default function AuthPage() {
     const toAdd = Array.from(files).slice(0, remaining);
     for (const file of toAdd) {
       if (!file.type.startsWith('image/')) { toast.error('Please select only image files'); return; }
-      if (file.size > 5 * 1024 * 1024) { toast.error('Each image must be less than 5MB'); return; }
+      if (file.size > 20 * 1024 * 1024) { toast.error('Each image must be less than 20MB'); return; }
     }
     setShowcaseFiles(prev => [...prev, ...toAdd.map(f => ({ file: f, preview: URL.createObjectURL(f) }))]);
     if (showcaseInputRef.current) showcaseInputRef.current.value = '';
