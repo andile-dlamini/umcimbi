@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { toSocialUrl, extractSocialHandle } from '@/lib/socialLinks';
 import { toast } from 'sonner';
 import type { Vendor } from '@/types/database';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 const vendorSchema = z.object({
   name: z.string().trim().min(2, 'Business name must be at least 2 characters').max(100),
@@ -161,7 +162,7 @@ export function VendorProfileForm({
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) return toast.error('Please select an image file');
-    if (file.size > 5 * 1024 * 1024) return toast.error('Image must be less than 5MB');
+    if (file.size > 20 * 1024 * 1024) return toast.error('Image must be less than 20MB');
     setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
@@ -174,7 +175,7 @@ export function VendorProfileForm({
     const toAdd = Array.from(files).slice(0, remaining);
     for (const file of toAdd) {
       if (!file.type.startsWith('image/')) { toast.error('Please select only image files'); return; }
-      if (file.size > 5 * 1024 * 1024) { toast.error('Each image must be less than 5MB'); return; }
+      if (file.size > 20 * 1024 * 1024) { toast.error('Each image must be less than 20MB'); return; }
     }
     const newItems = toAdd.map(f => ({ file: f, preview: URL.createObjectURL(f) }));
     setShowcaseFiles(prev => [...prev, ...newItems]);
@@ -353,9 +354,10 @@ export function VendorProfileForm({
 
     try {
       if (logoFile) {
-        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const preparedLogo = await prepareImageForUpload(logoFile);
+        const ext = preparedLogo.name.split('.').pop() || 'jpg';
         const path = `${vendorId}/logo-${Date.now()}.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, logoFile, { upsert: true });
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, preparedLogo, { upsert: true });
         if (uploadErr) {
           await logUploadFailure('logo', path, uploadErr.message);
         } else {
@@ -365,7 +367,7 @@ export function VendorProfileForm({
       }
 
       for (let i = 0; i < showcaseFiles.length; i++) {
-        const file = showcaseFiles[i].file;
+        const file = await prepareImageForUpload(showcaseFiles[i].file);
         const ext = file.name.split('.').pop() || 'jpg';
         const path = `${vendorId}/showcase-${Date.now()}-${i}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, file, { upsert: true });
@@ -476,7 +478,7 @@ export function VendorProfileForm({
                   </div>
                 )}
               </div>
-              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+              <input ref={logoInputRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={handleLogoChange} />
               <p className="text-[10px] text-muted-foreground text-center mt-1">Optional</p>
             </div>
             <div className="flex-1 space-y-2">
@@ -713,7 +715,7 @@ export function VendorProfileForm({
                 </div>
               )}
             </div>
-            <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+            <input ref={showcaseInputRef} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={handleShowcaseAdd} />
             <p className="text-xs text-muted-foreground">Add photos of your work to attract clients. You can also add these later.</p>
           </div>
 

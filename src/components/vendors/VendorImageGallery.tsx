@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 interface VendorImageGalleryProps {
   vendorId: string;
@@ -29,7 +30,8 @@ export function VendorImageGallery({
   const galleryImages = imageUrls.slice(1, 15);
   const canAddMore = imageUrls.length < 15;
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (original: File): Promise<string | null> => {
+    const file = await prepareImageForUpload(original);
     const fileExt = file.name.split('.').pop();
     const fileName = `${vendorId}/${Date.now()}.${fileExt}`;
     
@@ -62,8 +64,8 @@ export function VendorImageGallery({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('Image must be less than 20MB');
       return;
     }
 
@@ -104,8 +106,8 @@ export function VendorImageGallery({
         toast.error('Please select only image files');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Each image must be less than 5MB');
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('Each image must be less than 20MB');
         return;
       }
     }
@@ -233,7 +235,7 @@ export function VendorImageGallery({
           <input
             ref={mainImageInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
             onChange={handleMainImageChange}
           />
@@ -279,7 +281,7 @@ export function VendorImageGallery({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             className="hidden"
             onChange={handleGalleryImagesAdd}

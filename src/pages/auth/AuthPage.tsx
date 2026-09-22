@@ -26,6 +26,7 @@ import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import { trackPixel } from '@/lib/metaPixel';
 import { toSocialUrl } from '@/lib/socialLinks';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 // ─── CONSTANTS ───
 const SA_DIAL = '+27';
@@ -615,7 +616,7 @@ export default function AuthPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be less than 5MB'); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error('Image must be less than 20MB'); return; }
     setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   };
@@ -628,7 +629,7 @@ export default function AuthPage() {
     const toAdd = Array.from(files).slice(0, remaining);
     for (const file of toAdd) {
       if (!file.type.startsWith('image/')) { toast.error('Please select only image files'); return; }
-      if (file.size > 5 * 1024 * 1024) { toast.error('Each image must be less than 5MB'); return; }
+      if (file.size > 20 * 1024 * 1024) { toast.error('Each image must be less than 20MB'); return; }
     }
     setShowcaseFiles(prev => [...prev, ...toAdd.map(f => ({ file: f, preview: URL.createObjectURL(f) }))]);
     if (showcaseInputRef.current) showcaseInputRef.current.value = '';
@@ -722,9 +723,10 @@ export default function AuthPage() {
     const uploadedUrls: string[] = [];
     try {
       if (logoFile) {
-        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const preparedLogo = await prepareImageForUpload(logoFile);
+        const ext = preparedLogo.name.split('.').pop() || 'jpg';
         const path = `${vendorData.id}/logo.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, logoFile, { upsert: true });
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, preparedLogo, { upsert: true });
         if (!uploadErr) {
           const { data: urlData } = supabase.storage.from('vendor-images').getPublicUrl(path);
           uploadedUrls.push(urlData.publicUrl);
@@ -732,7 +734,7 @@ export default function AuthPage() {
         }
       }
       for (let i = 0; i < showcaseFiles.length; i++) {
-        const file = showcaseFiles[i].file;
+        const file = await prepareImageForUpload(showcaseFiles[i].file);
         const ext = file.name.split('.').pop() || 'jpg';
         const path = `${vendorData.id}/showcase-${i}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, file, { upsert: true });
@@ -1354,7 +1356,7 @@ export default function AuthPage() {
                         {logoPreview ? <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" /> :
                           <div className="flex flex-col items-center gap-1"><Camera className="h-5 w-5 text-muted-foreground" /><span className="text-[10px] text-muted-foreground">Logo</span></div>}
                       </div>
-                      <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                      <input ref={logoInputRef} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={handleLogoChange} />
                     </div>
                     <div className="flex-1 space-y-2">
                       <Label htmlFor="biz_name">Business name *</Label>
@@ -1456,7 +1458,7 @@ export default function AuthPage() {
                       </div>
                     )}
                   </div>
-                  <input ref={showcaseInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleShowcaseAdd} />
+                  <input ref={showcaseInputRef} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={handleShowcaseAdd} />
                 </div>
 
                 {/* Verification Docs (if registered business) */}

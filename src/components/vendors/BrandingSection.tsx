@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { prepareImageForUpload } from '@/lib/imagePrep';
 
 interface BrandingSectionProps {
   vendor: any;
@@ -30,12 +31,13 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
 
     setIsUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const prepared = await prepareImageForUpload(file);
+      const ext = prepared.name.split('.').pop();
       const path = `${vendor.id}/logo.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from('vendor-images')
-        .upload(path, file, { upsert: true });
+        .upload(path, prepared, { upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -95,7 +97,7 @@ export function BrandingSection({ vendor, onUpdate }: BrandingSectionProps) {
                 </Button>
                 <input
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept="image/*,.heic,.heif"
                   className="hidden"
                   onChange={handleLogoUpload}
                 />
