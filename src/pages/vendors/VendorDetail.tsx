@@ -78,9 +78,11 @@ export default function VendorDetail() {
     };
   }, [user, id]);
 
-  useEffect(() => {
-    if (galleryOpen) setGalleryIndex(0);
-  }, [galleryOpen]);
+  const openGalleryAt = (index: number) => {
+    setGalleryIndex(index);
+    setGalleryOpen(true);
+  };
+
 
   const handleChatWithVendor = async () => {
     if (!user) {
@@ -189,8 +191,23 @@ export default function VendorDetail() {
       <div
         className={cn(
           'bg-muted overflow-hidden flex items-center justify-center',
+          url && 'cursor-pointer',
           className,
         )}
+        role={url ? 'button' : undefined}
+        tabIndex={url ? 0 : undefined}
+        aria-label={url ? `View photo ${index + 1}` : undefined}
+        onClick={url ? () => openGalleryAt(index) : undefined}
+        onKeyDown={
+          url
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openGalleryAt(index);
+                }
+              }
+            : undefined
+        }
       >
         {url ? (
           <img
@@ -204,6 +221,7 @@ export default function VendorDetail() {
       </div>
     );
   };
+
 
   const circleBtn =
     'inline-flex items-center justify-center h-10 w-10 rounded-full bg-background/95 shadow-md backdrop-blur-sm hover:bg-background transition-colors';
@@ -256,7 +274,7 @@ export default function VendorDetail() {
           {totalImages > 3 && (
             <button
               type="button"
-              onClick={() => setGalleryOpen(true)}
+              onClick={() => openGalleryAt(0)}
               className="absolute bottom-3 right-3 z-10 rounded-full bg-background/95 backdrop-blur-sm shadow-md px-3 py-1.5 text-xs font-medium text-foreground hover:bg-background transition-colors"
             >
               Show all {totalImages} photos
