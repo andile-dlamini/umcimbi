@@ -722,9 +722,10 @@ export default function AuthPage() {
     const uploadedUrls: string[] = [];
     try {
       if (logoFile) {
-        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const preparedLogo = await prepareImageForUpload(logoFile);
+        const ext = preparedLogo.name.split('.').pop() || 'jpg';
         const path = `${vendorData.id}/logo.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, logoFile, { upsert: true });
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, preparedLogo, { upsert: true });
         if (!uploadErr) {
           const { data: urlData } = supabase.storage.from('vendor-images').getPublicUrl(path);
           uploadedUrls.push(urlData.publicUrl);
@@ -732,7 +733,7 @@ export default function AuthPage() {
         }
       }
       for (let i = 0; i < showcaseFiles.length; i++) {
-        const file = showcaseFiles[i].file;
+        const file = await prepareImageForUpload(showcaseFiles[i].file);
         const ext = file.name.split('.').pop() || 'jpg';
         const path = `${vendorData.id}/showcase-${i}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, file, { upsert: true });

@@ -353,9 +353,10 @@ export function VendorProfileForm({
 
     try {
       if (logoFile) {
-        const ext = logoFile.name.split('.').pop() || 'jpg';
+        const preparedLogo = await prepareImageForUpload(logoFile);
+        const ext = preparedLogo.name.split('.').pop() || 'jpg';
         const path = `${vendorId}/logo-${Date.now()}.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, logoFile, { upsert: true });
+        const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, preparedLogo, { upsert: true });
         if (uploadErr) {
           await logUploadFailure('logo', path, uploadErr.message);
         } else {
@@ -365,7 +366,7 @@ export function VendorProfileForm({
       }
 
       for (let i = 0; i < showcaseFiles.length; i++) {
-        const file = showcaseFiles[i].file;
+        const file = await prepareImageForUpload(showcaseFiles[i].file);
         const ext = file.name.split('.').pop() || 'jpg';
         const path = `${vendorId}/showcase-${Date.now()}-${i}.${ext}`;
         const { error: uploadErr } = await supabase.storage.from('vendor-images').upload(path, file, { upsert: true });
