@@ -251,17 +251,23 @@ Deno.serve(async (req) => {
 
     const recipients: Recipient[] = [];
     const skipped: SkippedVendor[] = [];
+    const queuedOwners = new Set<string>();
+    const queuedPhones = new Set<string>();
 
     for (const v of vendors ?? []) {
       if (!v.owner_user_id) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'missing owner_user_id' });
         continue;
       }
-      if (hasServiceRegions.has(v.id)) {
+      if (excludeVendorIds.has(v.id)) {
+        skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'explicitly excluded' });
+        continue;
+      }
+      if (campaign === 'service_areas' && hasServiceRegions.has(v.id)) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'has service regions' });
         continue;
       }
-      if (contacted.has(v.owner_user_id)) {
+      if (contacted.has(v.owner_user_id) || queuedOwners.has(v.owner_user_id)) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'already contacted' });
         continue;
       }
@@ -271,14 +277,26 @@ Deno.serve(async (req) => {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'no phone number' });
         continue;
       }
+      const normalized = normalizePhone(phone);
+      if (queuedPhones.has(normalized)) {
+        skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'duplicate phone number' });
+        continue;
+      }
 
-      const firstName = profileByUserId.get(v.owner_user_id)?.first_name?.trim() || v.name?.trim() || 'there';
+      const rawFirst =
+        profileByUserId.get(v.owner_user_id)?.first_name?.trim() || v.name?.trim() || 'there';
+      const firstName = rawFirst.split(/\s+/)[0] || 'there';
+      queuedOwners.add(v.owner_user_id);
+      queuedPhones.add(normalized);
       recipients.push({
         user_id: v.owner_user_id,
         vendor_id: v.id,
         first_name: firstName,
         phone_number: phone,
-        message: buildServiceAreasMessage(firstName),
+        message:
+          campaign === 'whatsapp_community'
+            ? buildWhatsappCommunityMessage(firstName)
+            : buildServiceAreasMessage(firstName),
       });
     }
 
