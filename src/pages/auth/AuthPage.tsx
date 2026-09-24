@@ -773,6 +773,11 @@ export default function AuthPage() {
       await supabase.from('vendors').update({ signup_source: refSource } as any).eq('id', vendorData.id);
     }
 
+    // One-time welcome message (SMS and/or email) — non-blocking
+    supabase.functions.invoke('send-vendor-welcome', {
+      body: { vendor_id: vendorData.id },
+    }).catch((e: any) => console.error('Welcome message failed (non-blocking):', e));
+
     setIsLoading(false);
     setStep('success');
     toast.success('Your business profile is live!');

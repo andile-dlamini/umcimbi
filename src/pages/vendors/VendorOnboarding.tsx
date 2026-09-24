@@ -154,6 +154,9 @@ export default function VendorOnboarding() {
       supabase.functions.invoke('send-vendor-status-sms', {
         body: { vendor_id: result.id, sms_type: 'registration' }
       }).catch((e: any) => console.error('Registration SMS failed (non-blocking):', e));
+      supabase.functions.invoke('send-vendor-welcome', {
+        body: { vendor_id: result.id }
+      }).catch((e: any) => console.error('Welcome message failed (non-blocking):', e));
     }
     navigate('/vendor-dashboard');
   };
@@ -180,6 +183,9 @@ export default function VendorOnboarding() {
     supabase.functions.invoke('send-vendor-status-sms', {
       body: { vendor_id: vendorId, sms_type: 'registration' }
     }).catch((e: any) => console.error('Registration SMS failed (non-blocking):', e));
+    supabase.functions.invoke('send-vendor-welcome', {
+      body: { vendor_id: vendorId }
+    }).catch((e: any) => console.error('Welcome message failed (non-blocking):', e));
     navigate('/profile/vendor');
   };
 
