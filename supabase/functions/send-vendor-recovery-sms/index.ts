@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // campaign === 'service_areas'
+    // campaign === 'service_areas' | 'whatsapp_community'
     const { data: vendors, error: vendorsErr } = await admin
       .from('vendors')
       .select('id, name, owner_user_id, phone_number')
