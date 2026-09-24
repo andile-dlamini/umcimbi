@@ -283,9 +283,10 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const rawFirst =
-        profileByUserId.get(v.owner_user_id)?.first_name?.trim() || v.name?.trim() || 'there';
-      const firstName = rawFirst.split(/\s+/)[0] || 'there';
+      const profileFirst = profileByUserId.get(v.owner_user_id)?.first_name?.trim();
+      const firstName = profileFirst
+        ? profileFirst.split(/\s+/)[0]
+        : v.name?.trim() || 'there';
       queuedOwners.add(v.owner_user_id);
       queuedPhones.add(normalized);
       recipients.push({
