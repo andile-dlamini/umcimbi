@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
     }
     const dryRun = parsed.data.dry_run !== false;
     const campaign = parsed.data.campaign;
+    const excludeVendorIds = new Set(parsed.data.exclude_vendor_ids ?? []);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
