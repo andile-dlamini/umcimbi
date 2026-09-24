@@ -8,8 +8,19 @@ const CONNECT_MOBILE_API_KEY = Deno.env.get('CONNECT_MOBILE_API_KEY')!;
 
 const BodySchema = z.object({
   dry_run: z.boolean().optional().default(true),
-  campaign: z.enum(['vendor_recovery', 'service_areas']).optional().default('vendor_recovery'),
+  campaign: z
+    .enum(['vendor_recovery', 'service_areas', 'whatsapp_community'])
+    .optional()
+    .default('vendor_recovery'),
+  exclude_vendor_ids: z.array(z.string().uuid()).optional().default([]),
 });
+
+function buildWhatsappCommunityMessage(firstName: string): string {
+  return `Sawubona ${firstName}. Thank you again for joining UMCIMBI. I have started an optional UMCIMBI Vendor Community WhatsApp group. The aim of the group is for UMCIMBI vendors to learn from each other, give feedback about the platform, ask questions, make recommendations and celebrate successes. Please note other members can see your number and joining is optional. If you are interested to join please click this link: https://chat.whatsapp.com/DNgVHc9z8bn4g2PlbMi8T1?mode=gi_t
+
+Thanks
+Andile`;
+}
 
 function buildVendorRecoveryMessage(firstName: string): string {
   return `Hi ${firstName}. This is Andile Dlamini from UMCIMBI. Thanks for signing up as a vendor, but we noticed you haven't finished your business profile so that your business can be online. Please complete your profile by following this link: umcimbi.co.za/complete-profile?ref=vendor-recovery`;
@@ -83,6 +94,7 @@ Deno.serve(async (req) => {
     }
     const dryRun = parsed.data.dry_run !== false;
     const campaign = parsed.data.campaign;
+    const excludeVendorIds = new Set(parsed.data.exclude_vendor_ids ?? []);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
@@ -208,7 +220,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // campaign === 'service_areas'
+    // campaign === 'service_areas' | 'whatsapp_community'
     const { data: vendors, error: vendorsErr } = await admin
       .from('vendors')
       .select('id, name, owner_user_id, phone_number')
@@ -239,17 +251,23 @@ Deno.serve(async (req) => {
 
     const recipients: Recipient[] = [];
     const skipped: SkippedVendor[] = [];
+    const queuedOwners = new Set<string>();
+    const queuedPhones = new Set<string>();
 
     for (const v of vendors ?? []) {
       if (!v.owner_user_id) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'missing owner_user_id' });
         continue;
       }
-      if (hasServiceRegions.has(v.id)) {
+      if (excludeVendorIds.has(v.id)) {
+        skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'explicitly excluded' });
+        continue;
+      }
+      if (campaign === 'service_areas' && hasServiceRegions.has(v.id)) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'has service regions' });
         continue;
       }
-      if (contacted.has(v.owner_user_id)) {
+      if (contacted.has(v.owner_user_id) || queuedOwners.has(v.owner_user_id)) {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'already contacted' });
         continue;
       }
@@ -259,14 +277,27 @@ Deno.serve(async (req) => {
         skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'no phone number' });
         continue;
       }
+      const normalized = normalizePhone(phone);
+      if (queuedPhones.has(normalized)) {
+        skipped.push({ vendor_id: v.id, name: v.name || '', reason: 'duplicate phone number' });
+        continue;
+      }
 
-      const firstName = profileByUserId.get(v.owner_user_id)?.first_name?.trim() || v.name?.trim() || 'there';
+      const profileFirst = profileByUserId.get(v.owner_user_id)?.first_name?.trim();
+      const firstName = profileFirst
+        ? profileFirst.split(/\s+/)[0]
+        : v.name?.trim() || 'there';
+      queuedOwners.add(v.owner_user_id);
+      queuedPhones.add(normalized);
       recipients.push({
         user_id: v.owner_user_id,
         vendor_id: v.id,
         first_name: firstName,
         phone_number: phone,
-        message: buildServiceAreasMessage(firstName),
+        message:
+          campaign === 'whatsapp_community'
+            ? buildWhatsappCommunityMessage(firstName)
+            : buildServiceAreasMessage(firstName),
       });
     }
 
