@@ -8,8 +8,19 @@ const CONNECT_MOBILE_API_KEY = Deno.env.get('CONNECT_MOBILE_API_KEY')!;
 
 const BodySchema = z.object({
   dry_run: z.boolean().optional().default(true),
-  campaign: z.enum(['vendor_recovery', 'service_areas']).optional().default('vendor_recovery'),
+  campaign: z
+    .enum(['vendor_recovery', 'service_areas', 'whatsapp_community'])
+    .optional()
+    .default('vendor_recovery'),
+  exclude_vendor_ids: z.array(z.string().uuid()).optional().default([]),
 });
+
+function buildWhatsappCommunityMessage(firstName: string): string {
+  return `Sawubona ${firstName}. Thank you again for joining UMCIMBI. I have started an optional UMCIMBI Vendor Community WhatsApp group. The aim of the group is for UMCIMBI vendors to learn from each other, give feedback about the platform, ask questions, make recommendations and celebrate successes. Please note other members can see your number and joining is optional. If you are interested to join please click this link: https://chat.whatsapp.com/DNgVHc9z8bn4g2PlbMi8T1?mode=gi_t
+
+Thanks
+Andile`;
+}
 
 function buildVendorRecoveryMessage(firstName: string): string {
   return `Hi ${firstName}. This is Andile Dlamini from UMCIMBI. Thanks for signing up as a vendor, but we noticed you haven't finished your business profile so that your business can be online. Please complete your profile by following this link: umcimbi.co.za/complete-profile?ref=vendor-recovery`;
