@@ -36,6 +36,9 @@ verify_jwt = false
 [functions.send-vendor-recovery-sms]
 verify_jwt = false
 
+[functions.send-vendor-welcome]
+verify_jwt = false
+
 
 
 [functions.vendor-selfie-submission]
