@@ -21,6 +21,7 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
+import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
 import {
   Select,
