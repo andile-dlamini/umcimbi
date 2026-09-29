@@ -21,6 +21,7 @@ import { useStartConversation } from '@/hooks/useChat';
 import { useAuth } from '@/context/AuthContext';
 import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
+import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
 import {
   Select,
@@ -449,16 +450,21 @@ export default function VendorDetail() {
             </SelectContent>
           </Select>
         )}
+        <RequestQuoteDialog vendor={vendor}>
+          <Button size="lg" className="w-full" variant="default">
+            Request a quote
+          </Button>
+        </RequestQuoteDialog>
         <Button
           size="lg"
           className="w-full"
-          variant="default"
+          variant="outline"
           onClick={handleChatWithVendor}
         >
-          Ask for quotation
+          Ask a question
         </Button>
         <p className="text-xs text-muted-foreground text-center">
-          Vendor will receive your event details
+          Request a quote, or message the vendor with a question
         </p>
       </div>
 
