@@ -14,6 +14,7 @@ export type SmsEvent =
   | "dispute_raised_vendor"
   | "dispute_raised_planner"
   | "response_nudge"
+  | "activation_nudge_24h"
   | "digest"
   | "vendor_bulk_registered";
 
@@ -44,6 +45,8 @@ const T: Record<SmsEvent, (ctx: { name: string; count?: number }) => string> = {
     `Hi ${name}, your dispute has been received and is under review. Please log into your UMCIMBI app for more details.`,
   response_nudge: ({ name }) =>
     `Hi ${name}, a request on UMCIMBI is still waiting on you. Please log into your UMCIMBI app for more details.`,
+  activation_nudge_24h: ({ name }) =>
+    `Hi ${name}, still looking for vendors for your ceremony? Browse caterers, decor and tents on UMCIMBI and message one directly: umcimbi.co.za/vendors`,
   digest: ({ name, count }) =>
     `Hi ${name}, you have ${count ?? 1} new update(s) on UMCIMBI. Please log into your UMCIMBI app for more details.`,
   vendor_bulk_registered: ({ name }) =>
