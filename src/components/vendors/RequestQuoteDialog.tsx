@@ -32,13 +32,14 @@ const quoteRequestSchema = z.object({
 interface RequestQuoteDialogProps {
   vendor: Vendor;
   children: React.ReactNode;
+  defaultEventId?: string;
 }
 
 const NEW_EVENT = '__new__';
 
-export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps) {
+export function RequestQuoteDialog({ vendor, children, defaultEventId }: RequestQuoteDialogProps) {
   const [open, setOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState('');
+  const [selectedEventId, setSelectedEventId] = useState(defaultEventId ?? '');
   const [message, setMessage] = useState('');
   const [guestCount, setGuestCount] = useState('');
   const [budgetRange, setBudgetRange] = useState('');
@@ -124,7 +125,7 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
       setMessage('');
       setGuestCount('');
       setBudgetRange('');
-      setSelectedEventId('');
+      setSelectedEventId(defaultEventId ?? '');
       setNewEventType('');
       setNewEventDate('');
       setNewEventLocation('');

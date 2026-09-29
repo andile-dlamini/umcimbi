@@ -23,14 +23,6 @@ import { VendorRating } from '@/components/vendors/VendorRating';
 import { VendorBadges } from '@/components/vendors/VendorBadges';
 import { RequestQuoteDialog } from '@/components/vendors/RequestQuoteDialog';
 import { getVendorCategoryLabel, truncateVendorCategories, formatServiceAreas } from '@/lib/vendorCategories';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useEvents } from '@/hooks/useEvents';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -436,21 +428,7 @@ export default function VendorDetail() {
 
       {/* Floating CTA bar */}
       <div className="sticky bottom-0 inset-x-0 z-30 bg-background border-t border-border px-3 py-3 space-y-2">
-        {events.length > 0 && (
-          <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Link to an event" />
-            </SelectTrigger>
-            <SelectContent>
-              {events.map((evt) => (
-                <SelectItem key={evt.id} value={evt.id}>
-                  {evt.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        <RequestQuoteDialog vendor={vendor}>
+        <RequestQuoteDialog vendor={vendor} defaultEventId={selectedEventId || undefined}>
           <Button size="lg" className="w-full" variant="default">
             Request a quote
           </Button>
