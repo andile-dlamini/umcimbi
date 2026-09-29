@@ -97,8 +97,7 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
         estimated_guest_count: guests,
         size: guests <= 80 ? 'small' : guests <= 200 ? 'medium' : 'large',
         notes: null,
-        owner_user_id: undefined as unknown as string,
-      } as Parameters<typeof createEvent>[0]);
+      } as any);
 
       if (!createdEvent) {
         setIsSubmitting(false);
