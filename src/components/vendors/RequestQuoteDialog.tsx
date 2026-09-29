@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { useEvents } from '@/hooks/useEvents';
 import { useMyServiceRequests } from '@/hooks/useServiceRequests';
-import { Vendor, getEventTypeInfo } from '@/types/database';
+import { Vendor, EventType, EVENT_TYPES, getEventTypeInfo } from '@/types/database';
 import { format } from 'date-fns';
 import { z } from 'zod';
 
