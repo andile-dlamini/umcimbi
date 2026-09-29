@@ -53,6 +53,9 @@ verify_jwt = true
 [functions.vendor-response-nudge]
 verify_jwt = true
 
+[functions.organiser-activation-nudge]
+verify_jwt = true
+
 [functions.notification-digest]
 verify_jwt = true
 
