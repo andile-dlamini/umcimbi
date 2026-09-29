@@ -83,7 +83,7 @@ export async function sendChatNotification(
       sender_type: 'system',
       sender_user_id: senderUserId ?? userId,
       content: message,
-      metadata: metadata ?? {},
+      metadata: (metadata ?? {}) as never,
     });
 
     if (msgError) {
