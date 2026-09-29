@@ -16,7 +16,8 @@ export async function sendChatNotification(
   vendorId: string,
   message: string,
   eventId?: string,
-  senderUserId?: string
+  senderUserId?: string,
+  metadata?: Record<string, unknown>
 ): Promise<boolean> {
   try {
     // Find or create conversation
@@ -82,6 +83,7 @@ export async function sendChatNotification(
       sender_type: 'system',
       sender_user_id: senderUserId ?? userId,
       content: message,
+      metadata: metadata ?? {},
     });
 
     if (msgError) {
