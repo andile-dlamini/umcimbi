@@ -266,7 +266,7 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!selectedEventId || isSubmitting}
+            disabled={!selectedEventId || (isNewEvent && !newEventType) || isSubmitting}
           >
             <Send className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Sending...' : 'Send request'}
