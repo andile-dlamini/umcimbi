@@ -2680,6 +2680,20 @@ export type Database = {
           requests_sent: number
         }[]
       }
+      get_dormant_organisers: {
+        Args: {
+          _limit?: number
+          _max_age_days?: number
+          _min_age_hours?: number
+        }
+        Returns: {
+          created_at: string
+          first_name: string
+          full_name: string
+          phone_number: string
+          user_id: string
+        }[]
+      }
       get_incomplete_vendor_signups: {
         Args: never
         Returns: {
