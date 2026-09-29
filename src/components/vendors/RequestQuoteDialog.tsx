@@ -34,21 +34,28 @@ interface RequestQuoteDialogProps {
   children: React.ReactNode;
 }
 
+const NEW_EVENT = '__new__';
+
 export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [message, setMessage] = useState('');
   const [guestCount, setGuestCount] = useState('');
   const [budgetRange, setBudgetRange] = useState('');
+  const [newEventType, setNewEventType] = useState<EventType | ''>('');
+  const [newEventDate, setNewEventDate] = useState('');
+  const [newEventLocation, setNewEventLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { events } = useEvents();
+  const { events, createEvent } = useEvents();
   const { createRequest } = useMyServiceRequests();
 
+  const isNewEvent = selectedEventId === NEW_EVENT;
   const selectedEvent = events.find(e => e.id === selectedEventId);
 
   const handleSubmit = async () => {
     if (!selectedEventId) return;
+    if (isNewEvent && !newEventType) return;
 
     // Validate inputs
     const result = quoteRequestSchema.safeParse({
@@ -70,12 +77,44 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
 
     setValidationErrors({});
     setIsSubmitting(true);
+
+    let eventId = selectedEventId;
+    let requestDate = selectedEvent?.date || null;
+
+    if (isNewEvent) {
+      const parsedGuests = guestCount ? parseInt(guestCount) : NaN;
+      const guests = !isNaN(parsedGuests) ? parsedGuests : 50;
+      const typeInfo = getEventTypeInfo(newEventType as EventType);
+      const dateValue = newEventDate || null;
+      const createdEvent = await createEvent({
+        name: dateValue
+          ? `${typeInfo.shortLabel} — ${format(new Date(dateValue), 'dd MMM yyyy')}`
+          : typeInfo.shortLabel,
+        type: newEventType as EventType,
+        date: dateValue,
+        location: newEventLocation.trim() || null,
+        state_province: vendor.state_province ?? 'KwaZulu-Natal',
+        estimated_guest_count: guests,
+        size: guests <= 80 ? 'small' : guests <= 200 ? 'medium' : 'large',
+        notes: null,
+        owner_user_id: undefined as unknown as string,
+      } as Parameters<typeof createEvent>[0]);
+
+      if (!createdEvent) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      eventId = createdEvent.id;
+      requestDate = createdEvent.date || null;
+    }
+
     const success = await createRequest({
-      event_id: selectedEventId,
+      event_id: eventId,
       vendor_id: vendor.id,
       requester_user_id: '', // Will be set by the hook
       message: message.trim() || null,
-      event_date: selectedEvent?.date || null,
+      event_date: requestDate,
       guest_count: guestCount ? parseInt(guestCount) : null,
       budget_range: budgetRange.trim() || null,
     });
@@ -87,6 +126,9 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
       setGuestCount('');
       setBudgetRange('');
       setSelectedEventId('');
+      setNewEventType('');
+      setNewEventDate('');
+      setNewEventLocation('');
     }
   };
 
