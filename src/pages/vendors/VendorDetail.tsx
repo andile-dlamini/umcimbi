@@ -47,9 +47,8 @@ export default function VendorDetail() {
   const { user } = useAuth();
   const { vendor, isLoading } = useVendor(id);
   const { startConversation } = useStartConversation();
-  const { events } = useEvents();
 
-  const [selectedEventId, setSelectedEventId] = useState(eventId || '');
+  const selectedEventId = eventId || '';
   const [isSaved, setIsSaved] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
