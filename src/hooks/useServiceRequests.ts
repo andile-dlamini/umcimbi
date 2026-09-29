@@ -81,7 +81,8 @@ export function useMyServiceRequests() {
           request.guest_count || event.estimated_guest_count || undefined
         ),
         request.event_id,
-        user.id
+        user.id,
+        { visibility: 'vendor' }
       );
 
       // Send user-facing confirmation (sender = user, so it won't show as unread for them)
@@ -90,7 +91,8 @@ export function useMyServiceRequests() {
         request.vendor_id,
         notificationMessages.quoteRequested(event.name, vendor?.name || 'the vendor'),
         request.event_id,
-        user.id
+        user.id,
+        { visibility: 'client' }
       );
     }
 
