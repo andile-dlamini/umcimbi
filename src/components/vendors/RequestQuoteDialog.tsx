@@ -163,14 +163,54 @@ export function RequestQuoteDialog({ vendor, children }: RequestQuoteDialogProps
                     </span>
                   </SelectItem>
                 ))}
+                <SelectItem value={NEW_EVENT}>+ Create a new ceremony</SelectItem>
               </SelectContent>
             </Select>
-            {events.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Create an event first to request quotes
-              </p>
-            )}
           </div>
+
+          {isNewEvent && (
+            <div className="space-y-4 rounded-lg border border-border p-3">
+              <div className="space-y-2">
+                <Label>Ceremony type *</Label>
+                <Select
+                  value={newEventType}
+                  onValueChange={(value) => setNewEventType(value as EventType)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a ceremony" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_TYPES.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-event-date">Date (optional)</Label>
+                <Input
+                  id="new-event-date"
+                  type="date"
+                  value={newEventDate}
+                  onChange={(e) => setNewEventDate(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-event-location">Location (optional)</Label>
+                <Input
+                  id="new-event-location"
+                  placeholder="e.g. Umlazi, Durban"
+                  value={newEventLocation}
+                  onChange={(e) => setNewEventLocation(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
