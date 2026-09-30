@@ -67,13 +67,15 @@ Deno.serve(async (req) => {
 
     if (vErr || !vendor) return json({ error: 'Vendor not found' }, 404);
 
-    // Only the vendor owner (or an internal service call) may trigger this.
-    if (callerId && vendor.owner_user_id !== callerId) {
-      return json({ error: 'Forbidden' }, 403);
+    // Only an admin (or an internal service call) may trigger this — it is sent on approval.
+    if (callerId) {
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: callerId, _role: 'admin' });
+      if (!isAdmin) return json({ error: 'Forbidden' }, 403);
     }
 
     if (!vendor.owner_user_id) return json({ skipped: 'no_owner' }, 200);
     if (vendor.is_demo) return json({ skipped: 'demo_vendor' }, 200);
+    if (!vendor.is_active) return json({ skipped: 'not_approved' }, 200);
 
     const { data: profile } = await admin
       .from('profiles')
