@@ -66,6 +66,15 @@ const toE164WithCountry = (phone: string, countryCode: string) => {
 };
 
 // ─── SCHEMAS ───
+const validateDob = (value: string): string | null => {
+  if (!value) return 'Please enter your date of birth';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return 'Please enter a valid date of birth';
+  if (d > new Date()) return 'Date of birth cannot be in the future';
+  if (d.getFullYear() < 1900) return 'Please enter a valid date of birth';
+  return null;
+};
+
 const detailsSchema = z.object({
   first_name: z.string().trim().min(2, 'First name must be at least 2 characters').max(50),
   surname: z.string().trim().min(2, 'Surname must be at least 2 characters').max(50),
@@ -196,6 +205,8 @@ function CompleteProfileStep() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [dob, setDob] = useState('');
+  const isVendorRole = new URLSearchParams(window.location.search).get('role') === 'vendor';
 
   useEffect(() => {
     // Pre-fill from profile if available
@@ -232,6 +243,10 @@ function CompleteProfileStep() {
       setFieldErrors({ phoneNumber: 'Please enter a valid SA phone number' });
       return;
     }
+    if (!isVendorRole) {
+      const dobErr = validateDob(dob);
+      if (dobErr) { setFieldErrors({ dob: dobErr }); return; }
+    }
 
     setIsSubmitting(true);
     try {
@@ -248,7 +263,8 @@ function CompleteProfileStep() {
         phone_number: toE164(phoneNumber),
         phone_verified: false,
         is_profile_complete: true,
-      }).eq('user_id', user.id);
+        ...(!isVendorRole ? { date_of_birth: dob } : {}),
+      } as any).eq('user_id', user.id);
 
       if (error) {
         toast.error('Failed to save profile. Please try again.');
@@ -315,6 +331,16 @@ function CompleteProfileStep() {
                 We need your number to connect you with vendors
               </p>
             </div>
+            {!isVendorRole && (
+              <div className="space-y-2">
+                <Label htmlFor="cpDob">Date of Birth *</Label>
+                <Input id="cpDob" type="date" value={dob}
+                  max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+                  onChange={e => { setDob(e.target.value); setFieldErrors(prev => { const n = { ...prev }; delete n.dob; return n; }); }}
+                  className={`h-12 ${fieldErrors.dob ? 'border-destructive' : ''}`} />
+                {fieldErrors.dob && <p className="text-sm text-destructive">{fieldErrors.dob}</p>}
+              </div>
+            )}
             <Button type="submit" className="w-full h-12" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
               {isSubmitting ? 'Saving...' : 'Continue'}
@@ -411,6 +437,7 @@ export default function AuthPage() {
     first_name: '',
     surname: '',
     phone_number: '',
+    date_of_birth: '',
     terms_accepted: false as any,
   });
 
@@ -506,11 +533,13 @@ export default function AuthPage() {
     e.preventDefault();
     setErrors({});
     const result = detailsSchema.safeParse(form);
-    if (!result.success) {
+    const dobError = selectedRole !== 'vendor' ? validateDob(form.date_of_birth) : null;
+    if (!result.success || dobError) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach(err => { const f = err.path[0]?.toString(); if (f) fieldErrors[f] = err.message; });
+      if (!result.success) result.error.errors.forEach(err => { const f = err.path[0]?.toString(); if (f) fieldErrors[f] = err.message; });
+      if (dobError) fieldErrors.date_of_birth = dobError;
       setErrors(fieldErrors);
-      const first = result.error.errors[0]?.message;
+      const first = !result.success ? result.error.errors[0]?.message : dobError;
       if (first) toast.error(first);
       return;
     }
@@ -575,6 +604,7 @@ export default function AuthPage() {
           otp: otpValue,
           first_name: form.first_name,
           surname: form.surname,
+          date_of_birth: selectedRole !== 'vendor' ? form.date_of_birth || undefined : undefined,
           address: 'Not provided',
           password: passwordForm.password,
           role: selectedRole === 'vendor' ? 'vendor' : undefined,
@@ -1264,6 +1294,16 @@ export default function AuthPage() {
                     </div>
                     {errors.phone_number && <p className="text-xs text-destructive">{errors.phone_number}</p>}
                   </div>
+                  {selectedRole !== 'vendor' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="date_of_birth">Date of Birth *</Label>
+                      <Input id="date_of_birth" type="date" value={form.date_of_birth}
+                        max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+                        onChange={e => updateForm('date_of_birth', e.target.value)}
+                        className={`h-12 ${errors.date_of_birth ? 'border-destructive' : ''}`} />
+                      {errors.date_of_birth && <p className="text-xs text-destructive">{errors.date_of_birth}</p>}
+                    </div>
+                  )}
                   <div className="flex items-start space-x-3 pt-2">
                     <Checkbox id="terms" checked={form.terms_accepted}
                       onCheckedChange={checked => updateForm('terms_accepted', !!checked)}
