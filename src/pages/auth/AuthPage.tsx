@@ -205,6 +205,8 @@ function CompleteProfileStep() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [dob, setDob] = useState('');
+  const isVendorRole = new URLSearchParams(window.location.search).get('role') === 'vendor';
 
   useEffect(() => {
     // Pre-fill from profile if available
@@ -241,6 +243,10 @@ function CompleteProfileStep() {
       setFieldErrors({ phoneNumber: 'Please enter a valid SA phone number' });
       return;
     }
+    if (!isVendorRole) {
+      const dobErr = validateDob(dob);
+      if (dobErr) { setFieldErrors({ dob: dobErr }); return; }
+    }
 
     setIsSubmitting(true);
     try {
@@ -257,7 +263,8 @@ function CompleteProfileStep() {
         phone_number: toE164(phoneNumber),
         phone_verified: false,
         is_profile_complete: true,
-      }).eq('user_id', user.id);
+        ...(!isVendorRole ? { date_of_birth: dob } : {}),
+      } as any).eq('user_id', user.id);
 
       if (error) {
         toast.error('Failed to save profile. Please try again.');
@@ -324,6 +331,16 @@ function CompleteProfileStep() {
                 We need your number to connect you with vendors
               </p>
             </div>
+            {!isVendorRole && (
+              <div className="space-y-2">
+                <Label htmlFor="cpDob">Date of Birth *</Label>
+                <Input id="cpDob" type="date" value={dob}
+                  max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+                  onChange={e => { setDob(e.target.value); setFieldErrors(prev => { const n = { ...prev }; delete n.dob; return n; }); }}
+                  className={`h-12 ${fieldErrors.dob ? 'border-destructive' : ''}`} />
+                {fieldErrors.dob && <p className="text-sm text-destructive">{fieldErrors.dob}</p>}
+              </div>
+            )}
             <Button type="submit" className="w-full h-12" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRight className="h-4 w-4 mr-2" />}
               {isSubmitting ? 'Saving...' : 'Continue'}
