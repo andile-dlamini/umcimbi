@@ -23,6 +23,7 @@ interface RegisterData {
   email?: string;
   password: string;
   role?: string;
+  date_of_birth?: string;
 }
 
 Deno.serve(async (req) => {
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
 
   try {
     const body: RegisterData = await req.json();
-    const { phone_number, otp, first_name, surname, address, email, password, role } = body;
+    const { phone_number, otp, first_name, surname, address, email, password, role, date_of_birth } = body;
 
     if (!phone_number || !otp || !first_name || !surname || !password) {
       return new Response(
@@ -196,6 +197,9 @@ Deno.serve(async (req) => {
         phone_verified: true,
         address: address?.trim() || null,
         email: email?.trim() || null,
+        ...(date_of_birth && /^\d{4}-\d{2}-\d{2}$/.test(date_of_birth) && new Date(date_of_birth) <= new Date()
+          ? { date_of_birth }
+          : {}),
       })
       .eq("user_id", authData.user.id);
 
