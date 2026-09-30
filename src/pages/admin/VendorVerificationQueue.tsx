@@ -293,6 +293,11 @@ export default function VendorVerificationQueue() {
         })
         .catch((e) => console.error('Approve SMS failed:', e));
 
+      // One-time welcome message (with WhatsApp community link) — only once approved
+      supabase.functions
+        .invoke('send-vendor-welcome', { body: { vendor_id: vendor.id } })
+        .catch((e) => console.error('Welcome message failed:', e));
+
       supabase
         .rpc('calculate_vendor_trust_score', { p_vendor_id: vendor.id })
         .then(({ error: rpcErr }) => {

@@ -1,5 +1,5 @@
 // Sends a one-time welcome message (SMS and/or email) to a newly created vendor.
-// Triggered from the signup flows right after the vendors row is created.
+// Triggered by the admin approval flow once the vendor is approved (is_active).
 // Idempotent: guarded by the unique (user_id, campaign) index on vendor_sms_log.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
@@ -61,19 +61,21 @@ Deno.serve(async (req) => {
 
     const { data: vendor, error: vErr } = await admin
       .from('vendors')
-      .select('id, name, owner_user_id, phone_number, email, is_demo')
+      .select('id, name, owner_user_id, phone_number, email, is_demo, is_active')
       .eq('id', vendor_id)
       .maybeSingle();
 
     if (vErr || !vendor) return json({ error: 'Vendor not found' }, 404);
 
-    // Only the vendor owner (or an internal service call) may trigger this.
-    if (callerId && vendor.owner_user_id !== callerId) {
-      return json({ error: 'Forbidden' }, 403);
+    // Only an admin (or an internal service call) may trigger this — it is sent on approval.
+    if (callerId) {
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: callerId, _role: 'admin' });
+      if (!isAdmin) return json({ error: 'Forbidden' }, 403);
     }
 
     if (!vendor.owner_user_id) return json({ skipped: 'no_owner' }, 200);
     if (vendor.is_demo) return json({ skipped: 'demo_vendor' }, 200);
+    if (!vendor.is_active) return json({ skipped: 'not_approved' }, 200);
 
     const { data: profile } = await admin
       .from('profiles')

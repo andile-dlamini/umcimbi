@@ -773,10 +773,7 @@ export default function AuthPage() {
       await supabase.from('vendors').update({ signup_source: refSource } as any).eq('id', vendorData.id);
     }
 
-    // One-time welcome message (SMS and/or email) — non-blocking
-    supabase.functions.invoke('send-vendor-welcome', {
-      body: { vendor_id: vendorData.id },
-    }).catch((e: any) => console.error('Welcome message failed (non-blocking):', e));
+    // Welcome message is sent by the admin approval flow, not at signup.
 
     setIsLoading(false);
     setStep('success');
