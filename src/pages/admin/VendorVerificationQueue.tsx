@@ -63,6 +63,7 @@ interface PendingVendor {
   admin_approval_notes: string | null;
   selfie_photo_url: string | null;
   selfie_request_sent_at: string | null;
+  state_province: string | null;
   created_at: string;
 }
 
@@ -105,7 +106,7 @@ const VENDOR_SELECT = `
   bank_account_type, bank_branch_code,
   instagram_url, tiktok_url, facebook_url, website_url,
   image_urls, logo_url, admin_approval_notes,
-  selfie_photo_url, selfie_request_sent_at, created_at
+  selfie_photo_url, selfie_request_sent_at, state_province, created_at
 `;
 
 function maskAccount(num: string | null): string {
