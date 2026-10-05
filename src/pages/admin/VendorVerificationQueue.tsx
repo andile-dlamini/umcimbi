@@ -159,7 +159,16 @@ export default function VendorVerificationQueue() {
       return;
     }
 
-    const list = (vendorData ?? []) as unknown as PendingVendor[];
+    // Only show vendors in provinces that are actually live (e.g. KZN until Gauteng
+    // launches). Vendors with no province set are always kept visible.
+    const { data: liveProvincesData } = await supabase
+      .from('live_provinces')
+      .select('province');
+    const liveProvinces = new Set((liveProvincesData ?? []).map((p: any) => p.province));
+
+    const list = ((vendorData ?? []) as unknown as PendingVendor[]).filter(
+      (v) => !v.state_province || liveProvinces.has(v.state_province)
+    );
     setVendors(list);
 
     // Seed notes drafts + checklist defaults
