@@ -280,7 +280,7 @@ export default function AdminDashboard() {
       setFunnelBooked(new Set((bkClients || []).map(b => b.client_id)).size);
 
       // Tier 4 — Vendors by category
-      const { data: vendors } = await supabase.from('vendors').select('category').eq('is_active', true);
+      const { data: vendors } = await supabase.from('vendors').select('category').eq('is_active', true).eq('is_demo', false).eq('is_banned', false);
       const vbc: Record<string, number> = {};
       (vendors || []).forEach(v => { vbc[v.category] = (vbc[v.category] || 0) + 1; });
       setVendorsByCategory(vbc);
@@ -342,7 +342,7 @@ export default function AdminDashboard() {
   ];
 
   const accountCards = [
-    { label: 'Total real vendors', value: totalVendors, joined: vendorsJoinedThisMonth, icon: Store },
+    { label: 'Live vendors', value: totalVendors, joined: vendorsJoinedThisMonth, icon: Store },
     { label: 'Total organisers', value: totalOrganisers, joined: organisersJoinedThisMonth, icon: Users },
   ];
 
