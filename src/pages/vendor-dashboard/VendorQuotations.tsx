@@ -98,14 +98,14 @@ export default function VendorQuotations() {
       <div className="px-4 py-4 max-w-lg mx-auto space-y-4">
         <Tabs defaultValue="awaiting" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="awaiting">
-              Awaiting Client ({awaitingClientQuotes.length})
+            <TabsTrigger value="awaiting" className="min-w-0 px-2 text-xs sm:text-sm">
+              <span className="truncate">Awaiting ({awaitingClientQuotes.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="accepted">
-              Accepted ({acceptedQuotes.length})
+            <TabsTrigger value="accepted" className="min-w-0 px-2 text-xs sm:text-sm">
+              <span className="truncate">Accepted ({acceptedQuotes.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="closed">
-              Closed ({declinedOrExpired.length})
+            <TabsTrigger value="closed" className="min-w-0 px-2 text-xs sm:text-sm">
+              <span className="truncate">Closed ({declinedOrExpired.length})</span>
             </TabsTrigger>
           </TabsList>
 
