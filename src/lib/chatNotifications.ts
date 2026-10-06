@@ -108,10 +108,13 @@ export async function sendChatNotification(
 // Notification message templates
 export const notificationMessages = {
   // For vendors - when they receive a new request
-  newRequestForVendor: (eventName: string, eventType: string, guestCount?: number) =>
-    guestCount
-      ? `🔔 New quote request! "${eventName}" (${eventType}) for ${guestCount} guests. Please review and respond.`
-      : `🔔 New quote request! "${eventName}" (${eventType}). Please review and respond.`,
+  newRequestForVendor: (eventName: string, eventType: string, guestCount?: number, eventDate?: string | null, location?: string | null) => {
+    const parts = [`🔔 New quote request! "${eventName}" (${eventType})`];
+    if (eventDate) parts.push(`📅 ${eventDate}`);
+    if (guestCount) parts.push(`👥 ${guestCount} guests`);
+    if (location) parts.push(`📍 ${location}`);
+    return `${parts.join('\n')}\nPlease review and respond.`;
+  },
   
   // For clients - confirmation that request was sent
   quoteRequested: (eventName: string, vendorName: string) =>
