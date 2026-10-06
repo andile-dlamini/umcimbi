@@ -273,11 +273,6 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
                         </span>
                       )}
                     </div>
-                    {isClient && (
-                      <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => { onOpenChange(false); navigate(`/events/${event.id}`); }}>
-                        <ExternalLink className="h-3 w-3 mr-1" /> View Event
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               )}
