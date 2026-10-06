@@ -51,6 +51,7 @@ const colorMap: Record<EventType, string> = {
   umemulo: 'bg-accent/20 text-accent',
   imbeleko: 'bg-accent/20 text-accent',
   ancestral_ritual: 'bg-accent/20 text-accent',
+  other: 'bg-accent/20 text-accent border border-accent/50',
 };
 
 export default function CreateEvent() {
