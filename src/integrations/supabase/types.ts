@@ -2818,6 +2818,7 @@ export type Database = {
         | "umemulo"
         | "funeral"
         | "ancestral_ritual"
+        | "other"
       payment_status: "not_due" | "due" | "paid" | "pending_verification"
       preferred_language: "zulu" | "english"
       quote_status:
@@ -3039,6 +3040,7 @@ export const Constants = {
         "umemulo",
         "funeral",
         "ancestral_ritual",
+        "other",
       ],
       payment_status: ["not_due", "due", "paid", "pending_verification"],
       preferred_language: ["zulu", "english"],

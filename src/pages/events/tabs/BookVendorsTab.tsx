@@ -15,6 +15,7 @@ const CEREMONY_VENDOR_MAP: Partial<Record<EventType, VendorCategory[]>> = {
   umemulo:          ['catering', 'tents', 'decor', 'photographer', 'attire_tailoring', 'makeup_beauty', 'cold_room_hire', 'drinks_ice_delivery', 'mobile_toilets', 'dj_sound_audio', 'livestock'],
   imbeleko:         ['catering', 'cold_room_hire', 'livestock'],
   ancestral_ritual: ['catering', 'cold_room_hire', 'livestock'],
+  other:            ['catering', 'tents', 'decor', 'photographer', 'attire_tailoring', 'makeup_beauty', 'cold_room_hire', 'drinks_ice_delivery', 'mobile_toilets', 'dj_sound_audio', 'livestock'],
 };
 
 type BookingStatus = 'not_started' | 'quote_requested' | 'quote_received' | 'deposit_due' | 'upcoming' | 'balance_due';
