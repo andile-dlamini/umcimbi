@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
   const [eventLocation, setEventLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const prefilledFor = useRef<string | null>(null);
   const { events, createEvent, updateEvent } = useEvents();
   const { createRequest } = useMyServiceRequests();
 
@@ -61,18 +62,24 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
   useEffect(() => {
     if (!selectedEventId) return;
     if (selectedEventId === NEW_EVENT) {
-      setEventDate('');
-      setGuestCount('');
-      setEventLocation('');
+      if (prefilledFor.current !== NEW_EVENT) {
+        setEventDate('');
+        setGuestCount('');
+        setEventLocation('');
+        prefilledFor.current = NEW_EVENT;
+      }
       return;
     }
+    // Already pre-filled for this ceremony — do not clobber the organiser's edits
+    // when the events array is replaced by a later fetch or an updateEvent call.
+    if (prefilledFor.current === selectedEventId) return;
     const ev = events.find(e => e.id === selectedEventId);
-    if (!ev) return;
+    if (!ev) return; // events not loaded yet; this effect re-runs when they arrive
     setEventDate(ev.date ?? '');
     setGuestCount(ev.estimated_guest_count ? String(ev.estimated_guest_count) : '');
     setEventLocation(ev.location ?? '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEventId]);
+    prefilledFor.current = selectedEventId;
+  }, [selectedEventId, events]);
 
   const canSubmit =
     !!selectedEventId &&
@@ -157,6 +164,7 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
       setGuestCount('');
       setBudgetRange('');
       setSelectedEventId(defaultEventId ?? '');
+      prefilledFor.current = null;
       setNewEventType('');
       setNewEventName('');
       setEventDate('');
