@@ -267,15 +267,17 @@ export function ChatDetailsDrawer({ open, onOpenChange, conversationId, isVendor
                           <Users className="h-3 w-3" /> {event.estimated_guest_count} guests
                         </span>
                       )}
-                      {event.estimated_budget && (
+                      {isClient && event.estimated_budget && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Banknote className="h-3 w-3" /> R{event.estimated_budget.toLocaleString()}
                         </span>
                       )}
                     </div>
-                    <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => { onOpenChange(false); navigate(`/events/${event.id}`); }}>
-                      <ExternalLink className="h-3 w-3 mr-1" /> View Event
-                    </Button>
+                    {isClient && (
+                      <Button variant="ghost" size="sm" className="w-full mt-1" onClick={() => { onOpenChange(false); navigate(`/events/${event.id}`); }}>
+                        <ExternalLink className="h-3 w-3 mr-1" /> View Event
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
