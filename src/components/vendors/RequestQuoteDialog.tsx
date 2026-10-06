@@ -59,13 +59,20 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
 
   // Pre-fill from the chosen existing ceremony; re-run whenever the selection changes
   useEffect(() => {
-    if (!selectedEventId || selectedEventId === NEW_EVENT) return;
+    if (!selectedEventId) return;
+    if (selectedEventId === NEW_EVENT) {
+      setEventDate('');
+      setGuestCount('');
+      setEventLocation('');
+      return;
+    }
     const ev = events.find(e => e.id === selectedEventId);
     if (!ev) return;
     setEventDate(ev.date ?? '');
     setGuestCount(ev.estimated_guest_count ? String(ev.estimated_guest_count) : '');
     setEventLocation(ev.location ?? '');
-  }, [selectedEventId, events]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEventId]);
 
   const canSubmit =
     !!selectedEventId &&
@@ -263,8 +270,8 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
             </>
           )}
 
+          {selectedEventId && (
           <div className="grid grid-cols-2 gap-3">
-            {selectedEventId && (
             <div className="space-y-2">
               <Label htmlFor="guests">Expected guests *</Label>
               <Input
@@ -279,7 +286,6 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
                 <p className="text-xs text-destructive">{validationErrors.guestCount}</p>
               )}
             </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="budget">Budget range</Label>
               <Input
@@ -295,6 +301,7 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
               )}
             </div>
           </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="message">Message (optional)</Label>
