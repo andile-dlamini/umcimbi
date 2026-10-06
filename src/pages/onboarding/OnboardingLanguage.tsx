@@ -392,42 +392,22 @@ export default function OnboardingLanguage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="mb-9 sm:mb-12">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Careers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Open roles</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Work with us</h2>
             <p className="text-[15px] text-white/60 sm:whitespace-nowrap">
               Help us grow UMCIMBI on the ground and bring trusted ceremony vendors closer to families.
             </p>
           </div>
 
-          <div className="border-y border-white/15">
-            <Link
-              to="/careers/vendor-growth-manager"
-              className="group grid gap-6 py-7 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:py-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-4 focus-visible:ring-offset-[hsl(220_25%_8%)]"
-            >
-              <div>
-                <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase text-secondary">
-                  <span>Commission-based</span>
-                  <span className="text-white/30" aria-hidden="true">•</span>
-                  <span>eThekwini &amp; PMB</span>
-                  <span className="text-white/30" aria-hidden="true">•</span>
-                  <span>Flexible</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-secondary transition-colors">
-                  Vendor Growth Manager
-                </h3>
-                <p className="text-[15px] leading-relaxed text-white/70 max-w-2xl">
-                  We're looking for a driven, commission-based Vendor Growth Manager to help onboard
-                  ceremony vendors across eThekwini and PMB. No CV needed — just tell us why you'd be great at it.
-                </p>
-              </div>
-
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-white sm:justify-self-end">
-                View role
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Link>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">No open roles right now</h3>
+            <p className="text-[15px] leading-relaxed text-white/70 max-w-xl mx-auto">
+              We're a small team, and every hire matters — so we open roles only when there's a real seat to fill.
+              New positions will be posted here first, so check back soon or follow us on social media.
+            </p>
           </div>
         </div>
       </section>
+
 
 
       {/* ═══ FOOTER ═══ */}
