@@ -161,13 +161,13 @@ export default function VendorDashboard() {
 
         {/* Quick Links */}
         <div className="grid grid-cols-2 gap-3" data-tour="vendor-quick-links">
-          <Button variant="outline" className="h-auto py-3" onClick={() => navigate('/profile/vendor')}>
+          <Button variant="outline" className="h-auto py-3 min-w-0" onClick={() => navigate('/profile/vendor')}>
             <Store className="h-4 w-4 mr-2" />
-            Edit profile
+            <span className="truncate">Edit profile</span>
           </Button>
-          <Button variant="outline" className="h-auto py-3" onClick={() => navigate(`/vendors/${vendorProfile.id}`)}>
+          <Button variant="outline" className="h-auto py-3 min-w-0" onClick={() => navigate(`/vendors/${vendorProfile.id}`)}>
             <Eye className="h-4 w-4 mr-2" />
-            View public page
+            <span className="truncate">View public page</span>
           </Button>
         </div>
       </div>
