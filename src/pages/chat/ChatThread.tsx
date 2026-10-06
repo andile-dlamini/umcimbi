@@ -33,7 +33,25 @@ const ChatThread = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const proofFileInputRef = useRef<HTMLInputElement>(null);
 
-  const isVendorView = isVendor && vendorProfile?.id === conversation?.vendor_id;
+  const [ownsConversationVendor, setOwnsConversationVendor] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const vendorId = conversation?.vendor_id;
+    if (!user?.id || !vendorId) { setOwnsConversationVendor(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from('vendors')
+        .select('id')
+        .eq('id', vendorId)
+        .eq('owner_user_id', user.id)
+        .maybeSingle();
+      if (!cancelled) setOwnsConversationVendor(!!data);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, conversation?.vendor_id]);
+
+  const isVendorView = isVendor && (vendorProfile?.id === conversation?.vendor_id || ownsConversationVendor);
 
   const clientUserId = isVendorView
     ? (conversation as any)?.user_profile?.user_id || conversation?.user_id

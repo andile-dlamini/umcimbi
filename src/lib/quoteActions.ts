@@ -28,7 +28,8 @@ function renderDocument(win: Window | null, html: string, fallbackUrl: string): 
  * Returns the signed URL on success, null on failure.
  */
 export async function viewQuotePdfAction(quoteId: string): Promise<string | null> {
-  const win = window.open('', '_blank', 'noopener,noreferrer');
+  const win = window.open('', '_blank');
+  if (win) win.opener = null;
   try {
     const { data, error } = await supabase.functions.invoke('get-final-offer-url', {
       body: { quote_id: quoteId },
@@ -144,7 +145,8 @@ export async function declineQuoteAction(quoteId: string): Promise<boolean> {
  * survive mobile popup blockers.
  */
 export async function viewOrderPdfAction(bookingId: string): Promise<string | null> {
-  const win = window.open('', '_blank', 'noopener,noreferrer');
+  const win = window.open('', '_blank');
+  if (win) win.opener = null;
   try {
     const { data, error } = await supabase.functions.invoke('get-order-pdf-url', {
       body: { booking_id: bookingId },
