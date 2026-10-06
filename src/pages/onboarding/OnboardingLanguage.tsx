@@ -392,7 +392,7 @@ export default function OnboardingLanguage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="mb-9 sm:mb-12">
             <p className="text-sm font-semibold text-secondary uppercase tracking-wider mb-3">Careers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Open roles</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Work with us</h2>
             <p className="text-[15px] text-white/60 sm:whitespace-nowrap">
               Help us grow UMCIMBI on the ground and bring trusted ceremony vendors closer to families.
             </p>
