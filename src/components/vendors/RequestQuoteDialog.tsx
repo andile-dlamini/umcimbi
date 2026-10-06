@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,11 +21,13 @@ import { format } from 'date-fns';
 import { z } from 'zod';
 
 const quoteRequestSchema = z.object({
-  guestCount: z.string().optional().refine((val) => {
-    if (!val || val.trim() === '') return true;
-    const num = parseInt(val);
-    return !isNaN(num) && num >= 1 && num <= 10000;
-  }, { message: 'Guest count must be between 1 and 10,000' }),
+  date: z.string().trim().min(1, 'Please choose the event date'),
+  guestCount: z.string().trim().refine((val) => {
+    if (!/^\d+$/.test(val)) return false;
+    const num = parseInt(val, 10);
+    return num >= 1 && num <= 10000;
+  }, { message: 'Guest count must be a whole number between 1 and 10,000' }),
+  location: z.string().trim().min(1, 'Please enter the event location').max(200, 'Location must be less than 200 characters'),
   budgetRange: z.string().max(50, 'Budget range must be less than 50 characters').optional(),
   message: z.string().max(2000, 'Message must be less than 2,000 characters').optional(),
 });
@@ -44,23 +46,41 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
   const [guestCount, setGuestCount] = useState('');
   const [budgetRange, setBudgetRange] = useState('');
   const [newEventType, setNewEventType] = useState<EventType | ''>('');
-  const [newEventDate, setNewEventDate] = useState('');
-  const [newEventLocation, setNewEventLocation] = useState('');
+  const [newEventName, setNewEventName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventLocation, setEventLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const { events, createEvent } = useEvents();
+  const { events, createEvent, updateEvent } = useEvents();
   const { createRequest } = useMyServiceRequests();
 
   const isNewEvent = selectedEventId === NEW_EVENT;
   const selectedEvent = events.find(e => e.id === selectedEventId);
 
-  const handleSubmit = async () => {
-    if (!selectedEventId) return;
-    if (isNewEvent && !newEventType) return;
+  // Pre-fill from the chosen existing ceremony; re-run whenever the selection changes
+  useEffect(() => {
+    if (!selectedEventId || selectedEventId === NEW_EVENT) return;
+    const ev = events.find(e => e.id === selectedEventId);
+    if (!ev) return;
+    setEventDate(ev.date ?? '');
+    setGuestCount(ev.estimated_guest_count ? String(ev.estimated_guest_count) : '');
+    setEventLocation(ev.location ?? '');
+  }, [selectedEventId, events]);
 
-    // Validate inputs
+  const canSubmit =
+    !!selectedEventId &&
+    !!eventDate &&
+    guestCount.trim() !== '' &&
+    eventLocation.trim() !== '' &&
+    (!isNewEvent || (!!newEventType && (newEventType !== 'other' || newEventName.trim() !== '')));
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+
     const result = quoteRequestSchema.safeParse({
+      date: eventDate,
       guestCount,
+      location: eventLocation,
       budgetRange: budgetRange.trim(),
       message: message.trim(),
     });
@@ -79,21 +99,19 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
     setValidationErrors({});
     setIsSubmitting(true);
 
+    const guests = parseInt(guestCount.trim(), 10);
+    const location = eventLocation.trim();
     let eventId = selectedEventId;
-    let requestDate = selectedEvent?.date || null;
 
     if (isNewEvent) {
-      const parsedGuests = guestCount ? parseInt(guestCount) : NaN;
-      const guests = !isNaN(parsedGuests) ? parsedGuests : 50;
       const typeInfo = getEventTypeInfo(newEventType as EventType);
-      const dateValue = newEventDate || null;
       const createdEvent = await createEvent({
-        name: dateValue
-          ? `${typeInfo.shortLabel} — ${format(new Date(dateValue), 'dd MMM yyyy')}`
-          : typeInfo.shortLabel,
+        name: newEventType === 'other'
+          ? newEventName.trim()
+          : `${typeInfo.shortLabel} — ${format(new Date(eventDate), 'dd MMM yyyy')}`,
         type: newEventType as EventType,
-        date: dateValue,
-        location: newEventLocation.trim() || null,
+        date: eventDate,
+        location,
         state_province: vendor.state_province ?? 'KwaZulu-Natal',
         estimated_guest_count: guests,
         size: guests <= 80 ? 'small' : guests <= 200 ? 'medium' : 'large',
@@ -104,9 +122,15 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
         setIsSubmitting(false);
         return;
       }
-
       eventId = createdEvent.id;
-      requestDate = createdEvent.date || null;
+    } else if (selectedEvent) {
+      const changes: Record<string, unknown> = {};
+      if ((selectedEvent.date ?? '') !== eventDate) changes.date = eventDate;
+      if ((selectedEvent.location ?? '') !== location) changes.location = location;
+      if (selectedEvent.estimated_guest_count !== guests) changes.estimated_guest_count = guests;
+      if (Object.keys(changes).length > 0) {
+        await updateEvent(selectedEvent.id, changes as any);
+      }
     }
 
     const success = await createRequest({
@@ -114,8 +138,8 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
       vendor_id: vendor.id,
       requester_user_id: '', // Will be set by the hook
       message: message.trim() || null,
-      event_date: requestDate,
-      guest_count: guestCount ? parseInt(guestCount) : null,
+      event_date: eventDate,
+      guest_count: guests,
       budget_range: budgetRange.trim() || null,
     });
     setIsSubmitting(false);
@@ -127,8 +151,9 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
       setBudgetRange('');
       setSelectedEventId(defaultEventId ?? '');
       setNewEventType('');
-      setNewEventDate('');
-      setNewEventLocation('');
+      setNewEventName('');
+      setEventDate('');
+      setEventLocation('');
     }
   };
 
@@ -190,32 +215,58 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="new-event-date">Date (optional)</Label>
-                <Input
-                  id="new-event-date"
-                  type="date"
-                  value={newEventDate}
-                  onChange={(e) => setNewEventDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="new-event-location">Location (optional)</Label>
-                <Input
-                  id="new-event-location"
-                  placeholder="e.g. Umlazi, Durban"
-                  value={newEventLocation}
-                  onChange={(e) => setNewEventLocation(e.target.value)}
-                  maxLength={200}
-                />
-              </div>
+              {newEventType === 'other' && (
+                <div className="space-y-2">
+                  <Label htmlFor="new-event-name">What kind of ceremony? *</Label>
+                  <Input
+                    id="new-event-name"
+                    placeholder="e.g. White wedding, 60th birthday"
+                    value={newEventName}
+                    onChange={(e) => setNewEventName(e.target.value)}
+                    maxLength={100}
+                  />
+                </div>
+              )}
             </div>
           )}
 
+          {selectedEventId && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="event-date">Date *</Label>
+                <Input
+                  id="event-date"
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className={validationErrors.date ? 'border-destructive' : ''}
+                />
+                {validationErrors.date && (
+                  <p className="text-xs text-destructive">{validationErrors.date}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="event-location">Event location (incl. nearest school) *</Label>
+                <Input
+                  id="event-location"
+                  placeholder="e.g. 12 Khuzimpi Rd, Umlazi — near Menzi High School"
+                  value={eventLocation}
+                  onChange={(e) => setEventLocation(e.target.value)}
+                  maxLength={200}
+                  className={validationErrors.location ? 'border-destructive' : ''}
+                />
+                {validationErrors.location && (
+                  <p className="text-xs text-destructive">{validationErrors.location}</p>
+                )}
+              </div>
+            </>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
+            {selectedEventId && (
             <div className="space-y-2">
-              <Label htmlFor="guests">Expected guests</Label>
+              <Label htmlFor="guests">Expected guests *</Label>
               <Input
                 id="guests"
                 type="number"
@@ -228,6 +279,7 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
                 <p className="text-xs text-destructive">{validationErrors.guestCount}</p>
               )}
             </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="budget">Budget range</Label>
               <Input
@@ -267,7 +319,7 @@ export function RequestQuoteDialog({ vendor, children, defaultEventId }: Request
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!selectedEventId || (isNewEvent && !newEventType) || isSubmitting}
+            disabled={!canSubmit || isSubmitting}
           >
             <Send className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Sending...' : 'Send request'}

@@ -4,6 +4,7 @@ import { ServiceRequest, ServiceRequestWithDetails, CreateServiceRequest, Servic
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { sendChatNotification, notificationMessages } from '@/lib/chatNotifications';
+import { format } from 'date-fns';
 
 // Hook for organisers to manage their service requests
 export function useMyServiceRequests() {
@@ -60,7 +61,7 @@ export function useMyServiceRequests() {
     // Send chat notification to vendor about the new request
     const { data: event } = await supabase
       .from('events')
-      .select('name, type, estimated_guest_count')
+      .select('name, type, estimated_guest_count, date, location')
       .eq('id', request.event_id)
       .single();
 
@@ -78,7 +79,9 @@ export function useMyServiceRequests() {
         notificationMessages.newRequestForVendor(
           event.name,
           event.type.charAt(0).toUpperCase() + event.type.slice(1).replace('_', ' '),
-          request.guest_count || event.estimated_guest_count || undefined
+          request.guest_count || event.estimated_guest_count || undefined,
+          request.event_date ? format(new Date(request.event_date), 'dd MMM yyyy') : (event.date ? format(new Date(event.date), 'dd MMM yyyy') : null),
+          event.location ?? null
         ),
         request.event_id,
         user.id,
