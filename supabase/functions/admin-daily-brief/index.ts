@@ -62,7 +62,9 @@ serve(async (req) => {
     // Admin-account activity is demo traffic and never counts.
     const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
     const adminIds = new Set((adminRoles ?? []).map((r: any) => r.user_id));
-    const requests = (requestsResult.data ?? []).filter((r: any) => !adminIds.has(r.requester_user_id));
+    const { data: demoVendors } = await supabase.from('vendors').select('id').eq('is_demo', true);
+    const demoVendorIds = new Set((demoVendors ?? []).map((v: any) => v.id));
+    const requests = (requestsResult.data ?? []).filter((r: any) => !adminIds.has(r.requester_user_id) && !demoVendorIds.has(r.vendor_id));
     const requestIds = new Set(requests.map((r: any) => r.id));
     const quotes = (quotesResult.data ?? []).filter((q: any) => requestIds.has(q.request_id));
     const bookings = (bookingsResult.data ?? []).filter((b: any) => !adminIds.has(b.client_id));
