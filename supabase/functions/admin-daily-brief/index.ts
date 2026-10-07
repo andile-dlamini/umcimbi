@@ -50,8 +50,8 @@ serve(async (req) => {
       }),
       supabase.from('events').select('id, owner_user_id, type, created_at'),
       supabase.from('service_requests').select('id, status, created_at, vendor_id, requester_user_id, responded_at'),
-      supabase.from('quotes').select('id, status, created_at'),
-      supabase.from('bookings').select('id, agreed_price, booking_status, deposit_status, balance_status, funds_held_since, event_date_time, created_at, updated_at'),
+      supabase.from('quotes').select('id, status, created_at, request_id'),
+      supabase.from('bookings').select('id, client_id, agreed_price, booking_status, deposit_status, balance_status, funds_held_since, event_date_time, created_at, updated_at'),
       supabase.from('platform_events').select('event_type, metadata, created_at').gte('created_at', yesterday.toISOString()),
       supabase.from('daily_briefs').select('raw_stats').order('generated_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
@@ -59,9 +59,13 @@ serve(async (req) => {
     const vendors = vendorsResult.data ?? [];
     const organisers = organisersResult.data ?? [];
     const events = eventsResult.data ?? [];
-    const requests = requestsResult.data ?? [];
-    const quotes = quotesResult.data ?? [];
-    const bookings = bookingsResult.data ?? [];
+    // Admin-account activity is demo traffic and never counts.
+    const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
+    const adminIds = new Set((adminRoles ?? []).map((r: any) => r.user_id));
+    const requests = (requestsResult.data ?? []).filter((r: any) => !adminIds.has(r.requester_user_id));
+    const requestIds = new Set(requests.map((r: any) => r.id));
+    const quotes = (quotesResult.data ?? []).filter((q: any) => requestIds.has(q.request_id));
+    const bookings = (bookingsResult.data ?? []).filter((b: any) => !adminIds.has(b.client_id));
     const platformEvents = platformEventsResult.data ?? [];
     const previousBrief = previousBriefResult.data?.raw_stats ?? null;
 
