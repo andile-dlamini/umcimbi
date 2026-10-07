@@ -2662,6 +2662,7 @@ export type Database = {
           vendors_ever_responded: number
         }[]
       }
+      get_admin_user_ids: { Args: never; Returns: string[] }
       get_admin_user_registration_stats: {
         Args: never
         Returns: {

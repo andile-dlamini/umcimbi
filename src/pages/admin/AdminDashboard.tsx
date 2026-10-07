@@ -157,10 +157,17 @@ export default function AdminDashboard() {
       setIsLoading(true);
       const { start, prevStart } = getPeriodDates(period);
 
+      // Admin-account activity is demo traffic and never counts.
+      const { data: adminIdRows } = await (supabase as any).rpc('get_admin_user_ids');
+      const adminIds: string[] = ((adminIdRows || []) as any[]).map((r) => (typeof r === 'string' ? r : r.get_admin_user_ids)).filter(Boolean);
+      const adminList = `(${adminIds.join(',')})`;
+      const exclAdmin = (q: any, col: string) => (adminIds.length ? q.not(col, 'in', adminList) : q);
+      const adminCol: Record<string, string> = { service_requests: 'requester_user_id', bookings: 'client_id', events: 'owner_user_id' };
+
       // Tier 1 — Revenue
-      let bookingsQuery = supabase
+      let bookingsQuery = exclAdmin(supabase
         .from('bookings')
-        .select('agreed_price')
+        .select('agreed_price'), 'client_id')
         .in('booking_status', ['confirmed', 'completed', 'disputed']);
       if (start) bookingsQuery = bookingsQuery.gte('created_at', start);
       const { data: revenueBookings } = await bookingsQuery;
@@ -176,10 +183,10 @@ export default function AdminDashboard() {
       // Escrow — only money actually received and not yet released
       const { data: escrowBookings } = await supabase
         .from('bookings')
-        .select('deposit_amount, deposit_status, balance_amount, balance_status')
+        .select('deposit_amount, deposit_status, balance_amount, balance_status, client_id')
         .not('funds_held_since', 'is', null)
         .is('funds_released_at', null);
-      setEscrow((escrowBookings || []).reduce((s, b) => {
+      setEscrow((escrowBookings || []).filter((b: any) => !adminIds.includes(b.client_id)).reduce((s, b) => {
         const dep = b.deposit_status === 'paid' ? Number(b.deposit_amount || 0) : 0;
         const bal = b.balance_status === 'paid' ? Number(b.balance_amount || 0) : 0;
         return s + dep + bal;
@@ -189,6 +196,7 @@ export default function AdminDashboard() {
       // Tier 2 — Growth signals (current period)
       const fetchCount = async (table: string, col: string, gte?: string | null, filters?: Record<string, any>) => {
         let q = supabase.from(table as any).select(col, { count: 'exact', head: true });
+        if (adminCol[table]) q = exclAdmin(q, adminCol[table]);
         if (gte) q = q.gte('created_at', gte);
         if (filters) {
           for (const [k, v] of Object.entries(filters)) q = q.eq(k, v);
@@ -198,8 +206,8 @@ export default function AdminDashboard() {
       };
 
       const fetchBookingCount = async (gte?: string | null) => {
-        let q = supabase.from('bookings').select('*', { count: 'exact', head: true })
-          .in('booking_status', ['confirmed', 'completed', 'disputed']);
+        let q = exclAdmin(supabase.from('bookings').select('*', { count: 'exact', head: true })
+          .in('booking_status', ['confirmed', 'completed', 'disputed']), 'client_id');
         if (gte) q = q.gte('created_at', gte);
         const { count } = await q;
         return count || 0;
@@ -245,6 +253,7 @@ export default function AdminDashboard() {
         const fetchPrevCount = async (table: string, col: string, filters?: Record<string, any>) => {
           let q = supabase.from(table as any).select(col, { count: 'exact', head: true })
             .gte('created_at', prevStart).lt('created_at', start);
+          if (adminCol[table]) q = exclAdmin(q, adminCol[table]);
           if (filters) {
             for (const [k, v] of Object.entries(filters)) q = q.eq(k, v);
           }
@@ -252,9 +261,9 @@ export default function AdminDashboard() {
           return count || 0;
         };
         const fetchPrevBookingCount = async () => {
-          const { count } = await supabase.from('bookings').select('*', { count: 'exact', head: true })
+          const { count } = await exclAdmin(supabase.from('bookings').select('*', { count: 'exact', head: true })
             .in('booking_status', ['confirmed', 'completed', 'disputed'])
-            .gte('created_at', prevStart).lt('created_at', start);
+            .gte('created_at', prevStart).lt('created_at', start), 'client_id');
           return count || 0;
         };
         setPrevCeremonies(await fetchPrevCount('events', '*'));
@@ -269,15 +278,15 @@ export default function AdminDashboard() {
       setFunnelRegistered(Number(stats?.total_organisers || 0));
 
 
-      const { count: evtCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
+      const { count: evtCount } = await exclAdmin(supabase.from('events').select('*', { count: 'exact', head: true }), 'owner_user_id');
       setFunnelCreated(evtCount || 0);
 
       const { data: srUsers } = await supabase.from('service_requests').select('requester_user_id');
-      setFunnelRequested(new Set((srUsers || []).map(r => r.requester_user_id)).size);
+      setFunnelRequested(new Set((srUsers || []).map(r => r.requester_user_id).filter(id => !adminIds.includes(id))).size);
 
       const { data: bkClients } = await supabase.from('bookings').select('client_id')
         .in('booking_status', ['confirmed', 'completed', 'disputed']);
-      setFunnelBooked(new Set((bkClients || []).map(b => b.client_id)).size);
+      setFunnelBooked(new Set((bkClients || []).map(b => b.client_id).filter(id => !adminIds.includes(id))).size);
 
       // Tier 4 — Vendors by category
       const { data: vendors } = await supabase.from('vendors').select('category').eq('is_active', true).eq('is_demo', false).eq('is_banned', false);

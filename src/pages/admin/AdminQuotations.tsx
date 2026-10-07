@@ -77,6 +77,9 @@ export default function AdminQuotations() {
 
       // Demo / sandbox traffic must never show up in operational funnel numbers.
       const demoUserIds = new Set<string>();
+      // Admin-account requests are demo traffic too.
+      const { data: adminIdRows } = await (supabase as any).rpc('get_admin_user_ids');
+      ((adminIdRows || []) as any[]).forEach((r) => { const id = typeof r === 'string' ? r : r.get_admin_user_ids; if (id) demoUserIds.add(id); });
       const requesterIds = Array.from(
         new Set(allQuotes.map((q) => q.request?.requester_user_id).filter(Boolean))
       );
