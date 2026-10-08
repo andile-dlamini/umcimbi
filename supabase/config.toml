@@ -60,7 +60,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.vendor-registration-reminder]
-verify_jwt = false
+verify_jwt = true
 
 
 [functions.create-vendor-selfie-request]
