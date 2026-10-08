@@ -2299,7 +2299,6 @@ export type Database = {
           address_line_1: string | null
           address_line_2: string | null
           avg_response_time_minutes: number | null
-          bank_name: string | null
           business_verification_status:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2307,20 +2306,16 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string | null
-          dormant_nudge_count: number | null
           email: string | null
           facebook_url: string | null
           id: string | null
           image_urls: string[] | null
           instagram_url: string | null
           is_active: boolean | null
-          is_banned: boolean | null
           is_demo: boolean | null
           is_super_vendor: boolean | null
           jobs_completed: number | null
           languages: string[] | null
-          last_notified_at: string | null
-          last_nudge_sent_at: string | null
           latitude: number | null
           letterhead_enabled: boolean | null
           location: string | null
@@ -2328,32 +2323,24 @@ export type Database = {
           longitude: number | null
           name: string | null
           owner_user_id: string | null
-          payout_method: string | null
           phone_number: string | null
           postal_code: string | null
           price_range_text: string | null
           rating: number | null
           registered_business_name: string | null
           review_count: number | null
-          selfie_request_sent_at: string | null
           show_registration_on_pdf: boolean | null
           show_vat_on_pdf: boolean | null
-          signup_source: string | null
           state_province: string | null
           super_vendor_awarded_at: string | null
           super_vendor_reason: string | null
           tiktok_url: string | null
           trust_score: number | null
-          trust_score_breakdown: Json | null
-          trust_score_calculated_at: string | null
           updated_at: string | null
           vendor_business_type:
             | Database["public"]["Enums"]["vendor_business_type"]
             | null
           vendor_tier: string | null
-          vendor_tier_override: boolean | null
-          verification_reviewed_at: string | null
-          verification_reviewed_by: string | null
           view_count: number | null
           website_url: string | null
           whatsapp_number: string | null
@@ -2367,7 +2354,6 @@ export type Database = {
           address_line_1?: string | null
           address_line_2?: string | null
           avg_response_time_minutes?: number | null
-          bank_name?: string | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2375,20 +2361,16 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
-          dormant_nudge_count?: number | null
           email?: string | null
           facebook_url?: string | null
           id?: string | null
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
-          is_banned?: boolean | null
           is_demo?: boolean | null
           is_super_vendor?: boolean | null
           jobs_completed?: number | null
           languages?: string[] | null
-          last_notified_at?: string | null
-          last_nudge_sent_at?: string | null
           latitude?: number | null
           letterhead_enabled?: boolean | null
           location?: string | null
@@ -2396,32 +2378,24 @@ export type Database = {
           longitude?: number | null
           name?: string | null
           owner_user_id?: string | null
-          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
           registered_business_name?: string | null
           review_count?: number | null
-          selfie_request_sent_at?: string | null
           show_registration_on_pdf?: boolean | null
           show_vat_on_pdf?: boolean | null
-          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
           tiktok_url?: string | null
           trust_score?: number | null
-          trust_score_breakdown?: Json | null
-          trust_score_calculated_at?: string | null
           updated_at?: string | null
           vendor_business_type?:
             | Database["public"]["Enums"]["vendor_business_type"]
             | null
           vendor_tier?: string | null
-          vendor_tier_override?: boolean | null
-          verification_reviewed_at?: string | null
-          verification_reviewed_by?: string | null
           view_count?: number | null
           website_url?: string | null
           whatsapp_number?: string | null
@@ -2435,7 +2409,6 @@ export type Database = {
           address_line_1?: string | null
           address_line_2?: string | null
           avg_response_time_minutes?: number | null
-          bank_name?: string | null
           business_verification_status?:
             | Database["public"]["Enums"]["business_verification_status"]
             | null
@@ -2443,20 +2416,16 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
-          dormant_nudge_count?: number | null
           email?: string | null
           facebook_url?: string | null
           id?: string | null
           image_urls?: string[] | null
           instagram_url?: string | null
           is_active?: boolean | null
-          is_banned?: boolean | null
           is_demo?: boolean | null
           is_super_vendor?: boolean | null
           jobs_completed?: number | null
           languages?: string[] | null
-          last_notified_at?: string | null
-          last_nudge_sent_at?: string | null
           latitude?: number | null
           letterhead_enabled?: boolean | null
           location?: string | null
@@ -2464,32 +2433,24 @@ export type Database = {
           longitude?: number | null
           name?: string | null
           owner_user_id?: string | null
-          payout_method?: string | null
           phone_number?: string | null
           postal_code?: string | null
           price_range_text?: string | null
           rating?: number | null
           registered_business_name?: string | null
           review_count?: number | null
-          selfie_request_sent_at?: string | null
           show_registration_on_pdf?: boolean | null
           show_vat_on_pdf?: boolean | null
-          signup_source?: string | null
           state_province?: string | null
           super_vendor_awarded_at?: string | null
           super_vendor_reason?: string | null
           tiktok_url?: string | null
           trust_score?: number | null
-          trust_score_breakdown?: Json | null
-          trust_score_calculated_at?: string | null
           updated_at?: string | null
           vendor_business_type?:
             | Database["public"]["Enums"]["vendor_business_type"]
             | null
           vendor_tier?: string | null
-          vendor_tier_override?: boolean | null
-          verification_reviewed_at?: string | null
-          verification_reviewed_by?: string | null
           view_count?: number | null
           website_url?: string | null
           whatsapp_number?: string | null
@@ -2631,6 +2592,10 @@ export type Database = {
     }
     Functions: {
       calculate_vendor_trust_score: {
+        Args: { p_vendor_id: string }
+        Returns: undefined
+      }
+      calculate_vendor_trust_score_core: {
         Args: { p_vendor_id: string }
         Returns: undefined
       }

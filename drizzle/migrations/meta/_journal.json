@@ -8,6 +8,13 @@
       "when": 1791397847623,
       "tag": "0000_lock_email_rpcs_and_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791445699937,
+      "tag": "0001_lock_trust_score_and_trim_marketplace_view",
+      "breakpoints": true
     }
   ]
 }
