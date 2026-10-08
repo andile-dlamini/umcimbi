@@ -29,7 +29,7 @@ Same pattern as organiser-activation-nudge:
 
 - Migration applies cleanly (all functions pre-confirmed).
 - Function grants re-checked via query after applying: anon has no EXECUTE on any of the 19.
-- `vendor-registration-reminder` cron still authenticates: invoke it with the service-role token and expect a non-401 response; an unauthenticated call with a forged `service_role`-claim token returns 401 from the platform.
+- `vendor-registration-reminder` forgery test ONLY: call it with a syntactically valid token carrying `role: service_role` and a garbage signature — expect 401 from the platform. Do NOT invoke it with the real service-role token (it sends real SMS); the scheduled hourly run is confirmed separately by the user.
 
 ## Out of scope (untouched)
 
