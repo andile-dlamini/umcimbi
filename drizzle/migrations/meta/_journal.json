@@ -15,6 +15,13 @@
       "when": 1791445699937,
       "tag": "0001_lock_trust_score_and_trim_marketplace_view",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791447498607,
+      "tag": "0002_lock_function_execute_grants",
+      "breakpoints": true
     }
   ]
 }

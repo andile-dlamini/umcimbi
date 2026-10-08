@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { normalizeSaPhone, sendConnectMobileSms } from '../_shared/smsTemplates.ts';
+import { isInternalCall } from '../_shared/internalAuth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -11,7 +12,8 @@ function buildMessage(name: string, type: '24h' | '72h'): string {
   return `Hi ${name}, your UMCIMBI vendor profile is still incomplete. Families in your area are already browsing for vendors like you. Finish your profile now to start getting bookings: umcimbi.co.za/vendors/onboarding. Kind regards, Andile`;
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  if (!isInternalCall(req)) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
   try {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
